@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบบาลีไฮไลท์ & ควบคุมประโยค - เรื่องพระจักขุบาล</title>
+    <style>
+        body { font-family: 'Sarabun', sans-serif; background-color: #fcfbf7; color: #333; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .player-container { background-color: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 30px; text-align: center; }
+        audio { width: 100%; margin-top: 10px; }
+        .controls-row { margin: 15px 0; display: flex; justify-content: center; gap: 15px; }
+        .btn { padding: 8px 16px; border: 1px solid #ccc; border-radius: 6px; background: #fff; cursor: pointer; font-size: 14px; font-family: inherit; }
+        .btn.active { background-color: #f2a600; color: white; border-color: #f2a600; font-weight: bold; }
+        .text-display-box { background-color: #fff; padding: 40px; border-radius: 12px; border: 1px solid #e1dbcd; line-height: 2.8; font-size: 24px; }
+        .sentence-block { display: inline; padding: 4px; border-radius: 6px; transition: background 0.3s; }
+        .sentence-block.current-sentence-zone { background-color: #f7f4eb; } /* ไฮไลท์จางๆ ทั้งประโยคที่กำลังเล่น */
+        .pali-word { display: inline-block; margin: 0 4px; padding: 0 4px; border-radius: 4px; cursor: pointer; }
+        .pali-word.active-highlight { background-color: #ffd166; color: #000; font-weight: bold; }
+        .subtitle-thai { font-size: 16px; color: #666; margin-top: 15px; min-height: 24px; }
+    </style>
+</head>
+<body>
+
+    <div class="player-container">
+        <h3>ธัมมปทัฏฐกถา ภาค 1 (เรื่องพระจักขุบาล)</h3>
+        <audio id="baliAudio" src="chakkhupala.mp3" controls></audio>
+        
+        <!-- แผงควบคุมโหมดการเล่นทีละประโยค -->
+        <div class="controls-row">
+            <button id="btnNormal" class="btn active" onclick="setPlayMode('normal')">▶ เล่นต่อเนื่องปกติ</button>
+            <button id="btnLoop" class="btn" onclick="setPlayMode('loop')">🔁 วนลูปประโยคนี้</button>
+            <button id="btnPause" class="btn" onclick="setPlayMode('pause')">⏸ จบประโยคแล้วหยุด</button>
+        </div>
+        <div id="thaiSubtitle" class="subtitle-thai">เลือกคำศัพท์บาลีเพื่อกระโดดไปยังคำนั้นๆ</div>
+    </div>
+
+    <div class="text-display-box" id="paliTextBox"></div>
+
+<script>
+// ข้อมูลที่มีการระบุ "sid" (Sentence ID) เพื่อรวมคำศัพท์เข้าเป็นประโยคเดียวกัน
+const alignmentData = [
+    // ประโยคที่ 1 (sid: s1) เริ่ม 0.0 ถึง 3.2
+    { "mid_code": "w001", "sid": "s1", "pali": "จกฺขุปาลเถรวตฺถุ", "thai_read": "เรื่องพระจักขุบาลเถระ", "start": 0.0, "end": 3.2, "s_start": 0.0, "s_end": 3.2 },
+    
+    // ประโยคที่ 2 (sid: s2) เริ่ม 3.3 ถึง 10.0
+    { "mid_code": "w002", "sid": "s2", "pali": "ตตฺร", "thai_read": "ในเรื่องนั้น", "start": 3.3, "end": 5.0, "s_start": 3.3, "s_end": 10.0 },
+    { "mid_code": "w003", "sid": "s2", "pali": "อยํ", "thai_read": "อันว่า", "start": 5.1, "end": 6.2, "s_start": 3.3, "s_end": 10.0 },
+    { "mid_code": "w004", "sid": "s2", "pali": "อนุปุพฺพิกถา", "thai_read": "เรื่องโดยลำดับ", "start": 6.3, "end": 8.5, "s_start": 3.3, "s_end": 10.0 },
+    { "mid_code": "w005", "sid": "s2", "pali": "โหติ", "thai_read": "ย่อมมี", "start": 8.6, "end": 10.0, "s_start": 3.3, "s_end": 10.0 }
+];
+
+let playMode = 'normal'; // 'normal', 'loop', 'pause'
+let lastSentenceId = null;
+
+const paliTextBox = document.getElementById('paliTextBox');
+const audio = document.getElementById('baliAudio');
+
+// สร้างโครงสร้างข้อความบาลีแยกตามประโยค
+function renderText() {
+    let currentSid = null;
+    let sentenceSpan = null;
+
+    alignmentData.forEach(item => {
+        // ถ้าขึ้นประโยคใหม่ ให้สร้างกล่องครอบประโยค (Sentence Block)
+        if (item.sid !== currentSid) {
+            currentSid = item.sid;
+            sentenceSpan = document.createElement('span');
+            sentenceSpan.className = 'sentence-block';
+            sentenceSpan.id = `block_${item.sid}`;
+            paliTextBox.appendChild(sentenceSpan);
+        }
+
+        const wordSpan = document.createElement('span');
+        wordSpan.className = 'pali-word';
+        wordSpan.id = item.mid_code;
+        wordSpan.textContent = item.pali;
+        
+        wordSpan.onclick = () => {
+            audio.currentTime = item.start;
+            audio.play();
+        };
+
+        sentenceSpan.appendChild(wordSpan);
+    });
+}
+
+// เปลี่ยนโหมดการเล่นและอัปเดตสถานะปุ่ม
+function setPlayMode(mode) {
+    playMode = mode;
+    document.getElementById('btnNormal').classList.toggle('active', mode === 'normal');
+    document.getElementById('btnLoop').classList.toggle('active', mode === 'loop');
+    document.getElementById('btnPause').classList.toggle('active', mode === 'pause');
+}
+
+// ดักจับเวลาเสียงเพื่อทำไฮไลท์และจัดการระบบลูป
+audio.addEventListener('timeupdate', () => {
+    const currentTime = audio.currentTime;
+    let activeWord = null;
+
+    alignmentData.forEach(item => {
+        const wordEl = document.getElementById(item.mid_code);
+        const blockEl = document.getElementById(`block_${item.sid}`);
+
+        if (currentTime >= item.start && currentTime <= item.end) {
+            wordEl.classList.add('active-highlight');
+            blockEl.classList.add('current-sentence-zone');
+            document.getElementById('thaiSubtitle').textContent = `คำแปล: ${item.thai_read}`;
+            activeWord = item;
+        } else {
+            wordEl.classList.remove('active-highlight');
+            // เอาไฮไลท์ประโยคออกถ้าไม่ได้อยู่ในประโยคนั้นแล้ว
+            if (currentTime < item.s_start || currentTime > item.s_end) {
+                blockEl.classList.remove('current-sentence-zone');
+            }
+        }
+    });
+
+    // ตรวจสอบเงื่อนไขเมื่อเล่นจบประโยค (Sentence Boundary Control)
+    if (activeWord) {
+        lastSentenceId = activeWord.sid;
+        
+        // เฝ้าระวังเมื่อเสียงเดินไปใกล้จะหมดช่วงประโยคปัจจุบัน (เหลืออีก 0.1 วินาทีจะจบ)
+        if (currentTime >= activeWord.s_end - 0.1) {
+            if (playMode === 'loop') {
+                audio.currentTime = activeWord.s_start; // วนกลับไปเริ่มประโยคเดิมใหม่
+                audio.play();
+            } else if (playMode === 'pause') {
+                audio.pause(); // หยุดเล่นเมื่อจบประโยค
+                audio.currentTime = activeWord.s_end; // เลื่อนสเกลไปจ่อไว้ต้นประโยคถัดไป
+                setPlayMode('normal'); // รีเซ็ตโหมดกลับมาปกติเพื่อให้กดปุ่ม Play ต่อได้เลย
+            }
+        }
+    }
+});
+
+renderText();
+</script>
+</body>
+</html>
