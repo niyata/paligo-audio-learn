@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ruled Lines Template</title>
+    <style>
+      :root {
+        --page-bg: #f8f0e3;
+        --paper-bg: #fffaf0;
+        --paper-border: rgba(74, 44, 10, 0.22);
+        --card-bg: rgba(255, 255, 255, 0.78);
+        --card-border: rgba(74, 44, 10, 0.16);
+        --ink: #3a3a3a;
+        --rule-color: rgba(212, 175, 55, 0.42);
+        --margin-color: rgba(184, 92, 92, 0.42);
+        --line-height: 22px;
+        --line-width: 1px;
+        --number-gutter: 5ch;
+        --editor-font-size: 12px;
+        --text-y-offset: 2px;
+        --paper-padding-block: 28px;
+        --paper-padding-inline: clamp(22px, 5vw, 56px);
+        --paper-min-height: 420px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        background: var(--page-bg);
+        color: var(--ink);
+        font-family: Sarabun, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        line-height: 1.5;
+        margin: 0;
+        min-height: 100vh;
+        padding: clamp(18px, 4vw, 48px);
+      }
+
+      .template-shell {
+        display: grid;
+        gap: 18px;
+        grid-template-columns: minmax(220px, 0.34fr) minmax(0, 1fr);
+        margin: 0 auto;
+        max-width: 1120px;
+      }
+
+      .lesson-panel,
+      .answer-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 8px;
+        box-shadow: 0 18px 46px rgba(74, 44, 10, 0.1);
+      }
+
+      .lesson-panel {
+        min-height: 520px;
+        padding: 18px;
+      }
+
+      .answer-card {
+        min-width: 0;
+        padding: clamp(14px, 2.4vw, 22px);
+      }
+
+      .exam-page-stack {
+        display: grid;
+        gap: 18px;
+      }
+
+      .exam-page {
+        background: var(--paper-bg);
+        border: 1px solid var(--paper-border);
+        border-radius: 8px;
+        box-shadow:
+          inset 0 1px rgba(255, 255, 255, 0.74),
+          0 10px 26px rgba(74, 44, 10, 0.08);
+        overflow: hidden;
+      }
+
+      .exam-page.is-first {
+        padding-top: 30px;
+      }
+
+      .exam-header {
+        display: grid;
+        gap: 8px 16px;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        padding: 0 var(--paper-padding-inline) 10px;
+      }
+
+      .exam-emphasis-line {
+        border-top: 2px solid rgba(35, 61, 164, 0.82);
+        margin: 0 var(--paper-padding-inline);
+      }
+
+      .exam-field {
+        align-items: end;
+        color: rgba(58, 58, 58, 0.68);
+        display: grid;
+        font-size: 0.78rem;
+        font-weight: 700;
+        gap: 4px;
+        grid-template-columns: auto minmax(42px, 1fr);
+        min-width: 0;
+      }
+
+      .exam-line {
+        border-bottom: 1px dotted rgba(74, 44, 10, 0.32);
+        display: block;
+        height: 1.15em;
+        min-width: 0;
+      }
+
+      .ruled-editor-frame {
+        position: relative;
+      }
+
+      .ruled-editor-frame::before {
+        background: var(--margin-color);
+        bottom: 0;
+        content: "";
+        left: calc(var(--paper-padding-inline) + var(--number-gutter));
+        position: absolute;
+        top: 0;
+        width: 1px;
+        z-index: 1;
+      }
+
+      .template-credit {
+        color: rgba(58, 58, 58, 0.58);
+        font-size: 0.72rem;
+        font-weight: 700;
+        margin-top: 12px;
+        text-align: right;
+      }
+
+      .control-group {
+        display: grid;
+        gap: 10px;
+      }
+
+      .control-row {
+        align-items: center;
+        display: grid;
+        gap: 10px;
+        grid-template-columns: 1fr auto;
+      }
+
+      .control-label,
+      .control-value {
+        color: rgba(58, 58, 58, 0.72);
+        font-size: 0.86rem;
+        font-weight: 700;
+      }
+
+      .control-slider {
+        accent-color: #d4af37;
+        grid-column: 1 / -1;
+        width: 100%;
+      }
+
+      .ruled-editor {
+        background:
+          repeating-linear-gradient(
+            to bottom,
+            transparent 0 calc(var(--line-height) - var(--line-width)),
+            var(--rule-color) calc(var(--line-height) - var(--line-width)) var(--line-height)
+          ),
+          var(--paper-bg);
+        background-origin: padding-box, padding-box;
+        background-size: 100% var(--line-height), auto;
+        background-attachment: local, scroll;
+        border: 0;
+        border-radius: 0;
+        min-height: var(--paper-min-height);
+        padding: var(--paper-padding-block) var(--paper-padding-inline);
+      }
+
+      .exam-page.is-continuation .ruled-editor {
+        min-height: calc(var(--paper-min-height) + 120px);
+      }
+
+      .ruled-editor {
+        background-position:
+          0 calc(var(--text-y-offset) * -1),
+          0 0;
+        display: block;
+        font: inherit;
+        font-size: var(--editor-font-size);
+        line-height: var(--line-height);
+        outline: none;
+        overflow: auto;
+        padding-block:
+          calc(var(--paper-padding-block) + var(--text-y-offset))
+          calc(var(--paper-padding-block) - var(--text-y-offset));
+        resize: vertical;
+        tab-size: 5;
+        width: 100%;
+      }
+
+      textarea.ruled-editor {
+        appearance: none;
+        color: var(--ink);
+        min-height: var(--paper-min-height);
+      }
+
+      @media (max-width: 640px) {
+        :root {
+          --line-height: 22px;
+          --number-gutter: 4.5ch;
+          --editor-font-size: 12px;
+          --paper-padding-block: 22px;
+          --paper-padding-inline: 30px;
+          --paper-min-height: 360px;
+        }
+
+        .template-shell {
+          grid-template-columns: 1fr;
+        }
+
+        .lesson-panel {
+          min-height: 140px;
+        }
+
+        .exam-header {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="template-shell">
+      <aside class="lesson-panel" aria-label="แผงควบคุมบทเรียน">
+        <div class="control-group">
+          <div class="control-row">
+            <label class="control-label" for="line-height-control">ระยะบรรทัด</label>
+            <output class="control-value" id="line-height-value" for="line-height-control">22px</output>
+            <input
+              class="control-slider"
+              id="line-height-control"
+              type="range"
+              min="22"
+              max="35"
+              step="1"
+              value="22"
+              data-line-height-control
+            />
+          </div>
+        </div>
+      </aside>
+
+      <section class="answer-card" aria-label="การ์ดพื้นที่เขียนคำตอบ">
+        <div class="exam-page-stack">
+          <article class="exam-page is-first" aria-label="กระดาษคำตอบหน้าแรก">
+            <div class="exam-header" aria-label="ข้อมูลหัวกระดาษหน้าแรก">
+              <label class="exam-field">ชื่อ <span class="exam-line"></span></label>
+              <label class="exam-field">สถานที่สอบ <span class="exam-line"></span></label>
+              <label class="exam-field">วิชา <span class="exam-line"></span></label>
+              <label class="exam-field">วันที่ <span class="exam-line"></span></label>
+            </div>
+            <div class="exam-emphasis-line" aria-hidden="true"></div>
+            <div class="ruled-editor-frame">
+              <textarea
+                class="ruled-editor"
+                aria-label="พื้นที่เขียนคำตอบหน้าแรก"
+                data-auto-indent="numbered-homework"
+                spellcheck="false"
+              ></textarea>
+            </div>
+          </article>
+
+          <article class="exam-page is-continuation" aria-label="กระดาษคำตอบหน้าถัดไป">
+            <div class="ruled-editor-frame">
+              <textarea
+                class="ruled-editor"
+                aria-label="พื้นที่เขียนคำตอบหน้าถัดไป"
+                data-auto-indent="numbered-homework"
+                spellcheck="false"
+              ></textarea>
+            </div>
+          </article>
+        </div>
+        <div class="template-credit">Ruled paper template by niyatajayo · v1.0.0 · 2026-07-01</div>
+      </section>
+    </main>
+    <script>
+      (() => {
+        const numberedLinePattern = /^\s*(\d+)(?:[.)])?\s*(.*)$/;
+        const numberedLineGap = " ".repeat(23);
+        const continuationIndent = `\t${" ".repeat(11)}`;
+        const editors = document.querySelectorAll('[data-auto-indent="numbered-homework"]');
+        const lineHeightControls = document.querySelectorAll("[data-line-height-control]");
+        const lineHeightValue = document.getElementById("line-height-value");
+
+        const normalizeLine = (line) => {
+          if (!line.trim()) return "";
+
+          const numbered = line.match(numberedLinePattern);
+          if (numbered) return `${numbered[1]}${numberedLineGap}${numbered[2].trimStart()}`;
+
+          return `${continuationIndent}${line.replace(/^\s+/, "")}`;
+        };
+
+        const normalizeValue = (value) => value.split("\n").map(normalizeLine).join("\n");
+
+        const insertAtSelection = (editor, text) => {
+          const start = editor.selectionStart;
+          const end = editor.selectionEnd;
+
+          editor.value = `${editor.value.slice(0, start)}${text}${editor.value.slice(end)}`;
+          editor.setSelectionRange(start + text.length, start + text.length);
+        };
+
+        editors.forEach((editor) => {
+          editor.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+              event.preventDefault();
+              insertAtSelection(editor, `\n${continuationIndent}`);
+            }
+
+            if (event.key === "Tab") {
+              event.preventDefault();
+              insertAtSelection(editor, continuationIndent);
+            }
+          });
+
+          editor.addEventListener("input", () => {
+            const before = editor.value;
+            const selectionStart = editor.selectionStart;
+            const selectionEnd = editor.selectionEnd;
+            const after = normalizeValue(before);
+
+            if (after === before) return;
+
+            const delta = after.length - before.length;
+            editor.value = after;
+            editor.setSelectionRange(Math.max(0, selectionStart + delta), Math.max(0, selectionEnd + delta));
+          });
+        });
+
+        const applyLineHeight = (lineHeight) => {
+          const fontSize = Math.round(lineHeight * 0.54);
+
+          document.documentElement.style.setProperty("--line-height", `${lineHeight}px`);
+          document.documentElement.style.setProperty("--editor-font-size", `${fontSize}px`);
+          if (lineHeightValue) lineHeightValue.value = `${lineHeight}px`;
+        };
+
+        lineHeightControls.forEach((control) => {
+          control.addEventListener("input", () => applyLineHeight(Number(control.value)));
+          applyLineHeight(Number(control.value));
+        });
+      })();
+    </script>
+  </body>
+</html>
