@@ -75,6 +75,166 @@
         box-shadow: 0 18px 46px rgba(74, 44, 10, 0.1);
       }
 
+      .profile-wizard {
+        align-items: center;
+        background: rgba(28, 24, 18, 0.32);
+        display: none;
+        inset: 0;
+        justify-content: center;
+        padding: 18px;
+        position: fixed;
+        z-index: 40;
+      }
+
+      body.needs-profile .profile-wizard {
+        display: flex;
+      }
+
+      .profile-wizard-card {
+        background: var(--paper-bg);
+        border: 1px solid var(--exam-blue);
+        border-radius: 8px;
+        box-shadow: 0 24px 70px rgba(31, 45, 137, 0.18);
+        color: var(--exam-blue);
+        max-width: 680px;
+        padding: 22px;
+        position: relative;
+        width: min(100%, 680px);
+      }
+
+      .profile-close-button {
+        appearance: none;
+        align-items: center;
+        background: transparent;
+        border: 1px solid rgba(31, 45, 137, 0.2);
+        border-radius: 999px;
+        color: var(--exam-blue);
+        cursor: pointer;
+        display: inline-flex;
+        font: inherit;
+        font-size: 1.1rem;
+        font-weight: 900;
+        height: 32px;
+        justify-content: center;
+        line-height: 1;
+        position: absolute;
+        right: 12px;
+        top: 12px;
+        width: 32px;
+      }
+
+      .profile-wizard-title {
+        font-size: 1.45rem;
+        font-weight: 800;
+        margin: 0 0 4px;
+      }
+
+      .profile-wizard-note {
+        color: rgba(31, 45, 137, 0.68);
+        font-size: 0.9rem;
+        margin: 0 0 18px;
+      }
+
+      .profile-wizard-grid {
+        display: grid;
+        gap: 12px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .profile-field {
+        display: grid;
+        gap: 5px;
+      }
+
+      .profile-field.is-wide {
+        grid-column: 1 / -1;
+      }
+
+      .profile-label {
+        font-size: 0.82rem;
+        font-weight: 800;
+      }
+
+      .profile-input,
+      .profile-select {
+        appearance: none;
+        background: rgba(255, 250, 240, 0.78);
+        border: 1px solid rgba(31, 45, 137, 0.28);
+        border-radius: 5px;
+        color: var(--exam-blue);
+        font: inherit;
+        min-height: 36px;
+        padding: 6px 9px;
+      }
+
+      .profile-choice-grid {
+        display: grid;
+        gap: 7px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .profile-choice-grid.is-role-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .profile-choice {
+        align-items: center;
+        border: 1px solid rgba(31, 45, 137, 0.2);
+        border-radius: 5px;
+        cursor: pointer;
+        display: flex;
+        font-weight: 800;
+        justify-content: center;
+        min-height: 36px;
+        padding: 4px 8px;
+      }
+
+      .profile-choice input {
+        clip: rect(0 0 0 0);
+        height: 1px;
+        overflow: hidden;
+        position: absolute;
+        width: 1px;
+      }
+
+      .profile-choice:has(input:checked) {
+        background: rgba(31, 45, 137, 0.12);
+        border-color: var(--exam-blue);
+        box-shadow: 0 0 0 2px rgba(31, 45, 137, 0.18);
+      }
+
+      .profile-wizard-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 18px;
+      }
+
+      .profile-save-button {
+        appearance: none;
+        background: var(--exam-blue);
+        border: 0;
+        border-radius: 5px;
+        color: #fffaf0;
+        cursor: pointer;
+        font: inherit;
+        font-weight: 800;
+        min-height: 38px;
+        padding: 7px 18px;
+      }
+
+      .profile-skip-button {
+        appearance: none;
+        background: transparent;
+        border: 1px solid rgba(31, 45, 137, 0.24);
+        border-radius: 5px;
+        color: var(--exam-blue);
+        cursor: pointer;
+        font: inherit;
+        font-weight: 800;
+        min-height: 38px;
+        padding: 7px 14px;
+      }
+
       .template-controls {
         margin-bottom: 14px;
         padding: 14px 18px;
@@ -116,6 +276,12 @@
         font-weight: 700;
         min-height: 34px;
         padding: 6px 10px;
+      }
+
+      a.save-button {
+        align-items: center;
+        display: inline-flex;
+        text-decoration: none;
       }
 
       .pagination-button:disabled {
@@ -515,6 +681,17 @@
         background: rgba(31, 45, 137, 0.1);
       }
 
+      .exam-picker-option.is-current {
+        background: rgba(31, 45, 137, 0.06);
+        border-color: var(--exam-blue);
+        box-shadow: 0 0 0 2px rgba(31, 45, 137, 0.18);
+      }
+
+      .exam-picker-option.is-current.is-selected {
+        background: rgba(31, 45, 137, 0.16);
+        box-shadow: 0 0 0 2px rgba(31, 45, 137, 0.28);
+      }
+
       .exam-emphasis-line {
         border-top: var(--emphasis-line-width) solid var(--exam-blue);
         margin: 0;
@@ -706,6 +883,84 @@
     </style>
   </head>
   <body>
+    <section class="profile-wizard" aria-label="ตั้งค่าโปรไฟล์ผู้เรียน" data-profile-wizard>
+      <form class="profile-wizard-card" data-profile-form novalidate>
+        <button class="profile-close-button" type="button" data-profile-dismiss aria-label="ปิดหน้าตั้งค่า">×</button>
+        <h1 class="profile-wizard-title">ตั้งค่าผู้เรียน</h1>
+        <p class="profile-wizard-note">บันทึกไว้ในเครื่องนี้ ใช้งานออฟไลน์ได้ และใช้เตรียมช่องทางส่งตรวจ</p>
+        <div class="profile-wizard-grid">
+          <div class="profile-field is-wide">
+            <span class="profile-label">บทบาทผู้ใช้</span>
+            <div class="profile-choice-grid is-role-grid">
+              <label class="profile-choice"><input type="radio" name="userRole" value="student" checked required />นักเรียน</label>
+              <label class="profile-choice"><input type="radio" name="userRole" value="teacher" />อาจารย์ผู้สอน</label>
+              <label class="profile-choice"><input type="radio" name="userRole" value="reviewer" />ผู้ตรวจ</label>
+              <label class="profile-choice"><input type="radio" name="userRole" value="teacher-reviewer" />ผู้สอนและผู้ตรวจ</label>
+            </div>
+          </div>
+          <div class="profile-field is-wide">
+            <span class="profile-label">คำนำหน้า</span>
+            <div class="profile-choice-grid">
+              <label class="profile-choice"><input type="radio" name="prefix" value="กัลฯ" required />กัลฯ</label>
+              <label class="profile-choice"><input type="radio" name="prefix" value="สามเณร" />สามเณร</label>
+              <label class="profile-choice"><input type="radio" name="prefix" value="พระ" />พระ</label>
+              <label class="profile-choice"><input type="radio" name="prefix" value="พระมหา" />พระมหา</label>
+              <label class="profile-choice"><input type="radio" name="prefix" value="อุบาสิกา" />อุบาสิกา</label>
+              <label class="profile-choice"><input type="radio" name="prefix" value="อุบาสก" />อุบาสก</label>
+            </div>
+          </div>
+          <label class="profile-field">
+            <span class="profile-label">ชื่อ</span>
+            <input class="profile-input" name="firstName" autocomplete="given-name" required />
+          </label>
+          <label class="profile-field">
+            <span class="profile-label">นามสกุล</span>
+            <input class="profile-input" name="lastName" autocomplete="family-name" />
+          </label>
+          <label class="profile-field">
+            <span class="profile-label">ฉายา</span>
+            <input class="profile-input" name="monasticName" />
+          </label>
+          <label class="profile-field">
+            <span class="profile-label">สมัครเรียนชั้นประโยค ป.ธ.</span>
+            <select class="profile-select" name="grade" required>
+              <option value="1-2">๑-๒</option>
+              <option value="3">๓</option>
+              <option value="4" selected>๔</option>
+              <option value="5">๕</option>
+              <option value="6">๖</option>
+              <option value="7">๗</option>
+              <option value="8">๘</option>
+              <option value="9">๙</option>
+            </select>
+          </label>
+          <label class="profile-field">
+            <span class="profile-label">อาจารย์ผู้สอน / ผู้ตรวจ</span>
+            <input class="profile-input" name="teacherName" />
+          </label>
+          <label class="profile-field">
+            <span class="profile-label">บทบาทอาจารย์ปลายทาง</span>
+            <select class="profile-select" name="teacherRole">
+              <option value="teacher-reviewer" selected>ผู้สอนและผู้ตรวจ</option>
+              <option value="teacher">อาจารย์ผู้สอน</option>
+              <option value="reviewer">ผู้ตรวจ</option>
+            </select>
+          </label>
+          <label class="profile-field">
+            <span class="profile-label">ช่องทางส่งตรวจ</span>
+            <select class="profile-select" name="deliveryMethod" required>
+              <option value="line" selected>LINE Flex Message</option>
+              <option value="email">อีเมล</option>
+              <option value="facebook">Facebook inbox</option>
+            </select>
+          </label>
+        </div>
+        <div class="profile-wizard-actions">
+          <button class="profile-skip-button" type="button" data-profile-dismiss>ตั้งค่าภายหลัง</button>
+          <button class="profile-save-button" type="submit">เริ่มใช้งาน</button>
+        </div>
+      </form>
+    </section>
     <main class="template-shell">
       <section class="template-controls" aria-label="แผงควบคุมพื้นที่เขียน">
         <div class="control-grid">
@@ -750,6 +1005,8 @@
           </button>
           <button class="clear-line-button" type="button" data-clear-bottom-line>ล้างบรรทัดล่าง</button>
           <button class="save-button" type="button" data-save-draft>บันทึก</button>
+          <button class="save-button" type="button" data-submit-review>ส่งตรวจ</button>
+          <a class="save-button" href="exam-books.html">สมุดข้อสอบ</a>
           <output class="save-status" data-save-status>Cmd/Ctrl+S เพื่อบันทึก</output>
         </div>
       </section>
@@ -761,7 +1018,7 @@
               <div class="exam-header-line" aria-hidden="true"></div>
               <div class="exam-header-line exam-grade-line">
                 <span>ประโยค ป.ธ.</span>
-                <div class="exam-picker exam-grade-picker" data-exam-picker="grade" data-default="4">
+                <div class="exam-picker exam-grade-picker" data-exam-picker="grade" data-current="4" data-default="4">
                   <button
                     class="exam-picker-trigger exam-grade-trigger"
                     type="button"
@@ -872,6 +1129,11 @@
     <script>
       (() => {
         const storageKey = "ruled-lines-card-only-draft-v1";
+        const profileStorageKey = "paligo-exam-student-profile-v1";
+        const submissionsStorageKey = "paligo-exam-submissions-v1";
+        const booksStorageKey = "paligo-exam-answer-books-v1";
+        const activeBookStorageKey = "paligo-exam-active-book-id-v1";
+        const ownerStorageKey = "paligo-exam-local-owner-id-v1";
         const numberedLinePattern = /^\s*(\d+)(?:[.)])?\s*(.*)$/;
         const numberedLinePrefix = " ".repeat(4);
         const numberedLineGap = " ".repeat(23);
@@ -930,11 +1192,14 @@
         const pageNextButton = document.querySelector("[data-page-next]");
         const pageStatus = document.querySelector("[data-page-status]");
         const saveButton = document.querySelector("[data-save-draft]");
+        const submitReviewButton = document.querySelector("[data-submit-review]");
         const clearBottomLineButton = document.querySelector("[data-clear-bottom-line]");
         const saveStatus = document.querySelector("[data-save-status]");
         const toastNotice = document.querySelector("[data-toast-notice]");
         const answerCard = document.querySelector(".answer-card");
         const annotationToggle = document.querySelector("[data-annotation-toggle]");
+        const profileForm = document.querySelector("[data-profile-form]");
+        const profileDismissButtons = document.querySelectorAll("[data-profile-dismiss]");
         const thaiDigits = new Map([
           ["0", "๐"],
           ["1", "๑"],
@@ -955,6 +1220,131 @@
           "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม",
         ];
         const gradeValues = ["1-2", "3", "4", "5", "6", "7", "8", "9"];
+        const queryParams = new URLSearchParams(window.location.search);
+
+        const createId = (prefix) => {
+          const random = window.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+          return `${prefix}-${random}`;
+        };
+
+        const getLocalOwnerId = () => {
+          const existing = localStorage.getItem(ownerStorageKey);
+          if (existing) return existing;
+
+          const ownerId = createId("owner");
+          localStorage.setItem(ownerStorageKey, ownerId);
+          return ownerId;
+        };
+
+        const localOwnerId = getLocalOwnerId();
+        const wantsNewBook = queryParams.get("newBook") === "1";
+        let currentBookId = wantsNewBook
+          ? createId("book")
+          : queryParams.get("bookId") || localStorage.getItem(activeBookStorageKey) || createId("book");
+
+        const getStoredList = (key) => {
+          try {
+            const parsed = JSON.parse(localStorage.getItem(key) || "[]");
+            return Array.isArray(parsed) ? parsed : [];
+          } catch {
+            return [];
+          }
+        };
+
+        const setStoredList = (key, value) => {
+          localStorage.setItem(key, JSON.stringify(value));
+        };
+
+        const loadStudentProfile = () => {
+          try {
+            const raw = localStorage.getItem(profileStorageKey);
+            return raw ? JSON.parse(raw) : null;
+          } catch {
+            return null;
+          }
+        };
+
+        const saveStudentProfile = (profile) => {
+          localStorage.setItem(profileStorageKey, JSON.stringify(profile));
+        };
+
+        const profileValidationMessages = {
+          userRole: "กรุณาเลือกบทบาทผู้ใช้",
+          prefix: "กรุณาเลือกคำนำหน้า",
+          firstName: "กรุณากรอกชื่อ",
+          grade: "กรุณาเลือกชั้นประโยค ป.ธ.",
+          deliveryMethod: "กรุณาเลือกช่องทางส่งตรวจ",
+        };
+
+        const clearProfileFieldValidity = (name) => {
+          Array.from(profileForm?.elements[name] || []).forEach?.((field) => field.setCustomValidity(""));
+          if (profileForm?.elements[name]?.setCustomValidity) profileForm.elements[name].setCustomValidity("");
+        };
+
+        const setProfileFieldInvalid = (field, message) => {
+          field.setCustomValidity(message);
+          field.reportValidity();
+          field.focus();
+        };
+
+        const validateProfileForm = () => {
+          if (!profileForm) return true;
+
+          Object.keys(profileValidationMessages).forEach(clearProfileFieldValidity);
+
+          for (const [name, message] of Object.entries(profileValidationMessages)) {
+            const field = profileForm.elements[name];
+            const fields = field instanceof RadioNodeList ? Array.from(field) : [field];
+            const firstField = fields.find(Boolean);
+            const hasValue = field instanceof RadioNodeList
+              ? fields.some((item) => item.checked)
+              : String(field?.value || "").trim().length > 0;
+
+            if (!hasValue && firstField) {
+              setProfileFieldInvalid(firstField, message);
+              return false;
+            }
+          }
+
+          return true;
+        };
+
+        profileForm?.addEventListener("input", (event) => {
+          if (event.target?.name) clearProfileFieldValidity(event.target.name);
+        });
+
+        profileForm?.addEventListener("change", (event) => {
+          if (event.target?.name) clearProfileFieldValidity(event.target.name);
+        });
+
+        const dismissProfileWizard = () => {
+          document.body.classList.remove("needs-profile");
+        };
+
+        profileDismissButtons.forEach((button) => {
+          button.addEventListener("click", dismissProfileWizard);
+        });
+
+        const setProfileFormValues = (profile) => {
+          if (!profileForm || !profile) return;
+
+          const prefix = profileForm.querySelector(`[name="prefix"][value="${profile.prefix}"]`);
+          if (prefix) prefix.checked = true;
+          const userRole = profileForm.querySelector(`[name="userRole"][value="${profile.userRole || "student"}"]`);
+          if (userRole) userRole.checked = true;
+          ["firstName", "lastName", "monasticName", "teacherName", "teacherRole", "grade", "deliveryMethod"].forEach((name) => {
+            if (profile[name] && profileForm.elements[name]) profileForm.elements[name].value = profile[name];
+          });
+        };
+
+        let studentProfile = loadStudentProfile();
+        const currentProfileGrade = studentProfile?.grade || "4";
+        const gradePicker = document.querySelector('[data-exam-picker="grade"]');
+        if (gradePicker) {
+          gradePicker.dataset.current = currentProfileGrade;
+          gradePicker.dataset.default = currentProfileGrade;
+        }
+
         let currentPageIndex = 0;
         let saveStatusTimer;
         let autoSaveTimer;
@@ -1370,11 +1760,34 @@
           });
         };
 
+        const updatePickerCurrentValue = (picker, value) => {
+          const options = picker.querySelector("[data-picker-options]");
+          if (!options) return;
+
+          picker.dataset.current = String(value);
+          options.querySelectorAll(".exam-picker-option").forEach((item) => {
+            const isCurrent = item.dataset.value === String(value);
+            item.classList.toggle("is-current", isCurrent);
+            if (isCurrent) item.setAttribute("aria-current", "true");
+            else item.removeAttribute("aria-current");
+          });
+        };
+
+        const currentExamDate = new Date();
+        const currentExamValues = {
+          day: String(currentExamDate.getDate()),
+          month: String(currentExamDate.getMonth() + 1),
+          year: String(currentExamDate.getFullYear() + 543),
+          grade: currentProfileGrade,
+        };
+
         examPickers.forEach((picker) => {
-          const currentBuddhistYear = new Date().getFullYear() + 543;
+          const currentBuddhistYear = currentExamDate.getFullYear() + 543;
+          const pickerType = picker.dataset.examPicker;
           const yearWindow = Number(picker.dataset.yearWindow || 0);
-          const isMonthPicker = picker.dataset.examPicker === "month";
-          const isGradePicker = picker.dataset.examPicker === "grade";
+          const isMonthPicker = pickerType === "month";
+          const isGradePicker = pickerType === "grade";
+          const currentValue = picker.dataset.current || currentExamValues[pickerType] || "";
           const trigger = picker.querySelector(".exam-picker-trigger");
           const popover = picker.querySelector("[data-picker-popover]");
           const options = picker.querySelector("[data-picker-options]");
@@ -1398,6 +1811,10 @@
             option.type = "button";
             option.textContent = isMonthPicker ? thaiMonthNames[value - 1] : toThaiNumber(value);
             option.dataset.value = String(value);
+            if (String(value) === currentValue) {
+              option.classList.add("is-current");
+              option.setAttribute("aria-current", "true");
+            }
             option.addEventListener("click", (event) => {
               event.stopPropagation();
               selectPickerValue(picker, value);
@@ -1431,7 +1848,10 @@
         });
 
         document.addEventListener("keydown", (event) => {
-          if (event.key === "Escape") closePickers();
+          if (event.key === "Escape") {
+            closePickers();
+            dismissProfileWizard();
+          }
         });
 
         const normalizeLine = (line, indent) => {
@@ -1513,22 +1933,180 @@
           balanceCurrentPageLines();
         };
 
-        const saveDraft = ({ silent = false } = {}) => {
-          const draft = {
-            lineHeight: lineHeightControls[0]?.value || "22",
-            page: currentPageIndex,
-            pickers: Array.from(examPickers).map((picker) => ({
-              type: picker.dataset.examPicker,
-              value: picker.dataset.value || "",
-            })),
-            pages: editors.map((editor) => editor.value),
-            annotations: annotations.slice(),
-            savedAt: new Date().toISOString(),
+        const getStudentDisplayName = () => [
+          studentProfile?.prefix,
+          studentProfile?.firstName,
+          studentProfile?.lastName,
+          studentProfile?.monasticName ? `(${studentProfile.monasticName})` : "",
+        ].filter(Boolean).join(" ") || "ไม่ระบุชื่อ";
+
+        const getBookTitle = (draft) => {
+          const grade = gradePicker?.dataset.value || studentProfile?.grade || "4";
+          const savedAt = new Date(draft?.savedAt || Date.now()).toLocaleDateString("th-TH", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          });
+
+          return `สมุดคำตอบ ป.ธ. ${toThaiNumber(grade)} · ${savedAt}`;
+        };
+
+        const buildDraftSnapshot = () => ({
+          schema: "paligo.exam.answerBookDraft.v1",
+          ownerId: localOwnerId,
+          bookId: currentBookId,
+          lineHeight: lineHeightControls[0]?.value || "22",
+          page: currentPageIndex,
+          profile: studentProfile ? { ...studentProfile } : null,
+          deliveryMethod: studentProfile?.deliveryMethod || "line",
+          pickers: Array.from(examPickers).map((picker) => ({
+            type: picker.dataset.examPicker,
+            value: picker.dataset.value || "",
+          })),
+          pages: editors.map((editor) => editor.value),
+          annotations: annotations.slice(),
+          savedAt: new Date().toISOString(),
+        });
+
+        const upsertAnswerBook = (draft) => {
+          const books = getStoredList(booksStorageKey);
+          const existing = books.find((book) => book.id === currentBookId);
+          const nextRevision = Number(existing?.revision || 0) + 1;
+          const nextBook = {
+            id: currentBookId,
+            schema: "paligo.exam.answerBook.v1",
+            ownerId: localOwnerId,
+            title: existing?.title || getBookTitle(draft),
+            studentName: getStudentDisplayName(),
+            grade: gradePicker?.dataset.value || studentProfile?.grade || "4",
+            deliveryMethod: studentProfile?.deliveryMethod || "line",
+            status: existing?.status || "draft",
+            revision: nextRevision,
+            createdAt: existing?.createdAt || draft.savedAt,
+            updatedAt: draft.savedAt,
+            draft,
           };
+          const nextBooks = books.filter((book) => book.id !== currentBookId);
+          nextBooks.push(nextBook);
+          setStoredList(booksStorageKey, nextBooks);
+          localStorage.setItem(activeBookStorageKey, currentBookId);
+          return nextBook;
+        };
+
+        const saveDraft = ({ silent = false } = {}) => {
+          const draft = buildDraftSnapshot();
 
           localStorage.setItem(storageKey, JSON.stringify(draft));
+          upsertAnswerBook(draft);
           if (!silent) setSaveStatus("บันทึกแล้ว");
         };
+
+        const getActiveBookDraft = () => {
+          if (wantsNewBook) return null;
+
+          const books = getStoredList(booksStorageKey);
+          const activeBook = books.find((book) => book.id === currentBookId);
+          if (activeBook?.draft) return activeBook.draft;
+
+          try {
+            return JSON.parse(localStorage.getItem(storageKey) || "null");
+          } catch {
+            return null;
+          }
+        };
+
+        const downloadJson = (fileName, payload) => {
+          const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = fileName;
+          document.body.append(link);
+          link.click();
+          link.remove();
+          URL.revokeObjectURL(url);
+        };
+
+        const createSubmissionPackage = () => {
+          const submittedAt = new Date().toISOString();
+          const draft = buildDraftSnapshot();
+          const book = upsertAnswerBook(draft);
+
+          return {
+            schema: "paligo.exam.submission.v1",
+            id: createId("submission"),
+            ownerId: localOwnerId,
+            bookId: currentBookId,
+            bookRevision: book.revision,
+            bookTitle: book.title,
+            submittedAt,
+            studentName: getStudentDisplayName(),
+            studentRole: "student",
+            teacherRole: studentProfile?.teacherRole || "teacher-reviewer",
+            teacherName: studentProfile?.teacherName || "",
+            deliveryMethod: studentProfile?.deliveryMethod || "line",
+            profile: studentProfile ? { ...studentProfile } : null,
+            grade: gradePicker?.dataset.value || studentProfile?.grade || "4",
+            pickers: draft.pickers,
+            pages: draft.pages.map((text, index) => ({ index, text })),
+            annotations: annotations.slice(),
+          };
+        };
+
+        const submitForReview = () => {
+          if (!studentProfile) {
+            document.body.classList.add("needs-profile");
+            setSaveStatus("กรอกโปรไฟล์ก่อนส่งตรวจ");
+            return;
+          }
+
+          saveDraft({ silent: true });
+          const submission = createSubmissionPackage();
+          const submissions = getStoredList(submissionsStorageKey).filter((item) => item.id !== submission.id);
+          submissions.push(submission);
+          setStoredList(submissionsStorageKey, submissions);
+          setStoredList(booksStorageKey, getStoredList(booksStorageKey).map((book) => (
+            book.id === currentBookId
+              ? { ...book, status: "submitted", submittedAt: submission.submittedAt }
+              : book
+          )));
+          downloadJson(`${submission.id}.paligo-submission.json`, submission);
+          showToast("สร้างไฟล์ส่งตรวจแล้ว พร้อมส่งผ่าน LINE Flex Message");
+          setSaveStatus("สร้างไฟล์ส่งตรวจแล้ว");
+        };
+
+        profileForm?.addEventListener("submit", (event) => {
+          event.preventDefault();
+          if (!validateProfileForm()) return;
+
+          const formData = new FormData(profileForm);
+          studentProfile = {
+            userRole: String(formData.get("userRole") || "student"),
+            prefix: String(formData.get("prefix") || ""),
+            firstName: String(formData.get("firstName") || "").trim(),
+            lastName: String(formData.get("lastName") || "").trim(),
+            monasticName: String(formData.get("monasticName") || "").trim(),
+            grade: String(formData.get("grade") || "4"),
+            teacherName: String(formData.get("teacherName") || "").trim(),
+            teacherRole: String(formData.get("teacherRole") || "teacher-reviewer"),
+            deliveryMethod: String(formData.get("deliveryMethod") || "line"),
+            updatedAt: new Date().toISOString(),
+          };
+
+          saveStudentProfile(studentProfile);
+          if (gradePicker) {
+            updatePickerCurrentValue(gradePicker, studentProfile.grade);
+            selectPickerValue(gradePicker, studentProfile.grade);
+          }
+          document.body.classList.remove("needs-profile");
+          saveDraft({ silent: true });
+        });
+
+        if (studentProfile) {
+          setProfileFormValues(studentProfile);
+        } else {
+          document.body.classList.add("needs-profile");
+        }
 
         const scheduleAutoSave = () => {
           clearTimeout(autoSaveTimer);
@@ -1555,11 +2133,14 @@
         };
 
         const restoreDraft = () => {
-          const raw = localStorage.getItem(storageKey);
-          if (!raw) return false;
+          const draft = getActiveBookDraft();
+          if (!draft) return false;
 
           try {
-            const draft = JSON.parse(raw);
+            if (draft.bookId) {
+              currentBookId = draft.bookId;
+              localStorage.setItem(activeBookStorageKey, currentBookId);
+            }
             const lineHeight = Number(draft.lineHeight || 22);
 
             lineHeightControls.forEach((control) => {
@@ -1617,6 +2198,7 @@
         pagePrevButton?.addEventListener("click", () => showPage(currentPageIndex - 1));
         pageNextButton?.addEventListener("click", () => showPage(currentPageIndex + 1));
         saveButton?.addEventListener("click", saveDraft);
+        submitReviewButton?.addEventListener("click", submitForReview);
         clearBottomLineButton?.addEventListener("click", clearBottomLine);
 
         document.addEventListener("keydown", (event) => {

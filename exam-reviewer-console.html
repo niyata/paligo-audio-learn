@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Exam Reviewer Console</title>
+    <style>
+      :root {
+        --page-bg: #f8f0e3;
+        --paper-bg: #fffaf0;
+        --card-bg: rgba(255, 255, 255, 0.84);
+        --card-border: rgba(74, 44, 10, 0.16);
+        --exam-blue: rgba(31, 45, 137, 0.76);
+        --ink: #333;
+        --muted: rgba(51, 51, 51, 0.62);
+        --red: #b4232f;
+        --yellow: #9a6a10;
+        --green: #24715b;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        background: var(--page-bg);
+        color: var(--ink);
+        font-family: Sarabun, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        line-height: 1.5;
+        margin: 0;
+        min-height: 100vh;
+        padding: clamp(18px, 4vw, 42px);
+      }
+
+      .review-shell {
+        display: grid;
+        gap: 16px;
+        grid-template-columns: minmax(280px, 0.36fr) minmax(0, 1fr);
+        margin: 0 auto;
+        max-width: 1240px;
+      }
+
+      .panel {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 8px;
+        box-shadow: 0 18px 46px rgba(74, 44, 10, 0.1);
+        min-width: 0;
+        padding: 16px;
+      }
+
+      .panel-title {
+        color: var(--exam-blue);
+        font-size: 1.18rem;
+        font-weight: 900;
+        margin: 0 0 10px;
+      }
+
+      .field {
+        display: grid;
+        gap: 5px;
+        margin-bottom: 10px;
+      }
+
+      .field span {
+        color: var(--muted);
+        font-size: 0.82rem;
+        font-weight: 800;
+      }
+
+      .input,
+      .select,
+      .textarea {
+        background: var(--paper-bg);
+        border: 1px solid rgba(31, 45, 137, 0.24);
+        border-radius: 6px;
+        color: var(--exam-blue);
+        font: inherit;
+        min-height: 36px;
+        padding: 7px 9px;
+        width: 100%;
+      }
+
+      .textarea {
+        min-height: 130px;
+        resize: vertical;
+      }
+
+      .button-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 10px;
+      }
+
+      .button {
+        appearance: none;
+        background: var(--paper-bg);
+        border: 1px solid rgba(31, 45, 137, 0.24);
+        border-radius: 6px;
+        color: var(--exam-blue);
+        cursor: pointer;
+        font: inherit;
+        font-size: 0.86rem;
+        font-weight: 900;
+        min-height: 36px;
+        padding: 7px 10px;
+      }
+
+      .button.is-primary {
+        background: var(--exam-blue);
+        color: var(--paper-bg);
+      }
+
+      .button.is-score {
+        border-color: rgba(36, 113, 91, 0.28);
+        color: var(--green);
+      }
+
+      .button.is-error {
+        border-color: rgba(180, 35, 47, 0.28);
+        color: var(--red);
+      }
+
+      .submission-list {
+        display: grid;
+        gap: 8px;
+        margin-top: 12px;
+      }
+
+      .submission-item {
+        background: rgba(31, 45, 137, 0.06);
+        border: 1px solid rgba(31, 45, 137, 0.16);
+        border-radius: 6px;
+        cursor: pointer;
+        padding: 9px;
+        text-align: left;
+      }
+
+      .submission-item.is-active {
+        border-color: var(--exam-blue);
+        box-shadow: 0 0 0 2px rgba(31, 45, 137, 0.16);
+      }
+
+      .submission-item strong {
+        color: var(--exam-blue);
+        display: block;
+      }
+
+      .submission-item span,
+      .status-note {
+        color: var(--muted);
+        font-size: 0.82rem;
+        font-weight: 700;
+      }
+
+      .answer-page {
+        background: var(--paper-bg);
+        border: 1px solid rgba(31, 45, 137, 0.18);
+        border-radius: 8px;
+        margin-bottom: 12px;
+        overflow: hidden;
+      }
+
+      .answer-page-header {
+        background: rgba(31, 45, 137, 0.08);
+        color: var(--exam-blue);
+        font-weight: 900;
+        padding: 8px 10px;
+      }
+
+      .answer-text {
+        color: var(--exam-blue);
+        font-size: 0.96rem;
+        margin: 0;
+        min-height: 120px;
+        overflow: auto;
+        padding: 12px;
+        white-space: pre-wrap;
+      }
+
+      .stamp-table {
+        border-collapse: collapse;
+        margin-top: 12px;
+        width: 100%;
+      }
+
+      .stamp-table th,
+      .stamp-table td {
+        border-bottom: 1px solid rgba(31, 45, 137, 0.12);
+        padding: 7px;
+        text-align: left;
+      }
+
+      .score-summary {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin: 10px 0;
+      }
+
+      .score-pill {
+        background: rgba(36, 113, 91, 0.12);
+        border: 1px solid rgba(36, 113, 91, 0.24);
+        border-radius: 999px;
+        color: var(--green);
+        font-weight: 900;
+        padding: 4px 10px;
+      }
+
+      @media (max-width: 820px) {
+        .review-shell {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="review-shell">
+      <aside class="panel">
+        <h1 class="panel-title">ผู้ตรวจข้อสอบ</h1>
+        <label class="field">
+          <span>ชื่ออาจารย์ / ผู้ตรวจ</span>
+          <input class="input" data-reviewer-name />
+        </label>
+        <label class="field">
+          <span>บทบาท</span>
+          <select class="select" data-reviewer-role>
+            <option value="teacher-reviewer">ผู้สอนและผู้ตรวจ</option>
+            <option value="teacher">อาจารย์ผู้สอน</option>
+            <option value="reviewer">ผู้ตรวจ</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>นำเข้า submission JSON</span>
+          <input class="input" type="file" accept="application/json,.json,.paligo-submission" data-import-file />
+        </label>
+        <label class="field">
+          <span>หรือวาง JSON</span>
+          <textarea class="textarea" data-import-text></textarea>
+        </label>
+        <div class="button-row">
+          <button class="button is-primary" type="button" data-import-json>นำเข้า</button>
+          <button class="button" type="button" data-refresh-list>รีเฟรชรายการ</button>
+        </div>
+        <p class="status-note" data-status-note>นำเข้าข้อสอบที่นักเรียนส่งมา แล้วเลือกเพื่อตรวจ</p>
+        <div class="submission-list" data-submission-list></div>
+      </aside>
+
+      <section class="panel">
+        <h2 class="panel-title" data-current-title>ยังไม่ได้เลือกข้อสอบ</h2>
+        <div class="score-summary">
+          <span class="score-pill" data-score-percent>๐%</span>
+          <span class="status-note" data-score-detail>ยังไม่มี score stamp</span>
+        </div>
+        <div class="button-row">
+          <label class="field">
+            <span>หน้า</span>
+            <input class="input" type="number" min="1" value="1" data-stamp-page />
+          </label>
+          <label class="field">
+            <span>บรรทัด</span>
+            <input class="input" type="number" min="1" value="1" data-stamp-line />
+          </label>
+        </div>
+        <div class="button-row">
+          <button class="button is-score" type="button" data-score-stamp="1">๑ ให้</button>
+          <button class="button is-score" type="button" data-score-stamp="2">๒ ให้</button>
+          <button class="button is-score" type="button" data-score-stamp="3">๓ ให้</button>
+          <button class="button is-error" type="button" data-error-stamp="wrong-word">ผิดศัพท์</button>
+          <button class="button is-error" type="button" data-error-stamp="wrong-relation">ผิดสัมพันธ์</button>
+          <button class="button is-error" type="button" data-error-stamp="wrong-pa">ผิด ป.</button>
+        </div>
+        <div class="button-row">
+          <button class="button is-primary" type="button" data-save-review>บันทึกการตรวจ</button>
+          <button class="button" type="button" data-return-package>ส่งคืนนักเรียน</button>
+          <a class="button" href="exam-leaderboard.html">เปิด leaderboard</a>
+        </div>
+        <div data-answer-view></div>
+        <table class="stamp-table">
+          <thead>
+            <tr>
+              <th>ชนิด</th>
+              <th>ค่า</th>
+              <th>หน้า</th>
+              <th>บรรทัด</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody data-stamp-body></tbody>
+        </table>
+      </section>
+    </main>
+
+    <script>
+      (() => {
+        const submissionsStorageKey = "paligo-exam-submissions-v1";
+        const resultsStorageKey = "paligo-exam-results-v1";
+        const reviewerStorageKey = "paligo-exam-reviewer-profile-v1";
+        const list = document.querySelector("[data-submission-list]");
+        const answerView = document.querySelector("[data-answer-view]");
+        const stampBody = document.querySelector("[data-stamp-body]");
+        const statusNote = document.querySelector("[data-status-note]");
+        const currentTitle = document.querySelector("[data-current-title]");
+        const scorePercent = document.querySelector("[data-score-percent]");
+        const scoreDetail = document.querySelector("[data-score-detail]");
+        const reviewerName = document.querySelector("[data-reviewer-name]");
+        const reviewerRole = document.querySelector("[data-reviewer-role]");
+        const importFile = document.querySelector("[data-import-file]");
+        const importText = document.querySelector("[data-import-text]");
+        const pageInput = document.querySelector("[data-stamp-page]");
+        const lineInput = document.querySelector("[data-stamp-line]");
+        const thaiDigits = new Map([
+          ["0", "๐"], ["1", "๑"], ["2", "๒"], ["3", "๓"], ["4", "๔"],
+          ["5", "๕"], ["6", "๖"], ["7", "๗"], ["8", "๘"], ["9", "๙"],
+        ]);
+        let submissions = [];
+        let currentSubmission = null;
+        let scoreStamps = [];
+        let errorStamps = [];
+
+        const toThaiNumber = (value) => String(value).replace(/[0-9]/g, (digit) => thaiDigits.get(digit));
+        const toThaiPercent = (value) => `${toThaiNumber(Math.round(value))}%`;
+        const getList = (key) => {
+          try {
+            const parsed = JSON.parse(localStorage.getItem(key) || "[]");
+            return Array.isArray(parsed) ? parsed : [];
+          } catch {
+            return [];
+          }
+        };
+        const setList = (key, value) => localStorage.setItem(key, JSON.stringify(value));
+        const setStatus = (message) => {
+          statusNote.textContent = message;
+        };
+        const getReviewerProfile = () => {
+          try {
+            return JSON.parse(localStorage.getItem(reviewerStorageKey) || "null");
+          } catch {
+            return null;
+          }
+        };
+        const saveReviewerProfile = () => {
+          localStorage.setItem(reviewerStorageKey, JSON.stringify({
+            name: reviewerName.value.trim(),
+            role: reviewerRole.value,
+            updatedAt: new Date().toISOString(),
+          }));
+        };
+        const downloadJson = (fileName, payload) => {
+          const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = fileName;
+          document.body.append(link);
+          link.click();
+          link.remove();
+          URL.revokeObjectURL(url);
+        };
+        const calculateScore = () => {
+          const earned = scoreStamps.reduce((sum, stamp) => sum + Number(stamp.value || 0), 0);
+          const max = scoreStamps.length * 3;
+          const percent = max > 0 ? (earned / max) * 100 : 0;
+          return { earned, max, percent, stampCount: scoreStamps.length };
+        };
+        const renderScore = () => {
+          const score = calculateScore();
+          scorePercent.textContent = toThaiPercent(score.percent);
+          scoreDetail.textContent = score.stampCount
+            ? `${toThaiNumber(score.earned)} / ${toThaiNumber(score.max)} จาก ${toThaiNumber(score.stampCount)} stamp`
+            : "ยังไม่มี score stamp";
+        };
+        const renderSubmissions = () => {
+          submissions = getList(submissionsStorageKey);
+          list.innerHTML = "";
+          submissions.forEach((submission) => {
+            const button = document.createElement("button");
+            const title = document.createElement("strong");
+            const meta = document.createElement("span");
+            button.className = "submission-item";
+            button.type = "button";
+            button.classList.toggle("is-active", currentSubmission?.id === submission.id);
+            title.textContent = submission.studentName || "ไม่ระบุชื่อ";
+            meta.textContent = `ป.ธ. ${toThaiNumber(submission.grade || "-")} · ${new Date(submission.submittedAt).toLocaleString("th-TH")}`;
+            button.append(title, meta);
+            button.addEventListener("click", () => selectSubmission(submission.id));
+            list.append(button);
+          });
+        };
+        const renderAnswers = () => {
+          answerView.innerHTML = "";
+          if (!currentSubmission) return;
+          currentSubmission.pages?.forEach((page, index) => {
+            const article = document.createElement("article");
+            const header = document.createElement("div");
+            const pre = document.createElement("pre");
+            article.className = "answer-page";
+            header.className = "answer-page-header";
+            pre.className = "answer-text";
+            header.textContent = `หน้า ${toThaiNumber(index + 1)}`;
+            pre.textContent = page.text || "";
+            article.append(header, pre);
+            answerView.append(article);
+          });
+        };
+        const renderStamps = () => {
+          stampBody.innerHTML = "";
+          [...scoreStamps, ...errorStamps].forEach((stamp, index) => {
+            const tr = document.createElement("tr");
+            ["kind", "value", "page", "line"].forEach((key) => {
+              const td = document.createElement("td");
+              td.textContent = key === "page" || key === "line" || key === "value"
+                ? toThaiNumber(stamp[key] || "-")
+                : stamp[key];
+              tr.append(td);
+            });
+            const action = document.createElement("td");
+            const remove = document.createElement("button");
+            remove.className = "button";
+            remove.type = "button";
+            remove.textContent = "ลบ";
+            remove.addEventListener("click", () => {
+              if (stamp.kind === "score") scoreStamps.splice(index, 1);
+              else errorStamps.splice(index - scoreStamps.length, 1);
+              renderStamps();
+              renderScore();
+            });
+            action.append(remove);
+            tr.append(action);
+            stampBody.append(tr);
+          });
+        };
+        function selectSubmission(id) {
+          currentSubmission = submissions.find((item) => item.id === id) || null;
+          scoreStamps = [];
+          errorStamps = [];
+          currentTitle.textContent = currentSubmission
+            ? `ตรวจ: ${currentSubmission.studentName || "ไม่ระบุชื่อ"}`
+            : "ยังไม่ได้เลือกข้อสอบ";
+          renderSubmissions();
+          renderAnswers();
+          renderStamps();
+          renderScore();
+        }
+        const addStamp = (kind, value) => {
+          if (!currentSubmission) {
+            setStatus("เลือกข้อสอบก่อนเพิ่ม stamp");
+            return;
+          }
+          const stamp = {
+            kind,
+            value,
+            page: Math.max(1, Number(pageInput.value || 1)),
+            line: Math.max(1, Number(lineInput.value || 1)),
+            createdAt: new Date().toISOString(),
+          };
+          if (kind === "score") scoreStamps.push(stamp);
+          else errorStamps.push(stamp);
+          renderStamps();
+          renderScore();
+        };
+        const buildReviewResult = () => {
+          const score = calculateScore();
+          return {
+            schema: "paligo.exam.review.v1",
+            id: `review-${currentSubmission.id}`,
+            submissionId: currentSubmission.id,
+            ownerId: currentSubmission.ownerId || "",
+            bookId: currentSubmission.bookId || "",
+            bookRevision: currentSubmission.bookRevision || 0,
+            bookTitle: currentSubmission.bookTitle || "",
+            studentName: currentSubmission.studentName,
+            grade: currentSubmission.grade,
+            profile: currentSubmission.profile,
+            teacherName: reviewerName.value.trim() || currentSubmission.teacherName || "",
+            reviewerRole: reviewerRole.value,
+            scoreStamps: scoreStamps.slice(),
+            errorStamps: errorStamps.slice(),
+            score,
+            reviewedAt: new Date().toISOString(),
+          };
+        };
+        const saveReview = () => {
+          if (!currentSubmission) {
+            setStatus("เลือกข้อสอบก่อนบันทึก");
+            return null;
+          }
+          saveReviewerProfile();
+          const result = buildReviewResult();
+          const results = getList(resultsStorageKey).filter((item) => item.submissionId !== result.submissionId);
+          results.push(result);
+          setList(resultsStorageKey, results);
+          setStatus("บันทึกผลตรวจแล้ว และส่งคะแนนเข้า leaderboard แล้ว");
+          return result;
+        };
+        const importSubmission = (payload) => {
+          if (!payload || payload.schema !== "paligo.exam.submission.v1") {
+            setStatus("ไฟล์ไม่ใช่ submission package");
+            return;
+          }
+          const next = getList(submissionsStorageKey).filter((item) => item.id !== payload.id);
+          next.push(payload);
+          setList(submissionsStorageKey, next);
+          submissions = next;
+          selectSubmission(payload.id);
+          renderSubmissions();
+          setStatus("นำเข้า submission แล้ว");
+        };
+
+        document.querySelector("[data-import-json]")?.addEventListener("click", () => {
+          try {
+            importSubmission(JSON.parse(importText.value));
+          } catch {
+            setStatus("อ่าน JSON ไม่ได้");
+          }
+        });
+        importFile?.addEventListener("change", async () => {
+          const file = importFile.files?.[0];
+          if (!file) return;
+          try {
+            importSubmission(JSON.parse(await file.text()));
+          } catch {
+            setStatus("อ่านไฟล์ไม่ได้");
+          }
+        });
+        document.querySelector("[data-refresh-list]")?.addEventListener("click", renderSubmissions);
+        document.querySelectorAll("[data-score-stamp]").forEach((button) => {
+          button.addEventListener("click", () => addStamp("score", Number(button.dataset.scoreStamp)));
+        });
+        document.querySelectorAll("[data-error-stamp]").forEach((button) => {
+          button.addEventListener("click", () => addStamp(button.dataset.errorStamp, ""));
+        });
+        document.querySelector("[data-save-review]")?.addEventListener("click", saveReview);
+        document.querySelector("[data-return-package]")?.addEventListener("click", () => {
+          const result = saveReview();
+          if (result) downloadJson(`${result.id}.paligo-review.json`, result);
+        });
+
+        const reviewer = getReviewerProfile();
+        if (reviewer) {
+          reviewerName.value = reviewer.name || "";
+          reviewerRole.value = reviewer.role || "teacher-reviewer";
+        }
+        renderSubmissions();
+        renderScore();
+      })();
+    </script>
+  </body>
+</html>

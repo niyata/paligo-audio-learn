@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Exam Leaderboard</title>
+    <style>
+      :root {
+        --page-bg: #f8f0e3;
+        --paper-bg: #fffaf0;
+        --card-bg: rgba(255, 255, 255, 0.82);
+        --card-border: rgba(74, 44, 10, 0.16);
+        --exam-blue: rgba(31, 45, 137, 0.76);
+        --ink: #343434;
+        --muted: rgba(52, 52, 52, 0.62);
+        --good: #24715b;
+        --warn: #9a5b18;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        background: var(--page-bg);
+        color: var(--ink);
+        font-family: Sarabun, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        line-height: 1.5;
+        margin: 0;
+        min-height: 100vh;
+        padding: clamp(18px, 4vw, 42px);
+      }
+
+      .leaderboard-shell {
+        display: grid;
+        gap: 16px;
+        margin: 0 auto;
+        max-width: 1120px;
+      }
+
+      .leaderboard-header,
+      .leaderboard-panel {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 8px;
+        box-shadow: 0 18px 46px rgba(74, 44, 10, 0.1);
+      }
+
+      .leaderboard-header {
+        align-items: end;
+        display: grid;
+        gap: 12px;
+        grid-template-columns: minmax(0, 1fr) auto;
+        padding: 18px;
+      }
+
+      .leaderboard-title {
+        color: var(--exam-blue);
+        font-size: clamp(1.45rem, 3vw, 2.1rem);
+        line-height: 1.15;
+        margin: 0;
+      }
+
+      .leaderboard-subtitle {
+        color: var(--muted);
+        font-size: 0.92rem;
+        font-weight: 700;
+        margin: 4px 0 0;
+      }
+
+      .leaderboard-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        justify-content: flex-end;
+      }
+
+      .leaderboard-tab {
+        appearance: none;
+        background: var(--paper-bg);
+        border: 1px solid rgba(31, 45, 137, 0.22);
+        border-radius: 6px;
+        color: var(--exam-blue);
+        cursor: pointer;
+        font: inherit;
+        font-size: 0.86rem;
+        font-weight: 800;
+        min-height: 34px;
+        padding: 6px 10px;
+      }
+
+      .leaderboard-tab.is-active {
+        background: rgba(31, 45, 137, 0.12);
+        border-color: var(--exam-blue);
+        box-shadow: 0 0 0 2px rgba(31, 45, 137, 0.16);
+      }
+
+      .leaderboard-panel {
+        overflow: hidden;
+      }
+
+      .leaderboard-table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+
+      .leaderboard-table th,
+      .leaderboard-table td {
+        border-bottom: 1px solid rgba(31, 45, 137, 0.12);
+        padding: 10px 12px;
+        text-align: left;
+        vertical-align: middle;
+      }
+
+      .leaderboard-table th {
+        color: rgba(31, 45, 137, 0.76);
+        font-size: 0.78rem;
+        font-weight: 900;
+        letter-spacing: 0;
+        white-space: nowrap;
+      }
+
+      .rank-cell {
+        color: var(--exam-blue);
+        font-size: 1.05rem;
+        font-weight: 900;
+        width: 56px;
+      }
+
+      .student-name {
+        color: var(--ink);
+        font-weight: 900;
+      }
+
+      .student-meta {
+        color: var(--muted);
+        font-size: 0.82rem;
+        font-weight: 700;
+      }
+
+      .score-pill {
+        background: rgba(36, 113, 91, 0.12);
+        border: 1px solid rgba(36, 113, 91, 0.24);
+        border-radius: 999px;
+        color: var(--good);
+        display: inline-flex;
+        font-weight: 900;
+        min-width: 76px;
+        padding: 3px 9px;
+      }
+
+      .score-detail {
+        color: var(--muted);
+        font-size: 0.82rem;
+        font-weight: 700;
+      }
+
+      .empty-state {
+        color: var(--muted);
+        display: grid;
+        gap: 4px;
+        justify-items: center;
+        padding: 46px 18px;
+        text-align: center;
+      }
+
+      .empty-state strong {
+        color: var(--exam-blue);
+        font-size: 1.1rem;
+      }
+
+      @media (max-width: 720px) {
+        .leaderboard-header {
+          grid-template-columns: 1fr;
+        }
+
+        .leaderboard-tabs {
+          justify-content: flex-start;
+        }
+
+        .leaderboard-table,
+        .leaderboard-table tbody,
+        .leaderboard-table tr,
+        .leaderboard-table td {
+          display: block;
+        }
+
+        .leaderboard-table thead {
+          display: none;
+        }
+
+        .leaderboard-table tr {
+          border-bottom: 1px solid rgba(31, 45, 137, 0.14);
+          padding: 8px 0;
+        }
+
+        .leaderboard-table td {
+          border-bottom: 0;
+          padding: 5px 12px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="leaderboard-shell">
+      <header class="leaderboard-header">
+        <div>
+          <h1 class="leaderboard-title">กระดานคะแนนข้อสอบ</h1>
+          <p class="leaderboard-subtitle" data-leaderboard-summary>
+            คะแนนคำนวณจาก stamp "๑ ให้ / ๒ ให้ / ๓ ให้" เท่านั้น
+          </p>
+        </div>
+        <nav class="leaderboard-tabs" aria-label="ช่วงเวลาคะแนน">
+          <button class="leaderboard-tab is-active" type="button" data-range="daily">รายวัน</button>
+          <button class="leaderboard-tab" type="button" data-range="weekly">รายสัปดาห์</button>
+          <button class="leaderboard-tab" type="button" data-range="threeWeeks">สามสัปดาห์ต่อเนื่อง</button>
+          <button class="leaderboard-tab" type="button" data-range="monthly">รายเดือน</button>
+        </nav>
+      </header>
+
+      <section class="leaderboard-panel" aria-label="อันดับคะแนน">
+        <table class="leaderboard-table">
+          <thead>
+            <tr>
+              <th>อันดับ</th>
+              <th>ผู้เรียน</th>
+              <th>ชั้น</th>
+              <th>คะแนน</th>
+              <th>จำนวน stamp</th>
+              <th>ตรวจเมื่อ</th>
+            </tr>
+          </thead>
+          <tbody data-leaderboard-body></tbody>
+        </table>
+        <div class="empty-state" data-empty-state hidden>
+          <strong>ยังไม่มีผลตรวจในช่วงนี้</strong>
+          <span>เมื่อครูกดบันทึกการตรวจ ระบบจะเพิ่มผลคะแนนจาก score stamps เข้ากระดานนี้</span>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      (() => {
+        const resultsStorageKey = "paligo-exam-results-v1";
+        const tabs = document.querySelectorAll("[data-range]");
+        const tbody = document.querySelector("[data-leaderboard-body]");
+        const emptyState = document.querySelector("[data-empty-state]");
+        const summary = document.querySelector("[data-leaderboard-summary]");
+        const thaiDigits = new Map([
+          ["0", "๐"],
+          ["1", "๑"],
+          ["2", "๒"],
+          ["3", "๓"],
+          ["4", "๔"],
+          ["5", "๕"],
+          ["6", "๖"],
+          ["7", "๗"],
+          ["8", "๘"],
+          ["9", "๙"],
+        ]);
+
+        const rangeLabels = {
+          daily: "รายวัน",
+          weekly: "รายสัปดาห์",
+          threeWeeks: "สามสัปดาห์ต่อเนื่อง",
+          monthly: "รายเดือน",
+        };
+
+        const toThaiNumber = (value) => String(value).replace(/[0-9]/g, (digit) => thaiDigits.get(digit));
+        const toThaiPercent = (value) => `${toThaiNumber(Math.round(value))}%`;
+
+        const getStoredResults = () => {
+          try {
+            const raw = localStorage.getItem(resultsStorageKey);
+            const parsed = raw ? JSON.parse(raw) : [];
+            return Array.isArray(parsed) ? parsed : [];
+          } catch {
+            return [];
+          }
+        };
+
+        const getScoreStamps = (result) => {
+          const stamps = Array.isArray(result.scoreStamps) ? result.scoreStamps : [];
+          return stamps
+            .map((stamp) => Number(stamp.value))
+            .filter((value) => value >= 1 && value <= 3);
+        };
+
+        const calculateScore = (result) => {
+          const stamps = getScoreStamps(result);
+          const earned = stamps.reduce((sum, value) => sum + value, 0);
+          const max = stamps.length * 3;
+          const percent = max > 0 ? (earned / max) * 100 : 0;
+
+          return { earned, max, percent, stampCount: stamps.length };
+        };
+
+        const startOfDay = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+        const isInRange = (date, range) => {
+          const now = new Date();
+          const reviewedAt = startOfDay(date);
+          const today = startOfDay(now);
+
+          if (range === "daily") return reviewedAt.getTime() === today.getTime();
+          if (range === "weekly") {
+            const since = new Date(today);
+            since.setDate(today.getDate() - 6);
+            return reviewedAt >= since && reviewedAt <= today;
+          }
+          if (range === "threeWeeks") {
+            const since = new Date(today);
+            since.setDate(today.getDate() - 20);
+            return reviewedAt >= since && reviewedAt <= today;
+          }
+
+          return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth();
+        };
+
+        const getStudentName = (result) => {
+          const profile = result.profile || {};
+          const parts = [
+            profile.prefix,
+            profile.firstName,
+            profile.lastName,
+            profile.monasticName ? `(${profile.monasticName})` : "",
+          ].filter(Boolean);
+
+          return result.studentName || parts.join(" ") || "ไม่ระบุชื่อ";
+        };
+
+        const renderLeaderboard = (range = "daily") => {
+          const rows = getStoredResults()
+            .map((result) => {
+              const reviewedAt = new Date(result.reviewedAt || result.savedAt || result.submittedAt || 0);
+              return { ...result, reviewedAt, score: calculateScore(result) };
+            })
+            .filter((result) => Number.isFinite(result.reviewedAt.getTime()))
+            .filter((result) => result.score.stampCount > 0)
+            .filter((result) => isInRange(result.reviewedAt, range))
+            .sort((a, b) => {
+              if (b.score.percent !== a.score.percent) return b.score.percent - a.score.percent;
+              if (b.score.earned !== a.score.earned) return b.score.earned - a.score.earned;
+              return b.reviewedAt - a.reviewedAt;
+            });
+
+          tbody.innerHTML = "";
+          emptyState.hidden = rows.length > 0;
+          summary.textContent = `${rangeLabels[range]} · ${toThaiNumber(rows.length)} ผลตรวจ · คิดจาก stamp คะแนนเท่านั้น`;
+
+          rows.forEach((result, index) => {
+            const tr = document.createElement("tr");
+            const grade = result.grade || result.profile?.grade || "-";
+            const reviewedText = result.reviewedAt.toLocaleDateString("th-TH", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            });
+            const rankCell = document.createElement("td");
+            const studentCell = document.createElement("td");
+            const gradeCell = document.createElement("td");
+            const scoreCell = document.createElement("td");
+            const stampCell = document.createElement("td");
+            const reviewedCell = document.createElement("td");
+            const studentName = document.createElement("div");
+            const studentMeta = document.createElement("div");
+            const scorePill = document.createElement("span");
+            const scoreDetail = document.createElement("div");
+
+            rankCell.className = "rank-cell";
+            rankCell.textContent = toThaiNumber(index + 1);
+            studentName.className = "student-name";
+            studentName.textContent = getStudentName(result);
+            studentMeta.className = "student-meta";
+            studentMeta.textContent = result.teacherName || result.profile?.teacherName || "ยังไม่ระบุผู้ตรวจ";
+            studentCell.append(studentName, studentMeta);
+            gradeCell.textContent = `ป.ธ. ${toThaiNumber(grade)}`;
+            scorePill.className = "score-pill";
+            scorePill.textContent = toThaiPercent(result.score.percent);
+            scoreDetail.className = "score-detail";
+            scoreDetail.textContent = `${toThaiNumber(result.score.earned)} / ${toThaiNumber(result.score.max)}`;
+            scoreCell.append(scorePill, scoreDetail);
+            stampCell.textContent = toThaiNumber(result.score.stampCount);
+            reviewedCell.textContent = reviewedText;
+
+            tr.append(rankCell, studentCell, gradeCell, scoreCell, stampCell, reviewedCell);
+            tbody.append(tr);
+          });
+        };
+
+        tabs.forEach((tab) => {
+          tab.addEventListener("click", () => {
+            tabs.forEach((item) => item.classList.toggle("is-active", item === tab));
+            renderLeaderboard(tab.dataset.range);
+          });
+        });
+
+        renderLeaderboard("daily");
+      })();
+    </script>
+  </body>
+</html>
