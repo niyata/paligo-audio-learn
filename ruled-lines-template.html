@@ -12,16 +12,33 @@
         --card-bg: rgba(255, 255, 255, 0.78);
         --card-border: rgba(74, 44, 10, 0.16);
         --ink: #3a3a3a;
-        --rule-color: rgba(212, 175, 55, 0.42);
-        --margin-color: rgba(184, 92, 92, 0.42);
-        --line-height: 22px;
-        --line-width: 1px;
+        --exam-blue: rgba(31, 45, 137, 0.72);
+        --rule-color: var(--exam-blue);
+        --margin-color: var(--exam-blue);
+        --line-height: 26px;
+        --line-width: 0.75px;
+        --emphasis-line-width: 1px;
         --number-gutter: 5ch;
-        --editor-font-size: 12px;
-        --text-y-offset: 2px;
+        --editor-font-size: 14px;
+        --header-text-y-offset: 2px;
+        --text-y-offset: var(--header-text-y-offset);
         --paper-padding-block: 28px;
         --paper-padding-inline: clamp(22px, 5vw, 56px);
-        --paper-min-height: 420px;
+        --paper-padding-inline-end: clamp(8px, 1.4vw, 18px);
+        --lines-first-page: 29;
+        --lines-per-page: 33;
+        /* is-after-prefilled uses: min-height = --paper-min-height - line-height
+           so we add 1 extra line: (lines-first-page+1)×lh + padding-block */
+        --paper-min-height: calc(
+          var(--paper-padding-block) +
+          (var(--lines-first-page) + 1) * var(--line-height)
+        );
+        /* continuation pages: lines-per-page×lh + padding-block */
+        --paper-min-height-continuation: calc(
+          var(--paper-padding-block) +
+          var(--lines-per-page) * var(--line-height)
+        );
+        --paper-edge-blank: 30px;
       }
 
       * {
@@ -78,44 +95,419 @@
           inset 0 1px rgba(255, 255, 255, 0.74),
           0 10px 26px rgba(74, 44, 10, 0.08);
         overflow: hidden;
+        padding-bottom: 0;
+      }
+
+      .exam-page[hidden] {
+        display: none;
       }
 
       .exam-page.is-first {
-        padding-top: 30px;
+        padding-top: var(--paper-edge-blank);
       }
 
-      .exam-header {
+      .exam-page.is-continuation {
+        padding-top: var(--paper-edge-blank);
+      }
+
+      /* ── Annotation (ruler / emphasis-line) tool ─────────────────── */
+      :root {
+        --annotation-line-width: calc(var(--line-width) + 0.4px);
+      }
+
+      .exam-page.is-first .ruled-editor-frame {
+        --annotation-page-offset: var(--line-height);
+      }
+
+      .exam-page.is-continuation .ruled-editor-frame {
+        --annotation-page-offset: var(--text-y-offset);
+      }
+
+      .annotation-lines {
+        bottom: 0;
+        left: 0;
+        pointer-events: none;
+        position: absolute;
+        right: 0;
+        top: 0;
+        z-index: 3;
+      }
+
+      .annotation-line {
+        background: var(--exam-blue);
+        height: var(--annotation-line-width);
+        left: calc(var(--paper-padding-inline) + var(--number-gutter));
+        pointer-events: none;
+        position: absolute;
+        right: 0;
+        top: calc(
+          var(--annotation-page-offset, 0px) +
+          var(--line-n, 1) * var(--line-height) -
+          var(--annotation-line-width)
+        );
+        z-index: 3;
+      }
+
+      .annotation-canvas {
+        bottom: 0;
+        cursor: default;
+        left: 0;
+        pointer-events: none;
+        position: absolute;
+        right: 0;
+        top: 0;
+        user-select: none;
+        z-index: 5;
+      }
+
+      .is-annotating .annotation-canvas {
+        cursor: crosshair;
+        pointer-events: auto;
+      }
+
+      .is-annotating .annotation-canvas:hover {
+        background: rgba(31, 45, 137, 0.04);
+      }
+
+      .annotation-toggle-button {
+        appearance: none;
+        background: var(--paper-bg);
+        border: 1px solid var(--paper-border);
+        border-radius: 6px;
+        color: var(--exam-blue);
+        cursor: pointer;
+        font: inherit;
+        min-height: 34px;
+        padding: 5px 9px;
+        position: relative;
+      }
+
+      .annotation-toggle-button:hover:not(.is-active) {
+        background: rgba(31, 45, 137, 0.06);
+      }
+
+      .annotation-toggle-button.is-active {
+        background: rgba(31, 45, 137, 0.88);
+        border-color: rgba(31, 45, 137, 0.88);
+        color: #fff;
+      }
+
+      /* Tooltip แจ้งวิธีใช้เครื่องมือตีเส้น — เข้าชุดกับ .number-area-tooltip */
+      .annotation-toggle-button::after {
+        background: #fff0a8;
+        border: 1px solid #e5c400;
+        border-radius: 6px;
+        bottom: calc(100% + 9px);
+        box-shadow: 0 10px 24px rgba(74, 44, 10, 0.16);
+        color: #3a3a3a;
+        content: "ตีเส้นบรรทัด แตะเพื่อตีเส้น\A แตะซ้ำ เอาเส้นออก";
+        font-size: 0.74rem;
+        font-weight: 700;
+        left: 50%;
+        line-height: 1.5;
+        opacity: 0;
+        padding: 7px 11px;
+        pointer-events: none;
+        position: absolute;
+        text-align: center;
+        transform: translateX(-50%) translateY(4px);
+        transition: opacity 140ms ease, transform 140ms ease;
+        white-space: pre;
+        z-index: 300;
+      }
+
+      .annotation-toggle-button::before {
+        border: 6px solid transparent;
+        border-top-color: #e5c400;
+        bottom: calc(100% + 3px);
+        content: "";
+        left: 50%;
+        opacity: 0;
+        pointer-events: none;
+        position: absolute;
+        transform: translateX(-50%);
+        transition: opacity 140ms ease;
+        z-index: 301;
+      }
+
+      .annotation-toggle-button:hover::after,
+      .annotation-toggle-button:focus-visible::after {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+
+      .annotation-toggle-button:hover::before,
+      .annotation-toggle-button:focus-visible::before {
+        opacity: 1;
+      }
+
+      .number-area-tooltip {
+        background: #fff0a8;
+        border: 1px solid #e5c400;
+        border-radius: 6px;
+        box-shadow: 0 10px 24px rgba(74, 44, 10, 0.16);
+        color: #3a3a3a;
+        font-size: 0.8rem;
+        font-weight: 700;
+        line-height: 1.45;
+        max-width: min(260px, calc(100vw - 24px));
+        opacity: 0;
+        padding: 8px 10px;
+        pointer-events: none;
+        position: fixed;
+        transform: translateY(calc(-100% - 6px));
+        transition: opacity 140ms ease;
+        z-index: 300;
+      }
+
+      .number-area-tooltip.is-visible {
+        opacity: 1;
+      }
+
+      /* ── View-all / print-preview mode ─────────────────────────── */
+      .view-all-button {
+        appearance: none;
+        background: var(--paper-bg);
+        border: 1px solid var(--paper-border);
+        border-radius: 6px;
+        color: var(--exam-blue);
+        cursor: pointer;
+        font: inherit;
+        min-height: 34px;
+        padding: 5px 9px;
+      }
+
+      .view-all-button:hover:not([aria-pressed="true"]) {
+        background: rgba(31, 45, 137, 0.06);
+      }
+
+      .view-all-button[aria-pressed="true"] {
+        background: rgba(31, 45, 137, 0.1);
+        border-color: var(--exam-blue);
+      }
+
+      .view-all-icon-compress { display: none; }
+
+      body.is-view-all .view-all-icon-expand { display: none; }
+      body.is-view-all .view-all-icon-compress { display: inline-flex; }
+
+      body.is-view-all .exam-page,
+      body.is-view-all .exam-page[hidden] {
+        display: block !important;
+        padding-top: var(--paper-edge-blank);
+      }
+
+      body.is-view-all .exam-page.is-first {
+        padding-top: var(--paper-edge-blank);
+      }
+
+      body.is-view-all .ruled-editor {
+        overflow: auto;
+      }
+
+      body.is-view-all .exam-page-stack {
+        gap: 32px;
+      }
+
+      .exam-header-lines {
+        background:
+          repeating-linear-gradient(
+            to bottom,
+            transparent 0 calc(var(--line-height) - var(--line-width)),
+            var(--rule-color) calc(var(--line-height) - var(--line-width)) var(--line-height)
+          ),
+          var(--paper-bg);
+        color: var(--exam-blue);
         display: grid;
-        gap: 8px 16px;
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-        padding: 0 var(--paper-padding-inline) 10px;
+        font-size: var(--editor-font-size);
+        font-weight: 700;
+        line-height: var(--line-height);
+        min-height: calc(var(--line-height) * 4);
+        padding: 0 var(--paper-padding-inline);
+        place-items: center;
+        position: relative;
+        text-align: center;
+        z-index: 4;
+      }
+
+      .exam-footer-lines {
+        background: var(--paper-bg);
+        border-top: var(--emphasis-line-width) solid var(--exam-blue);
+        min-height: var(--paper-edge-blank);
+      }
+
+      .exam-header-line {
+        min-height: var(--line-height);
+        transform: translateY(var(--header-text-y-offset));
+      }
+
+      .exam-date-line {
+        align-items: center;
+        display: inline-flex;
+        gap: 6px;
+        justify-content: center;
+        min-height: var(--line-height);
+        position: relative;
+        white-space: nowrap;
+        z-index: 10;
+      }
+
+      .exam-picker {
+        display: inline-flex;
+        position: relative;
+      }
+
+      .exam-picker-trigger {
+        appearance: none;
+        background: transparent;
+        border: 0;
+        color: var(--exam-blue);
+        cursor: pointer;
+        font: inherit;
+        font-weight: 700;
+        height: calc(var(--line-height) - 2px);
+        line-height: calc(var(--line-height) - 2px);
+        padding: 0 2px;
+        text-align: center;
+      }
+
+      .exam-picker-trigger:focus-visible {
+        outline: 1px solid var(--exam-blue);
+        outline-offset: 2px;
+      }
+
+      .picker-placeholder {
+        font-size: 0.64em;
+        letter-spacing: 0;
+        opacity: 0.72;
+      }
+
+      .exam-picker-trigger.has-value .picker-placeholder,
+      .picker-value:empty {
+        display: none;
+      }
+
+      .exam-date-day {
+        min-width: 5ch;
+      }
+
+      .exam-date-month {
+        min-width: 11ch;
+      }
+
+      .exam-date-year {
+        min-width: 8ch;
+      }
+
+      .exam-picker-popover {
+        background: var(--paper-bg);
+        border: var(--emphasis-line-width) solid var(--exam-blue);
+        border-radius: 6px;
+        box-shadow: 0 12px 28px rgba(31, 45, 137, 0.18);
+        left: 50%;
+        min-width: 180px;
+        padding: 8px;
+        pointer-events: auto;
+        position: absolute;
+        top: calc(100% + 4px);
+        transform: translateX(-50%);
+        z-index: 100;
+      }
+
+      .exam-picker-title {
+        font-size: 0.72rem;
+        line-height: 1.2;
+        margin-bottom: 6px;
+        text-align: center;
+      }
+
+      .exam-picker-grid {
+        display: grid;
+        gap: 4px;
+        grid-template-columns: repeat(7, minmax(24px, 1fr));
+      }
+
+      .exam-year-grid {
+        grid-template-columns: repeat(4, minmax(42px, 1fr));
+        max-height: 210px;
+        overflow: auto;
+      }
+
+      .exam-month-grid {
+        grid-template-columns: repeat(2, minmax(90px, 1fr));
+      }
+
+      .exam-grade-line {
+        align-items: center;
+        display: inline-flex;
+        gap: 4px;
+        justify-content: center;
+        min-height: var(--line-height);
+        position: relative;
+        white-space: nowrap;
+        z-index: 12;
+      }
+
+      .exam-grade-trigger {
+        min-width: 0;
+        padding-left: 0;
+        text-align: left;
+      }
+
+      .exam-grade-grid {
+        grid-template-columns: repeat(4, minmax(40px, 1fr));
+      }
+
+      .exam-picker-option {
+        appearance: none;
+        background: transparent;
+        border: 1px solid rgba(31, 45, 137, 0.18);
+        border-radius: 4px;
+        color: var(--exam-blue);
+        cursor: pointer;
+        font: inherit;
+        font-size: 0.78rem;
+        font-weight: 700;
+        line-height: 1.4;
+        min-height: 24px;
+        padding: 2px 4px;
+      }
+
+      .exam-picker-option:hover,
+      .exam-picker-option.is-selected {
+        background: rgba(31, 45, 137, 0.1);
       }
 
       .exam-emphasis-line {
-        border-top: 2px solid rgba(35, 61, 164, 0.82);
-        margin: 0 var(--paper-padding-inline);
+        border-top: var(--emphasis-line-width) solid var(--exam-blue);
+        margin: 0;
       }
 
-      .exam-field {
-        align-items: end;
-        color: rgba(58, 58, 58, 0.68);
-        display: grid;
-        font-size: 0.78rem;
+      .prefilled-answer-line {
+        background:
+          repeating-linear-gradient(
+            to bottom,
+            transparent 0 calc(var(--line-height) - var(--line-width)),
+            var(--rule-color) calc(var(--line-height) - var(--line-width)) var(--line-height)
+          ),
+          var(--paper-bg);
+        color: var(--exam-blue);
+        font-size: var(--editor-font-size);
         font-weight: 700;
-        gap: 4px;
-        grid-template-columns: auto minmax(42px, 1fr);
-        min-width: 0;
-      }
-
-      .exam-line {
-        border-bottom: 1px dotted rgba(74, 44, 10, 0.32);
-        display: block;
-        height: 1.15em;
-        min-width: 0;
+        line-height: var(--line-height);
+        min-height: var(--line-height);
+        padding: 0 var(--paper-padding-inline);
+        text-align: center;
+        transform: translateY(var(--header-text-y-offset));
       }
 
       .ruled-editor-frame {
         position: relative;
+        z-index: 1;
+      }
+
+      .exam-page.is-continuation .ruled-editor-frame {
+        border-top: var(--emphasis-line-width) solid var(--exam-blue);
       }
 
       .ruled-editor-frame::before {
@@ -125,8 +517,40 @@
         left: calc(var(--paper-padding-inline) + var(--number-gutter));
         position: absolute;
         top: 0;
-        width: 1px;
+        width: var(--emphasis-line-width);
         z-index: 1;
+      }
+
+      .exam-page.is-first .ruled-editor-frame::after {
+        background: var(--paper-bg);
+        bottom: 0;
+        content: "";
+        height: calc(var(--line-width) + 1px);
+        left: 0;
+        pointer-events: none;
+        position: absolute;
+        right: 0;
+        z-index: 2;
+      }
+
+      .exam-page.is-continuation .ruled-editor-frame::after {
+        background:
+          linear-gradient(
+            to bottom,
+            transparent 0 calc(var(--line-height) - var(--line-width) - var(--emphasis-line-width)),
+            var(--paper-bg) calc(var(--line-height) - var(--line-width) - var(--emphasis-line-width)) calc(var(--line-height) - var(--emphasis-line-width)),
+            transparent calc(var(--line-height) - var(--emphasis-line-width)) calc(var(--line-height) + var(--line-height) - var(--line-width) - var(--emphasis-line-width)),
+            var(--paper-bg) calc(var(--line-height) + var(--line-height) - var(--line-width) - var(--emphasis-line-width)) calc(var(--line-height) + var(--line-height) - var(--emphasis-line-width)),
+            transparent calc(var(--line-height) + var(--line-height) - var(--emphasis-line-width)) 100%
+          );
+        content: "";
+        height: calc(var(--line-height) * 2);
+        left: 0;
+        pointer-events: none;
+        position: absolute;
+        right: 0;
+        top: var(--emphasis-line-width);
+        z-index: 2;
       }
 
       .template-credit {
@@ -162,6 +586,40 @@
         width: 100%;
       }
 
+      .pagination-controls {
+        align-items: center;
+        display: grid;
+        gap: 10px;
+        grid-template-columns: auto 1fr auto;
+        margin-top: 14px;
+      }
+
+      .pagination-button {
+        appearance: none;
+        background: var(--paper-bg);
+        border: 1px solid var(--paper-border);
+        border-radius: 6px;
+        color: var(--exam-blue);
+        cursor: pointer;
+        font: inherit;
+        font-size: 0.82rem;
+        font-weight: 700;
+        min-height: 34px;
+        padding: 6px 10px;
+      }
+
+      .pagination-button:disabled {
+        cursor: default;
+        opacity: 0.42;
+      }
+
+      .pagination-status {
+        color: rgba(58, 58, 58, 0.72);
+        font-size: 0.86rem;
+        font-weight: 700;
+        text-align: center;
+      }
+
       .ruled-editor {
         background:
           repeating-linear-gradient(
@@ -180,19 +638,25 @@
       }
 
       .exam-page.is-continuation .ruled-editor {
-        min-height: calc(var(--paper-min-height) + 120px);
+        min-height: var(--paper-min-height-continuation);
+        padding-block:
+          var(--text-y-offset)
+          calc(var(--paper-padding-block) - var(--text-y-offset));
       }
 
       .ruled-editor {
         background-position:
           0 calc(var(--text-y-offset) * -1),
           0 0;
+        color: var(--exam-blue);
         display: block;
         font: inherit;
         font-size: var(--editor-font-size);
+        font-weight: 400;
         line-height: var(--line-height);
         outline: none;
         overflow: auto;
+        padding-inline: var(--paper-padding-inline) var(--paper-padding-inline-end);
         padding-block:
           calc(var(--paper-padding-block) + var(--text-y-offset))
           calc(var(--paper-padding-block) - var(--text-y-offset));
@@ -203,8 +667,14 @@
 
       textarea.ruled-editor {
         appearance: none;
-        color: var(--ink);
         min-height: var(--paper-min-height);
+      }
+
+      textarea.ruled-editor.is-after-prefilled {
+        min-height: calc(var(--paper-min-height) - var(--line-height));
+        padding-block:
+          var(--text-y-offset)
+          calc(var(--paper-padding-block) - var(--text-y-offset));
       }
 
       @media (max-width: 640px) {
@@ -214,7 +684,6 @@
           --editor-font-size: 12px;
           --paper-padding-block: 22px;
           --paper-padding-inline: 30px;
-          --paper-min-height: 360px;
         }
 
         .template-shell {
@@ -225,8 +694,12 @@
           min-height: 140px;
         }
 
-        .exam-header {
-          grid-template-columns: 1fr 1fr;
+        .exam-header-lines {
+          min-height: calc(var(--line-height) * 4);
+        }
+
+        .pagination-controls {
+          grid-template-columns: 1fr;
         }
       }
     </style>
@@ -249,30 +722,131 @@
               data-line-height-control
             />
           </div>
+          <nav class="pagination-controls" aria-label="เปลี่ยนหน้ากระดาษ">
+            <button class="pagination-button" type="button" data-page-prev>ก่อนหน้า</button>
+            <output class="pagination-status" data-page-status>หน้า ๑ / ๒</output>
+            <button class="pagination-button" type="button" data-page-next>ถัดไป</button>
+            <button class="view-all-button" type="button" data-view-all aria-pressed="false" title="เปิดดูทั้งหมด — แสดงเนื้อหาครบทุกบรรทัด เตรียมก่อนปริ้นท์">
+              <span class="view-all-icon-expand" aria-hidden="true">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <path d="M1 5V1h4M1 1l4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M13 9v4H9M13 13l-4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              <span class="view-all-icon-compress" aria-hidden="true">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <path d="M5 1v4H1M5 5L1 1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M9 13v-4h4M9 9l4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+            </button>
+            <button class="annotation-toggle-button" type="button" data-annotation-toggle aria-label="ตีเส้นบรรทัด แตะเพื่อตีเส้น แตะซ้ำ เอาเส้นออก">
+              <svg width="18" height="16" viewBox="0 0 18 16" fill="none" aria-hidden="true">
+                <rect x="0.75" y="3" width="16.5" height="7" rx="1.5" stroke="currentColor" stroke-width="1.25"/>
+                <line x1="4" y1="5.2" x2="4" y2="7.6" stroke="currentColor" stroke-width="1"/>
+                <line x1="7" y1="5.2" x2="7" y2="8.5" stroke="currentColor" stroke-width="1"/>
+                <line x1="10" y1="5.2" x2="10" y2="7.6" stroke="currentColor" stroke-width="1"/>
+                <line x1="13" y1="5.2" x2="13" y2="8.5" stroke="currentColor" stroke-width="1"/>
+                <line x1="1" y1="13.5" x2="17" y2="13.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </nav>
         </div>
       </aside>
 
       <section class="answer-card" aria-label="การ์ดพื้นที่เขียนคำตอบ">
         <div class="exam-page-stack">
           <article class="exam-page is-first" aria-label="กระดาษคำตอบหน้าแรก">
-            <div class="exam-header" aria-label="ข้อมูลหัวกระดาษหน้าแรก">
-              <label class="exam-field">ชื่อ <span class="exam-line"></span></label>
-              <label class="exam-field">สถานที่สอบ <span class="exam-line"></span></label>
-              <label class="exam-field">วิชา <span class="exam-line"></span></label>
-              <label class="exam-field">วันที่ <span class="exam-line"></span></label>
+            <div class="exam-header-lines" aria-label="หัวกระดาษหน้าแรก">
+              <div class="exam-header-line" aria-hidden="true"></div>
+              <div class="exam-header-line exam-grade-line">
+                <span>ประโยค ป.ธ.</span>
+                <div class="exam-picker exam-grade-picker" data-exam-picker="grade" data-default="4">
+                  <button
+                    class="exam-picker-trigger exam-grade-trigger"
+                    type="button"
+                    aria-label="เลือกชั้นประโยค ป.ธ."
+                    aria-haspopup="dialog"
+                    aria-expanded="false"
+                  >
+                    <span class="picker-value" data-picker-value></span>
+                    <span class="picker-placeholder" data-picker-placeholder>....</span>
+                  </button>
+                  <div class="exam-picker-popover" data-picker-popover hidden>
+                    <div class="exam-picker-title">ชั้นประโยค</div>
+                    <div class="exam-picker-grid exam-grade-grid" data-picker-options></div>
+                  </div>
+                </div>
+              </div>
+              <div class="exam-header-line">แปลมคธเป็นไทย</div>
+              <div class="exam-header-line exam-date-line">
+                <span>สอบ วันที่</span>
+                <div class="exam-picker" data-exam-picker="day" data-min="1" data-max="31">
+                  <button
+                    class="exam-picker-trigger exam-date-day"
+                    type="button"
+                    aria-label="เลือกวันที่สอบ"
+                    aria-haspopup="dialog"
+                    aria-expanded="false"
+                  >
+                    <span class="picker-value" data-picker-value></span>
+                    <span class="picker-placeholder" data-picker-placeholder>.......</span>
+                  </button>
+                  <div class="exam-picker-popover" data-picker-popover hidden>
+                    <div class="exam-picker-title">วันที่</div>
+                    <div class="exam-picker-grid" data-picker-options></div>
+                  </div>
+                </div>
+                <div class="exam-picker" data-exam-picker="month">
+                  <button
+                    class="exam-picker-trigger exam-date-month"
+                    type="button"
+                    aria-label="เลือกเดือนที่สอบ"
+                    aria-haspopup="dialog"
+                    aria-expanded="false"
+                  >
+                    <span class="picker-value" data-picker-value></span>
+                    <span class="picker-placeholder" data-picker-placeholder>.......</span>
+                  </button>
+                  <div class="exam-picker-popover" data-picker-popover hidden>
+                    <div class="exam-picker-title">เดือน</div>
+                    <div class="exam-picker-grid exam-month-grid" data-picker-options></div>
+                  </div>
+                </div>
+                <div class="exam-picker" data-exam-picker="year" data-year-window="4">
+                  <button
+                    class="exam-picker-trigger exam-date-year"
+                    type="button"
+                    aria-label="เลือกปี พ.ศ. ที่สอบ"
+                    aria-haspopup="dialog"
+                    aria-expanded="false"
+                  >
+                    <span class="picker-value" data-picker-value></span>
+                    <span class="picker-placeholder" data-picker-placeholder>.......</span>
+                  </button>
+                  <div class="exam-picker-popover" data-picker-popover hidden>
+                    <div class="exam-picker-title">พ.ศ.</div>
+                    <div class="exam-picker-grid exam-year-grid" data-picker-options></div>
+                  </div>
+                </div>
+              </div>
             </div>
             <div class="exam-emphasis-line" aria-hidden="true"></div>
             <div class="ruled-editor-frame">
+              <div class="prefilled-answer-line">แปลโดยพยัญชนะ</div>
               <textarea
-                class="ruled-editor"
+                class="ruled-editor is-after-prefilled"
                 aria-label="พื้นที่เขียนคำตอบหน้าแรก"
                 data-auto-indent="numbered-homework"
                 spellcheck="false"
               ></textarea>
+              <div class="annotation-lines" data-annotation-lines aria-hidden="true"></div>
+              <div class="annotation-canvas" data-annotation-canvas aria-hidden="true"></div>
             </div>
+            <div class="exam-footer-lines" aria-label="ท้ายกระดาษหน้าแรก" aria-hidden="true"></div>
           </article>
 
-          <article class="exam-page is-continuation" aria-label="กระดาษคำตอบหน้าถัดไป">
+          <article class="exam-page is-continuation" aria-label="กระดาษคำตอบหน้าถัดไป" hidden>
             <div class="ruled-editor-frame">
               <textarea
                 class="ruled-editor"
@@ -280,31 +854,279 @@
                 data-auto-indent="numbered-homework"
                 spellcheck="false"
               ></textarea>
+              <div class="annotation-lines" data-annotation-lines aria-hidden="true"></div>
+              <div class="annotation-canvas" data-annotation-canvas aria-hidden="true"></div>
             </div>
+            <div class="exam-footer-lines" aria-label="ท้ายกระดาษหน้าถัดไป" aria-hidden="true"></div>
           </article>
         </div>
         <div class="template-credit">Ruled paper template by niyatajayo · v1.0.0 · 2026-07-01</div>
       </section>
     </main>
+    <div class="number-area-tooltip" role="tooltip" data-number-area-tooltip hidden>
+      กด Tab หรือ เริ่มพิมพ์อักขระ สร้างย่อหน้าอัตโนมัติ
+    </div>
     <script>
       (() => {
         const numberedLinePattern = /^\s*(\d+)(?:[.)])?\s*(.*)$/;
+        const numberedLinePrefix = " ".repeat(4);
         const numberedLineGap = " ".repeat(23);
-        const continuationIndent = `\t${" ".repeat(11)}`;
+        const wrapSafetyGap = 6;
+        const marginTextGapSteps = 1.5;
+
+        const getNumberGutterCh = () => {
+          const raw = getComputedStyle(document.documentElement).getPropertyValue("--number-gutter").trim();
+          const match = raw.match(/^([\d.]+)\s*ch$/);
+          return match ? Number.parseFloat(match[1]) : 5;
+        };
+
+        const measureFontContext = (styles) => {
+          const canvas = measureFontContext._canvas || (measureFontContext._canvas = document.createElement("canvas"));
+          const context = canvas.getContext("2d");
+          context.font = `${styles.fontStyle} ${styles.fontVariant} ${styles.fontWeight} ${styles.fontSize} ${styles.fontFamily}`;
+          return context;
+        };
+
+        // Space-only indent: right of the margin line by marginTextGapSteps character widths (editor font).
+        // Gutter position uses frame/body ch (same as CSS --number-gutter on ::before).
+        const computeContinuationIndent = (() => {
+          let _cacheKey = null;
+          let _cached = "";
+          return (editor) => {
+            const editorStyles = getComputedStyle(editor);
+            const frame = editor.closest(".ruled-editor-frame");
+            const frameStyles = frame ? getComputedStyle(frame) : getComputedStyle(document.body);
+            const gutterCh = getNumberGutterCh();
+            const frameCtx = measureFontContext(frameStyles);
+            const editorCtx = measureFontContext(editorStyles);
+            const gutterPx = gutterCh * frameCtx.measureText("0").width;
+            const charStep = editorCtx.measureText("ก").width;
+            const targetPx = gutterPx + charStep * marginTextGapSteps;
+            const cacheKey = `${editorStyles.fontSize}|${gutterCh}|${targetPx}`;
+
+            if (cacheKey === _cacheKey) return _cached;
+
+            let s = "";
+            while (editorCtx.measureText(s + " ").width < targetPx) s += " ";
+
+            _cacheKey = cacheKey;
+            _cached = s;
+            return s;
+          };
+        })();
         const editors = document.querySelectorAll('[data-auto-indent="numbered-homework"]');
         const lineHeightControls = document.querySelectorAll("[data-line-height-control]");
         const lineHeightValue = document.getElementById("line-height-value");
+        const examPickers = document.querySelectorAll("[data-exam-picker]");
+        const examPages = Array.from(document.querySelectorAll(".exam-page"));
+        const pagePrevButton = document.querySelector("[data-page-prev]");
+        const pageNextButton = document.querySelector("[data-page-next]");
+        const pageStatus = document.querySelector("[data-page-status]");
+        const thaiDigits = new Map([
+          ["0", "๐"],
+          ["1", "๑"],
+          ["2", "๒"],
+          ["3", "๓"],
+          ["4", "๔"],
+          ["5", "๕"],
+          ["6", "๖"],
+          ["7", "๗"],
+          ["8", "๘"],
+          ["9", "๙"],
+        ]);
 
-        const normalizeLine = (line) => {
+        const toThaiNumber = (value) => String(value).replace(/[0-9]/g, (digit) => thaiDigits.get(digit));
+        const thaiMonthNames = [
+          "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน",
+          "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม",
+          "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม",
+        ];
+        const gradeOptions = [
+          { value: "1-2", label: "๑-๒" },
+          { value: "3", label: "๓" },
+          { value: "4", label: "๔" },
+          { value: "5", label: "๕" },
+          { value: "6", label: "๖" },
+          { value: "7", label: "๗" },
+          { value: "8", label: "๘" },
+          { value: "9", label: "๙" },
+        ];
+
+        let currentPageIndex = 0;
+
+        const showPage = (nextPageIndex) => {
+          if (!examPages.length) return;
+
+          currentPageIndex = Math.min(Math.max(nextPageIndex, 0), examPages.length - 1);
+
+          examPages.forEach((page, index) => {
+            page.hidden = index !== currentPageIndex;
+          });
+
+          if (pagePrevButton) pagePrevButton.disabled = currentPageIndex === 0;
+          if (pageNextButton) pageNextButton.disabled = currentPageIndex === examPages.length - 1;
+          if (pageStatus) {
+            pageStatus.textContent = `หน้า ${toThaiNumber(currentPageIndex + 1)} / ${toThaiNumber(examPages.length)}`;
+          }
+        };
+
+        pagePrevButton?.addEventListener("click", () => showPage(currentPageIndex - 1));
+        pageNextButton?.addEventListener("click", () => showPage(currentPageIndex + 1));
+        showPage(0);
+
+        const closePickers = (exceptPicker) => {
+          examPickers.forEach((picker) => {
+            if (picker === exceptPicker) return;
+
+            const trigger = picker.querySelector(".exam-picker-trigger");
+            const popover = picker.querySelector("[data-picker-popover]");
+
+            trigger?.setAttribute("aria-expanded", "false");
+            if (popover) popover.hidden = true;
+          });
+        };
+
+        examPickers.forEach((picker) => {
+          const currentBuddhistYear = new Date().getFullYear() + 543;
+          const yearWindow = Number(picker.dataset.yearWindow || 0);
+          const isMonthPicker = picker.dataset.examPicker === "month";
+          const isGradePicker = picker.dataset.examPicker === "grade";
+          const trigger = picker.querySelector(".exam-picker-trigger");
+          const valueDisplay = picker.querySelector("[data-picker-value]");
+          const popover = picker.querySelector("[data-picker-popover]");
+          const options = picker.querySelector("[data-picker-options]");
+
+          if (!trigger || !valueDisplay || !popover || !options) return;
+
+          let entries;
+          if (isGradePicker) {
+            entries = gradeOptions.slice();
+          } else {
+            const min = isMonthPicker ? 1 : (yearWindow ? currentBuddhistYear : Number(picker.dataset.min));
+            const max = isMonthPicker ? 12 : (yearWindow ? currentBuddhistYear + yearWindow - 1 : Number(picker.dataset.max));
+            entries = [];
+            for (let value = min; value <= max; value += 1) {
+              entries.push({
+                value: String(value),
+                label: isMonthPicker ? thaiMonthNames[value - 1] : toThaiNumber(value),
+              });
+            }
+          }
+
+          entries.forEach((entry) => {
+            const option = document.createElement("button");
+
+            option.className = "exam-picker-option";
+            option.type = "button";
+            option.textContent = entry.label;
+            option.dataset.value = entry.value;
+            option.addEventListener("click", (event) => {
+              event.stopPropagation();
+              picker.dataset.value = entry.value;
+              valueDisplay.textContent = entry.label;
+              trigger.classList.add("has-value");
+              trigger.setAttribute("aria-expanded", "false");
+              popover.hidden = true;
+              options.querySelectorAll(".exam-picker-option").forEach((item) => {
+                item.classList.toggle("is-selected", item === option);
+              });
+            });
+
+            if (picker.dataset.default && entry.value === picker.dataset.default) {
+              picker.dataset.value = entry.value;
+              valueDisplay.textContent = entry.label;
+              trigger.classList.add("has-value");
+              option.classList.add("is-selected");
+            }
+
+            options.append(option);
+          });
+
+          trigger.addEventListener("click", (event) => {
+            event.stopPropagation();
+            const willOpen = popover.hidden;
+
+            closePickers(picker);
+            popover.hidden = !willOpen;
+            trigger.setAttribute("aria-expanded", String(willOpen));
+            if (willOpen) options.querySelector(".exam-picker-option")?.focus();
+          });
+
+          picker.addEventListener("click", (event) => {
+            event.stopPropagation();
+          });
+        });
+
+        document.addEventListener("click", (event) => {
+          if (!(event.target instanceof Element)) return;
+          if (event.target.closest("[data-exam-picker]")) return;
+
+          closePickers();
+        });
+
+        document.addEventListener("keydown", (event) => {
+          if (event.key === "Escape") closePickers();
+        });
+
+        const normalizeLine = (line, indent) => {
           if (!line.trim()) return "";
 
           const numbered = line.match(numberedLinePattern);
-          if (numbered) return `${numbered[1]}${numberedLineGap}${numbered[2].trimStart()}`;
+          if (numbered) return `${numberedLinePrefix}${numbered[1]}${numberedLineGap}${numbered[2].trimStart()}`;
 
-          return `${continuationIndent}${line.replace(/^\s+/, "")}`;
+          return `${indent}${line.replace(/^\s+/, "")}`;
         };
 
-        const normalizeValue = (value) => value.split("\n").map(normalizeLine).join("\n");
+        const createMeasureContext = (editor) => {
+          const canvas = createMeasureContext.canvas || document.createElement("canvas");
+          const context = canvas.getContext("2d");
+          const styles = getComputedStyle(editor);
+
+          createMeasureContext.canvas = canvas;
+          context.font = `${styles.fontStyle} ${styles.fontVariant} ${styles.fontWeight} ${styles.fontSize} ${styles.fontFamily}`;
+          return context;
+        };
+
+        const getWritableWidth = (editor) => {
+          const styles = getComputedStyle(editor);
+          const paddingLeft = Number.parseFloat(styles.paddingLeft) || 0;
+          const paddingRight = Number.parseFloat(styles.paddingRight) || 0;
+
+          return Math.max(40, editor.clientWidth - paddingLeft - paddingRight - wrapSafetyGap);
+        };
+
+        const wrapLineToEditor = (line, editor, indent) => {
+          if (!line.trim()) return [""];
+
+          const context = createMeasureContext(editor);
+          const writableWidth = getWritableWidth(editor);
+          const wrapped = [];
+          let current = "";
+
+          Array.from(line).forEach((char) => {
+            const candidate = `${current}${char}`;
+
+            if (current && context.measureText(candidate).width > writableWidth) {
+              wrapped.push(current.trimEnd());
+              current = `${indent}${char}`;
+              return;
+            }
+
+            current = candidate;
+          });
+
+          wrapped.push(current.trimEnd());
+          return wrapped;
+        };
+
+        const normalizeValue = (value, editor) => {
+          const indent = computeContinuationIndent(editor);
+          return value
+            .split("\n")
+            .map((line) => normalizeLine(line, indent))
+            .flatMap((line) => wrapLineToEditor(line, editor, indent))
+            .join("\n");
+        };
 
         const insertAtSelection = (editor, text) => {
           const start = editor.selectionStart;
@@ -314,30 +1136,162 @@
           editor.setSelectionRange(start + text.length, start + text.length);
         };
 
+        const editorsArray = Array.from(editors);
+        const linesFirstPage = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--lines-first-page").trim()) || 29;
+        const linesPerPage = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--lines-per-page").trim()) || 33;
+        const getMaxLines = (editor) => editorsArray.indexOf(editor) === 0 ? linesFirstPage : linesPerPage;
+        const getCaretLineNumber = (editor) => editor.value.slice(0, editor.selectionStart).split("\n").length;
+
+        const numberAreaTooltip = document.querySelector("[data-number-area-tooltip]");
+
+        const getLineContextAtCaret = (editor) => {
+          const value = editor.value;
+          const pos = editor.selectionStart;
+          const lineStart = value.lastIndexOf("\n", pos - 1) + 1;
+          const lineEndIndex = value.indexOf("\n", pos);
+          const lineEnd = lineEndIndex === -1 ? value.length : lineEndIndex;
+
+          return {
+            line: value.slice(lineStart, lineEnd),
+            caretInLine: pos - lineStart,
+          };
+        };
+
+        const isCaretInNumberArea = (editor) => {
+          const { line, caretInLine } = getLineContextAtCaret(editor);
+          const numbered = line.match(numberedLinePattern);
+
+          if (numbered) {
+            const numberEnd = numberedLinePrefix.length + numbered[1].length;
+            return caretInLine <= numberEnd;
+          }
+
+          const partial = line.slice(0, caretInLine);
+          const leading = partial.match(/^(\s*)(\d*)/);
+          if (!leading) return false;
+
+          const numberEnd = leading[1].length + leading[2].length;
+          return caretInLine <= numberEnd && leading[2].length > 0;
+        };
+
+        const positionNumberAreaTooltip = (editor) => {
+          if (!numberAreaTooltip) return;
+
+          const styles = getComputedStyle(editor);
+          const frame = editor.closest(".ruled-editor-frame");
+          const frameStyles = frame ? getComputedStyle(frame) : getComputedStyle(document.body);
+          const lineHeight = Number.parseFloat(styles.lineHeight) || 26;
+          const paddingTop = Number.parseFloat(styles.paddingTop) || 0;
+          const paddingLeft = Number.parseFloat(styles.paddingLeft) || 0;
+          const gutterPx = getNumberGutterCh() * measureFontContext(frameStyles).measureText("0").width;
+          const rect = editor.getBoundingClientRect();
+          const lineNum = getCaretLineNumber(editor);
+
+          numberAreaTooltip.style.top = `${rect.top + paddingTop + (lineNum - 1) * lineHeight}px`;
+          numberAreaTooltip.style.left = `${rect.left + paddingLeft + gutterPx + 8}px`;
+        };
+
+        const hideNumberAreaTooltip = () => {
+          if (!numberAreaTooltip) return;
+          numberAreaTooltip.classList.remove("is-visible");
+          numberAreaTooltip.hidden = true;
+        };
+
+        const jumpToParagraphFromNumberArea = (editor, insertedText = "") => {
+          insertAtSelection(editor, computeContinuationIndent(editor) + insertedText);
+          hideNumberAreaTooltip();
+          // With a typed character the normalizer keeps the line; a bare Tab inserts
+          // only indent spaces, which normalizeValue would trimEnd away — so skip the
+          // normalizing input dispatch and just sync state, leaving the caret in the paragraph.
+          if (insertedText) {
+            editor.dispatchEvent(new Event("input", { bubbles: true }));
+          } else {
+            syncNumberAreaTooltip(editor);
+          }
+        };
+
+        const syncNumberAreaTooltip = (editor) => {
+          if (!numberAreaTooltip) return;
+
+          if (isCaretInNumberArea(editor)) {
+            positionNumberAreaTooltip(editor);
+            numberAreaTooltip.hidden = false;
+            numberAreaTooltip.classList.add("is-visible");
+            return;
+          }
+
+          hideNumberAreaTooltip();
+        };
+
+        const bindNumberAreaTooltip = (editor) => {
+          if (editor.dataset.numberTooltipBound === "true") return;
+          editor.dataset.numberTooltipBound = "true";
+
+          editor.addEventListener("input", () => syncNumberAreaTooltip(editor));
+          editor.addEventListener("keyup", () => syncNumberAreaTooltip(editor));
+          editor.addEventListener("click", () => syncNumberAreaTooltip(editor));
+          editor.addEventListener("blur", hideNumberAreaTooltip);
+        };
+
         editors.forEach((editor) => {
           editor.addEventListener("keydown", (event) => {
             if (event.key === "Enter") {
               event.preventDefault();
-              insertAtSelection(editor, `\n${continuationIndent}`);
+              const editorIndex = editorsArray.indexOf(editor);
+              const caretLine = getCaretLineNumber(editor);
+              const maxLines = getMaxLines(editor);
+
+              if (caretLine >= maxLines) {
+                showPage(editorIndex + 1);
+                const nextEditor = editorsArray[editorIndex + 1];
+                if (nextEditor) { nextEditor.focus(); nextEditor.setSelectionRange(0, 0); }
+                return;
+              }
+
+              insertAtSelection(editor, `\n${computeContinuationIndent(editor)}`);
             }
 
             if (event.key === "Tab") {
               event.preventDefault();
-              insertAtSelection(editor, continuationIndent);
+              jumpToParagraphFromNumberArea(editor);
+              return;
+            }
+
+            if (
+              isCaretInNumberArea(editor) &&
+              event.key.length === 1 &&
+              !event.ctrlKey &&
+              !event.metaKey &&
+              !event.altKey &&
+              !/^\d$/.test(event.key)
+            ) {
+              event.preventDefault();
+              jumpToParagraphFromNumberArea(editor, event.key);
             }
           });
+
+          bindNumberAreaTooltip(editor);
 
           editor.addEventListener("input", () => {
             const before = editor.value;
             const selectionStart = editor.selectionStart;
             const selectionEnd = editor.selectionEnd;
-            const after = normalizeValue(before);
+            let after = normalizeValue(before, editor);
 
-            if (after === before) return;
+            const maxLines = getMaxLines(editor);
+            const afterLines = after.split("\n");
+            if (afterLines.length > maxLines) after = afterLines.slice(0, maxLines).join("\n");
 
-            const delta = after.length - before.length;
-            editor.value = after;
-            editor.setSelectionRange(Math.max(0, selectionStart + delta), Math.max(0, selectionEnd + delta));
+            if (after !== before) {
+              const delta = after.length - before.length;
+              editor.value = after;
+              editor.setSelectionRange(
+                Math.max(0, Math.min(selectionStart + delta, after.length)),
+                Math.max(0, Math.min(selectionEnd + delta, after.length))
+              );
+            }
+
+            syncNumberAreaTooltip(editor);
           });
         });
 
@@ -350,8 +1304,91 @@
         };
 
         lineHeightControls.forEach((control) => {
+          const responsiveDefault = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--line-height").trim()) || 26;
+          control.value = String(responsiveDefault);
           control.addEventListener("input", () => applyLineHeight(Number(control.value)));
           applyLineHeight(Number(control.value));
+        });
+
+        // ── Annotation (ruler / emphasis-line) tool ─────────────────
+        const answerCard = document.querySelector(".answer-card");
+        const annotationToggle = document.querySelector("[data-annotation-toggle]");
+        let annotations = []; // [{page: number, line: number (1-based)}]
+        let isAnnotating = false;
+
+        const renderAnnotations = () => {
+          examPages.forEach((page, pageIndex) => {
+            const container = page.querySelector("[data-annotation-lines]");
+            if (!container) return;
+
+            container.innerHTML = "";
+            annotations
+              .filter((a) => a.page === pageIndex)
+              .forEach(({ line }) => {
+                const el = document.createElement("div");
+                el.className = "annotation-line";
+                el.style.setProperty("--line-n", String(line));
+                container.append(el);
+              });
+          });
+        };
+
+        const bindAnnotationCanvas = (canvas, pageIndex) => {
+          if (canvas.dataset.annotationBound === "true") return;
+          canvas.dataset.annotationBound = "true";
+
+          canvas.addEventListener("click", (e) => {
+            if (!isAnnotating) return;
+
+            const frame = canvas.closest(".ruled-editor-frame");
+            const editor = frame?.querySelector(".ruled-editor");
+            if (!frame || !editor) return;
+
+            const lineHeight =
+              Number.parseFloat(
+                getComputedStyle(document.documentElement).getPropertyValue("--line-height").trim()
+              ) || 26;
+            const editorRect = editor.getBoundingClientRect();
+            const relativeY = e.clientY - editorRect.top;
+            const lineN = Math.ceil(relativeY / lineHeight);
+            const maxLines = pageIndex === 0 ? linesFirstPage : linesPerPage;
+
+            if (lineN < 1 || lineN > maxLines) return;
+
+            const existingIdx = annotations.findIndex(
+              (a) => a.page === pageIndex && a.line === lineN
+            );
+            if (existingIdx >= 0) {
+              annotations.splice(existingIdx, 1);
+            } else {
+              annotations.push({ page: pageIndex, line: lineN });
+            }
+
+            renderAnnotations();
+          });
+        };
+
+        annotationToggle?.addEventListener("click", () => {
+          isAnnotating = !isAnnotating;
+          answerCard?.classList.toggle("is-annotating", isAnnotating);
+          annotationToggle.classList.toggle("is-active", isAnnotating);
+        });
+
+        const viewAllButton = document.querySelector("[data-view-all]");
+        viewAllButton?.addEventListener("click", () => {
+          const isNowActive = document.body.classList.toggle("is-view-all");
+          viewAllButton.setAttribute("aria-pressed", String(isNowActive));
+          viewAllButton.setAttribute(
+            "title",
+            isNowActive
+              ? "ปิดดูทั้งหมด — กลับโหมดแก้ไขปกติ"
+              : "เปิดดูทั้งหมด — แสดงเนื้อหาครบทุกบรรทัด เตรียมก่อนปริ้นท์"
+          );
+        });
+
+        examPages.forEach((page, pageIndex) => {
+          const canvas = page.querySelector("[data-annotation-canvas]");
+          if (canvas) bindAnnotationCanvas(canvas, pageIndex);
         });
       })();
     </script>
