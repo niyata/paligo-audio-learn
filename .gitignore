@@ -11,3 +11,7 @@ npm-debug.log*
 
 # Editor
 .vscode/
+
+# Generated book HTML from PDF conversion (do not commit copyrighted books)
+output/
+tmp/

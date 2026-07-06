@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Book Page QA — PDF vs HTML</title>
+    <link rel="stylesheet" href="" data-book-css />
+    <style>
+      :root {
+        --page-bg: #f8f0e3;
+        --paper-bg: #fffaf0;
+        --card-border: rgba(74, 44, 10, 0.16);
+        --exam-blue: rgba(31, 45, 137, 0.76);
+        --ink: #343434;
+        --muted: rgba(52, 52, 52, 0.62);
+        --ok: #155724;
+        --warn: #856404;
+        --bad: #721c24;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        background: var(--page-bg);
+        color: var(--ink);
+        font-family: Sarabun, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        line-height: 1.45;
+        margin: 0;
+        min-height: 100vh;
+        padding: clamp(14px, 3vw, 34px);
+      }
+
+      .qa-shell {
+        display: grid;
+        gap: 14px;
+        margin: 0 auto;
+        max-width: 1480px;
+      }
+
+      .qa-card {
+        background: rgba(255, 255, 255, 0.84);
+        border: 1px solid var(--card-border);
+        border-radius: 8px;
+        box-shadow: 0 18px 46px rgba(74, 44, 10, 0.1);
+        padding: 14px 16px;
+      }
+
+      .qa-title {
+        color: var(--exam-blue);
+        font-size: clamp(1.25rem, 2.8vw, 1.75rem);
+        margin: 0;
+      }
+
+      .qa-note {
+        color: var(--muted);
+        font-size: 0.88rem;
+        font-weight: 700;
+        margin: 6px 0 0;
+      }
+
+      .qa-controls {
+        align-items: end;
+        display: grid;
+        gap: 10px;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+      }
+
+      .qa-field {
+        display: grid;
+        gap: 4px;
+      }
+
+      .qa-label {
+        color: var(--muted);
+        font-size: 0.78rem;
+        font-weight: 800;
+      }
+
+      .qa-input,
+      .qa-button,
+      .qa-select {
+        appearance: none;
+        background: var(--paper-bg);
+        border: 1px solid rgba(31, 45, 137, 0.22);
+        border-radius: 6px;
+        color: var(--exam-blue);
+        font: inherit;
+        font-size: 0.86rem;
+        font-weight: 800;
+        min-height: 36px;
+        padding: 7px 10px;
+      }
+
+      .qa-button {
+        cursor: pointer;
+      }
+
+      .qa-button[disabled] {
+        cursor: not-allowed;
+        opacity: 0.45;
+      }
+
+      .qa-button.is-active {
+        background: rgba(31, 45, 137, 0.12);
+      }
+
+      .qa-status-row {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 14px;
+        justify-content: space-between;
+        margin-top: 10px;
+      }
+
+      .qa-status {
+        color: var(--muted);
+        font-size: 0.84rem;
+        font-weight: 700;
+      }
+
+      .qa-progress {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .qa-chip {
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 800;
+        padding: 4px 10px;
+      }
+
+      .qa-chip--pending {
+        background: #fff3cd;
+        color: var(--warn);
+      }
+
+      .qa-chip--verified {
+        background: #d4edda;
+        color: var(--ok);
+      }
+
+      .qa-chip--issue {
+        background: #f8d7da;
+        color: var(--bad);
+      }
+
+      .qa-metrics {
+        display: grid;
+        gap: 10px;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      .qa-metric {
+        background: rgba(255, 250, 240, 0.88);
+        border: 1px solid rgba(74, 44, 10, 0.12);
+        border-radius: 6px;
+        padding: 10px 12px;
+      }
+
+      .qa-metric-label {
+        color: var(--muted);
+        display: block;
+        font-size: 0.76rem;
+        font-weight: 800;
+      }
+
+      .qa-metric-value {
+        color: var(--exam-blue);
+        display: block;
+        font-size: 1.15rem;
+        font-weight: 800;
+        margin-top: 2px;
+      }
+
+      .qa-verify-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .qa-verify-actions .qa-button--pending.is-active {
+        background: #fff3cd;
+        color: var(--warn);
+      }
+
+      .qa-verify-actions .qa-button--verified.is-active {
+        background: #d4edda;
+        color: var(--ok);
+      }
+
+      .qa-verify-actions .qa-button--issue.is-active {
+        background: #f8d7da;
+        color: var(--bad);
+      }
+
+      .qa-note-input {
+        margin-top: 10px;
+        min-height: 64px;
+        resize: vertical;
+        width: 100%;
+      }
+
+      .qa-compare {
+        display: grid;
+        gap: 16px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .qa-compare.is-overlay {
+        grid-template-columns: 1fr;
+      }
+
+      .qa-pane {
+        display: grid;
+        gap: 8px;
+        min-width: 0;
+      }
+
+      .qa-pane-title {
+        color: var(--exam-blue);
+        font-size: 0.92rem;
+        font-weight: 800;
+        margin: 0;
+        text-align: center;
+      }
+
+      .qa-pane-frame {
+        align-items: flex-start;
+        background: #fff;
+        border: 1px solid rgba(74, 44, 10, 0.14);
+        border-radius: 8px;
+        display: flex;
+        justify-content: center;
+        min-height: 560px;
+        overflow: auto;
+        padding: 12px;
+        position: relative;
+      }
+
+      .qa-page-slot {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+      }
+
+      .qa-pane-frame canvas {
+        display: block;
+        height: auto;
+        max-width: 100%;
+      }
+
+      .qa-html-host {
+        width: 100%;
+      }
+
+      .qa-html-host .book-page {
+        box-shadow: 0 8px 24px rgba(74, 44, 10, 0.1);
+        margin: 0;
+        max-width: none;
+      }
+
+      .qa-overlay-stack {
+        align-items: flex-start;
+        display: none;
+        justify-content: center;
+        min-height: 560px;
+        padding: 12px;
+        position: relative;
+      }
+
+      .qa-compare.is-overlay .qa-overlay-stack {
+        display: flex;
+      }
+
+      .qa-compare.is-overlay .qa-pane {
+        display: none;
+      }
+
+      .qa-overlay-stack canvas,
+      .qa-overlay-stack .book-page {
+        left: 50%;
+        position: absolute;
+        top: 12px;
+        transform: translateX(-50%);
+      }
+
+      .qa-overlay-stack .book-page {
+        box-shadow: none;
+        margin: 0;
+        max-width: none;
+        pointer-events: none;
+      }
+
+      .qa-overlay-stack canvas {
+        z-index: 1;
+      }
+
+      .qa-overlay-stack .book-page {
+        z-index: 2;
+      }
+
+      .qa-help {
+        color: var(--muted);
+        font-size: 0.82rem;
+        font-weight: 700;
+      }
+
+      .qa-help code {
+        color: var(--exam-blue);
+      }
+
+      @media (max-width: 980px) {
+        .qa-controls,
+        .qa-metrics {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        .qa-compare:not(.is-overlay) {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="qa-shell">
+      <header class="qa-card">
+        <h1 class="qa-title" data-book-title>Book Page QA</h1>
+        <p class="qa-note">เทียบ PDF ต้นฉบับกับ HTML ที่แปลงแล้ว และบันทึกสถานะตรวจสอบลง footnote ของแต่ละหน้า</p>
+      </header>
+
+      <section class="qa-card" aria-label="ตัวควบคุม">
+        <div class="qa-controls">
+          <button class="qa-button" type="button" data-page-prev>ก่อนหน้า</button>
+          <button class="qa-button" type="button" data-page-next>ถัดไป</button>
+          <label class="qa-field">
+            <span class="qa-label">หน้า</span>
+            <input class="qa-input" type="number" min="1" value="1" data-page-input />
+          </label>
+          <label class="qa-field">
+            <span class="qa-label">โหมด</span>
+            <select class="qa-select" data-view-mode>
+              <option value="split">เทียบคู่ขนาน</option>
+              <option value="overlay">ซ้อนทับ</option>
+              <option value="blink">สลับกระพริบ</option>
+            </select>
+          </label>
+          <label class="qa-field">
+            <span class="qa-label">ความโปร่ง HTML</span>
+            <input class="qa-input" type="range" min="0" max="100" value="55" data-overlay-opacity />
+          </label>
+          <button class="qa-button" type="button" data-blink-toggle hidden>หยุดสลับ</button>
+        </div>
+        <div class="qa-status-row">
+          <p class="qa-status" data-qa-status>เปิดด้วย ?manifest=output/4-MT-29/manifest.json</p>
+          <div class="qa-progress" data-progress-chips></div>
+        </div>
+      </section>
+
+      <section class="qa-card" aria-label="ตัวชี้วัด">
+        <div class="qa-metrics">
+          <div class="qa-metric">
+            <span class="qa-metric-label">ความคล้ายข้อความ</span>
+            <strong class="qa-metric-value" data-metric-similarity>—</strong>
+          </div>
+          <div class="qa-metric">
+            <span class="qa-metric-label">คำใน PDF / HTML</span>
+            <strong class="qa-metric-value" data-metric-tokens>—</strong>
+          </div>
+          <div class="qa-metric">
+            <span class="qa-metric-label">สถานะหน้านี้</span>
+            <strong class="qa-metric-value" data-metric-status>รอตรวจสอบ</strong>
+          </div>
+          <div class="qa-metric">
+            <span class="qa-metric-label">ความคืบหน้า</span>
+            <strong class="qa-metric-value" data-metric-progress>0 / 0</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="qa-card" aria-label="บันทึกการตรวจสอบ">
+        <div class="qa-verify-actions">
+          <button class="qa-button qa-button--pending" type="button" data-set-status="pending">รอตรวจสอบ</button>
+          <button class="qa-button qa-button--verified" type="button" data-set-status="verified">ยืนยันถูกต้อง</button>
+          <button class="qa-button qa-button--issue" type="button" data-set-status="issue">พบปัญหา</button>
+          <button class="qa-button" type="button" data-export-verification>ดาวน์โหลด verification.json</button>
+          <label class="qa-button" style="display: inline-grid; place-items: center">
+            นำเข้า verification.json
+            <input type="file" accept=".json,application/json" hidden data-import-verification />
+          </label>
+        </div>
+        <label class="qa-field" style="margin-top: 10px">
+          <span class="qa-label">หมายเหตุปัญหา / ข้อสังเกต</span>
+          <textarea class="qa-input qa-note-input" data-verify-note placeholder="เช่น คำ 'อนาคา-' ถูกตัดบรรทัดผิด"></textarea>
+        </label>
+        <p class="qa-help" style="margin-top: 10px">
+          หลังดาวน์โหลดแล้ว รัน
+          <code>python3 scripts/apply_book_verification.py output/BOOK-ID</code>
+          เพื่อเขียนป้ายสถานะลง footnote ของไฟล์ HTML จริง
+        </p>
+      </section>
+
+      <section class="qa-card qa-compare" data-compare-root aria-label="การเทียบหน้า">
+        <div class="qa-overlay-stack" data-overlay-stack>
+          <canvas data-pdf-overlay-canvas></canvas>
+          <div data-html-overlay-host></div>
+        </div>
+
+        <div class="qa-pane">
+          <h2 class="qa-pane-title">PDF ต้นฉบับ</h2>
+          <div class="qa-pane-frame">
+            <div class="qa-page-slot">
+              <canvas data-pdf-canvas></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-pane">
+          <h2 class="qa-pane-title">HTML ที่แปลง</h2>
+          <div class="qa-pane-frame">
+            <div class="qa-page-slot qa-html-host" data-html-host></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+      (() => {
+        const STATUS_LABELS = {
+          pending: "รอตรวจสอบ",
+          verified: "ยืนยันแล้ว",
+          issue: "พบปัญหา",
+        };
+
+        const els = {
+          title: document.querySelector("[data-book-title]"),
+          status: document.querySelector("[data-qa-status]"),
+          progressChips: document.querySelector("[data-progress-chips]"),
+          pagePrev: document.querySelector("[data-page-prev]"),
+          pageNext: document.querySelector("[data-page-next]"),
+          pageInput: document.querySelector("[data-page-input]"),
+          viewMode: document.querySelector("[data-view-mode]"),
+          overlayOpacity: document.querySelector("[data-overlay-opacity]"),
+          blinkToggle: document.querySelector("[data-blink-toggle]"),
+          compareRoot: document.querySelector("[data-compare-root]"),
+          pdfCanvas: document.querySelector("[data-pdf-canvas]"),
+          pdfOverlayCanvas: document.querySelector("[data-pdf-overlay-canvas]"),
+          htmlHost: document.querySelector("[data-html-host]"),
+          htmlOverlayHost: document.querySelector("[data-html-overlay-host]"),
+          metricSimilarity: document.querySelector("[data-metric-similarity]"),
+          metricTokens: document.querySelector("[data-metric-tokens]"),
+          metricStatus: document.querySelector("[data-metric-status]"),
+          metricProgress: document.querySelector("[data-metric-progress]"),
+          verifyNote: document.querySelector("[data-verify-note]"),
+          exportVerification: document.querySelector("[data-export-verification]"),
+          importVerification: document.querySelector("[data-import-verification]"),
+          statusButtons: [...document.querySelectorAll("[data-set-status]")],
+          bookCss: document.querySelector("[data-book-css]"),
+        };
+
+        let manifest = null;
+        let manifestBase = "";
+        let pdfDoc = null;
+        let pdfUrl = "";
+        let verification = null;
+        let currentPage = 1;
+        let blinkTimer = null;
+        let blinkVisible = true;
+
+        pdfjsLib.GlobalWorkerOptions.workerSrc =
+          "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+        const resolveQueryParam = (name) => {
+          const params = new URLSearchParams(window.location.search);
+          const direct = params.get(name);
+          if (direct) return direct;
+
+          const raw = window.location.search.replace(/^\?/, "");
+          if (!raw) return null;
+
+          const decoded = decodeURIComponent(raw);
+          const prefix = `${name}=`;
+          if (decoded.startsWith(prefix)) {
+            return decoded.slice(prefix.length);
+          }
+
+          for (const [key, value] of params.entries()) {
+            if (value) continue;
+            if (key.startsWith(prefix)) return key.slice(prefix.length);
+          }
+
+          return null;
+        };
+
+        const resolveAssetUrl = (value) => new URL(value, window.location.href).href;
+
+        const storageKey = () => `paligo-book-verification:${manifest?.bookId || "unknown"}`;
+
+        const normalizeText = (value) =>
+          String(value || "")
+            .replace(/\s+/g, " ")
+            .trim();
+
+        const wordJaccard = (left, right) => {
+          const wordsLeft = new Set(normalizeText(left).split(" ").filter(Boolean));
+          const wordsRight = new Set(normalizeText(right).split(" ").filter(Boolean));
+          if (!wordsLeft.size && !wordsRight.size) return 100;
+          const intersection = [...wordsLeft].filter((word) => wordsRight.has(word)).length;
+          const union = new Set([...wordsLeft, ...wordsRight]).size;
+          return union ? Math.round((intersection / union) * 100) : 100;
+        };
+
+        const getPageEntry = (pageNo) => manifest?.pages?.find((entry) => entry.page === pageNo) || null;
+
+        const defaultVerification = () => ({
+          schema: "paligo.bookVerification.v1",
+          bookId: manifest.bookId,
+          updatedAt: new Date().toISOString(),
+          pages: Object.fromEntries(
+            (manifest.pages || []).map((entry) => [
+              String(entry.page),
+              { status: "pending", note: "", checkedAt: null },
+            ])
+          ),
+        });
+
+        const saveLocalVerification = () => {
+          if (!verification) return;
+          verification.updatedAt = new Date().toISOString();
+          localStorage.setItem(storageKey(), JSON.stringify(verification));
+        };
+
+        const mergeVerification = (remote) => {
+          const base = defaultVerification();
+          const merged = { ...base, ...(remote || {}), pages: { ...base.pages } };
+          for (const [pageKey, pageState] of Object.entries(remote?.pages || {})) {
+            merged.pages[pageKey] = {
+              ...base.pages[pageKey],
+              ...pageState,
+            };
+          }
+
+          const localRaw = localStorage.getItem(storageKey());
+          if (localRaw) {
+            try {
+              const local = JSON.parse(localRaw);
+              for (const [pageKey, pageState] of Object.entries(local.pages || {})) {
+                const localTime = Date.parse(pageState.checkedAt || local.updatedAt || 0);
+                const mergedTime = Date.parse(merged.pages[pageKey]?.checkedAt || merged.updatedAt || 0);
+                if (localTime >= mergedTime) {
+                  merged.pages[pageKey] = { ...merged.pages[pageKey], ...pageState };
+                }
+              }
+            } catch (_error) {
+              /* ignore invalid local cache */
+            }
+          }
+
+          verification = merged;
+        };
+
+        const getPageState = (pageNo) =>
+          verification?.pages?.[String(pageNo)] || { status: "pending", note: "", checkedAt: null };
+
+        const updateProgress = () => {
+          const counts = { pending: 0, verified: 0, issue: 0 };
+          for (const entry of manifest?.pages || []) {
+            const status = getPageState(entry.page).status || "pending";
+            counts[status] = (counts[status] || 0) + 1;
+          }
+
+          els.progressChips.innerHTML = [
+            `<span class="qa-chip qa-chip--pending">รอตรวจ ${counts.pending}</span>`,
+            `<span class="qa-chip qa-chip--verified">ยืนยัน ${counts.verified}</span>`,
+            `<span class="qa-chip qa-chip--issue">ปัญหา ${counts.issue}</span>`,
+          ].join("");
+
+          els.metricProgress.textContent = `${counts.verified} / ${manifest?.pageCount || 0} ยืนยันแล้ว`;
+        };
+
+        const updateStatusButtons = (status) => {
+          els.statusButtons.forEach((button) => {
+            button.classList.toggle("is-active", button.dataset.setStatus === status);
+          });
+        };
+
+        const updateHtmlFootnote = (root, pageNo) => {
+          if (!root) return;
+          const pageState = getPageState(pageNo);
+          const entry = getPageEntry(pageNo);
+          const footnote = root.querySelector(".book-page-footnote");
+          const badge = root.querySelector(".book-verify-badge");
+          const noteEl = root.querySelector(".book-verify-note");
+
+          if (footnote) {
+            footnote.dataset.verifyStatus = pageState.status;
+          }
+          if (badge) {
+            badge.className = `book-verify-badge book-verify-badge--${pageState.status}`;
+            badge.textContent = STATUS_LABELS[pageState.status] || STATUS_LABELS.pending;
+          }
+          if (pageState.note) {
+            if (noteEl) {
+              noteEl.textContent = pageState.note;
+            } else if (footnote) {
+              footnote.insertAdjacentHTML(
+                "beforeend",
+                `<span class="book-verify-note">${pageState.note.replace(/[<>&"]/g, (char) =>
+                  ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", '"': "&quot;" }[char])
+                )}</span>`
+              );
+            }
+          } else if (noteEl) {
+            noteEl.remove();
+          }
+
+          if (entry && footnote) {
+            const meta = footnote.querySelector(".book-verify-meta");
+            if (meta) {
+              meta.textContent = `หน้า ${pageNo} · ${entry.tokenCount || 0} คำ · ${manifest.bookId}`;
+            }
+          }
+        };
+
+        const renderPdfToCanvas = async (pageNo, canvas, targetWidth) => {
+          if (!pdfDoc || !canvas) return;
+          const entry = getPageEntry(pageNo);
+          const page = await pdfDoc.getPage(pageNo);
+          const baseViewport = page.getViewport({ scale: 1 });
+          const aspect = getPageAspect(entry);
+          const cssWidth = targetWidth || getComparePaneWidth();
+          const cssHeight = cssWidth / aspect;
+          const dpr = window.devicePixelRatio || 1;
+          const scale = (cssWidth / baseViewport.width) * dpr;
+          const viewport = page.getViewport({ scale });
+          const context = canvas.getContext("2d");
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+          canvas.style.width = `${cssWidth}px`;
+          canvas.style.height = `${cssHeight}px`;
+          await page.render({ canvasContext: context, viewport }).promise;
+        };
+
+        const getPageAspect = (entry) => {
+          const width = Number(entry?.width) || 540;
+          const height = Number(entry?.height) || 756;
+          return width / height;
+        };
+
+        const getComparePaneWidth = () => {
+          const pdfSlot = els.pdfCanvas.parentElement;
+          const htmlSlot = els.htmlHost;
+          const pdfPane = pdfSlot?.closest(".qa-pane-frame");
+          const htmlPane = htmlSlot?.closest(".qa-pane-frame");
+          const pdfAvailable = (pdfPane?.clientWidth || 0) - 24;
+          const htmlAvailable = (htmlPane?.clientWidth || 0) - 24;
+          const available = Math.min(pdfAvailable, htmlAvailable);
+          return Math.max(280, Math.min(available, 720));
+        };
+
+        const applyPageDimensions = (targetWidth) => {
+          const entry = getPageEntry(currentPage);
+          if (!entry) return targetWidth;
+          const aspect = getPageAspect(entry);
+          const cssHeight = targetWidth / aspect;
+
+          [els.pdfCanvas, els.pdfOverlayCanvas].forEach((canvas) => {
+            canvas.style.width = `${targetWidth}px`;
+            canvas.style.height = `${cssHeight}px`;
+          });
+
+          [els.htmlHost, els.htmlOverlayHost].forEach((host) => {
+            const page = host.querySelector(".book-page");
+            if (!page) return;
+            page.style.width = `${targetWidth}px`;
+            page.style.maxWidth = `${targetWidth}px`;
+            page.style.height = `${cssHeight}px`;
+          });
+
+          return targetWidth;
+        };
+
+        const extractHtmlText = (root) => {
+          if (!root) return "";
+          return [...root.querySelectorAll(".book-token")]
+            .map((node) => node.textContent || "")
+            .join(" ");
+        };
+
+        const applyOverlayOpacity = () => {
+          const opacity = Number(els.overlayOpacity.value) / 100;
+          [els.htmlHost, els.htmlOverlayHost].forEach((host) => {
+            const page = host?.querySelector(".book-page");
+            if (page) page.style.opacity = String(opacity);
+          });
+        };
+
+        const stopBlink = () => {
+          if (blinkTimer) {
+            clearInterval(blinkTimer);
+            blinkTimer = null;
+          }
+          els.blinkToggle.hidden = true;
+          els.htmlHost.style.visibility = "visible";
+          els.pdfCanvas.style.visibility = "visible";
+        };
+
+        const startBlink = () => {
+          stopBlink();
+          blinkTimer = setInterval(() => {
+            blinkVisible = !blinkVisible;
+            els.htmlHost.style.visibility = blinkVisible ? "visible" : "hidden";
+            els.pdfCanvas.style.visibility = blinkVisible ? "hidden" : "visible";
+          }, 700);
+          els.blinkToggle.hidden = false;
+        };
+
+        const setViewMode = (mode) => {
+          stopBlink();
+          els.compareRoot.classList.toggle("is-overlay", mode === "overlay");
+          if (mode === "blink") startBlink();
+          applyOverlayOpacity();
+        };
+
+        const mountBookPage = (host, html, entry) => {
+          host.innerHTML = html;
+          const page = host.querySelector(".book-page");
+          if (!page) return null;
+
+          const background = page.querySelector(".book-page-bg");
+          if (background && entry.background) {
+            background.src = new URL(entry.background, manifestBase).href;
+            page.classList.add("has-background");
+          }
+
+          return page;
+        };
+        const renderHtmlPage = async (targetWidth) => {
+          const entry = getPageEntry(currentPage);
+          if (!entry) {
+            els.htmlHost.innerHTML = "";
+            els.htmlOverlayHost.innerHTML = "";
+            return "";
+          }
+
+          const response = await fetch(`${manifestBase}${entry.html}`);
+          const html = await response.text();
+          mountBookPage(els.htmlHost, html, entry);
+          mountBookPage(els.htmlOverlayHost, html, entry);
+          applyPageDimensions(targetWidth || getComparePaneWidth());
+
+          [els.htmlHost, els.htmlOverlayHost].forEach((host) => {
+            updateHtmlFootnote(host, currentPage);
+          });
+
+          applyOverlayOpacity();
+          return extractHtmlText(els.htmlHost);
+        };
+
+        const renderPage = async () => {
+          if (!manifest) return;
+
+          const entry = getPageEntry(currentPage);
+          if (!entry) {
+            els.status.textContent = `ไม่พบหน้า ${currentPage}`;
+            return;
+          }
+
+          const targetWidth = getComparePaneWidth();
+
+          await Promise.all([
+            renderPdfToCanvas(currentPage, els.pdfCanvas, targetWidth),
+            renderPdfToCanvas(currentPage, els.pdfOverlayCanvas, targetWidth),
+          ]);
+
+          const htmlText = await renderHtmlPage(targetWidth);
+          applyPageDimensions(targetWidth);
+          const pageState = getPageState(currentPage);
+          const similarity = wordJaccard(entry.sourceText || "", htmlText);
+
+          els.pageInput.value = String(currentPage);
+          els.pageInput.max = String(manifest.pageCount || manifest.pages.length);
+          els.pagePrev.disabled = currentPage <= 1;
+          els.pageNext.disabled = currentPage >= (manifest.pageCount || manifest.pages.length);
+          els.status.textContent = `${manifest.title || manifest.bookId} · หน้า ${currentPage} / ${manifest.pageCount}`;
+          els.metricSimilarity.textContent = `${similarity}%`;
+          els.metricTokens.textContent = `${(entry.sourceText || "").split(/\s+/).filter(Boolean).length} / ${htmlText.split(/\s+/).filter(Boolean).length}`;
+          els.metricStatus.textContent = STATUS_LABELS[pageState.status] || STATUS_LABELS.pending;
+          els.verifyNote.value = pageState.note || "";
+          updateStatusButtons(pageState.status || "pending");
+          updateProgress();
+        };
+
+        const setPageStatus = (status) => {
+          if (!verification) return;
+          verification.pages[String(currentPage)] = {
+            status,
+            note: els.verifyNote.value.trim(),
+            checkedAt: new Date().toISOString(),
+          };
+          saveLocalVerification();
+          updateHtmlFootnote(els.htmlHost, currentPage);
+          updateHtmlFootnote(els.htmlOverlayHost, currentPage);
+          renderPage();
+        };
+
+        const exportVerification = () => {
+          if (!verification) return;
+          verification.updatedAt = new Date().toISOString();
+          const blob = new Blob([JSON.stringify(verification, null, 2)], { type: "application/json" });
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          link.download = "verification.json";
+          link.click();
+          URL.revokeObjectURL(link.href);
+        };
+
+        const loadManifest = async (manifestUrl) => {
+          const resolvedManifestUrl = resolveAssetUrl(manifestUrl);
+          const response = await fetch(resolvedManifestUrl);
+          if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+          manifest = await response.json();
+          manifestBase = new URL("./", resolvedManifestUrl).href;
+          els.title.textContent = `${manifest.title || manifest.bookId} — QA`;
+          els.bookCss.href = `${manifestBase}book.css`;
+
+          const pdfParam = resolveQueryParam("pdf");
+          pdfUrl = pdfParam || manifest.sourcePdfRelative || manifest.sourcePdf || "";
+          if (pdfUrl && !/^https?:\/\//.test(pdfUrl)) {
+            pdfUrl = new URL(pdfUrl, manifestBase).href;
+          }
+
+          try {
+            const verifyResponse = await fetch(`${manifestBase}verification.json`);
+            if (verifyResponse.ok) {
+              mergeVerification(await verifyResponse.json());
+            } else {
+              mergeVerification(null);
+            }
+          } catch (_error) {
+            mergeVerification(null);
+          }
+
+          if (!pdfUrl) throw new Error("ไม่พบ path PDF — ใส่ ?pdf=korsob/file.pdf");
+
+          pdfDoc = await pdfjsLib.getDocument(pdfUrl).promise;
+          currentPage = manifest.pages?.[0]?.page || 1;
+          await renderPage();
+          window.addEventListener("resize", () => {
+            if (!manifest) return;
+            renderPage();
+          });
+        };
+
+        els.pagePrev?.addEventListener("click", () => {
+          currentPage = Math.max(1, currentPage - 1);
+          renderPage();
+        });
+
+        els.pageNext?.addEventListener("click", () => {
+          currentPage = Math.min(manifest?.pageCount || currentPage, currentPage + 1);
+          renderPage();
+        });
+
+        els.pageInput?.addEventListener("change", () => {
+          currentPage = Math.max(1, Number(els.pageInput.value) || 1);
+          renderPage();
+        });
+
+        els.viewMode?.addEventListener("change", () => setViewMode(els.viewMode.value));
+        els.overlayOpacity?.addEventListener("input", applyOverlayOpacity);
+        els.blinkToggle?.addEventListener("click", () => {
+          els.viewMode.value = "split";
+          setViewMode("split");
+        });
+
+        els.statusButtons.forEach((button) => {
+          button.addEventListener("click", () => setPageStatus(button.dataset.setStatus));
+        });
+
+        els.verifyNote?.addEventListener("change", () => {
+          if (!verification) return;
+          const pageState = getPageState(currentPage);
+          verification.pages[String(currentPage)] = {
+            ...pageState,
+            note: els.verifyNote.value.trim(),
+            checkedAt: pageState.checkedAt || new Date().toISOString(),
+          };
+          saveLocalVerification();
+          updateHtmlFootnote(els.htmlHost, currentPage);
+          updateHtmlFootnote(els.htmlOverlayHost, currentPage);
+        });
+
+        els.exportVerification?.addEventListener("click", exportVerification);
+
+        els.importVerification?.addEventListener("change", async (event) => {
+          const file = event.target.files?.[0];
+          if (!file) return;
+          mergeVerification(JSON.parse(await file.text()));
+          saveLocalVerification();
+          await renderPage();
+        });
+
+        const manifestParam = resolveQueryParam("manifest");
+        if (manifestParam) {
+          loadManifest(manifestParam).catch((error) => {
+            els.status.textContent = `โหลดไม่สำเร็จ: ${error.message}`;
+          });
+        } else {
+          els.status.textContent =
+            "เปิดด้วย ?manifest=output/4-MT-29/manifest.json (อย่า encode = เป็น %3D)";
+        }
+      })();
+    </script>
+  </body>
+</html>

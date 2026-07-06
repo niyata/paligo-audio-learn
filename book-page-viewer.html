@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Book Page Viewer</title>
+    <style>
+      :root {
+        --page-bg: #f8f0e3;
+        --paper-bg: #fffaf0;
+        --card-border: rgba(74, 44, 10, 0.16);
+        --exam-blue: rgba(31, 45, 137, 0.76);
+        --ink: #343434;
+        --muted: rgba(52, 52, 52, 0.62);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        background: var(--page-bg);
+        color: var(--ink);
+        font-family: Sarabun, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        line-height: 1.5;
+        margin: 0;
+        min-height: 100vh;
+        padding: clamp(18px, 4vw, 42px);
+      }
+
+      .viewer-shell {
+        display: grid;
+        gap: 16px;
+        margin: 0 auto;
+        max-width: 920px;
+      }
+
+      .viewer-header,
+      .viewer-controls,
+      .viewer-stage {
+        background: rgba(255, 255, 255, 0.82);
+        border: 1px solid var(--card-border);
+        border-radius: 8px;
+        box-shadow: 0 18px 46px rgba(74, 44, 10, 0.1);
+      }
+
+      .viewer-header,
+      .viewer-controls {
+        padding: 16px 18px;
+      }
+
+      .viewer-title {
+        color: var(--exam-blue);
+        font-size: clamp(1.35rem, 3vw, 1.9rem);
+        margin: 0;
+      }
+
+      .viewer-note {
+        color: var(--muted);
+        font-size: 0.9rem;
+        font-weight: 700;
+        margin: 6px 0 0;
+      }
+
+      .control-grid {
+        align-items: end;
+        display: grid;
+        gap: 10px;
+        grid-template-columns: minmax(0, 1fr) auto auto auto;
+      }
+
+      .control-field {
+        display: grid;
+        gap: 4px;
+      }
+
+      .control-label {
+        color: var(--muted);
+        font-size: 0.82rem;
+        font-weight: 800;
+      }
+
+      .control-input,
+      .control-button {
+        appearance: none;
+        background: var(--paper-bg);
+        border: 1px solid rgba(31, 45, 137, 0.22);
+        border-radius: 6px;
+        color: var(--exam-blue);
+        font: inherit;
+        font-size: 0.88rem;
+        font-weight: 800;
+        min-height: 36px;
+        padding: 7px 10px;
+      }
+
+      .control-button {
+        cursor: pointer;
+      }
+
+      .viewer-stage {
+        min-height: 420px;
+        padding: 18px;
+      }
+
+      .viewer-stage iframe {
+        border: 0;
+        display: block;
+        min-height: 70vh;
+        width: 100%;
+      }
+
+      .viewer-status {
+        color: var(--muted);
+        font-size: 0.86rem;
+        font-weight: 700;
+        margin-top: 10px;
+      }
+
+      @media (max-width: 720px) {
+        .control-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+    <link rel="stylesheet" href="" data-book-css />
+  </head>
+  <body>
+    <main class="viewer-shell">
+      <header class="viewer-header">
+        <h1 class="viewer-title" data-book-title>Book Page Viewer</h1>
+        <p class="viewer-note">
+          โหลด `manifest.json` จากผลแปลง PDF แล้วพลิกดูหน้าเล่มที่จำลองเป็น HTML
+        </p>
+      </header>
+
+      <section class="viewer-controls" aria-label="ตัวควบคุมหนังสือ">
+        <div class="control-grid">
+          <label class="control-field">
+            <span class="control-label">manifest.json</span>
+            <input class="control-input" type="file" accept=".json,application/json" data-manifest-file />
+          </label>
+          <button class="control-button" type="button" data-page-prev>ก่อนหน้า</button>
+          <button class="control-button" type="button" data-page-next>ถัดไป</button>
+          <label class="control-field">
+            <span class="control-label">หน้า</span>
+            <input class="control-input" type="number" min="1" value="1" data-page-input />
+          </label>
+        </div>
+        <p class="viewer-status" data-viewer-status>ยังไม่ได้โหลด manifest</p>
+      </section>
+
+      <section class="viewer-stage" aria-label="หน้าหนังสือ">
+        <div data-page-host></div>
+      </section>
+    </main>
+
+    <script>
+      (() => {
+        const manifestFileInput = document.querySelector("[data-manifest-file]");
+        const pagePrevButton = document.querySelector("[data-page-prev]");
+        const pageNextButton = document.querySelector("[data-page-next]");
+        const pageInput = document.querySelector("[data-page-input]");
+        const pageHost = document.querySelector("[data-page-host]");
+        const status = document.querySelector("[data-viewer-status]");
+        const bookTitle = document.querySelector("[data-book-title]");
+        const bookCssLink = document.querySelector("[data-book-css]");
+
+        let manifest = null;
+        let manifestBase = "";
+        let currentPage = 1;
+
+        const resolveQueryParam = (name) => {
+          const params = new URLSearchParams(window.location.search);
+          const direct = params.get(name);
+          if (direct) return direct;
+
+          const raw = window.location.search.replace(/^\?/, "");
+          if (!raw) return null;
+
+          const decoded = decodeURIComponent(raw);
+          const prefix = `${name}=`;
+          if (decoded.startsWith(prefix)) {
+            return decoded.slice(prefix.length);
+          }
+
+          for (const [key, value] of params.entries()) {
+            if (value) continue;
+            if (key.startsWith(prefix)) return key.slice(prefix.length);
+          }
+
+          return null;
+        };
+
+        const resolveAssetUrl = (value) => new URL(value, window.location.href).href;
+
+        const setStatus = (message) => {
+          status.textContent = message;
+        };
+
+        const getPageEntry = (pageNo) => manifest?.pages?.find((entry) => entry.page === pageNo) || null;
+
+        const renderPage = async () => {
+          if (!manifest) return;
+
+          const entry = getPageEntry(currentPage);
+          if (!entry) {
+            setStatus(`ไม่พบหน้า ${currentPage}`);
+            pageHost.innerHTML = "";
+            return;
+          }
+
+          const response = await fetch(`${manifestBase}${entry.html}`);
+          const html = await response.text();
+          pageHost.innerHTML = html;
+
+          const pageEl = pageHost.querySelector(".book-page");
+          const background = pageEl?.querySelector(".book-page-bg");
+          if (pageEl && entry.background) {
+            if (background) {
+              background.src = new URL(entry.background, manifestBase).href;
+            }
+            pageEl.classList.add("has-background");
+          }
+
+          pageInput.value = String(currentPage);
+          pageInput.max = String(manifest.pageCount || manifest.pages.length);
+          pagePrevButton.disabled = currentPage <= 1;
+          pageNextButton.disabled = currentPage >= (manifest.pageCount || manifest.pages.length);
+          setStatus(`${manifest.title || manifest.bookId} · หน้า ${currentPage} / ${manifest.pageCount}`);
+        };
+
+        const loadManifestFromUrl = async (manifestUrl) => {
+          const resolvedManifestUrl = resolveAssetUrl(manifestUrl);
+          const response = await fetch(resolvedManifestUrl);
+          if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+
+          manifest = await response.json();
+          manifestBase = new URL("./", resolvedManifestUrl).href;
+          bookTitle.textContent = manifest.title || manifest.bookId || "Book Page Viewer";
+          bookCssLink.href = `${manifestBase}book.css`;
+          currentPage = manifest.pages?.[0]?.page || 1;
+          await renderPage();
+        };
+
+        manifestFileInput?.addEventListener("change", async (event) => {
+          const file = event.target.files?.[0];
+          if (!file) return;
+
+          try {
+            manifest = JSON.parse(await file.text());
+            bookTitle.textContent = manifest.title || manifest.bookId || "Book Page Viewer";
+            currentPage = manifest.pages?.[0]?.page || 1;
+            setStatus(
+              "โหลด manifest แล้ว — ต้องเปิดผ่าน local server และใช้ ?manifest=... เพื่อโหลดหน้า HTML/CSS ให้ครบ"
+            );
+            pageHost.innerHTML = "";
+          } catch (error) {
+            setStatus(`โหลด manifest ไม่ได้: ${error.message}`);
+          }
+        });
+
+        pagePrevButton?.addEventListener("click", () => {
+          currentPage = Math.max(1, currentPage - 1);
+          renderPage();
+        });
+
+        pageNextButton?.addEventListener("click", () => {
+          const maxPage = manifest?.pageCount || manifest?.pages?.length || currentPage;
+          currentPage = Math.min(maxPage, currentPage + 1);
+          renderPage();
+        });
+
+        pageInput?.addEventListener("change", () => {
+          currentPage = Math.max(1, Number(pageInput.value) || 1);
+          renderPage();
+        });
+
+        const manifestParam = resolveQueryParam("manifest");
+        if (manifestParam) {
+          loadManifestFromUrl(manifestParam).catch((error) =>
+            setStatus(`โหลด manifest จาก URL ไม่ได้: ${error.message}`)
+          );
+        } else {
+          setStatus("เปิดแบบ ?manifest=output/4-MT-29/manifest.json หลังรัน python3 -m http.server");
+        }
+      })();
+    </script>
+  </body>
+</html>
