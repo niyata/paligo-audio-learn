@@ -15,6 +15,7 @@ Spec: [`docs/exam-inbox-v1-spec.md`](../docs/exam-inbox-v1-spec.md)
 # Terminal 1 — API
 cd workers
 npm install
+npm run db:migrate:local
 npm run dev
 
 # Terminal 2 — static app (repo root)
@@ -25,31 +26,53 @@ Verify:
 
 ```bash
 curl -s http://localhost:8787/v1/health | jq .
-curl -s -H "Origin: http://localhost:8765" http://localhost:8787/v1/health -D -
+
+# Register reviewer
+curl -s -X POST http://localhost:8787/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"role":"reviewer","displayName":"ครูทดสอบ","pin":"123456"}' | jq .
+
+# Login + me (use sessionToken from register)
+curl -s http://localhost:8787/v1/me -H "Authorization: Bearer <token>" | jq .
 ```
 
-Browser (เปิด `exam-books.html`):
-
-```javascript
-PaligoInboxClient.healthCheck().then(console.log);
-```
+Browser: [`exam-account.html`](../exam-account.html) — สมัคร · login · จับคู่
 
 ---
 
-## Routes (Phase 0)
+## Routes (Phase 1)
 
 | Method | Path | Status |
 |--------|------|--------|
 | GET | `/v1/health` | 200 |
-| GET | `/v1/me` | 401 stub |
-| GET | `/v1/inbox` | 401 stub |
+| POST | `/v1/auth/register` | 201 |
+| POST | `/v1/auth/login` | 200 |
+| POST | `/v1/auth/logout` | 200 |
+| GET | `/v1/me` | 200 (auth) |
+| POST | `/v1/pairings/invite` | 201 (reviewer) |
+| POST | `/v1/pairings/join` | 201 (student) |
+| GET | `/v1/inbox` | 200 empty (Phase 2) |
 | POST | `/v1/packages` | 501 Phase 2 |
-| POST | `/v1/auth/*` | 501 Phase 1 |
-| POST | `/v1/pairings/*` | 501 Phase 1 |
 
 ---
 
-## Deploy
+## D1 migrations
+
+```bash
+cd workers
+npm run db:migrate:local    # dev
+npm run db:migrate:remote   # production (after wrangler d1 create)
+```
+
+Production: สร้าง DB จริงแล้วอัปเดต `database_id` ใน `wrangler.jsonc`:
+
+```bash
+wrangler d1 create paligo-inbox
+```
+
+---
+
+## Deploy (unchanged)
 
 1. `wrangler login`
 2. เพิ่ม zone `paligo.com` ใน Cloudflare
@@ -86,8 +109,8 @@ Override: `window.PALIGO_API_BASE = "…"` ก่อนโหลด `paligo-conf
 
 | Phase | งาน |
 |-------|-----|
-| 0 | skeleton (นี้) |
-| 1 | D1 + auth + pairing |
+| 0 | skeleton (นี้) | ✅ |
+| 1 | D1 + auth + pairing | ✅ |
 | 2 | R2 + POST packages |
 | 3 | claim + reviewer UI |
 | 4 | return to student |

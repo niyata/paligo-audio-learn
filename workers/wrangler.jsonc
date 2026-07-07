@@ -4,13 +4,18 @@
   "main": "src/index.js",
   "compatibility_date": "2026-07-01",
   "workers_dev": true,
-  // Uncomment after paligo.com zone is on Cloudflare:
+  // Production: uncomment after paligo.com zone is on Cloudflare
   // "routes": [{ "pattern": "api.paligo.com/*", "zone_name": "paligo.com" }],
   "vars": {
     "PALIGO_API_VERSION": "v1",
     "PALIGO_ENV": "production"
-  }
-  // Phase 1+: D1, R2 bindings
-  // "d1_databases": [{ "binding": "DB", "database_name": "paligo-inbox", "database_id": "..." }],
-  // "r2_buckets": [{ "binding": "PACKAGES", "bucket_name": "paligo-inbox-packages" }]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "paligo-inbox",
+      "database_id": "00000000-0000-4000-8000-000000000001",
+      "migrations_dir": "migrations"
+    }
+  ]
 }

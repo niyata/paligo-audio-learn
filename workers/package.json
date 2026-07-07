@@ -6,8 +6,10 @@
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
-    "check": "wrangler check",
-    "tail": "wrangler tail"
+    "check": "wrangler deploy --dry-run",
+    "tail": "wrangler tail",
+    "db:migrate:local": "wrangler d1 migrations apply paligo-inbox --local",
+    "db:migrate:remote": "wrangler d1 migrations apply paligo-inbox --remote"
   },
   "devDependencies": {
     "wrangler": "^4.24.0"

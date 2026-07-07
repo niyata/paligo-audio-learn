@@ -48,6 +48,11 @@
           href: "exam-review-results.html",
           description: "นำเข้าไฟล์ผลตรวจจากครู",
         },
+        {
+          label: "บัญชี Inbox",
+          href: "exam-account.html",
+          description: "สมัคร เข้าสู่ระบบ จับคู่ครู–นักเรียน",
+        },
       ],
     },
     {
@@ -110,6 +115,10 @@
     },
     "exam-review-results.html": {
       title: "ผลตรวจของฉัน",
+      section: "exam",
+    },
+    "exam-account.html": {
+      title: "บัญชี Inbox",
       section: "exam",
     },
     "exam-reviewer-console.html": {

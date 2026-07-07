@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>บัญชี Inbox · Paligo</title>
+    <link rel="stylesheet" href="paligo-design-tokens.css" />
+    <link rel="stylesheet" href="sidebar-nav.css" />
+    <link rel="stylesheet" href="paligo-exam-ui.css" />
+    <style>
+      :root {
+        --page-bg: #f8f0e3;
+        --paper-bg: #fffaf0;
+        --card-bg: rgba(255, 255, 255, 0.84);
+        --card-border: rgba(74, 44, 10, 0.16);
+        --exam-blue: rgba(31, 45, 137, 0.76);
+        --ink: #333;
+        --muted: rgba(51, 51, 51, 0.62);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        background: var(--page-bg);
+        color: var(--ink);
+        font-family: Sarabun, ui-sans-serif, system-ui, sans-serif;
+        line-height: 1.5;
+        margin: 0;
+        min-height: 100vh;
+      }
+
+      .account-shell {
+        display: grid;
+        gap: 16px;
+        margin: 0 auto;
+        max-width: 720px;
+        padding: 16px;
+      }
+
+      .account-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 8px;
+        box-shadow: 0 18px 46px rgba(74, 44, 10, 0.1);
+        padding: 18px;
+      }
+
+      .account-title {
+        color: var(--exam-blue);
+        font-size: clamp(1.35rem, 3vw, 1.85rem);
+        margin: 0 0 4px;
+      }
+
+      .account-subtitle {
+        color: var(--muted);
+        font-size: 0.92rem;
+        font-weight: 700;
+        margin: 0 0 16px;
+      }
+
+      .tab-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+
+      .tab {
+        appearance: none;
+        background: var(--paper-bg);
+        border: 1px solid rgba(31, 45, 137, 0.24);
+        border-radius: 6px;
+        color: var(--exam-blue);
+        cursor: pointer;
+        font: inherit;
+        font-size: 0.86rem;
+        font-weight: 900;
+        min-height: 36px;
+        padding: 7px 12px;
+      }
+
+      .tab.is-active {
+        background: var(--exam-blue);
+        color: var(--paper-bg);
+      }
+
+      .panel[hidden] {
+        display: none;
+      }
+
+      .field-grid {
+        display: grid;
+        gap: 12px;
+      }
+
+      label {
+        display: grid;
+        gap: 4px;
+        font-size: 0.88rem;
+        font-weight: 700;
+      }
+
+      input,
+      select {
+        background: var(--paper-bg);
+        border: 1px solid rgba(31, 45, 137, 0.24);
+        border-radius: 6px;
+        font: inherit;
+        min-height: 38px;
+        padding: 8px 10px;
+      }
+
+      .button {
+        appearance: none;
+        background: var(--paper-bg);
+        border: 1px solid rgba(31, 45, 137, 0.24);
+        border-radius: 6px;
+        color: var(--exam-blue);
+        cursor: pointer;
+        font: inherit;
+        font-size: 0.86rem;
+        font-weight: 900;
+        min-height: 38px;
+        padding: 8px 12px;
+      }
+
+      .button.is-primary {
+        background: var(--exam-blue);
+        color: var(--paper-bg);
+      }
+
+      .status-box {
+        background: rgba(31, 45, 137, 0.06);
+        border: 1px solid rgba(31, 45, 137, 0.16);
+        border-radius: 6px;
+        font-size: 0.9rem;
+        margin-top: 12px;
+        padding: 12px;
+        white-space: pre-wrap;
+      }
+
+      .status-box.is-error {
+        background: rgba(180, 40, 40, 0.08);
+        border-color: rgba(180, 40, 40, 0.24);
+      }
+
+      .invite-code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 1.35rem;
+        font-weight: 900;
+        letter-spacing: 0.12em;
+      }
+
+      .hint {
+        color: var(--muted);
+        font-size: 0.82rem;
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="account-shell">
+      <section class="account-card">
+        <h1 class="account-title">บัญชี Inbox</h1>
+        <p class="account-subtitle">สมัคร · เข้าสู่ระบบ · จับคู่ครู–นักเรียน (Phase 1)</p>
+
+        <div class="tab-row" role="tablist">
+          <button class="tab is-active" type="button" data-tab="login">เข้าสู่ระบบ</button>
+          <button class="tab" type="button" data-tab="register">สมัครบัญชี</button>
+          <button class="tab" type="button" data-tab="pairing">จับคู่</button>
+          <button class="tab" type="button" data-tab="me">สถานะ</button>
+        </div>
+
+        <div class="panel" data-panel="login">
+          <form class="field-grid" data-login-form>
+            <label>
+              User ID (จากตอนสมัคร)
+              <input name="userId" autocomplete="username" placeholder="uuid หรือเว้นว่างถ้าใช้อีเมล" />
+            </label>
+            <label>
+              อีเมล (ถ้ามีตอนสมัคร)
+              <input name="email" type="email" autocomplete="email" placeholder="name@example.com" />
+            </label>
+            <label>
+              PIN (ตัวเลข 6 หลักขึ้นไป)
+              <input name="pin" inputmode="numeric" autocomplete="current-password" required />
+            </label>
+            <button class="button is-primary" type="submit">เข้าสู่ระบบ</button>
+          </form>
+        </div>
+
+        <div class="panel" data-panel="register" hidden>
+          <form class="field-grid" data-register-form>
+            <label>
+              บทบาท
+              <select name="role" required>
+                <option value="student">นักเรียน</option>
+                <option value="reviewer">ครู/ผู้ตรวจ</option>
+              </select>
+            </label>
+            <label>
+              ชื่อแสดง
+              <input name="displayName" required minlength="2" placeholder="ชื่อบนปก/inbox" />
+            </label>
+            <label>
+              อีเมล (ไม่บังคับ)
+              <input name="email" type="email" placeholder="ใช้ login แทน userId ได้" />
+            </label>
+            <label>
+              PIN (ตัวเลข 6 หลักขึ้นไป)
+              <input name="pin" inputmode="numeric" required minlength="6" pattern="\\d{6,}" />
+            </label>
+            <button class="button is-primary" type="submit">สมัครบัญชี</button>
+          </form>
+          <p class="hint">หลังสมัคร ระบบจะแสดง User ID — เก็บไว้ถ้าไม่ได้ใส่อีเมล</p>
+        </div>
+
+        <div class="panel" data-panel="pairing" hidden>
+          <div class="field-grid">
+            <p class="hint">ต้องเข้าสู่ระบบก่อน · ครูสร้างรหัส · นักเรียนกรอกรหัส</p>
+            <button class="button is-primary" type="button" data-create-invite>สร้าง/ดูรหัสจับคู่ (ครู)</button>
+            <form class="field-grid" data-join-form>
+              <label>
+                รหัสจับคู่
+                <input name="inviteCode" required placeholder="เช่น AB12CD34" style="text-transform: uppercase" />
+              </label>
+              <button class="button is-primary" type="submit">เข้าร่วม (นักเรียน)</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="panel" data-panel="me" hidden>
+          <div class="field-grid">
+            <button class="button" type="button" data-refresh-me>โหลดสถานะ</button>
+            <button class="button" type="button" data-logout>ออกจากระบบ</button>
+            <pre class="status-box" data-me-output>ยังไม่โหลด</pre>
+          </div>
+        </div>
+
+        <div class="status-box" data-status hidden></div>
+      </section>
+    </div>
+
+    <script src="paligo-config.js"></script>
+    <script src="paligo-inbox-client.js"></script>
+    <script src="paligo-nav-config.js"></script>
+    <script src="sidebar-nav.js"></script>
+    <script>
+      const tabs = document.querySelectorAll("[data-tab]");
+      const panels = document.querySelectorAll("[data-panel]");
+      const statusEl = document.querySelector("[data-status]");
+      const meOutput = document.querySelector("[data-me-output]");
+
+      function showStatus(message, isError = false) {
+        statusEl.hidden = false;
+        statusEl.textContent = message;
+        statusEl.classList.toggle("is-error", isError);
+      }
+
+      tabs.forEach((tab) => {
+        tab.addEventListener("click", () => {
+          tabs.forEach((item) => item.classList.toggle("is-active", item === tab));
+          panels.forEach((panel) => {
+            panel.hidden = panel.dataset.panel !== tab.dataset.tab;
+          });
+        });
+      });
+
+      document.querySelector("[data-login-form]").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const form = event.currentTarget;
+        const data = new FormData(form);
+        try {
+          const payload = await PaligoInboxClient.login({
+            userId: String(data.get("userId") || "").trim() || null,
+            email: String(data.get("email") || "").trim() || null,
+            pin: String(data.get("pin") || ""),
+          });
+          showStatus(`เข้าสู่ระบบแล้ว: ${payload.user.displayName} (${payload.user.role})`);
+        } catch (error) {
+          showStatus(error.message || "เข้าสู่ระบบไม่สำเร็จ", true);
+        }
+      });
+
+      document.querySelector("[data-register-form]").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const form = event.currentTarget;
+        const data = new FormData(form);
+        try {
+          const payload = await PaligoInboxClient.register({
+            role: String(data.get("role")),
+            displayName: String(data.get("displayName") || "").trim(),
+            email: String(data.get("email") || "").trim() || null,
+            pin: String(data.get("pin") || ""),
+          });
+          showStatus(
+            `สมัครสำเร็จ\nชื่อ: ${payload.user.displayName}\nUser ID: ${payload.user.id}\nบทบาท: ${payload.user.role}\n\nเก็บ User ID ไว้ถ้าไม่ได้ใส่อีเมล`
+          );
+        } catch (error) {
+          showStatus(error.message || "สมัครไม่สำเร็จ", true);
+        }
+      });
+
+      document.querySelector("[data-create-invite]").addEventListener("click", async () => {
+        try {
+          const payload = await PaligoInboxClient.createInvite();
+          showStatus(`รหัสจับคู่: ${payload.inviteCode}\nแจกให้นักเรียนกรอกในแท็บจับคู่`);
+        } catch (error) {
+          showStatus(error.message || "สร้างรหัสไม่สำเร็จ", true);
+        }
+      });
+
+      document.querySelector("[data-join-form]").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const form = event.currentTarget;
+        const inviteCode = String(new FormData(form).get("inviteCode") || "").trim();
+        try {
+          const payload = await PaligoInboxClient.joinPairing(inviteCode);
+          showStatus(`จับคู่แล้วกับ ${payload.reviewerDisplayName}`);
+        } catch (error) {
+          showStatus(error.message || "จับคู่ไม่สำเร็จ", true);
+        }
+      });
+
+      document.querySelector("[data-refresh-me]").addEventListener("click", async () => {
+        try {
+          const payload = await PaligoInboxClient.getMe();
+          meOutput.textContent = JSON.stringify(payload, null, 2);
+        } catch (error) {
+          meOutput.textContent = error.message || "โหลดไม่สำเร็จ";
+        }
+      });
+
+      document.querySelector("[data-logout]").addEventListener("click", async () => {
+        await PaligoInboxClient.logout();
+        meOutput.textContent = "ออกจากระบบแล้ว";
+        showStatus("ออกจากระบบแล้ว");
+      });
+
+      PaligoSidebar.autoInit();
+    </script>
+  </body>
+</html>
