@@ -101,20 +101,64 @@
 
       .book-grid {
         display: grid;
-        gap: 12px;
-        grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+        gap: 14px;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
       }
 
       .book-card {
         display: grid;
-        gap: 10px;
-        padding: 14px;
+        gap: 0;
+        overflow: hidden;
+        padding: 0;
+      }
+
+      .book-cover {
+        background:
+          repeating-linear-gradient(
+            to bottom,
+            transparent 0 calc(1.35rem - 1px),
+            rgba(31, 45, 137, 0.28) calc(1.35rem - 1px) 1.35rem
+          ),
+          var(--paper-bg);
+        color: var(--exam-blue);
+        display: grid;
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "Thonburi", sans-serif;
+        gap: 2px;
+        min-height: 132px;
+        padding: 14px 16px 12px;
+        place-items: center;
+        text-align: center;
+      }
+
+      .book-cover-grade,
+      .book-cover-date {
+        color: color-mix(in srgb, var(--exam-blue) 82%, transparent);
+        font-size: 0.78rem;
+        font-weight: 600;
+        letter-spacing: 0.01em;
+        line-height: 1.35rem;
+      }
+
+      .book-cover-subject {
+        color: var(--exam-blue);
+        font-size: clamp(1rem, 2.4vw, 1.18rem);
+        font-weight: 700;
+        letter-spacing: 0.015em;
+        line-height: 1.35;
+        max-width: 100%;
+        padding: 2px 4px;
+      }
+
+      .book-card-body {
+        display: grid;
+        gap: 8px;
+        padding: 12px 14px 14px;
       }
 
       .book-title {
         color: var(--exam-blue);
-        font-size: 1.05rem;
-        font-weight: 900;
+        font-size: 0.92rem;
+        font-weight: 800;
         line-height: 1.25;
         margin: 0;
       }
@@ -149,6 +193,111 @@
         display: none;
       }
 
+      .cover-modal {
+        align-items: center;
+        background: rgba(28, 24, 18, 0.34);
+        display: none;
+        inset: 0;
+        justify-content: center;
+        padding: 18px;
+        position: fixed;
+        z-index: 50;
+      }
+
+      .cover-modal.is-open {
+        display: flex;
+      }
+
+      .cover-modal-card {
+        background: var(--paper-bg);
+        border: 1px solid rgba(31, 45, 137, 0.18);
+        border-radius: 14px;
+        box-shadow: 0 24px 70px rgba(31, 45, 137, 0.18);
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "Thonburi", sans-serif;
+        max-width: 420px;
+        padding: 18px;
+        width: min(100%, 420px);
+      }
+
+      .cover-modal-title {
+        color: var(--exam-blue);
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin: 0 0 4px;
+      }
+
+      .cover-modal-note {
+        color: var(--muted);
+        font-size: 0.86rem;
+        margin: 0 0 14px;
+      }
+
+      .cover-form {
+        display: grid;
+        gap: 12px;
+      }
+
+      .cover-field {
+        display: grid;
+        gap: 5px;
+      }
+
+      .cover-label {
+        color: var(--exam-blue);
+        font-size: 0.82rem;
+        font-weight: 700;
+      }
+
+      .cover-input,
+      .cover-select {
+        appearance: none;
+        background: rgba(255, 250, 240, 0.88);
+        border: 1px solid rgba(31, 45, 137, 0.22);
+        border-radius: 10px;
+        color: var(--ink);
+        font: inherit;
+        min-height: 40px;
+        padding: 8px 10px;
+      }
+
+      .cover-preview {
+        background:
+          repeating-linear-gradient(
+            to bottom,
+            transparent 0 calc(1.35rem - 1px),
+            rgba(31, 45, 137, 0.24) calc(1.35rem - 1px) 1.35rem
+          ),
+          var(--paper-bg);
+        border: 1px solid rgba(31, 45, 137, 0.14);
+        border-radius: 12px;
+        color: var(--exam-blue);
+        display: grid;
+        gap: 2px;
+        min-height: 118px;
+        padding: 12px;
+        place-items: center;
+        text-align: center;
+      }
+
+      .cover-preview-subject {
+        font-size: 1.08rem;
+        font-weight: 700;
+        line-height: 1.35;
+      }
+
+      .cover-preview-meta {
+        font-size: 0.78rem;
+        font-weight: 600;
+        opacity: 0.85;
+      }
+
+      .cover-modal-actions {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+        margin-top: 14px;
+      }
+
       @media (max-width: 720px) {
         .books-header {
           grid-template-columns: 1fr;
@@ -168,7 +317,7 @@
           <p class="books-subtitle" data-summary>สมุดคำตอบ ๑ รอบสอบ = ๑ เล่ม แยกข้อมูลไม่ให้ทับกัน</p>
         </div>
         <div class="button-row">
-          <a class="button is-primary" href="ruled-lines-card-only-template.html?newBook=1">สร้างสมุดใหม่</a>
+          <button class="button is-primary" type="button" data-open-cover-modal>สร้างสมุดใหม่</button>
           <button class="button" type="button" data-export-all>ส่งออกทั้งหมด</button>
           <label class="button">
             นำเข้าสมุด
@@ -187,6 +336,55 @@
         <span>กดสร้างสมุดใหม่เพื่อเริ่มทำข้อสอบรอบแรก</span>
       </section>
     </main>
+
+    <div class="cover-modal" data-cover-modal hidden aria-hidden="true">
+      <form class="cover-modal-card" data-cover-form>
+        <h2 class="cover-modal-title">สร้างสมุดใหม่</h2>
+        <p class="cover-modal-note">เลือกชั้น วิชา และวันสอบ — ระบบจะสร้างหน้าปกสมุดคำตอบให้ทันที</p>
+        <div class="cover-form">
+          <label class="cover-field">
+            <span class="cover-label">ประโยค ป.ธ.</span>
+            <select class="cover-select" name="grade" required>
+              <option value="1-2">๑-๒</option>
+              <option value="3">๓</option>
+              <option value="4" selected>๔</option>
+              <option value="5">๕</option>
+              <option value="6">๖</option>
+              <option value="7">๗</option>
+              <option value="8">๘</option>
+              <option value="9">๙</option>
+            </select>
+          </label>
+          <label class="cover-field">
+            <span class="cover-label">วิชา</span>
+            <select class="cover-select" name="subject" required>
+              <option value="pali-to-thai" selected>แปลมคธเป็นไทย</option>
+              <option value="grammar">ไวยากรณ์</option>
+              <option value="sambandha-thai">สัมพันธ์ไทย</option>
+              <option value="burapapak">บุรพภาค</option>
+              <option value="thai-to-pali">แปลไทยเป็นมคธ</option>
+            </select>
+          </label>
+          <div class="cover-field">
+            <span class="cover-label">วันสอบ</span>
+            <div class="cover-form" style="grid-template-columns: repeat(3, minmax(0, 1fr));">
+              <input class="cover-input" name="day" type="number" min="1" max="31" required />
+              <select class="cover-select" name="month" required></select>
+              <input class="cover-input" name="year" type="number" min="2500" max="2700" required />
+            </div>
+          </div>
+          <div class="cover-preview" data-cover-preview aria-live="polite">
+            <div class="cover-preview-meta" data-preview-grade>ประโยค ป.ธ. ๔</div>
+            <div class="cover-preview-subject" data-preview-subject>แปลมคธเป็นไทย</div>
+            <div class="cover-preview-meta" data-preview-date>สอบ วันที่ —</div>
+          </div>
+        </div>
+        <div class="cover-modal-actions">
+          <button class="button" type="button" data-close-cover-modal>ยกเลิก</button>
+          <button class="button is-primary" type="submit">สร้างและเปิดเล่ม</button>
+        </div>
+      </form>
+    </div>
 
     <script src="paligo-exam-shared.js"></script>
     <script src="paligo-nav-config.js"></script>
@@ -214,10 +412,182 @@
         const summary = document.querySelector("[data-summary]");
         const importFile = document.querySelector("[data-import-file]");
         const importTransferFile = document.querySelector("[data-import-transfer-file]");
+        const coverModal = document.querySelector("[data-cover-modal]");
+        const coverForm = document.querySelector("[data-cover-form]");
+        const previewGrade = document.querySelector("[data-preview-grade]");
+        const previewSubject = document.querySelector("[data-preview-subject]");
+        const previewDate = document.querySelector("[data-preview-date]");
+
+        const createId = (prefix) => {
+          const random = window.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+          return `${prefix}-${random}`;
+        };
+
+        const ensureOwnerId = () => {
+          const existing = getOwnerId();
+          if (existing) return existing;
+          const ownerId = createId("owner");
+          localStorage.setItem(KEYS.owner, ownerId);
+          return ownerId;
+        };
 
         const getBooks = () => getList(KEYS.books);
         const setBooks = (books) => setList(KEYS.books, books);
         const getOwnerId = () => localStorage.getItem(KEYS.owner) || "";
+
+        const thaiMonthNames = [
+          "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน",
+          "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม",
+          "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม",
+        ];
+        const subjectOptions = [
+          { value: "pali-to-thai", label: "แปลมคธเป็นไทย" },
+          { value: "grammar", label: "ไวยากรณ์" },
+          { value: "sambandha-thai", label: "สัมพันธ์ไทย" },
+          { value: "burapapak", label: "บุรพภาค" },
+          { value: "thai-to-pali", label: "แปลไทยเป็นมคธ" },
+        ];
+
+        const getPickerValue = (book, type) =>
+          book.draft?.pickers?.find((item) => item.type === type)?.value || "";
+
+        const getSubjectLabel = (book) => {
+          if (book.subjectLabel) return book.subjectLabel;
+          const value = book.subject || getPickerValue(book, "subject");
+          const match = subjectOptions.find((item) => item.value === value);
+          if (match) return match.label;
+          const titleParts = String(book.title || "")
+            .split("·")
+            .map((part) => part.trim());
+          if (titleParts.length >= 2 && !titleParts[1].startsWith("สมุด")) return titleParts[1];
+          return "แปลมคธเป็นไทย";
+        };
+
+        const getCoverGrade = (book) => book.grade || getPickerValue(book, "grade") || "-";
+
+        const getCoverDateLabel = (book) => {
+          const day = getPickerValue(book, "day");
+          const month = getPickerValue(book, "month");
+          const year = getPickerValue(book, "year");
+          if (day && month && year) {
+            return `${toThaiNumber(day)} ${thaiMonthNames[Number(month) - 1]} ${toThaiNumber(year)}`;
+          }
+          if (book.updatedAt) {
+            return new Date(book.updatedAt).toLocaleDateString("th-TH", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            });
+          }
+          return "—";
+        };
+
+        const buildBookCover = (book) => {
+          const cover = document.createElement("div");
+          const grade = document.createElement("div");
+          const subject = document.createElement("div");
+          const date = document.createElement("div");
+
+          cover.className = "book-cover";
+          grade.className = "book-cover-grade";
+          subject.className = "book-cover-subject";
+          date.className = "book-cover-date";
+          grade.textContent = `ประโยค ป.ธ. ${toThaiNumber(getCoverGrade(book))}`;
+          subject.textContent = getSubjectLabel(book);
+          date.textContent = `สอบ วันที่ ${getCoverDateLabel(book)}`;
+          cover.append(grade, subject, date);
+          return cover;
+        };
+
+        const updateCoverPreview = () => {
+          if (!coverForm) return;
+          const formData = new FormData(coverForm);
+          const grade = String(formData.get("grade") || "4");
+          const subject = getSubjectLabel({ subject: String(formData.get("subject") || "pali-to-thai") });
+          const day = String(formData.get("day") || "");
+          const month = String(formData.get("month") || "");
+          const year = String(formData.get("year") || "");
+          if (previewGrade) previewGrade.textContent = `ประโยค ป.ธ. ${toThaiNumber(grade)}`;
+          if (previewSubject) previewSubject.textContent = subject;
+          if (previewDate) {
+            previewDate.textContent =
+              day && month && year
+                ? `สอบ วันที่ ${toThaiNumber(day)} ${thaiMonthNames[Number(month) - 1]} ${toThaiNumber(year)}`
+                : "สอบ วันที่ —";
+          }
+        };
+
+        const openCoverModal = () => {
+          if (!coverModal || !coverForm) return;
+          const now = new Date();
+          coverForm.elements.day.value = String(now.getDate());
+          coverForm.elements.month.value = String(now.getMonth() + 1);
+          coverForm.elements.year.value = String(now.getFullYear() + 543);
+          updateCoverPreview();
+          coverModal.hidden = false;
+          coverModal.classList.add("is-open");
+          coverModal.setAttribute("aria-hidden", "false");
+        };
+
+        const closeCoverModal = () => {
+          if (!coverModal) return;
+          coverModal.hidden = true;
+          coverModal.classList.remove("is-open");
+          coverModal.setAttribute("aria-hidden", "true");
+        };
+
+        const createBookWithCover = (formData) => {
+          const now = new Date().toISOString();
+          const ownerId = ensureOwnerId();
+          const grade = String(formData.get("grade") || "4");
+          const subject = String(formData.get("subject") || "pali-to-thai");
+          const subjectLabel = getSubjectLabel({ subject });
+          const day = String(formData.get("day") || "");
+          const month = String(formData.get("month") || "");
+          const year = String(formData.get("year") || "");
+          const examDateLabel =
+            day && month && year
+              ? `${toThaiNumber(day)} ${thaiMonthNames[Number(month) - 1]} ${toThaiNumber(year)}`
+              : new Date(now).toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "numeric" });
+          const bookId = createId("book");
+          const book = {
+            id: bookId,
+            schema: "paligo.exam.answerBook.v1",
+            ownerId,
+            title: `สมุดคำตอบ ป.ธ. ${toThaiNumber(grade)} · ${subjectLabel} · ${examDateLabel}`,
+            studentName: "ไม่ระบุชื่อ",
+            grade,
+            subject,
+            subjectLabel,
+            status: BOOK_STATUS.draft,
+            revision: 1,
+            createdAt: now,
+            updatedAt: now,
+            draft: {
+              schema: "paligo.exam.answerBookDraft.v1",
+              ownerId,
+              bookId,
+              lineHeight: "22",
+              page: 0,
+              profile: null,
+              pickers: [
+                { type: "grade", value: grade },
+                { type: "subject", value: subject },
+                { type: "day", value: day },
+                { type: "month", value: month },
+                { type: "year", value: year },
+              ],
+              pages: [""],
+              annotations: [],
+              savedAt: now,
+            },
+          };
+          const books = getBooks();
+          books.push(book);
+          setBooks(books);
+          localStorage.setItem(KEYS.activeBook, bookId);
+          return bookId;
+        };
 
         const renderBooks = () => {
           const books = getBooks().sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0));
@@ -228,6 +598,7 @@
           books.forEach((book) => {
             const review = book.review || getReviewForBook(book.id);
             const article = document.createElement("article");
+            const body = document.createElement("div");
             const title = document.createElement("h2");
             const meta = document.createElement("div");
             const status = document.createElement("span");
@@ -237,6 +608,7 @@
             const exportBook = document.createElement("button");
 
             article.className = "book-card";
+            body.className = "book-card-body";
             title.className = "book-title";
             meta.className = "book-meta";
             status.className = "book-status";
@@ -246,8 +618,8 @@
             exportBook.className = "button";
             exportBook.type = "button";
 
-            title.textContent = book.title || "สมุดคำตอบ";
-            meta.textContent = `${book.studentName || "ไม่ระบุชื่อ"} · ป.ธ. ${toThaiNumber(book.grade || "-")} · แก้ไข ${formatThaiDateTime(book.updatedAt)}`;
+            title.textContent = book.studentName || "ไม่ระบุชื่อ";
+            meta.textContent = `แก้ไข ${formatThaiDateTime(book.updatedAt)} · revision ${toThaiNumber(book.revision || 1)}`;
             if (review?.score?.percent != null) {
               status.textContent = getStatusLabel(BOOK_STATUS.reviewed);
               reviewNote.textContent = `คะแนน ${toThaiPercent(review.score.percent)} · ตรวจ ${formatThaiDateTime(review.reviewedAt)}`;
@@ -285,9 +657,10 @@
             });
 
             actions.append(open, exportBook, transferOut);
-            article.append(title, meta, status);
-            if (reviewNote.textContent) article.append(reviewNote);
-            article.append(actions);
+            body.append(title, meta, status);
+            if (reviewNote.textContent) body.append(reviewNote);
+            body.append(actions);
+            article.append(buildBookCover(book), body);
             grid.append(article);
           });
         };
@@ -361,6 +734,29 @@
         });
         window.addEventListener("pageshow", renderBooks);
         renderBooks();
+
+        if (coverForm?.elements.month) {
+          thaiMonthNames.forEach((name, index) => {
+            const option = document.createElement("option");
+            option.value = String(index + 1);
+            option.textContent = name;
+            coverForm.elements.month.append(option);
+          });
+        }
+
+        document.querySelector("[data-open-cover-modal]")?.addEventListener("click", openCoverModal);
+        document.querySelector("[data-close-cover-modal]")?.addEventListener("click", closeCoverModal);
+        coverModal?.addEventListener("click", (event) => {
+          if (event.target === coverModal) closeCoverModal();
+        });
+        coverForm?.addEventListener("input", updateCoverPreview);
+        coverForm?.addEventListener("change", updateCoverPreview);
+        coverForm?.addEventListener("submit", (event) => {
+          event.preventDefault();
+          const bookId = createBookWithCover(new FormData(coverForm));
+          closeCoverModal();
+          window.location.href = `ruled-lines-card-only-template.html?bookId=${encodeURIComponent(bookId)}`;
+        });
       })();
       PaligoSidebar.autoInit();
     </script>
