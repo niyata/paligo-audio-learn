@@ -11,6 +11,17 @@ npm-debug.log*
 
 # Editor
 .vscode/
+.cursor/*
+!.cursor/rules/
+!.cursor/rules/**
+
+# Python
+__pycache__/
+*.pyc
+
+# Generated / local sample data
+book-*.paligo-book.json
+korsob/
 
 # Generated book HTML from PDF conversion (do not commit copyrighted books)
 output/

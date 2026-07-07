@@ -15,6 +15,12 @@ VERIFY_STATUSES = {
 FOOTNOTE_START = "<!-- paligo-verify-footnote -->"
 FOOTNOTE_END = "<!-- /paligo-verify-footnote -->"
 
+THAI_DIGIT_MAP = str.maketrans("0123456789", "๐๑๒๓๔๕๖๗๘๙")
+
+
+def to_thai_digits(value: str | int) -> str:
+    return str(value).translate(THAI_DIGIT_MAP)
+
 
 def normalize_status(status: str | None) -> str:
     if status in VERIFY_STATUSES:
@@ -38,7 +44,7 @@ def build_footnote_html(
     return f"""{FOOTNOTE_START}
   <footer class="book-page-footnote" data-verify-status="{status}" data-page="{page_no}">
     <span class="book-verify-badge book-verify-badge--{status}">{label}</span>
-    <span class="book-verify-meta">หน้า {page_no} · {token_count} คำ · {html.escape(book_id)}</span>
+    <span class="book-verify-meta">หน้า {to_thai_digits(page_no)} · {to_thai_digits(token_count)} คำ · {html.escape(book_id)}</span>
     {note_html}
   </footer>
 {FOOTNOTE_END}"""
@@ -108,6 +114,7 @@ def footnote_css() -> str:
   bottom: 0;
   display: flex;
   flex-wrap: wrap;
+  font-family: inherit;
   font-size: 11px;
   gap: 6px 10px;
   justify-content: space-between;

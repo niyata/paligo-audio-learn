@@ -26,13 +26,17 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(SCRIPT_DIR))
 
+from audio_practice_lib import export_practice_packs, flatten_words  # noqa: E402
+from book_fonts import DEFAULT_FONT_STACK, build_font_face_css, copy_font_assets  # noqa: E402
 from book_verification_lib import (  # noqa: E402
     build_footnote_html,
     build_page_shell,
     default_verification,
     footnote_css,
+    to_thai_digits,
     write_verification,
 )
+from book_bundle_lib import export_book_bundle  # noqa: E402
 
 
 def parse_args() -> argparse.Namespace:
@@ -178,9 +182,11 @@ def build_page_html(
 
     for line in lines:
         for word in line:
-            text = html.escape(str(word.get("text") or "").strip())
-            if not text:
+            raw_text = str(word.get("text") or "").strip()
+            if not raw_text:
                 continue
+
+            text = html.escape(to_thai_digits(raw_text))
 
             left = pct(float(word["x0"]), page_width)
             top = pct(float(word["top"]), page_height)
@@ -213,26 +219,32 @@ def extract_source_text(lines: list[list[dict]]) -> str:
         for word in line:
             text = str(word.get("text") or "").strip()
             if text:
-                words.append(text)
+                words.append(to_thai_digits(text))
     return " ".join(words)
 
 
 def write_assets(output_dir: Path) -> None:
-    css = """/* Generated book page layout */
-.book-page {
+    repo_root = Path(__file__).resolve().parent.parent
+    copy_font_assets(repo_root, output_dir)
+    font_face = build_font_face_css(output_dir)
+
+    css = font_face + f""".book-page {{
+  --book-font-family: {DEFAULT_FONT_STACK};
+  --book-font-scale: 1;
   aspect-ratio: var(--page-ratio, 540 / 756);
   background: #fffaf0;
   border: 1px solid rgba(74, 44, 10, 0.18);
   border-radius: 4px;
   box-shadow: 0 14px 34px rgba(74, 44, 10, 0.12);
+  font-family: var(--book-font-family);
   margin: 0 auto;
   max-width: min(100%, 760px);
   overflow: hidden;
   position: relative;
   width: 100%;
-}
+}}
 
-.book-page-bg {
+.book-page-bg {{
   height: 100%;
   inset: 0;
   object-fit: fill;
@@ -240,38 +252,40 @@ def write_assets(output_dir: Path) -> None:
   position: absolute;
   width: 100%;
   z-index: 0;
-}
+}}
 
-.book-page-text {
+.book-page-text {{
   inset: 0;
   position: absolute;
   z-index: 1;
-}
+}}
 
-.book-token {
+.book-token {{
   color: rgba(31, 45, 137, 0.01);
+  font-family: inherit;
   line-height: 1;
   overflow: hidden;
   position: absolute;
   white-space: pre;
-}
+}}
 
-.book-page.has-background .book-token {
+.book-page.has-background .book-token {{
   color: transparent;
-}
+}}
 
-.book-page:not(.has-background) .book-token {
-  color: rgba(31, 45, 137, 0.88);
-}
+.book-page:not(.has-background) .book-token {{
+  color: #1f2d89;
+}}
 
 .book-token:hover,
-.book-token:focus-visible {
+.book-token:focus-visible {{
   background: rgba(255, 240, 168, 0.72);
   color: rgba(31, 45, 137, 0.96);
   outline: none;
   z-index: 2;
-}
+}}
 """
+    css = "/* Generated book page layout */\n" + css
     css += footnote_css()
     (output_dir / "book.css").write_text(css, encoding="utf-8")
 
@@ -292,6 +306,7 @@ def main() -> int:
     title = args.title or args.pdf_path.stem
 
     manifest_pages: list[dict] = []
+    page_words: dict[int, list[dict]] = {}
 
     with pdfplumber.open(args.pdf_path) as pdf:
         last_page = args.to_page or len(pdf.pages)
@@ -305,6 +320,7 @@ def main() -> int:
             page = pdf.pages[page_no - 1]
             words = page.extract_words(use_text_flow=True, keep_blank_chars=False) or []
             lines = group_words_into_lines(words)
+            page_words[page_no] = flatten_words(lines)
             background_path = backgrounds.get(page_no)
             token_count = sum(len(line) for line in lines)
             page_html = build_page_html(
@@ -332,6 +348,14 @@ def main() -> int:
     except ValueError:
         source_pdf_relative = args.pdf_path.name
 
+    practice_index = export_practice_packs(
+        output_dir,
+        book_id,
+        title,
+        manifest_pages,
+        page_words,
+    )
+
     manifest = {
         "schema": "paligo.bookHtmlExport.v1",
         "bookId": book_id,
@@ -339,6 +363,7 @@ def main() -> int:
         "sourcePdf": args.pdf_path.name,
         "sourcePdfRelative": source_pdf_relative,
         "pageCount": len(manifest_pages),
+        "practiceIndex": "practice/index.json",
         "pages": manifest_pages,
     }
     (output_dir / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -346,7 +371,12 @@ def main() -> int:
     verification = default_verification(book_id, page_numbers)
     write_verification(output_dir / "verification.json", verification)
 
+    bundle_path = export_book_bundle(output_dir)
+    print(f"Wrote book bundle to {bundle_path}")
+
     print(f"Wrote {len(manifest_pages)} pages to {output_dir}")
+    print(f"Wrote {len(practice_index.get('packs', []))} audio practice packs to {output_dir / 'practice'}")
+    print("Open pali-audio-hightlight.html?manifest=output/BOOK-ID/manifest.json for audio practice.")
     print("Open book-page-qa.html for PDF/HTML comparison and verification.")
     return 0
 

@@ -3,7 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Book Page Viewer</title>
+    <title>อ่านหน้าเล่ม · Paligo</title>
+    <link rel="stylesheet" href="paligo-design-tokens.css" />
+    <link rel="stylesheet" href="sidebar-nav.css" />
     <style>
       :root {
         --page-bg: #f8f0e3;
@@ -26,7 +28,7 @@
         line-height: 1.5;
         margin: 0;
         min-height: 100vh;
-        padding: clamp(18px, 4vw, 42px);
+        padding: 0;
       }
 
       .viewer-shell {
@@ -67,7 +69,7 @@
         align-items: end;
         display: grid;
         gap: 10px;
-        grid-template-columns: minmax(0, 1fr) auto auto auto;
+        grid-template-columns: minmax(0, 1fr) auto auto auto minmax(0, 1fr);
       }
 
       .control-field {
@@ -82,7 +84,8 @@
       }
 
       .control-input,
-      .control-button {
+      .control-button,
+      .control-select {
         appearance: none;
         background: var(--paper-bg);
         border: 1px solid rgba(31, 45, 137, 0.22);
@@ -147,6 +150,14 @@
             <span class="control-label">หน้า</span>
             <input class="control-input" type="number" min="1" value="1" data-page-input />
           </label>
+          <label class="control-field">
+            <span class="control-label">ฟอนต์</span>
+            <select class="control-select" data-html-font></select>
+          </label>
+          <label class="control-field">
+            <span class="control-label">ขนาดฟอนต์ <span data-font-scale-value>100%</span></span>
+            <input class="control-input" type="range" min="70" max="150" step="5" value="100" data-html-font-scale />
+          </label>
         </div>
         <p class="viewer-status" data-viewer-status>ยังไม่ได้โหลด manifest</p>
       </section>
@@ -156,6 +167,7 @@
       </section>
     </main>
 
+    <script src="book-fonts.js"></script>
     <script>
       (() => {
         const manifestFileInput = document.querySelector("[data-manifest-file]");
@@ -163,6 +175,9 @@
         const pageNextButton = document.querySelector("[data-page-next]");
         const pageInput = document.querySelector("[data-page-input]");
         const pageHost = document.querySelector("[data-page-host]");
+        const htmlFontSelect = document.querySelector("[data-html-font]");
+        const htmlFontScale = document.querySelector("[data-html-font-scale]");
+        const fontScaleValue = document.querySelector("[data-font-scale-value]");
         const status = document.querySelector("[data-viewer-status]");
         const bookTitle = document.querySelector("[data-book-title]");
         const bookCssLink = document.querySelector("[data-book-css]");
@@ -170,6 +185,19 @@
         let manifest = null;
         let manifestBase = "";
         let currentPage = 1;
+        let fontScale = window.PaligoBookFonts?.getStoredScale?.() || 100;
+
+        if (htmlFontScale) {
+          htmlFontScale.value = String(fontScale);
+          if (fontScaleValue) {
+            fontScaleValue.textContent = `${fontScale}%`;
+          }
+        }
+
+        const applyPagePresentation = () => {
+          window.PaligoBookFonts?.applyToRoots([pageHost], htmlFontSelect?.value);
+          window.PaligoBookFonts?.applyBookTokenScale?.([pageHost], fontScale);
+        };
 
         const resolveQueryParam = (name) => {
           const params = new URLSearchParams(window.location.search);
@@ -224,6 +252,8 @@
             pageEl.classList.add("has-background");
           }
 
+          applyPagePresentation();
+
           pageInput.value = String(currentPage);
           pageInput.max = String(manifest.pageCount || manifest.pages.length);
           pagePrevButton.disabled = currentPage <= 1;
@@ -277,6 +307,12 @@
           renderPage();
         });
 
+        window.PaligoBookFonts?.bindSelect(htmlFontSelect, () => [pageHost]);
+        window.PaligoBookFonts?.bindScaleRange?.(htmlFontScale, fontScaleValue, (scale) => {
+          fontScale = scale;
+          applyPagePresentation();
+        });
+
         const manifestParam = resolveQueryParam("manifest");
         if (manifestParam) {
           loadManifestFromUrl(manifestParam).catch((error) =>
@@ -287,5 +323,8 @@
         }
       })();
     </script>
+    <script src="paligo-nav-config.js"></script>
+    <script src="sidebar-nav.js"></script>
+    <script>PaligoSidebar.autoInit();</script>
   </body>
 </html>

@@ -3,7 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ruled Lines Card Only Template</title>
+    <title>สมุดข้อสอบ · Paligo</title>
+    <link rel="stylesheet" href="paligo-design-tokens.css" />
+    <link rel="stylesheet" href="sidebar-nav.css" />
+    <link rel="stylesheet" href="paligo-exam-ui.css" />
     <style>
       :root {
         --page-bg: #f8f0e3;
@@ -59,7 +62,7 @@
         line-height: 1.5;
         margin: 0;
         min-height: 100vh;
-        padding: clamp(18px, 4vw, 48px);
+        padding: 0;
       }
 
       .template-shell {
@@ -962,6 +965,39 @@
       </form>
     </section>
     <main class="template-shell">
+      <div class="paligo-book-bar" data-book-bar>
+        <div class="paligo-book-bar__main">
+          <h1 class="paligo-book-bar__title" data-book-bar-title>สมุดคำตอบ</h1>
+          <p class="paligo-book-bar__meta" data-book-bar-meta>ฉบับร่าง</p>
+        </div>
+        <div class="paligo-book-bar__actions">
+          <span class="paligo-status-chip is-draft" data-book-bar-status>ฉบับร่าง</span>
+        </div>
+      </div>
+      <div class="paligo-permission-banner" data-permission-banner>ฉบับร่าง — แก้ไขคำตอบได้</div>
+      <section class="review-toolbar" data-review-toolbar hidden aria-label="แผงตรวจบนกระดาษ">
+        <div class="review-toolbar__label">โหมดผู้ตรวจ — คำตอบถูกล็อก · แตะบรรทัดเพื่อ stamp หรือวางลายเซ็น</div>
+        <div class="review-toolbar__row">
+          <button class="paligo-btn" type="button" data-review-stamp-mode>แตะบรรทัดเพื่อ stamp</button>
+          <button class="paligo-btn" type="button" data-score-stamp="1">๑ ให้</button>
+          <button class="paligo-btn" type="button" data-score-stamp="2">๒ ให้</button>
+          <button class="paligo-btn" type="button" data-score-stamp="3">๓ ให้</button>
+          <button class="paligo-btn" type="button" data-error-stamp="wrong-word">ผิดศัพท์</button>
+          <button class="paligo-btn" type="button" data-error-stamp="wrong-relation">ผิดสัมพันธ์</button>
+          <button class="paligo-btn" type="button" data-error-stamp="wrong-pa">ผิด ป.</button>
+        </div>
+        <div class="review-toolbar__row">
+          <label class="paligo-btn" style="cursor: pointer">
+            อัปโหลดลายเซ็น
+            <input type="file" accept="image/png,image/jpeg,image/webp" data-signature-file hidden />
+          </label>
+          <button class="paligo-btn is-primary" type="button" data-save-review-paper>บันทึกการตรวจ</button>
+          <button class="paligo-btn" type="button" data-return-review-paper>ส่งคืนนักเรียน</button>
+        </div>
+      </section>
+      <button class="paligo-btn" type="button" data-start-new-revision hidden style="margin-bottom: 12px">
+        ทำรอบใหม่ (revision ถัดไป)
+      </button>
       <section class="template-controls" aria-label="แผงควบคุมพื้นที่เขียน">
         <div class="control-grid">
           <label class="control-label" for="line-height-control">ระยะบรรทัด</label>
@@ -1007,7 +1043,7 @@
           <button class="save-button" type="button" data-save-draft>บันทึก</button>
           <button class="save-button" type="button" data-submit-review>ส่งตรวจ</button>
           <a class="save-button" href="exam-books.html">สมุดข้อสอบ</a>
-          <output class="save-status" data-save-status>Cmd/Ctrl+S เพื่อบันทึก</output>
+          <output class="save-status" data-save-status>กดบันทึก หรือ ⌘/Ctrl+S</output>
         </div>
       </section>
 
@@ -1099,7 +1135,9 @@
                 spellcheck="false"
               ></textarea>
               <div class="annotation-lines" data-annotation-lines aria-hidden="true"></div>
+              <div class="review-layer" data-review-layer aria-hidden="true"></div>
               <div class="annotation-canvas" data-annotation-canvas aria-hidden="true"></div>
+              <div class="review-canvas" data-review-canvas hidden aria-hidden="true"></div>
             </div>
             <div class="exam-footer-lines" aria-label="ท้ายกระดาษหน้าแรก" aria-hidden="true"></div>
           </article>
@@ -1114,7 +1152,9 @@
                 spellcheck="false"
               ></textarea>
               <div class="annotation-lines" data-annotation-lines aria-hidden="true"></div>
+              <div class="review-layer" data-review-layer aria-hidden="true"></div>
               <div class="annotation-canvas" data-annotation-canvas aria-hidden="true"></div>
+              <div class="review-canvas" data-review-canvas hidden aria-hidden="true"></div>
             </div>
             <div class="exam-footer-lines" aria-label="ท้ายกระดาษหน้าถัดไป" aria-hidden="true"></div>
           </article>
@@ -1122,10 +1162,31 @@
         <div class="template-credit">Ruled paper template by niyatajayo · v1.0.0 · 2026-07-01</div>
       </section>
     </main>
+    <div class="paligo-modal-backdrop" data-submit-modal hidden>
+      <div class="paligo-modal" role="dialog" aria-labelledby="submit-modal-title">
+        <h2 class="paligo-modal__title" id="submit-modal-title">ส่งตรวจแล้ว</h2>
+        <p class="paligo-modal__body">
+          ดาวน์โหลดไฟล์ส่งตรวจแล้ว — ส่งให้ครู/ผู้ตรวจ หรือเปิดตรวจบนเครื่องนี้ได้ทันที
+        </p>
+        <div class="paligo-modal__meta" data-submit-modal-meta></div>
+        <div class="paligo-modal__actions">
+          <a class="paligo-btn is-primary" data-reviewer-link href="exam-reviewer-console.html">เปิดคิวตรวจ</a>
+          <a class="paligo-btn" data-paper-review-link href="#">ตรวจบนกระดาษ</a>
+          <button class="paligo-btn" type="button" data-export-transfer>ดาวน์โหลดแพ็กเกจโอน (→ ผู้ตรวจ)</button>
+          <a class="paligo-btn" href="exam-review-results.html">ผลตรวจของฉัน</a>
+          <a class="paligo-btn" href="exam-books.html">กลับสมุดข้อสอบ</a>
+          <button class="paligo-btn is-ghost" type="button" data-close-submit-modal>ปิด</button>
+        </div>
+      </div>
+    </div>
     <div class="toast-notice" role="status" aria-live="polite" data-toast-notice></div>
     <div class="number-area-tooltip" role="tooltip" data-number-area-tooltip hidden>
       กด Tab หรือ เริ่มพิมพ์อักขระ สร้างย่อหน้าอัตโนมัติ
     </div>
+    <script src="paligo-exam-shared.js"></script>
+    <script src="paligo-exam-paper.js"></script>
+    <script src="paligo-nav-config.js"></script>
+    <script src="sidebar-nav.js"></script>
     <script>
       (() => {
         const storageKey = "ruled-lines-card-only-draft-v1";
@@ -1187,6 +1248,18 @@
         const lineHeightValue = document.getElementById("line-height-value");
         const examPickers = document.querySelectorAll("[data-exam-picker]");
         const pageStack = document.querySelector(".exam-page-stack");
+        const bookBarTitle = document.querySelector("[data-book-bar-title]");
+        const bookBarMeta = document.querySelector("[data-book-bar-meta]");
+        const bookBarStatus = document.querySelector("[data-book-bar-status]");
+        const permissionBanner = document.querySelector("[data-permission-banner]");
+        const reviewToolbar = document.querySelector("[data-review-toolbar]");
+        const startNewRevisionButton = document.querySelector("[data-start-new-revision]");
+        const submitModal = document.querySelector("[data-submit-modal]");
+        const submitModalMeta = document.querySelector("[data-submit-modal-meta]");
+        const reviewerLink = document.querySelector("[data-reviewer-link]");
+        const paperReviewLink = document.querySelector("[data-paper-review-link]");
+        const exportTransferButton = document.querySelector("[data-export-transfer]");
+        const signatureFileInput = document.querySelector("[data-signature-file]");
         let examPages = Array.from(document.querySelectorAll(".exam-page"));
         const pagePrevButton = document.querySelector("[data-page-prev]");
         const pageNextButton = document.querySelector("[data-page-next]");
@@ -1238,9 +1311,16 @@
 
         const localOwnerId = getLocalOwnerId();
         const wantsNewBook = queryParams.get("newBook") === "1";
+        const wantsResume = queryParams.get("resume") === "1";
+        const reviewMode = queryParams.get("mode") === "review";
+        const reviewSubmissionId = queryParams.get("submissionId");
+        const workspaceRole = reviewMode ? "reviewer" : "student";
         let currentBookId = wantsNewBook
           ? createId("book")
-          : queryParams.get("bookId") || localStorage.getItem(activeBookStorageKey) || createId("book");
+          : wantsResume
+            ? localStorage.getItem(activeBookStorageKey) || createId("book")
+            : queryParams.get("bookId") || localStorage.getItem(activeBookStorageKey) || createId("book");
+        localStorage.setItem(activeBookStorageKey, currentBookId);
 
         const getStoredList = (key) => {
           try {
@@ -1355,8 +1435,132 @@
           saveStatus.value = message;
           clearTimeout(saveStatusTimer);
           saveStatusTimer = setTimeout(() => {
-            saveStatus.value = "Cmd/Ctrl+S เพื่อบันทึก";
+            saveStatus.value = "กดบันทึก หรือ ⌘/Ctrl+S";
           }, 2200);
+        };
+
+        localStorage.setItem(activeBookStorageKey, currentBookId);
+
+        let activeSubmission = null;
+        let scoreStamps = [];
+        let errorStamps = [];
+        let reviewSignature = null;
+        let activeStampKind = null;
+        let isReviewStamping = false;
+        let lastSubmissionPackage = null;
+
+        const {
+          BOOK_STATUS,
+          formatThaiDateTime,
+          getReviewForBook,
+          getSavedReviewForSubmission,
+          getBookPermissions,
+          normalizeBookStatus,
+          getStatusLabel,
+          computeScore,
+          computeAnswerHash,
+          saveReviewResult,
+          upsertBookRecord,
+          buildBookTransfer,
+          downloadJson: sharedDownloadJson,
+        } = window.PaligoExamShared;
+        const {
+          renderAllReviewLayers,
+          bindReviewCanvas,
+          upsertScoreStamp,
+          upsertErrorStamp,
+          indexToDisplayPage,
+        } = window.PaligoExamPaper;
+
+        const getCurrentBook = () => getStoredList(booksStorageKey).find((book) => book.id === currentBookId) || null;
+
+        const updateBookBar = () => {
+          const book = getCurrentBook();
+          const review = getReviewForBook(currentBookId) || book?.review;
+          const status = normalizeBookStatus(book?.status);
+          if (bookBarTitle) bookBarTitle.textContent = book?.title || activeSubmission?.bookTitle || "สมุดคำตอบ";
+          if (bookBarMeta) {
+            bookBarMeta.textContent = `${getStudentDisplayName() || activeSubmission?.studentName || "ไม่ระบุชื่อ"} · revision ${toThaiNumber(book?.revision || activeSubmission?.bookRevision || 1)} · ป.ธ. ${toThaiNumber(book?.grade || studentProfile?.grade || "-")}`;
+          }
+          if (bookBarStatus) {
+            bookBarStatus.textContent = review ? getStatusLabel(BOOK_STATUS.reviewed) : getStatusLabel(status);
+            bookBarStatus.className = `paligo-status-chip ${
+              review || status === BOOK_STATUS.reviewed
+                ? "is-reviewed"
+                : status === BOOK_STATUS.underReview
+                  ? "is-under-review"
+                  : "is-draft"
+            }`;
+          }
+        };
+
+        const renderReviewOverlays = () => {
+          renderAllReviewLayers(examPages, {
+            scoreStamps,
+            errorStamps,
+            signature: reviewSignature,
+          });
+        };
+
+        const getPermissionMessage = (book) => {
+          const status = normalizeBookStatus(book?.status);
+          const perms = getBookPermissions(book || { status }, workspaceRole);
+          if (reviewMode) {
+            return "อยู่ระหว่างตรวจ — คำตอบถูกล็อกทั้งนักเรียนและผู้ตรวจ · ผู้ตรวจ stamp/ลายเซ็นบนกระดาษได้";
+          }
+          if (status === BOOK_STATUS.draft) return "ฉบับร่าง — นักเรียนแก้ไขคำตอบได้";
+          if (status === BOOK_STATUS.underReview) {
+            return "อยู่ระหว่างตรวจ — คำตอบถูกล็อกทั้งนักเรียนและผู้ตรวจ · รอผู้ตรวจ stamp และส่งคืน";
+          }
+          if (status === BOOK_STATUS.reviewed) {
+            return `ได้รับผลตรวจแล้ว — ดู stamp บนกระดาษได้ · คะแนน ${window.PaligoExamShared.toThaiPercent((getReviewForBook(currentBookId)?.score?.percent) || 0)}`;
+          }
+          return perms.canEditAnswer ? "แก้ไขคำตอบได้" : "คำตอบถูกล็อก";
+        };
+
+        const applyPermissions = () => {
+          const book = getCurrentBook() || (activeSubmission ? { status: BOOK_STATUS.underReview, id: currentBookId } : { status: BOOK_STATUS.draft });
+          const perms = getBookPermissions(book, workspaceRole);
+          const answerLocked = reviewMode || !perms.canEditAnswer;
+
+          if (permissionBanner) {
+            permissionBanner.textContent = getPermissionMessage(book);
+            permissionBanner.classList.toggle("is-locked", answerLocked);
+          }
+
+          pageStack?.classList.toggle("is-readonly", answerLocked);
+          pageStack?.classList.toggle("is-review-stamping", isReviewStamping && perms.canStamp);
+          editors.forEach((editor) => {
+            editor.readOnly = answerLocked;
+          });
+          annotationToggle?.toggleAttribute("disabled", answerLocked);
+          submitReviewButton?.toggleAttribute("disabled", !perms.canSubmit);
+          submitReviewButton?.toggleAttribute("hidden", reviewMode);
+          startNewRevisionButton?.toggleAttribute("hidden", !perms.canStartNewRevision);
+          reviewToolbar?.toggleAttribute("hidden", !(reviewMode && (perms.canStamp || perms.canSign)));
+
+          examPages.forEach((page) => {
+            const canvas = page.querySelector("[data-review-canvas]");
+            if (canvas) canvas.hidden = !(reviewMode && isReviewStamping && perms.canStamp);
+          });
+
+          renderReviewOverlays();
+          updateBookBar();
+        };
+
+        const applySubmittedLock = applyPermissions;
+
+        const showSubmitModal = (submission) => {
+          if (!submitModal) return;
+          lastSubmissionPackage = submission;
+          submitModalMeta.textContent = `${submission.bookTitle} · revision ${toThaiNumber(submission.bookRevision)} · ${formatThaiDateTime(submission.submittedAt)}`;
+          if (reviewerLink) {
+            reviewerLink.href = `exam-reviewer-console.html?submissionId=${encodeURIComponent(submission.id)}`;
+          }
+          if (paperReviewLink) {
+            paperReviewLink.href = `ruled-lines-card-only-template.html?mode=review&submissionId=${encodeURIComponent(submission.id)}`;
+          }
+          submitModal.hidden = false;
         };
 
         const showToast = (message) => {
@@ -1419,7 +1623,17 @@
           annotationCanvas.setAttribute("data-annotation-canvas", "");
           annotationCanvas.setAttribute("aria-hidden", "true");
 
-          frame.append(editor, annotationLines, annotationCanvas);
+          const reviewLayer = document.createElement("div");
+          const reviewCanvas = document.createElement("div");
+          reviewLayer.className = "review-layer";
+          reviewLayer.setAttribute("data-review-layer", "");
+          reviewLayer.setAttribute("aria-hidden", "true");
+          reviewCanvas.className = "review-canvas";
+          reviewCanvas.setAttribute("data-review-canvas", "");
+          reviewCanvas.hidden = true;
+          reviewCanvas.setAttribute("aria-hidden", "true");
+
+          frame.append(editor, annotationLines, reviewLayer, annotationCanvas, reviewCanvas);
           page.append(frame, footer);
           return page;
         };
@@ -1456,6 +1670,8 @@
 
           canvas.addEventListener("click", (e) => {
             if (!isAnnotating) return;
+            const book = getCurrentBook() || { status: BOOK_STATUS.draft };
+            if (!getBookPermissions(book, workspaceRole).canEditAnswer) return;
 
             const frame = canvas.closest(".ruled-editor-frame");
             const editor = frame?.querySelector(".ruled-editor");
@@ -1980,7 +2196,7 @@
             studentName: getStudentDisplayName(),
             grade: gradePicker?.dataset.value || studentProfile?.grade || "4",
             deliveryMethod: studentProfile?.deliveryMethod || "line",
-            status: existing?.status || "draft",
+            status: existing?.status || BOOK_STATUS.draft,
             revision: nextRevision,
             createdAt: existing?.createdAt || draft.savedAt,
             updatedAt: draft.savedAt,
@@ -1994,11 +2210,20 @@
         };
 
         const saveDraft = ({ silent = false } = {}) => {
+          const book = getCurrentBook() || { status: BOOK_STATUS.draft };
+          if (!getBookPermissions(book, workspaceRole).canEditAnswer) {
+            if (!silent) setSaveStatus("คำตอบถูกล็อก — บันทึกไม่ได้");
+            return;
+          }
+
           const draft = buildDraftSnapshot();
 
           localStorage.setItem(storageKey, JSON.stringify(draft));
           upsertAnswerBook(draft);
-          if (!silent) setSaveStatus("บันทึกแล้ว");
+          if (!silent) {
+            setSaveStatus("บันทึกแล้ว");
+            updateBookBar();
+          }
         };
 
         const getActiveBookDraft = () => {
@@ -2027,10 +2252,12 @@
           URL.revokeObjectURL(url);
         };
 
-        const createSubmissionPackage = () => {
+        const createSubmissionPackage = async () => {
           const submittedAt = new Date().toISOString();
           const draft = buildDraftSnapshot();
           const book = upsertAnswerBook(draft);
+          const pages = draft.pages.map((text, index) => ({ index, text }));
+          const answerHash = await computeAnswerHash(pages);
 
           return {
             schema: "paligo.exam.submission.v1",
@@ -2040,6 +2267,7 @@
             bookRevision: book.revision,
             bookTitle: book.title,
             submittedAt,
+            answerHash,
             studentName: getStudentDisplayName(),
             studentRole: "student",
             teacherRole: studentProfile?.teacherRole || "teacher-reviewer",
@@ -2048,31 +2276,57 @@
             profile: studentProfile ? { ...studentProfile } : null,
             grade: gradePicker?.dataset.value || studentProfile?.grade || "4",
             pickers: draft.pickers,
-            pages: draft.pages.map((text, index) => ({ index, text })),
+            pages,
             annotations: annotations.slice(),
           };
         };
 
-        const submitForReview = () => {
+        const submitForReview = async () => {
           if (!studentProfile) {
             document.body.classList.add("needs-profile");
             setSaveStatus("กรอกโปรไฟล์ก่อนส่งตรวจ");
             return;
           }
 
+          const book = getCurrentBook();
+          const status = normalizeBookStatus(book?.status);
+          if (status === BOOK_STATUS.underReview) {
+            setSaveStatus("อยู่ระหว่างตรวจ — คำตอบถูกล็อก");
+            return;
+          }
+          if (status === BOOK_STATUS.reviewed) {
+            setSaveStatus("ได้รับผลตรวจแล้ว — กดทำรอบใหม่หากต้องการส่ง revision ถัดไป");
+            return;
+          }
+
+          const existingForBook = getStoredList(submissionsStorageKey).filter((item) => item.bookId === currentBookId);
+          if (
+            existingForBook.length &&
+            !window.confirm(
+              `สมุดนี้เคยส่งตรวจแล้ว ${toThaiNumber(existingForBook.length)} ครั้ง — ส่งอีกครั้งจะสร้าง submission ใหม่ ต้องการดำเนินการต่อหรือไม่?`
+            )
+          ) {
+            return;
+          }
+
           saveDraft({ silent: true });
-          const submission = createSubmissionPackage();
-          const submissions = getStoredList(submissionsStorageKey).filter((item) => item.id !== submission.id);
+          const submission = await createSubmissionPackage();
+          const submissions = getStoredList(submissionsStorageKey);
           submissions.push(submission);
           setStoredList(submissionsStorageKey, submissions);
-          setStoredList(booksStorageKey, getStoredList(booksStorageKey).map((book) => (
-            book.id === currentBookId
-              ? { ...book, status: "submitted", submittedAt: submission.submittedAt }
-              : book
-          )));
+          upsertBookRecord(currentBookId, {
+            status: BOOK_STATUS.underReview,
+            submittedAt: submission.submittedAt,
+          });
           downloadJson(`${submission.id}.paligo-submission.json`, submission);
-          showToast("สร้างไฟล์ส่งตรวจแล้ว พร้อมส่งผ่าน LINE Flex Message");
-          setSaveStatus("สร้างไฟล์ส่งตรวจแล้ว");
+          try {
+            sharedDownloadJson(`${currentBookId}.to-reviewer.paligo-transfer.json`, buildBookTransfer(currentBookId, "to-reviewer"));
+          } catch {
+            /* book may not be indexed yet on first submit */
+          }
+          applyPermissions();
+          showSubmitModal(submission);
+          setSaveStatus("ส่งตรวจแล้ว — คำตอบถูกล็อกทั้งสองฝ่าย");
         };
 
         profileForm?.addEventListener("submit", (event) => {
@@ -2193,12 +2447,198 @@
         examPages.forEach((page, pageIndex) => {
           const canvas = page.querySelector("[data-annotation-canvas]");
           if (canvas) bindAnnotationCanvas(canvas, pageIndex);
+          const reviewCanvas = page.querySelector("[data-review-canvas]");
+          bindReviewCanvas({
+            canvas: reviewCanvas,
+            pageIndex,
+            linesFirstPage,
+            linesPerPage,
+            canStamp: () => reviewMode && Boolean(activeStampKind),
+            getActiveStampKind: () => activeStampKind,
+            onScoreStamp: ({ page, line, value }) => {
+              scoreStamps = upsertScoreStamp(scoreStamps, { page, line, value });
+              renderReviewOverlays();
+            },
+            onErrorStamp: ({ page, line, kind }) => {
+              errorStamps = upsertErrorStamp(errorStamps, { page, line, kind });
+              renderReviewOverlays();
+            },
+          });
         });
 
         pagePrevButton?.addEventListener("click", () => showPage(currentPageIndex - 1));
         pageNextButton?.addEventListener("click", () => showPage(currentPageIndex + 1));
         saveButton?.addEventListener("click", saveDraft);
-        submitReviewButton?.addEventListener("click", submitForReview);
+
+        const initReviewMode = () => {
+          if (!reviewMode || !reviewSubmissionId) return false;
+          activeSubmission =
+            getStoredList(submissionsStorageKey).find((item) => item.id === reviewSubmissionId) || null;
+          if (!activeSubmission) {
+            setSaveStatus("ไม่พบ submission ในเครื่อง — นำเข้าไฟล์ที่ console ก่อน");
+            return false;
+          }
+
+          currentBookId = activeSubmission.bookId;
+          localStorage.setItem(activeBookStorageKey, currentBookId);
+          const pageTexts = (activeSubmission.pages || []).map((page) => page.text || "");
+          ensurePageCount(Math.max(pageTexts.length, minPageCount));
+          pageTexts.forEach((text, index) => {
+            if (editors[index]) editors[index].value = text;
+          });
+          annotations = Array.isArray(activeSubmission.annotations) ? activeSubmission.annotations.slice() : [];
+          renderAnnotations();
+
+          const saved = getSavedReviewForSubmission(activeSubmission.id);
+          if (saved) {
+            scoreStamps = saved.scoreStamps ? saved.scoreStamps.slice() : [];
+            errorStamps = saved.errorStamps ? saved.errorStamps.slice() : [];
+            reviewSignature = saved.signature || null;
+          }
+          return true;
+        };
+
+        const loadReviewLayerForStudent = () => {
+          if (reviewMode) return;
+          const review = getReviewForBook(currentBookId) || getCurrentBook()?.review;
+          if (!review) return;
+          scoreStamps = review.scoreStamps || [];
+          errorStamps = review.errorStamps || [];
+          reviewSignature = review.signature || null;
+        };
+
+        const buildReviewFromPaper = () => {
+          if (!activeSubmission) return null;
+          let reviewerProfile = null;
+          try {
+            reviewerProfile = JSON.parse(localStorage.getItem("paligo-exam-reviewer-profile-v1") || "null");
+          } catch {
+            reviewerProfile = null;
+          }
+          const score = computeScore(scoreStamps);
+          return {
+            schema: "paligo.exam.review.v1",
+            id: `review-${activeSubmission.id}`,
+            submissionId: activeSubmission.id,
+            ownerId: activeSubmission.ownerId || "",
+            bookId: activeSubmission.bookId || "",
+            bookRevision: activeSubmission.bookRevision || 0,
+            bookTitle: activeSubmission.bookTitle || "",
+            studentName: activeSubmission.studentName,
+            grade: activeSubmission.grade,
+            profile: activeSubmission.profile,
+            teacherName: reviewerProfile?.name || activeSubmission.teacherName || "",
+            reviewerRole: reviewerProfile?.role || "teacher-reviewer",
+            scoreStamps: scoreStamps.slice(),
+            errorStamps: errorStamps.slice(),
+            signature: reviewSignature,
+            score,
+            reviewedAt: new Date().toISOString(),
+          };
+        };
+
+        const saveReviewFromPaper = () => {
+          const result = buildReviewFromPaper();
+          if (!result) return null;
+          saveReviewResult(result);
+          setSaveStatus("บันทึกการตรวจแล้ว");
+          return result;
+        };
+
+        const setActiveStampKind = (kind) => {
+          activeStampKind = kind;
+          isReviewStamping = Boolean(kind);
+          applyPermissions();
+        };
+
+        document.querySelector("[data-review-stamp-mode]")?.addEventListener("click", () => {
+          const nextKind = isReviewStamping ? null : "score-3";
+          setActiveStampKind(nextKind);
+          setSaveStatus(nextKind ? "โหมด stamp เปิด — แตะบรรทัดบนกระดาษ" : "ปิดโหมด stamp");
+        });
+
+        document.querySelectorAll("[data-score-stamp]").forEach((button) => {
+          button.addEventListener("click", () => {
+            setActiveStampKind(`score-${button.dataset.scoreStamp}`);
+          });
+        });
+        document.querySelectorAll("[data-error-stamp]").forEach((button) => {
+          button.addEventListener("click", () => {
+            setActiveStampKind(button.dataset.errorStamp);
+          });
+        });
+
+        signatureFileInput?.addEventListener("change", async () => {
+          const file = signatureFileInput.files?.[0];
+          if (!file) return;
+          const dataUrl = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(String(reader.result || ""));
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+          });
+          reviewSignature = {
+            dataUrl,
+            page: indexToDisplayPage(currentPageIndex),
+            line: linesPerPage,
+            widthPx: 120,
+            label: "ลายเซ็นผู้ตรวจ",
+          };
+          signatureFileInput.value = "";
+          renderReviewOverlays();
+          setSaveStatus("วางลายเซ็นบนหน้าปัจจุบันแล้ว");
+        });
+
+        document.querySelector("[data-save-review-paper]")?.addEventListener("click", saveReviewFromPaper);
+        document.querySelector("[data-return-review-paper]")?.addEventListener("click", () => {
+          const result = saveReviewFromPaper();
+          if (!result) return;
+          downloadJson(`${result.id}.paligo-review.json`, result);
+          upsertBookRecord(result.bookId, {
+            status: BOOK_STATUS.reviewed,
+            review: result,
+            reviewReceivedAt: new Date().toISOString(),
+          });
+          try {
+            sharedDownloadJson(
+              `${result.bookId}.to-student.paligo-transfer.json`,
+              buildBookTransfer(result.bookId, "to-student")
+            );
+          } catch {
+            /* transfer optional if book missing locally */
+          }
+          setSaveStatus("ส่งคืนนักเรียนแล้ว — ให้นำเข้าที่ ผลตรวจของฉัน");
+        });
+
+        startNewRevisionButton?.addEventListener("click", () => {
+          if (!window.confirm("เริ่ม revision ใหม่ — คำตอบจะแก้ไขได้อีกครั้ง แต่ผลตรวจเดิมยังดูได้")) return;
+          upsertBookRecord(currentBookId, { status: BOOK_STATUS.draft });
+          applyPermissions();
+          setSaveStatus("เริ่ม revision ใหม่แล้ว");
+        });
+
+        exportTransferButton?.addEventListener("click", () => {
+          if (!lastSubmissionPackage) return;
+          try {
+            sharedDownloadJson(
+              `${currentBookId}.to-reviewer.paligo-transfer.json`,
+              buildBookTransfer(currentBookId, "to-reviewer")
+            );
+          } catch (error) {
+            setSaveStatus(error.message || "ส่งออกแพ็กเกจไม่ได้");
+          }
+        });
+
+        document.querySelector("[data-close-submit-modal]")?.addEventListener("click", () => {
+          if (submitModal) submitModal.hidden = true;
+        });
+        submitModal?.addEventListener("click", (event) => {
+          if (event.target === submitModal) submitModal.hidden = true;
+        });
+
+        submitReviewButton?.addEventListener("click", () => {
+          submitForReview();
+        });
         clearBottomLineButton?.addEventListener("click", clearBottomLine);
 
         document.addEventListener("keydown", (event) => {
@@ -2231,8 +2671,15 @@
         });
 
         showPage(0);
-        restoreDraft();
+        if (initReviewMode()) {
+          /* loaded from submission */
+        } else {
+          restoreDraft();
+          loadReviewLayerForStudent();
+        }
+        applyPermissions();
       })();
+      PaligoSidebar.autoInit();
     </script>
   </body>
 </html>

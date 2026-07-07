@@ -3,7 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>สมุดข้อสอบ</title>
+    <title>สมุดข้อสอบของฉัน · Paligo</title>
+    <link rel="stylesheet" href="paligo-design-tokens.css" />
+    <link rel="stylesheet" href="sidebar-nav.css" />
+    <link rel="stylesheet" href="paligo-exam-ui.css" />
     <style>
       :root {
         --page-bg: #f8f0e3;
@@ -27,7 +30,7 @@
         line-height: 1.5;
         margin: 0;
         min-height: 100vh;
-        padding: clamp(18px, 4vw, 42px);
+        padding: 0;
       }
 
       .books-shell {
@@ -168,9 +171,14 @@
           <a class="button is-primary" href="ruled-lines-card-only-template.html?newBook=1">สร้างสมุดใหม่</a>
           <button class="button" type="button" data-export-all>ส่งออกทั้งหมด</button>
           <label class="button">
-            นำเข้า
+            นำเข้าสมุด
             <input class="import-input" type="file" accept="application/json,.json,.paligo-book,.paligo-backup" data-import-file />
           </label>
+          <label class="button">
+            นำเข้าแพ็กเกจโอน
+            <input class="import-input" type="file" accept="application/json,.json,.paligo-transfer" data-import-transfer-file />
+          </label>
+          <a class="button" href="exam-review-results.html">ผลตรวจของฉัน</a>
         </div>
       </header>
       <section class="book-grid" data-book-grid></section>
@@ -180,52 +188,37 @@
       </section>
     </main>
 
+    <script src="paligo-exam-shared.js"></script>
+    <script src="paligo-nav-config.js"></script>
+    <script src="sidebar-nav.js"></script>
     <script>
       (() => {
-        const booksStorageKey = "paligo-exam-answer-books-v1";
-        const activeBookStorageKey = "paligo-exam-active-book-id-v1";
-        const ownerStorageKey = "paligo-exam-local-owner-id-v1";
+        const {
+          KEYS,
+          getList,
+          setList,
+          downloadJson,
+          toThaiNumber,
+          toThaiPercent,
+          importReviewPayload,
+          importBookTransfer,
+          buildBookTransfer,
+          getReviewForBook,
+          getStatusLabel,
+          normalizeBookStatus,
+          BOOK_STATUS,
+          formatThaiDateTime,
+        } = window.PaligoExamShared;
         const grid = document.querySelector("[data-book-grid]");
         const emptyState = document.querySelector("[data-empty-state]");
         const summary = document.querySelector("[data-summary]");
         const importFile = document.querySelector("[data-import-file]");
-        const thaiDigits = new Map([
-          ["0", "๐"], ["1", "๑"], ["2", "๒"], ["3", "๓"], ["4", "๔"],
-          ["5", "๕"], ["6", "๖"], ["7", "๗"], ["8", "๘"], ["9", "๙"],
-        ]);
+        const importTransferFile = document.querySelector("[data-import-transfer-file]");
 
-        const toThaiNumber = (value) => String(value).replace(/[0-9]/g, (digit) => thaiDigits.get(digit));
-        const getBooks = () => {
-          try {
-            const parsed = JSON.parse(localStorage.getItem(booksStorageKey) || "[]");
-            return Array.isArray(parsed) ? parsed : [];
-          } catch {
-            return [];
-          }
-        };
-        const setBooks = (books) => localStorage.setItem(booksStorageKey, JSON.stringify(books));
-        const getOwnerId = () => localStorage.getItem(ownerStorageKey) || "";
-        const downloadJson = (fileName, payload) => {
-          const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
-          const url = URL.createObjectURL(blob);
-          const link = document.createElement("a");
-          link.href = url;
-          link.download = fileName;
-          document.body.append(link);
-          link.click();
-          link.remove();
-          URL.revokeObjectURL(url);
-        };
-        const formatDate = (value) => {
-          const date = new Date(value || Date.now());
-          return date.toLocaleString("th-TH", {
-            day: "numeric",
-            month: "short",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          });
-        };
+        const getBooks = () => getList(KEYS.books);
+        const setBooks = (books) => setList(KEYS.books, books);
+        const getOwnerId = () => localStorage.getItem(KEYS.owner) || "";
+
         const renderBooks = () => {
           const books = getBooks().sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0));
           grid.innerHTML = "";
@@ -233,10 +226,12 @@
           summary.textContent = `มีสมุดข้อสอบ ${toThaiNumber(books.length)} เล่ม · พร้อมส่งออกเพื่อย้ายเครื่อง`;
 
           books.forEach((book) => {
+            const review = book.review || getReviewForBook(book.id);
             const article = document.createElement("article");
             const title = document.createElement("h2");
             const meta = document.createElement("div");
             const status = document.createElement("span");
+            const reviewNote = document.createElement("div");
             const actions = document.createElement("div");
             const open = document.createElement("a");
             const exportBook = document.createElement("button");
@@ -245,16 +240,25 @@
             title.className = "book-title";
             meta.className = "book-meta";
             status.className = "book-status";
+            reviewNote.className = "book-meta";
             actions.className = "button-row";
             open.className = "button is-primary";
             exportBook.className = "button";
             exportBook.type = "button";
 
             title.textContent = book.title || "สมุดคำตอบ";
-            meta.textContent = `${book.studentName || "ไม่ระบุชื่อ"} · ป.ธ. ${toThaiNumber(book.grade || "-")} · แก้ไข ${formatDate(book.updatedAt)}`;
-            status.textContent = book.status === "submitted" ? "ส่งตรวจแล้ว" : "ฉบับร่าง";
+            meta.textContent = `${book.studentName || "ไม่ระบุชื่อ"} · ป.ธ. ${toThaiNumber(book.grade || "-")} · แก้ไข ${formatThaiDateTime(book.updatedAt)}`;
+            if (review?.score?.percent != null) {
+              status.textContent = getStatusLabel(BOOK_STATUS.reviewed);
+              reviewNote.textContent = `คะแนน ${toThaiPercent(review.score.percent)} · ตรวจ ${formatThaiDateTime(review.reviewedAt)}`;
+            } else {
+              status.textContent = getStatusLabel(normalizeBookStatus(book.status));
+            }
             open.href = `ruled-lines-card-only-template.html?bookId=${encodeURIComponent(book.id)}`;
             open.textContent = "เปิดเล่ม";
+            open.addEventListener("click", () => {
+              localStorage.setItem(KEYS.activeBook, book.id);
+            });
             exportBook.textContent = "ส่งออกเล่มนี้";
             exportBook.addEventListener("click", () => {
               downloadJson(`${book.id}.paligo-book.json`, {
@@ -265,11 +269,29 @@
               });
             });
 
-            actions.append(open, exportBook);
-            article.append(title, meta, status, actions);
+            const transferOut = document.createElement("button");
+            transferOut.className = "button";
+            transferOut.type = "button";
+            transferOut.textContent =
+              normalizeBookStatus(book.status) === BOOK_STATUS.reviewed ? "โอนกลับ (→ นักเรียน)" : "โอนไป (→ ผู้ตรวจ)";
+            transferOut.addEventListener("click", () => {
+              try {
+                const direction =
+                  normalizeBookStatus(book.status) === BOOK_STATUS.reviewed ? "to-student" : "to-reviewer";
+                downloadJson(`${book.id}.${direction}.paligo-transfer.json`, buildBookTransfer(book.id, direction));
+              } catch (error) {
+                window.alert(error.message || "ส่งออกแพ็กเกจโอนไม่ได้");
+              }
+            });
+
+            actions.append(open, exportBook, transferOut);
+            article.append(title, meta, status);
+            if (reviewNote.textContent) article.append(reviewNote);
+            article.append(actions);
             grid.append(article);
           });
         };
+
         const importPayload = (payload) => {
           const books = getBooks();
           const incoming = [];
@@ -279,6 +301,11 @@
 
           if (!incoming.length) {
             window.alert("ไฟล์นี้ไม่ใช่ไฟล์สมุดข้อสอบที่รองรับ");
+            return;
+          }
+
+          const conflicts = incoming.filter((item) => books.some((book) => book.id === item.id));
+          if (conflicts.length && !window.confirm(`มีสมุด id เดิม ${toThaiNumber(conflicts.length)} เล่ม — แทนที่ข้อมูลเดิมหรือไม่?`)) {
             return;
           }
 
@@ -309,9 +336,33 @@
             importFile.value = "";
           }
         });
+        importTransferFile?.addEventListener("change", async () => {
+          const file = importTransferFile.files?.[0];
+          if (!file) return;
+
+          try {
+            const payload = JSON.parse(await file.text());
+            if (payload.schema === "paligo.exam.bookTransfer.v1") {
+              importBookTransfer(payload);
+            } else if (payload.schema === "paligo.exam.review.v1") {
+              importReviewPayload(payload);
+            } else {
+              importPayload(payload);
+              importTransferFile.value = "";
+              return;
+            }
+            renderBooks();
+            window.alert("นำเข้าแพ็กเกจโอนแล้ว");
+          } catch (error) {
+            window.alert(error.message || "อ่านไฟล์ไม่ได้");
+          } finally {
+            importTransferFile.value = "";
+          }
+        });
         window.addEventListener("pageshow", renderBooks);
         renderBooks();
       })();
+      PaligoSidebar.autoInit();
     </script>
   </body>
 </html>

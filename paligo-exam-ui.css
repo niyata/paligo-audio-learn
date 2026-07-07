@@ -1,0 +1,352 @@
+/* Exam flow UI — book bar, modals, review cards (book theme) */
+
+.paligo-app .paligo-content {
+  padding: clamp(18px, 4vw, 42px);
+}
+
+.paligo-book-bar {
+  align-items: center;
+  background: var(--paligo-paper-bg, #fffaf0);
+  border: 1px solid var(--paligo-paper-border, rgba(74, 44, 10, 0.16));
+  border-radius: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding: 12px 16px;
+}
+
+.paligo-book-bar__main {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.paligo-book-bar__title {
+  color: var(--paligo-exam-blue, #1f2d89);
+  font-size: 1rem;
+  font-weight: 800;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.paligo-book-bar__meta {
+  color: var(--paligo-muted, rgba(52, 52, 52, 0.62));
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.paligo-book-bar__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.paligo-status-chip {
+  border-radius: 999px;
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 4px 10px;
+}
+
+.paligo-status-chip.is-draft {
+  background: rgba(154, 106, 16, 0.12);
+  color: #9a6a10;
+}
+
+.paligo-status-chip.is-submitted {
+  background: rgba(36, 113, 91, 0.12);
+  color: #24715b;
+}
+
+.paligo-status-chip.is-reviewed {
+  background: rgba(31, 45, 137, 0.1);
+  color: #1f2d89;
+}
+
+.paligo-submitted-banner {
+  background: rgba(36, 113, 91, 0.1);
+  border: 1px solid rgba(36, 113, 91, 0.24);
+  border-radius: 8px;
+  color: #1f553f;
+  font-size: 0.88rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  padding: 10px 14px;
+}
+
+.paligo-submitted-banner[hidden] {
+  display: none !important;
+}
+
+.exam-page-stack.is-readonly .ruled-editor-frame textarea {
+  background: rgba(248, 240, 227, 0.65);
+  cursor: not-allowed;
+}
+
+.exam-page-stack.is-readonly .annotation-canvas,
+.exam-page-stack.is-readonly [data-review-canvas] {
+  pointer-events: none;
+}
+
+.exam-page-stack.is-review-stamping [data-review-canvas] {
+  cursor: crosshair;
+  pointer-events: auto;
+}
+
+.paligo-permission-banner {
+  background: rgba(31, 45, 137, 0.08);
+  border: 1px solid rgba(31, 45, 137, 0.18);
+  border-radius: 8px;
+  color: #1f2d89;
+  font-size: 0.88rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  padding: 10px 14px;
+}
+
+.paligo-permission-banner.is-locked {
+  background: rgba(154, 106, 16, 0.1);
+  border-color: rgba(154, 106, 16, 0.24);
+  color: #7a5610;
+}
+
+.review-toolbar {
+  background: var(--paligo-paper-bg, #fffaf0);
+  border: 1px solid var(--paligo-paper-border);
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 12px 14px;
+}
+
+.review-toolbar[hidden] {
+  display: none !important;
+}
+
+.review-toolbar__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.review-toolbar__label {
+  color: var(--paligo-muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.review-layer {
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+  z-index: 3;
+}
+
+.review-canvas {
+  inset: 0;
+  position: absolute;
+  z-index: 4;
+}
+
+.review-canvas[hidden] {
+  display: none !important;
+}
+
+.review-stamp-overlay {
+  align-items: center;
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 0.72rem;
+  font-weight: 900;
+  justify-content: center;
+  min-width: 52px;
+  padding: 2px 8px;
+  pointer-events: none;
+  position: absolute;
+  right: 8px;
+  top: calc(var(--line-n) * var(--line-height, 26px) - var(--line-height, 26px) + 2px);
+  transform: translateY(-2px);
+}
+
+.review-stamp-overlay.is-score {
+  background: rgba(36, 113, 91, 0.18);
+  border: 1px solid rgba(36, 113, 91, 0.42);
+  color: #1f553f;
+}
+
+.review-stamp-overlay.is-error {
+  background: rgba(180, 35, 47, 0.12);
+  border: 1px solid rgba(180, 35, 47, 0.32);
+  color: #8f1d28;
+}
+
+.review-signature-overlay {
+  pointer-events: none;
+  position: absolute;
+  right: 12px;
+  top: calc(var(--line-n) * var(--line-height, 26px));
+  transform: translateY(-50%);
+  z-index: 5;
+}
+
+.paligo-status-chip.is-under-review {
+  background: rgba(154, 106, 16, 0.12);
+  color: #9a6a10;
+}
+
+.paligo-modal-backdrop {
+  align-items: center;
+  background: rgba(52, 52, 52, 0.38);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: 20px;
+  position: fixed;
+  z-index: 200;
+}
+
+.paligo-modal-backdrop[hidden] {
+  display: none !important;
+}
+
+.paligo-modal {
+  background: var(--paligo-paper-bg, #fffaf0);
+  border: 1px solid var(--paligo-paper-border);
+  border-radius: 12px;
+  box-shadow: 0 20px 48px rgba(74, 44, 10, 0.18);
+  max-width: 520px;
+  padding: 20px;
+  width: 100%;
+}
+
+.paligo-modal__title {
+  color: var(--paligo-exam-blue);
+  font-size: 1.15rem;
+  font-weight: 900;
+  margin: 0 0 8px;
+}
+
+.paligo-modal__body {
+  color: var(--paligo-ink, #343434);
+  font-size: 0.92rem;
+  line-height: 1.55;
+  margin: 0 0 16px;
+}
+
+.paligo-modal__meta {
+  background: rgba(31, 45, 137, 0.06);
+  border-radius: 8px;
+  font-size: 0.84rem;
+  margin: 0 0 16px;
+  padding: 10px 12px;
+}
+
+.paligo-modal__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.paligo-btn {
+  appearance: none;
+  background: var(--paligo-paper-bg);
+  border: 1px solid rgba(31, 45, 137, 0.24);
+  border-radius: 8px;
+  color: var(--paligo-exam-blue);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 800;
+  justify-content: center;
+  min-height: 40px;
+  padding: 8px 12px;
+  text-decoration: none;
+}
+
+.paligo-btn.is-primary {
+  background: var(--paligo-exam-blue);
+  border-color: var(--paligo-exam-blue);
+  color: #fff;
+}
+
+.paligo-btn.is-ghost {
+  background: transparent;
+}
+
+.paligo-review-preflight {
+  background: rgba(31, 45, 137, 0.05);
+  border: 1px solid rgba(31, 45, 137, 0.14);
+  border-radius: 8px;
+  display: grid;
+  gap: 6px;
+  margin: 0 0 12px;
+  padding: 12px 14px;
+}
+
+.paligo-review-preflight[hidden] {
+  display: none !important;
+}
+
+.paligo-review-preflight dt {
+  color: var(--paligo-muted);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.paligo-review-preflight dd {
+  color: var(--paligo-exam-blue);
+  font-size: 0.88rem;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+
+.paligo-review-card {
+  background: var(--paligo-paper-bg);
+  border: 1px solid var(--paligo-paper-border);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.paligo-review-card + .paligo-review-card {
+  margin-top: 12px;
+}
+
+.paligo-review-card__score {
+  color: #24715b;
+  font-size: 1.4rem;
+  font-weight: 900;
+}
+
+.paligo-review-stamp-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.paligo-review-stamp {
+  background: rgba(36, 113, 91, 0.1);
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 4px 8px;
+}
+
+.paligo-review-stamp.is-error {
+  background: rgba(180, 35, 47, 0.1);
+  color: #b4232f;
+}
+
+.paligo-local-note {
+  color: var(--paligo-muted);
+  font-size: 0.84rem;
+  font-weight: 700;
+  margin: 0;
+}

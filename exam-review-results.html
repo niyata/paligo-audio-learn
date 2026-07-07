@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ผลตรวจของฉัน · Paligo</title>
+    <link rel="stylesheet" href="paligo-design-tokens.css" />
+    <link rel="stylesheet" href="sidebar-nav.css" />
+    <link rel="stylesheet" href="paligo-exam-ui.css" />
+    <style>
+      :root {
+        --page-bg: var(--paligo-page-bg);
+        --paper-bg: var(--paligo-paper-bg);
+        --card-bg: rgba(255, 255, 255, 0.84);
+        --card-border: var(--paligo-paper-border);
+        --exam-blue: var(--paligo-exam-blue);
+        --ink: var(--paligo-ink);
+        --muted: var(--paligo-muted);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        background: var(--page-bg);
+        color: var(--ink);
+        font-family: Sarabun, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        line-height: 1.5;
+        margin: 0;
+      }
+
+      .results-shell {
+        display: grid;
+        gap: 16px;
+        margin: 0 auto;
+        max-width: 900px;
+      }
+
+      .results-header,
+      .results-panel {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 8px;
+        box-shadow: 0 18px 46px rgba(74, 44, 10, 0.1);
+        padding: 18px;
+      }
+
+      .results-title {
+        color: var(--exam-blue);
+        font-size: clamp(1.35rem, 3vw, 1.9rem);
+        margin: 0 0 6px;
+      }
+
+      .field {
+        display: grid;
+        gap: 6px;
+        margin-bottom: 12px;
+      }
+
+      .field span {
+        color: var(--muted);
+        font-size: 0.82rem;
+        font-weight: 800;
+      }
+
+      .input {
+        background: var(--paper-bg);
+        border: 1px solid rgba(31, 45, 137, 0.24);
+        border-radius: 6px;
+        font: inherit;
+        min-height: 40px;
+        padding: 8px 10px;
+        width: 100%;
+      }
+
+      .empty-state {
+        color: var(--muted);
+        font-weight: 700;
+        padding: 24px 0;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="results-shell">
+      <header class="results-header">
+        <h1 class="results-title">ผลตรวจของฉัน</h1>
+        <p class="paligo-local-note">
+          นำเข้าไฟล์ `.paligo-review.json` ที่ครู/ผู้ตรวจส่งคืน — เก็บในเครื่องนี้และจับคู่กับสมุดข้อสอบ
+        </p>
+      </header>
+
+      <section class="results-panel">
+        <label class="field">
+          <span>นำเข้าไฟล์ผลตรวจ</span>
+          <input class="input" type="file" accept="application/json,.json,.paligo-review,.paligo-transfer" data-import-file />
+        </label>
+        <button class="paligo-btn is-primary" type="button" data-import-btn style="width: 100%">
+          นำเข้าผลตรวจ
+        </button>
+        <p class="paligo-local-note" data-status style="margin-top: 12px">ยังไม่มีผลตรวจที่นำเข้า</p>
+      </section>
+
+      <section class="results-panel">
+        <h2 class="results-title" style="font-size: 1.1rem">รายการผลตรวจ</h2>
+        <div data-review-list></div>
+        <p class="empty-state" data-empty hidden>ยังไม่มีผลตรวจ — รอครูส่งไฟล์ `.paligo-review.json` แล้วนำเข้าที่นี่</p>
+      </section>
+    </div>
+
+    <script src="paligo-exam-shared.js"></script>
+    <script src="paligo-nav-config.js"></script>
+    <script src="sidebar-nav.js"></script>
+    <script>
+      (() => {
+        const { KEYS, getList, importReviewPayload, importBookTransfer, toThaiNumber, toThaiPercent, formatThaiDateTime, getBookById } =
+          window.PaligoExamShared;
+        const importFile = document.querySelector("[data-import-file]");
+        const importBtn = document.querySelector("[data-import-btn]");
+        const status = document.querySelector("[data-status]");
+        const list = document.querySelector("[data-review-list]");
+        const empty = document.querySelector("[data-empty]");
+
+        const setStatus = (message) => {
+          status.textContent = message;
+        };
+
+        const renderReviews = () => {
+          const reviews = getList(KEYS.receivedReviews).sort(
+            (a, b) => new Date(b.reviewedAt || 0) - new Date(a.reviewedAt || 0)
+          );
+          list.innerHTML = "";
+          empty.hidden = reviews.length > 0;
+
+          reviews.forEach((review) => {
+            const book = getBookById(review.bookId);
+            const card = document.createElement("article");
+            card.className = "paligo-review-card";
+            const score = review.score || {};
+            const scoreStamps = review.scoreStamps || [];
+            const errorStamps = review.errorStamps || [];
+
+            card.innerHTML = `
+              <strong>${review.bookTitle || book?.title || "สมุดคำตอบ"}</strong>
+              <div class="paligo-review-card__score">${toThaiPercent(score.percent || 0)}</div>
+              <p class="paligo-local-note">
+                ตรวจเมื่อ ${formatThaiDateTime(review.reviewedAt)} ·
+                โดย ${review.teacherName || "ผู้ตรวจ"} ·
+                revision ${toThaiNumber(review.bookRevision || "—")}
+              </p>
+              <div class="paligo-review-stamp-list">
+                ${scoreStamps
+                  .map(
+                    (stamp) =>
+                      `<span class="paligo-review-stamp">ห.${toThaiNumber(stamp.page)} บ.${toThaiNumber(stamp.line)} · ${toThaiNumber(stamp.value)} ให้</span>`
+                  )
+                  .join("")}
+                ${errorStamps
+                  .map(
+                    (stamp) =>
+                      `<span class="paligo-review-stamp is-error">ห.${toThaiNumber(stamp.page)} บ.${toThaiNumber(stamp.line)} · ${stamp.kind}</span>`
+                  )
+                  .join("")}
+              </div>
+              <div style="margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap">
+                <a class="paligo-btn" href="ruled-lines-card-only-template.html?bookId=${encodeURIComponent(review.bookId)}">เปิดสมุด</a>
+                <a class="paligo-btn is-ghost" href="exam-books.html">สมุดข้อสอบ</a>
+              </div>
+            `;
+            list.append(card);
+          });
+
+          setStatus(reviews.length ? `มีผลตรวจ ${toThaiNumber(reviews.length)} ชุด` : "ยังไม่มีผลตรวจที่นำเข้า");
+        };
+
+        const handleImport = async () => {
+          const file = importFile.files?.[0];
+          if (!file) {
+            setStatus("เลือกไฟล์ผลตรวจก่อน");
+            return;
+          }
+          try {
+            const payload = JSON.parse(await file.text());
+            if (payload.schema === "paligo.exam.bookTransfer.v1") {
+              importBookTransfer(payload);
+            } else {
+              importReviewPayload(payload);
+            }
+            setStatus(`นำเข้าผลตรวจของ ${payload.bookTitle || "สมุด"} แล้ว`);
+            renderReviews();
+          } catch (error) {
+            setStatus(error.message || "อ่านไฟล์ไม่ได้");
+          } finally {
+            importFile.value = "";
+          }
+        };
+
+        importBtn?.addEventListener("click", handleImport);
+        importFile?.addEventListener("change", handleImport);
+        renderReviews();
+      })();
+      PaligoSidebar.autoInit();
+    </script>
+  </body>
+</html>

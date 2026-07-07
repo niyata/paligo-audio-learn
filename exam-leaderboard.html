@@ -3,7 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Exam Leaderboard</title>
+    <title>ตารางคะแนน · Paligo</title>
+    <link rel="stylesheet" href="paligo-design-tokens.css" />
+    <link rel="stylesheet" href="sidebar-nav.css" />
+    <link rel="stylesheet" href="paligo-exam-ui.css" />
     <style>
       :root {
         --page-bg: #f8f0e3;
@@ -29,7 +32,7 @@
         line-height: 1.5;
         margin: 0;
         min-height: 100vh;
-        padding: clamp(18px, 4vw, 42px);
+        padding: 0;
       }
 
       .leaderboard-shell {
@@ -206,17 +209,18 @@
     <main class="leaderboard-shell">
       <header class="leaderboard-header">
         <div>
-          <h1 class="leaderboard-title">กระดานคะแนนข้อสอบ</h1>
+          <h1 class="leaderboard-title">ตารางคะแนนข้อสอบ</h1>
           <p class="leaderboard-subtitle" data-leaderboard-summary>
-            คะแนนคำนวณจาก stamp "๑ ให้ / ๒ ให้ / ๓ ให้" เท่านั้น
+            คะแนนบนเครื่องนี้ · คำนวณจาก stamp "๑ ให้ / ๒ ให้ / ๓ ให้" เท่านั้น
           </p>
         </div>
-        <nav class="leaderboard-tabs" aria-label="ช่วงเวลาคะแนน">
+        <div class="leaderboard-tabs" aria-label="ช่วงเวลาคะแนน">
+          <a class="leaderboard-tab" href="exam-reviewer-console.html" style="text-decoration:none">กลับไปตรวจข้อสอบ</a>
           <button class="leaderboard-tab is-active" type="button" data-range="daily">รายวัน</button>
           <button class="leaderboard-tab" type="button" data-range="weekly">รายสัปดาห์</button>
           <button class="leaderboard-tab" type="button" data-range="threeWeeks">สามสัปดาห์ต่อเนื่อง</button>
           <button class="leaderboard-tab" type="button" data-range="monthly">รายเดือน</button>
-        </nav>
+        </div>
       </header>
 
       <section class="leaderboard-panel" aria-label="อันดับคะแนน">
@@ -240,6 +244,8 @@
       </section>
     </main>
 
+    <script src="paligo-nav-config.js"></script>
+    <script src="sidebar-nav.js"></script>
     <script>
       (() => {
         const resultsStorageKey = "paligo-exam-results-v1";
@@ -398,6 +404,7 @@
 
         renderLeaderboard("daily");
       })();
+      PaligoSidebar.autoInit();
     </script>
   </body>
 </html>

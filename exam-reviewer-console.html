@@ -3,7 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Exam Reviewer Console</title>
+    <title>ตรวจข้อสอบ · Paligo</title>
+    <link rel="stylesheet" href="paligo-design-tokens.css" />
+    <link rel="stylesheet" href="sidebar-nav.css" />
+    <link rel="stylesheet" href="paligo-exam-ui.css" />
     <style>
       :root {
         --page-bg: #f8f0e3;
@@ -30,7 +33,7 @@
         line-height: 1.5;
         margin: 0;
         min-height: 100vh;
-        padding: clamp(18px, 4vw, 42px);
+        padding: 0;
       }
 
       .review-shell {
@@ -251,6 +254,16 @@
 
       <section class="panel">
         <h2 class="panel-title" data-current-title>ยังไม่ได้เลือกข้อสอบ</h2>
+        <dl class="paligo-review-preflight" data-review-preflight hidden>
+          <dt>สมุด</dt>
+          <dd data-preflight-title>—</dd>
+          <dt>รหัสสมุด</dt>
+          <dd data-preflight-book-id>—</dd>
+          <dt>revision</dt>
+          <dd data-preflight-revision>—</dd>
+          <dt>ส่งเมื่อ</dt>
+          <dd data-preflight-submitted>—</dd>
+        </dl>
         <div class="score-summary">
           <span class="score-pill" data-score-percent>๐%</span>
           <span class="status-note" data-score-detail>ยังไม่มี score stamp</span>
@@ -274,10 +287,12 @@
           <button class="button is-error" type="button" data-error-stamp="wrong-pa">ผิด ป.</button>
         </div>
         <div class="button-row">
+          <a class="button is-primary" data-open-paper-review href="#">เปิดตรวจบนกระดาษ</a>
           <button class="button is-primary" type="button" data-save-review>บันทึกการตรวจ</button>
           <button class="button" type="button" data-return-package>ส่งคืนนักเรียน</button>
-          <a class="button" href="exam-leaderboard.html">เปิด leaderboard</a>
+          <a class="button" href="exam-leaderboard.html">เปิดตารางคะแนน</a>
         </div>
+        <p class="status-note">แนะนำ: stamp และลายเซ็นบนกระดาษจริง — ใช้ปุ่ม «เปิดตรวจบนกระดาษ» (คำตอบถูกล็อกทั้งสองฝ่าย)</p>
         <div data-answer-view></div>
         <table class="stamp-table">
           <thead>
@@ -294,16 +309,26 @@
       </section>
     </main>
 
+    <script src="paligo-exam-shared.js"></script>
+    <script src="paligo-nav-config.js"></script>
+    <script src="sidebar-nav.js"></script>
     <script>
       (() => {
-        const submissionsStorageKey = "paligo-exam-submissions-v1";
-        const resultsStorageKey = "paligo-exam-results-v1";
-        const reviewerStorageKey = "paligo-exam-reviewer-profile-v1";
+        const { KEYS, getList, setList, downloadJson, toThaiNumber, toThaiPercent, getSavedReviewForSubmission, formatThaiDateTime, computeScore, saveReviewResult, buildBookTransfer, importBookTransfer, upsertBookRecord, BOOK_STATUS } =
+          window.PaligoExamShared;
+        const submissionsStorageKey = KEYS.submissions;
+        const resultsStorageKey = KEYS.results;
+        const reviewerStorageKey = KEYS.reviewerProfile;
         const list = document.querySelector("[data-submission-list]");
         const answerView = document.querySelector("[data-answer-view]");
         const stampBody = document.querySelector("[data-stamp-body]");
         const statusNote = document.querySelector("[data-status-note]");
         const currentTitle = document.querySelector("[data-current-title]");
+        const preflight = document.querySelector("[data-review-preflight]");
+        const preflightTitle = document.querySelector("[data-preflight-title]");
+        const preflightBookId = document.querySelector("[data-preflight-book-id]");
+        const preflightRevision = document.querySelector("[data-preflight-revision]");
+        const preflightSubmitted = document.querySelector("[data-preflight-submitted]");
         const scorePercent = document.querySelector("[data-score-percent]");
         const scoreDetail = document.querySelector("[data-score-detail]");
         const reviewerName = document.querySelector("[data-reviewer-name]");
@@ -312,29 +337,13 @@
         const importText = document.querySelector("[data-import-text]");
         const pageInput = document.querySelector("[data-stamp-page]");
         const lineInput = document.querySelector("[data-stamp-line]");
-        const thaiDigits = new Map([
-          ["0", "๐"], ["1", "๑"], ["2", "๒"], ["3", "๓"], ["4", "๔"],
-          ["5", "๕"], ["6", "๖"], ["7", "๗"], ["8", "๘"], ["9", "๙"],
-        ]);
+        const openPaperReview = document.querySelector("[data-open-paper-review]");
         let submissions = [];
         let currentSubmission = null;
         let scoreStamps = [];
         let errorStamps = [];
+        let reviewSignature = null;
 
-        const toThaiNumber = (value) => String(value).replace(/[0-9]/g, (digit) => thaiDigits.get(digit));
-        const toThaiPercent = (value) => `${toThaiNumber(Math.round(value))}%`;
-        const getList = (key) => {
-          try {
-            const parsed = JSON.parse(localStorage.getItem(key) || "[]");
-            return Array.isArray(parsed) ? parsed : [];
-          } catch {
-            return [];
-          }
-        };
-        const setList = (key, value) => localStorage.setItem(key, JSON.stringify(value));
-        const setStatus = (message) => {
-          statusNote.textContent = message;
-        };
         const getReviewerProfile = () => {
           try {
             return JSON.parse(localStorage.getItem(reviewerStorageKey) || "null");
@@ -349,29 +358,27 @@
             updatedAt: new Date().toISOString(),
           }));
         };
-        const downloadJson = (fileName, payload) => {
-          const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
-          const url = URL.createObjectURL(blob);
-          const link = document.createElement("a");
-          link.href = url;
-          link.download = fileName;
-          document.body.append(link);
-          link.click();
-          link.remove();
-          URL.revokeObjectURL(url);
+        const setStatus = (message) => {
+          statusNote.textContent = message;
         };
-        const calculateScore = () => {
-          const earned = scoreStamps.reduce((sum, stamp) => sum + Number(stamp.value || 0), 0);
-          const max = scoreStamps.length * 3;
-          const percent = max > 0 ? (earned / max) * 100 : 0;
-          return { earned, max, percent, stampCount: scoreStamps.length };
-        };
+        const calculateScore = () => computeScore(scoreStamps);
         const renderScore = () => {
           const score = calculateScore();
           scorePercent.textContent = toThaiPercent(score.percent);
           scoreDetail.textContent = score.stampCount
             ? `${toThaiNumber(score.earned)} / ${toThaiNumber(score.max)} จาก ${toThaiNumber(score.stampCount)} stamp`
             : "ยังไม่มี score stamp";
+        };
+        const renderPreflight = () => {
+          if (!currentSubmission) {
+            preflight.hidden = true;
+            return;
+          }
+          preflight.hidden = false;
+          preflightTitle.textContent = currentSubmission.bookTitle || "สมุดคำตอบ";
+          preflightBookId.textContent = currentSubmission.bookId || "—";
+          preflightRevision.textContent = toThaiNumber(currentSubmission.bookRevision || "—");
+          preflightSubmitted.textContent = formatThaiDateTime(currentSubmission.submittedAt);
         };
         const renderSubmissions = () => {
           submissions = getList(submissionsStorageKey);
@@ -384,7 +391,7 @@
             button.type = "button";
             button.classList.toggle("is-active", currentSubmission?.id === submission.id);
             title.textContent = submission.studentName || "ไม่ระบุชื่อ";
-            meta.textContent = `ป.ธ. ${toThaiNumber(submission.grade || "-")} · ${new Date(submission.submittedAt).toLocaleString("th-TH")}`;
+            meta.textContent = `ป.ธ. ${toThaiNumber(submission.grade || "-")} · ${formatThaiDateTime(submission.submittedAt)}`;
             button.append(title, meta);
             button.addEventListener("click", () => selectSubmission(submission.id));
             list.append(button);
@@ -408,7 +415,11 @@
         };
         const renderStamps = () => {
           stampBody.innerHTML = "";
-          [...scoreStamps, ...errorStamps].forEach((stamp, index) => {
+          const allStamps = [
+            ...scoreStamps.map((stamp) => ({ ...stamp, kind: "score" })),
+            ...errorStamps.map((stamp) => ({ ...stamp, kind: stamp.kind || "error" })),
+          ];
+          allStamps.forEach((stamp, index) => {
             const tr = document.createElement("tr");
             ["kind", "value", "page", "line"].forEach((key) => {
               const td = document.createElement("td");
@@ -423,7 +434,7 @@
             remove.type = "button";
             remove.textContent = "ลบ";
             remove.addEventListener("click", () => {
-              if (stamp.kind === "score") scoreStamps.splice(index, 1);
+              if (index < scoreStamps.length) scoreStamps.splice(index, 1);
               else errorStamps.splice(index - scoreStamps.length, 1);
               renderStamps();
               renderScore();
@@ -435,15 +446,22 @@
         };
         function selectSubmission(id) {
           currentSubmission = submissions.find((item) => item.id === id) || null;
-          scoreStamps = [];
-          errorStamps = [];
+          const saved = currentSubmission ? getSavedReviewForSubmission(currentSubmission.id) : null;
+          scoreStamps = saved?.scoreStamps ? saved.scoreStamps.slice() : [];
+          errorStamps = saved?.errorStamps ? saved.errorStamps.slice() : [];
+          reviewSignature = saved?.signature || null;
+          if (openPaperReview && currentSubmission) {
+            openPaperReview.href = `ruled-lines-card-only-template.html?mode=review&submissionId=${encodeURIComponent(currentSubmission.id)}`;
+          }
           currentTitle.textContent = currentSubmission
             ? `ตรวจ: ${currentSubmission.studentName || "ไม่ระบุชื่อ"}`
             : "ยังไม่ได้เลือกข้อสอบ";
+          renderPreflight();
           renderSubmissions();
           renderAnswers();
           renderStamps();
           renderScore();
+          if (saved) setStatus("โหลดผลตรวจที่บันทึกไว้แล้ว");
         }
         const addStamp = (kind, value) => {
           if (!currentSubmission) {
@@ -458,7 +476,7 @@
             createdAt: new Date().toISOString(),
           };
           if (kind === "score") scoreStamps.push(stamp);
-          else errorStamps.push(stamp);
+          else errorStamps.push({ ...stamp, kind });
           renderStamps();
           renderScore();
         };
@@ -479,6 +497,7 @@
             reviewerRole: reviewerRole.value,
             scoreStamps: scoreStamps.slice(),
             errorStamps: errorStamps.slice(),
+            signature: reviewSignature,
             score,
             reviewedAt: new Date().toISOString(),
           };
@@ -490,13 +509,19 @@
           }
           saveReviewerProfile();
           const result = buildReviewResult();
-          const results = getList(resultsStorageKey).filter((item) => item.submissionId !== result.submissionId);
-          results.push(result);
-          setList(resultsStorageKey, results);
-          setStatus("บันทึกผลตรวจแล้ว และส่งคะแนนเข้า leaderboard แล้ว");
+          saveReviewResult(result);
+          setStatus("บันทึกผลตรวจแล้ว — เปิดตรวจบนกระดาษเพื่อ stamp/ลายเซ็นบนกระดาษ");
           return result;
         };
         const importSubmission = (payload) => {
+          if (payload?.schema === "paligo.exam.bookTransfer.v1") {
+            importBookTransfer(payload);
+            submissions = getList(submissionsStorageKey);
+            if (payload.submission) selectSubmission(payload.submission.id);
+            renderSubmissions();
+            setStatus("นำเข้าแพ็กเกจโอนสมุดแล้ว");
+            return;
+          }
           if (!payload || payload.schema !== "paligo.exam.submission.v1") {
             setStatus("ไฟล์ไม่ใช่ submission package");
             return;
@@ -536,7 +561,19 @@
         document.querySelector("[data-save-review]")?.addEventListener("click", saveReview);
         document.querySelector("[data-return-package]")?.addEventListener("click", () => {
           const result = saveReview();
-          if (result) downloadJson(`${result.id}.paligo-review.json`, result);
+          if (!result) return;
+          downloadJson(`${result.id}.paligo-review.json`, result);
+          upsertBookRecord(result.bookId, {
+            status: BOOK_STATUS.reviewed,
+            review: result,
+            reviewReceivedAt: new Date().toISOString(),
+          });
+          try {
+            downloadJson(`${result.bookId}.to-student.paligo-transfer.json`, buildBookTransfer(result.bookId, "to-student"));
+          } catch {
+            /* optional */
+          }
+          setStatus("ดาวน์โหลดไฟล์ผลตรวจแล้ว — ส่งให้นักเรียนนำเข้าที่ ผลตรวจของฉัน หรือแพ็กเกจโอน");
         });
 
         const reviewer = getReviewerProfile();
@@ -544,9 +581,13 @@
           reviewerName.value = reviewer.name || "";
           reviewerRole.value = reviewer.role || "teacher-reviewer";
         }
+
+        const querySubmissionId = new URLSearchParams(window.location.search).get("submissionId");
         renderSubmissions();
         renderScore();
+        if (querySubmissionId) selectSubmission(querySubmissionId);
       })();
+      PaligoSidebar.autoInit();
     </script>
   </body>
 </html>

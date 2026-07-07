@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ตัวอย่าง Sidebar · Paligo</title>
+    <link rel="stylesheet" href="paligo-design-tokens.css" />
+    <link rel="stylesheet" href="sidebar-nav.css" />
+    <style>
+      .demo-grid {
+        display: grid;
+        gap: 16px;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        margin-top: 16px;
+      }
+
+      .demo-card {
+        background: var(--paligo-paper-bg);
+        border: 1px solid var(--paligo-paper-border);
+        border-radius: 12px;
+        box-shadow: 0 8px 24px var(--paligo-warm-shadow);
+        padding: 18px;
+      }
+
+      .demo-card h2 {
+        color: var(--paligo-exam-blue);
+        font-size: 16px;
+        margin: 0 0 8px;
+      }
+
+      .demo-card p {
+        color: var(--paligo-muted);
+        font-size: 14px;
+        margin: 0;
+      }
+
+      .demo-note {
+        background: var(--paligo-paper-bg);
+        border: 1px solid var(--paligo-paper-border-strong);
+        border-radius: 12px;
+        color: var(--paligo-ink);
+        font-size: 14px;
+        margin-top: 20px;
+        padding: 14px 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page-shell">
+      <p>เมนูใช้สีเล่มสมุด — sidebar พับเป็นค่าเริ่มต้นเพื่อเน้นเนื้อเรียน</p>
+      <div class="demo-grid">
+        <article class="demo-card">
+          <h2>เรียนวันนี้</h2>
+          <p>ฝึกแปลด้วยเสียง · อ่านหน้าเล่ม — อยู่บนสุดของเมนู</p>
+        </article>
+        <article class="demo-card">
+          <h2>ฝึกทำข้อสอบ</h2>
+          <p>เริ่มทำข้อสอบ · สมุดข้อสอบของฉัน</p>
+        </article>
+        <article class="demo-card">
+          <h2>ครูและผู้ตรวจ</h2>
+          <p>ตรวจข้อสอบ · ตารางคะแนน</p>
+        </article>
+        <article class="demo-card">
+          <h2>เตรียมเล่ม</h2>
+          <p>ตรวจหน้าเล่ม (QA) — หมวดล่างสุด ไม่รบกวน flow เรียน</p>
+        </article>
+      </div>
+      <p class="demo-note">ดู PRD เมนู: docs/navigation-and-shell-prd.md · แก้รายการเมนูที่ paligo-nav-config.js เท่านั้น</p>
+    </div>
+
+    <script src="paligo-nav-config.js"></script>
+    <script src="sidebar-nav.js"></script>
+    <script>
+      PaligoSidebar.autoInit();
+    </script>
+  </body>
+</html>

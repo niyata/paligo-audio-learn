@@ -3,19 +3,28 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Book Page QA — PDF vs HTML</title>
+    <title>ตรวจหน้าเล่ม · Paligo</title>
+    <link rel="stylesheet" href="paligo-design-tokens.css" />
+    <link rel="stylesheet" href="sidebar-nav.css" />
     <link rel="stylesheet" href="" data-book-css />
     <style>
       :root {
-        --page-bg: #f8f0e3;
-        --paper-bg: #fffaf0;
-        --card-border: rgba(74, 44, 10, 0.16);
-        --exam-blue: rgba(31, 45, 137, 0.76);
-        --ink: #343434;
-        --muted: rgba(52, 52, 52, 0.62);
-        --ok: #155724;
-        --warn: #856404;
-        --bad: #721c24;
+        --page-bg: #f2f2f7;
+        --paper-bg: #ffffff;
+        --card-border: rgba(60, 60, 67, 0.12);
+        --exam-blue: #1f2d89;
+        --accent: #007aff;
+        --ink: #1c1c1e;
+        --muted: rgba(60, 60, 67, 0.6);
+        --separator: rgba(60, 60, 67, 0.12);
+        --fill-tertiary: rgba(118, 118, 128, 0.12);
+        --grouped-bg: #ffffff;
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 16px;
+        --ok: #248a3d;
+        --warn: #9a6700;
+        --bad: #d70015;
       }
 
       * {
@@ -25,12 +34,12 @@
       body {
         background: var(--page-bg);
         color: var(--ink);
-        font-family: Sarabun, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-          sans-serif;
-        line-height: 1.45;
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Sarabun, sans-serif;
+        line-height: 1.47;
         margin: 0;
         min-height: 100vh;
-        padding: clamp(14px, 3vw, 34px);
+        padding: 0;
+        -webkit-font-smoothing: antialiased;
       }
 
       .qa-shell {
@@ -41,11 +50,11 @@
       }
 
       .qa-card {
-        background: rgba(255, 255, 255, 0.84);
+        background: var(--grouped-bg);
         border: 1px solid var(--card-border);
-        border-radius: 8px;
-        box-shadow: 0 18px 46px rgba(74, 44, 10, 0.1);
-        padding: 14px 16px;
+        border-radius: var(--radius-lg);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+        padding: 16px 18px;
       }
 
       .qa-title {
@@ -56,16 +65,281 @@
 
       .qa-note {
         color: var(--muted);
-        font-size: 0.88rem;
-        font-weight: 700;
+        font-size: 0.9375rem;
+        font-weight: 400;
         margin: 6px 0 0;
       }
 
-      .qa-controls {
-        align-items: end;
+      .qa-toolbar {
         display: grid;
+        gap: 14px;
+      }
+
+      .qa-toolbar-section {
+        background: var(--fill-tertiary);
+        border-radius: var(--radius-md);
+        padding: 12px 14px;
+      }
+
+      .qa-section-label {
+        color: var(--muted);
+        display: block;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        margin-bottom: 10px;
+        text-transform: none;
+      }
+
+      .qa-page-nav {
+        align-items: center;
+        display: flex;
         gap: 10px;
-        grid-template-columns: repeat(6, minmax(0, 1fr));
+        justify-content: center;
+      }
+
+      .qa-nav-btn {
+        align-items: center;
+        appearance: none;
+        background: var(--paper-bg);
+        border: 1px solid var(--separator);
+        border-radius: 999px;
+        color: var(--accent);
+        cursor: pointer;
+        display: inline-flex;
+        flex-shrink: 0;
+        font: inherit;
+        font-size: 1.375rem;
+        font-weight: 500;
+        height: 44px;
+        justify-content: center;
+        line-height: 1;
+        min-width: 44px;
+        padding: 0;
+        transition: background 0.15s ease, opacity 0.15s ease;
+        width: 44px;
+      }
+
+      .qa-nav-btn:hover:not(:disabled) {
+        background: rgba(0, 122, 255, 0.08);
+      }
+
+      .qa-nav-btn:disabled {
+        color: var(--muted);
+        cursor: not-allowed;
+        opacity: 0.35;
+      }
+
+      .qa-page-input-wrap {
+        align-items: center;
+        background: var(--paper-bg);
+        border: 1px solid var(--separator);
+        border-radius: var(--radius-sm);
+        display: inline-flex;
+        gap: 4px;
+        min-height: 44px;
+        padding: 0 12px;
+      }
+
+      .qa-page-input-wrap .qa-input {
+        background: transparent;
+        border: 0;
+        color: var(--ink);
+        font-size: 1.0625rem;
+        font-variant-numeric: tabular-nums;
+        font-weight: 600;
+        min-height: 42px;
+        padding: 0;
+        text-align: center;
+        width: 3.2rem;
+      }
+
+      .qa-page-total {
+        color: var(--muted);
+        font-size: 1.0625rem;
+        font-variant-numeric: tabular-nums;
+        font-weight: 500;
+        white-space: nowrap;
+      }
+
+      .qa-segmented {
+        background: rgba(118, 118, 128, 0.16);
+        border-radius: var(--radius-sm);
+        display: grid;
+        gap: 2px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        padding: 2px;
+      }
+
+      .qa-segment {
+        appearance: none;
+        background: transparent;
+        border: 0;
+        border-radius: calc(var(--radius-sm) - 2px);
+        color: var(--ink);
+        cursor: pointer;
+        font: inherit;
+        font-size: 0.875rem;
+        font-weight: 500;
+        line-height: 1.2;
+        min-height: 36px;
+        padding: 8px 10px;
+        transition: background 0.15s ease, box-shadow 0.15s ease;
+      }
+
+      .qa-segment.is-selected {
+        background: var(--paper-bg);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+        font-weight: 600;
+      }
+
+      .qa-setting-list {
+        display: grid;
+      }
+
+      .qa-setting-row {
+        align-items: stretch;
+        border-top: 1px solid var(--separator);
+        display: grid;
+        gap: 8px;
+        min-height: 44px;
+        padding: 10px 0;
+      }
+
+      .qa-setting-row:first-child {
+        border-top: 0;
+        padding-top: 0;
+      }
+
+      .qa-setting-row[hidden] {
+        display: none;
+      }
+
+      .qa-setting-head {
+        align-items: baseline;
+        display: flex;
+        gap: 12px;
+        justify-content: space-between;
+      }
+
+      .qa-setting-label {
+        color: var(--ink);
+        font-size: 0.9375rem;
+        font-weight: 400;
+      }
+
+      .qa-setting-value {
+        color: var(--muted);
+        font-size: 0.9375rem;
+        font-variant-numeric: tabular-nums;
+        font-weight: 500;
+        white-space: nowrap;
+      }
+
+      .qa-switch-row {
+        align-items: center;
+        border-top: 1px solid var(--separator);
+        display: flex;
+        gap: 12px;
+        justify-content: space-between;
+        min-height: 44px;
+        padding: 10px 0;
+      }
+
+      .qa-switch-row:first-child {
+        border-top: 0;
+        padding-top: 0;
+      }
+
+      .qa-switch {
+        cursor: pointer;
+        display: inline-grid;
+        flex-shrink: 0;
+        grid-template-areas: "input track";
+        position: relative;
+      }
+
+      .qa-switch input {
+        grid-area: input;
+        height: 31px;
+        margin: 0;
+        opacity: 0;
+        width: 51px;
+      }
+
+      .qa-switch-track {
+        background: rgba(120, 120, 128, 0.16);
+        border-radius: 999px;
+        grid-area: track;
+        height: 31px;
+        pointer-events: none;
+        position: relative;
+        transition: background 0.2s ease;
+        width: 51px;
+      }
+
+      .qa-switch-track::after {
+        background: #ffffff;
+        border-radius: 50%;
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15), 0 0 0 0.5px rgba(0, 0, 0, 0.04);
+        content: "";
+        height: 27px;
+        left: 2px;
+        position: absolute;
+        top: 2px;
+        transition: transform 0.2s ease;
+        width: 27px;
+      }
+
+      .qa-switch input:checked + .qa-switch-track {
+        background: var(--accent);
+      }
+
+      .qa-switch input:checked + .qa-switch-track::after {
+        transform: translateX(20px);
+      }
+
+      .qa-select {
+        appearance: none;
+        background: var(--paper-bg)
+          url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23636366' d='M1.5 1.5 6 6l4.5-4.5'/%3E%3C/svg%3E")
+          no-repeat right 12px center;
+        border: 1px solid var(--separator);
+        border-radius: var(--radius-sm);
+        color: var(--ink);
+        font: inherit;
+        font-size: 0.9375rem;
+        font-weight: 500;
+        min-height: 44px;
+        padding: 0 36px 0 12px;
+        width: 100%;
+      }
+
+      .qa-range {
+        accent-color: var(--accent);
+        margin: 0;
+        width: 100%;
+      }
+
+      .qa-context-action {
+        display: flex;
+        justify-content: center;
+        margin-top: 10px;
+      }
+
+      .qa-context-action[hidden] {
+        display: none;
+      }
+
+      .qa-controls {
+        display: none;
+      }
+
+      .qa-field[data-overlay-field][hidden],
+      .qa-field[data-font-weight-field][hidden],
+      .qa-setting-row[data-overlay-field][hidden],
+      .qa-setting-row[data-font-weight-field][hidden] {
+        display: none;
       }
 
       .qa-field {
@@ -75,23 +349,22 @@
 
       .qa-label {
         color: var(--muted);
-        font-size: 0.78rem;
-        font-weight: 800;
+        font-size: 0.8125rem;
+        font-weight: 600;
       }
 
       .qa-input,
-      .qa-button,
-      .qa-select {
+      .qa-button {
         appearance: none;
         background: var(--paper-bg);
-        border: 1px solid rgba(31, 45, 137, 0.22);
-        border-radius: 6px;
-        color: var(--exam-blue);
+        border: 1px solid var(--separator);
+        border-radius: var(--radius-sm);
+        color: var(--ink);
         font: inherit;
-        font-size: 0.86rem;
-        font-weight: 800;
-        min-height: 36px;
-        padding: 7px 10px;
+        font-size: 0.9375rem;
+        font-weight: 500;
+        min-height: 44px;
+        padding: 10px 12px;
       }
 
       .qa-button {
@@ -100,26 +373,31 @@
 
       .qa-button[disabled] {
         cursor: not-allowed;
-        opacity: 0.45;
+        opacity: 0.35;
       }
 
       .qa-button.is-active {
-        background: rgba(31, 45, 137, 0.12);
+        background: rgba(0, 122, 255, 0.12);
+        border-color: rgba(0, 122, 255, 0.28);
+        color: var(--accent);
       }
 
       .qa-status-row {
         align-items: center;
+        border-top: 1px solid var(--separator);
         display: flex;
         flex-wrap: wrap;
-        gap: 8px 14px;
+        gap: 10px 16px;
         justify-content: space-between;
-        margin-top: 10px;
+        margin-top: 4px;
+        padding-top: 14px;
       }
 
       .qa-status {
-        color: var(--muted);
-        font-size: 0.84rem;
-        font-weight: 700;
+        color: var(--ink);
+        font-size: 0.9375rem;
+        font-weight: 500;
+        margin: 0;
       }
 
       .qa-progress {
@@ -130,23 +408,23 @@
 
       .qa-chip {
         border-radius: 999px;
-        font-size: 0.78rem;
-        font-weight: 800;
-        padding: 4px 10px;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        padding: 5px 11px;
       }
 
       .qa-chip--pending {
-        background: #fff3cd;
+        background: rgba(255, 204, 0, 0.18);
         color: var(--warn);
       }
 
       .qa-chip--verified {
-        background: #d4edda;
+        background: rgba(52, 199, 89, 0.16);
         color: var(--ok);
       }
 
       .qa-chip--issue {
-        background: #f8d7da;
+        background: rgba(255, 59, 48, 0.14);
         color: var(--bad);
       }
 
@@ -265,6 +543,45 @@
         max-width: none;
       }
 
+      .qa-html-host .book-page.book-page--clean,
+      .qa-overlay-stack .book-page.book-page--clean {
+        background: #fff;
+      }
+
+      .qa-html-host .book-page .book-page-bg,
+      .qa-overlay-stack .book-page .book-page-bg {
+        transform-origin: top center;
+      }
+
+      .qa-html-host .book-page .book-page-text,
+      .qa-overlay-stack .book-page .book-page-text {
+        transform-origin: top center;
+      }
+
+      .qa-html-host .book-page.book-page--clean .book-page-bg,
+      .qa-overlay-stack .book-page.book-page--clean .book-page-bg {
+        opacity: 0;
+        pointer-events: none;
+        visibility: hidden;
+      }
+
+      .qa-html-host .book-page .book-token,
+      .qa-overlay-stack .book-page .book-token {
+        -webkit-font-smoothing: antialiased;
+        font-weight: var(--book-token-weight, 400);
+        text-rendering: geometricPrecision;
+      }
+
+      .qa-html-host .book-page.book-page--clean .book-token,
+      .qa-overlay-stack .book-page.book-page--clean .book-token {
+        color: #1a1a1a;
+      }
+
+      .qa-html-host .book-page:not(.book-page--clean) .book-token,
+      .qa-overlay-stack .book-page:not(.book-page--clean) .book-token {
+        color: transparent;
+      }
+
       .qa-overlay-stack {
         align-items: flex-start;
         display: none;
@@ -316,7 +633,6 @@
       }
 
       @media (max-width: 980px) {
-        .qa-controls,
         .qa-metrics {
           grid-template-columns: 1fr 1fr;
         }
@@ -335,30 +651,84 @@
       </header>
 
       <section class="qa-card" aria-label="ตัวควบคุม">
-        <div class="qa-controls">
-          <button class="qa-button" type="button" data-page-prev>ก่อนหน้า</button>
-          <button class="qa-button" type="button" data-page-next>ถัดไป</button>
-          <label class="qa-field">
-            <span class="qa-label">หน้า</span>
-            <input class="qa-input" type="number" min="1" value="1" data-page-input />
-          </label>
-          <label class="qa-field">
-            <span class="qa-label">โหมด</span>
-            <select class="qa-select" data-view-mode>
+        <div class="qa-toolbar">
+          <div class="qa-toolbar-section" aria-label="การนำทางหน้า">
+            <div class="qa-page-nav">
+              <button class="qa-nav-btn" type="button" data-page-prev aria-label="หน้าก่อนหน้า">‹</button>
+              <label class="qa-page-input-wrap">
+                <span class="qa-label" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0)">หน้า</span>
+                <input class="qa-input" type="number" min="1" value="1" data-page-input aria-label="หมายเลขหน้า" />
+                <span class="qa-page-total" data-page-total>/ —</span>
+              </label>
+              <button class="qa-nav-btn" type="button" data-page-next aria-label="หน้าถัดไป">›</button>
+            </div>
+          </div>
+
+          <div class="qa-toolbar-section" aria-label="โหมดการดู">
+            <span class="qa-section-label">โหมดการดู</span>
+            <div class="qa-segmented" role="tablist" aria-label="เลือกโหมดการเทียบ">
+              <button class="qa-segment is-selected" type="button" role="tab" data-view-segment="split" aria-selected="true">ขนาน</button>
+              <button class="qa-segment" type="button" role="tab" data-view-segment="overlay" aria-selected="false">ซ้อนทับ</button>
+              <button class="qa-segment" type="button" role="tab" data-view-segment="blink" aria-selected="false">สลับ</button>
+            </div>
+            <select class="qa-select" data-view-mode hidden aria-hidden="true" tabindex="-1">
               <option value="split">เทียบคู่ขนาน</option>
               <option value="overlay">ซ้อนทับ</option>
               <option value="blink">สลับกระพริบ</option>
             </select>
-          </label>
-          <label class="qa-field">
-            <span class="qa-label">ความโปร่ง HTML</span>
-            <input class="qa-input" type="range" min="0" max="100" value="55" data-overlay-opacity />
-          </label>
-          <button class="qa-button" type="button" data-blink-toggle hidden>หยุดสลับ</button>
+            <div class="qa-context-action" data-blink-action hidden>
+              <button class="qa-button" type="button" data-blink-toggle>หยุดสลับ</button>
+            </div>
+          </div>
+
+          <div class="qa-toolbar-section" aria-label="การแสดงผล">
+            <span class="qa-section-label">การแสดงผล</span>
+            <div class="qa-setting-list">
+              <div class="qa-switch-row">
+                <span class="qa-setting-label">พื้นหลังสแกน HTML</span>
+                <label class="qa-switch">
+                  <input type="checkbox" data-html-background />
+                  <span class="qa-switch-track" aria-hidden="true"></span>
+                </label>
+              </div>
+              <div class="qa-setting-row" data-overlay-field hidden>
+                <div class="qa-setting-head">
+                  <span class="qa-setting-label">ความโปร่ง HTML</span>
+                  <span class="qa-setting-value" data-overlay-opacity-value>55%</span>
+                </div>
+                <input class="qa-range" type="range" min="0" max="100" value="55" data-overlay-opacity aria-label="ความโปร่ง HTML ในโหมดซ้อนทับ" />
+              </div>
+            </div>
+          </div>
+
+          <div class="qa-toolbar-section" aria-label="ตัวอักษร">
+            <span class="qa-section-label">ตัวอักษร · ขนาดขยายทั้งหน้า HTML (รวมสแกนและข้อความ)</span>
+            <div class="qa-setting-list">
+              <div class="qa-setting-row">
+                <span class="qa-setting-label">ฟอนต์ HTML</span>
+                <select class="qa-select" data-html-font aria-label="เลือกฟอนต์ HTML"></select>
+              </div>
+              <div class="qa-setting-row">
+                <div class="qa-setting-head">
+                  <span class="qa-setting-label">ขนาดฟอนต์</span>
+                  <span class="qa-setting-value" data-font-scale-value>100%</span>
+                </div>
+                <input class="qa-range" type="range" min="70" max="150" step="5" value="100" data-html-font-scale aria-label="ปรับขนาดฟอนต์" />
+              </div>
+              <div class="qa-setting-row" data-font-weight-field>
+                <div class="qa-setting-head">
+                  <span class="qa-setting-label">ความหนาข้อความ</span>
+                  <span class="qa-setting-value" data-font-weight-value>400</span>
+                </div>
+                <input class="qa-range" type="range" min="300" max="600" step="50" value="400" data-html-font-weight aria-label="ปรับความหนาข้อความ" />
+              </div>
+            </div>
+          </div>
         </div>
+
         <div class="qa-status-row">
           <p class="qa-status" data-qa-status>เปิดด้วย ?manifest=output/4-MT-29/manifest.json</p>
-          <div class="qa-progress" data-progress-chips></div>
+          <div class="qa-progress" data-progress-chips aria-label="ความคืบหน้าการตรวจ"></div>
         </div>
       </section>
 
@@ -429,6 +799,7 @@
       </section>
     </main>
 
+    <script src="book-fonts.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script>
       (() => {
@@ -445,9 +816,13 @@
           pagePrev: document.querySelector("[data-page-prev]"),
           pageNext: document.querySelector("[data-page-next]"),
           pageInput: document.querySelector("[data-page-input]"),
+          pageTotal: document.querySelector("[data-page-total]"),
           viewMode: document.querySelector("[data-view-mode]"),
+          viewSegments: [...document.querySelectorAll("[data-view-segment]")],
           overlayOpacity: document.querySelector("[data-overlay-opacity]"),
+          overlayOpacityValue: document.querySelector("[data-overlay-opacity-value]"),
           blinkToggle: document.querySelector("[data-blink-toggle]"),
+          blinkAction: document.querySelector("[data-blink-action]"),
           compareRoot: document.querySelector("[data-compare-root]"),
           pdfCanvas: document.querySelector("[data-pdf-canvas]"),
           pdfOverlayCanvas: document.querySelector("[data-pdf-overlay-canvas]"),
@@ -460,6 +835,14 @@
           verifyNote: document.querySelector("[data-verify-note]"),
           exportVerification: document.querySelector("[data-export-verification]"),
           importVerification: document.querySelector("[data-import-verification]"),
+          htmlBackground: document.querySelector("[data-html-background]"),
+          htmlFontWeight: document.querySelector("[data-html-font-weight]"),
+          htmlFontScale: document.querySelector("[data-html-font-scale]"),
+          htmlFontSelect: document.querySelector("[data-html-font]"),
+          fontWeightValue: document.querySelector("[data-font-weight-value]"),
+          fontScaleValue: document.querySelector("[data-font-scale-value]"),
+          fontWeightField: document.querySelector("[data-font-weight-field]"),
+          overlayField: document.querySelector("[data-overlay-field]"),
           statusButtons: [...document.querySelectorAll("[data-set-status]")],
           bookCss: document.querySelector("[data-book-css]"),
         };
@@ -472,9 +855,47 @@
         let currentPage = 1;
         let blinkTimer = null;
         let blinkVisible = true;
+        let showHtmlBackground = localStorage.getItem("paligo-qa-html-background") === "1";
+        let htmlTokenWeight = Number(localStorage.getItem("paligo-qa-html-font-weight")) || 400;
+        let htmlFontScale = window.PaligoBookFonts?.getStoredScale?.() || 100;
+
+        if (els.htmlBackground) {
+          els.htmlBackground.checked = showHtmlBackground;
+        }
+        if (els.htmlFontWeight) {
+          els.htmlFontWeight.value = String(htmlTokenWeight);
+          if (els.fontWeightValue) {
+            els.fontWeightValue.textContent = String(htmlTokenWeight);
+          }
+        }
+        if (els.htmlFontScale) {
+          els.htmlFontScale.value = String(htmlFontScale);
+          if (els.fontScaleValue) {
+            els.fontScaleValue.textContent = `${htmlFontScale}%`;
+          }
+        }
+        if (els.overlayOpacityValue && els.overlayOpacity) {
+          els.overlayOpacityValue.textContent = `${els.overlayOpacity.value}%`;
+        }
+
+        const syncViewSegments = (mode) => {
+          els.viewSegments.forEach((button) => {
+            const active = button.dataset.viewSegment === mode;
+            button.classList.toggle("is-selected", active);
+            button.setAttribute("aria-selected", active ? "true" : "false");
+          });
+          if (els.viewMode) {
+            els.viewMode.value = mode;
+          }
+        };
+
+        syncViewSegments(els.viewMode?.value || "split");
 
         pdfjsLib.GlobalWorkerOptions.workerSrc =
           "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+        const toThaiDigits = (value) =>
+          String(value).replace(/[0-9]/g, (digit) => "๐๑๒๓๔๕๖๗๘๙"[Number(digit)]);
 
         const resolveQueryParam = (name) => {
           const params = new URLSearchParams(window.location.search);
@@ -623,7 +1044,7 @@
           if (entry && footnote) {
             const meta = footnote.querySelector(".book-verify-meta");
             if (meta) {
-              meta.textContent = `หน้า ${pageNo} · ${entry.tokenCount || 0} คำ · ${manifest.bookId}`;
+              meta.textContent = `หน้า ${toThaiDigits(pageNo)} · ${toThaiDigits(entry.tokenCount || 0)} คำ · ${manifest.bookId}`;
             }
           }
         };
@@ -693,11 +1114,31 @@
             .join(" ");
         };
 
-        const applyOverlayOpacity = () => {
-          const opacity = Number(els.overlayOpacity.value) / 100;
+        const applyBookFont = () => {
+          window.PaligoBookFonts?.applyToRoots([els.htmlHost, els.htmlOverlayHost], els.htmlFontSelect?.value);
+        };
+
+        const applyBookScale = () => {
+          window.PaligoBookFonts?.applyBookTokenScale?.([els.htmlHost, els.htmlOverlayHost], htmlFontScale);
+        };
+
+        const applyHtmlPresentation = () => {
+          const mode = els.viewMode.value;
+          const overlayOpacity = mode === "overlay" ? Number(els.overlayOpacity.value) / 100 : 1;
+
+          if (els.overlayField) {
+            els.overlayField.hidden = mode !== "overlay";
+          }
+          if (els.fontWeightField) {
+            els.fontWeightField.hidden = false;
+          }
+
           [els.htmlHost, els.htmlOverlayHost].forEach((host) => {
             const page = host?.querySelector(".book-page");
-            if (page) page.style.opacity = String(opacity);
+            if (!page) return;
+            page.classList.toggle("book-page--clean", !showHtmlBackground);
+            page.style.opacity = String(overlayOpacity);
+            page.style.setProperty("--book-token-weight", String(htmlTokenWeight));
           });
         };
 
@@ -706,7 +1147,9 @@
             clearInterval(blinkTimer);
             blinkTimer = null;
           }
-          els.blinkToggle.hidden = true;
+          if (els.blinkAction) {
+            els.blinkAction.hidden = true;
+          }
           els.htmlHost.style.visibility = "visible";
           els.pdfCanvas.style.visibility = "visible";
         };
@@ -718,14 +1161,17 @@
             els.htmlHost.style.visibility = blinkVisible ? "visible" : "hidden";
             els.pdfCanvas.style.visibility = blinkVisible ? "hidden" : "visible";
           }, 700);
-          els.blinkToggle.hidden = false;
+          if (els.blinkAction) {
+            els.blinkAction.hidden = false;
+          }
         };
 
         const setViewMode = (mode) => {
           stopBlink();
+          syncViewSegments(mode);
           els.compareRoot.classList.toggle("is-overlay", mode === "overlay");
           if (mode === "blink") startBlink();
-          applyOverlayOpacity();
+          applyHtmlPresentation();
         };
 
         const mountBookPage = (host, html, entry) => {
@@ -759,7 +1205,9 @@
             updateHtmlFootnote(host, currentPage);
           });
 
-          applyOverlayOpacity();
+          applyHtmlPresentation();
+          applyBookFont();
+          applyBookScale();
           return extractHtmlText(els.htmlHost);
         };
 
@@ -786,6 +1234,9 @@
 
           els.pageInput.value = String(currentPage);
           els.pageInput.max = String(manifest.pageCount || manifest.pages.length);
+          if (els.pageTotal) {
+            els.pageTotal.textContent = `/ ${toThaiDigits(manifest.pageCount || manifest.pages.length)}`;
+          }
           els.pagePrev.disabled = currentPage <= 1;
           els.pageNext.disabled = currentPage >= (manifest.pageCount || manifest.pages.length);
           els.status.textContent = `${manifest.title || manifest.bookId} · หน้า ${currentPage} / ${manifest.pageCount}`;
@@ -873,10 +1324,35 @@
           renderPage();
         });
 
+        els.viewSegments.forEach((button) => {
+          button.addEventListener("click", () => setViewMode(button.dataset.viewSegment));
+        });
+
         els.viewMode?.addEventListener("change", () => setViewMode(els.viewMode.value));
-        els.overlayOpacity?.addEventListener("input", applyOverlayOpacity);
+        els.overlayOpacity?.addEventListener("input", () => {
+          if (els.overlayOpacityValue) {
+            els.overlayOpacityValue.textContent = `${els.overlayOpacity.value}%`;
+          }
+          applyHtmlPresentation();
+        });
+        els.htmlBackground?.addEventListener("change", () => {
+          showHtmlBackground = Boolean(els.htmlBackground.checked);
+          localStorage.setItem("paligo-qa-html-background", showHtmlBackground ? "1" : "0");
+          applyHtmlPresentation();
+        });
+        els.htmlFontWeight?.addEventListener("input", () => {
+          htmlTokenWeight = Number(els.htmlFontWeight.value) || 400;
+          if (els.fontWeightValue) {
+            els.fontWeightValue.textContent = String(htmlTokenWeight);
+          }
+          localStorage.setItem("paligo-qa-html-font-weight", String(htmlTokenWeight));
+          applyHtmlPresentation();
+        });
+        window.PaligoBookFonts?.bindScaleRange?.(els.htmlFontScale, els.fontScaleValue, (scale) => {
+          htmlFontScale = scale;
+          applyBookScale();
+        });
         els.blinkToggle?.addEventListener("click", () => {
-          els.viewMode.value = "split";
           setViewMode("split");
         });
 
@@ -907,6 +1383,8 @@
           await renderPage();
         });
 
+        window.PaligoBookFonts?.bindSelect(els.htmlFontSelect, () => [els.htmlHost, els.htmlOverlayHost]);
+
         const manifestParam = resolveQueryParam("manifest");
         if (manifestParam) {
           loadManifest(manifestParam).catch((error) => {
@@ -918,5 +1396,8 @@
         }
       })();
     </script>
+    <script src="paligo-nav-config.js"></script>
+    <script src="sidebar-nav.js"></script>
+    <script>PaligoSidebar.autoInit();</script>
   </body>
 </html>

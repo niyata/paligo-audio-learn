@@ -1,0 +1,54 @@
+/**
+ * Paligo design tokens — สีและ spacing จาก PRD เล่มสมุด (ruled-lines / book pages)
+ * ใช้ร่วมกับ sidebar-nav.css และหน้าเรียนทุกหน้า
+ */
+:root {
+  --paligo-page-bg: #f8f0e3;
+  --paligo-paper-bg: #fffaf0;
+  --paligo-paper-border: rgba(74, 44, 10, 0.16);
+  --paligo-paper-border-strong: rgba(74, 44, 10, 0.22);
+  --paligo-exam-blue: #1f2d89;
+  --paligo-exam-blue-soft: rgba(31, 45, 137, 0.1);
+  --paligo-exam-blue-muted: rgba(31, 45, 137, 0.72);
+  --paligo-ink: #343434;
+  --paligo-muted: rgba(52, 52, 52, 0.62);
+  --paligo-warm-shadow: rgba(74, 44, 10, 0.1);
+  --paligo-focus-ring: rgba(31, 45, 137, 0.35);
+
+  --sidebar-width-expanded: 260px;
+  --sidebar-width-collapsed: 64px;
+  --sidebar-current-width: var(--sidebar-width-expanded);
+  --sidebar-bg: #f0e8d6;
+  --sidebar-bg-hover: rgba(31, 45, 137, 0.06);
+  --sidebar-bg-active: rgba(31, 45, 137, 0.11);
+  --sidebar-border: var(--paligo-paper-border);
+  --sidebar-text: var(--paligo-ink);
+  --sidebar-muted: var(--paligo-muted);
+  --sidebar-accent: var(--paligo-exam-blue);
+  --sidebar-transition: width 0.3s ease-in-out, transform 0.3s ease-in-out;
+  --topbar-height: 52px;
+}
+
+.paligo-app {
+  background: var(--paligo-page-bg);
+  color: var(--paligo-ink);
+}
+
+.paligo-main {
+  background: var(--paligo-page-bg);
+}
+
+.paligo-topbar {
+  background: color-mix(in srgb, var(--paligo-paper-bg) 92%, transparent);
+  border-bottom-color: var(--paligo-paper-border);
+  color: var(--paligo-ink);
+}
+
+.paligo-topbar__menu {
+  border-color: var(--paligo-paper-border);
+  color: var(--paligo-exam-blue);
+}
+
+.paligo-topbar__hint {
+  color: var(--paligo-muted);
+}
