@@ -1,0 +1,28 @@
+name: Epic
+description: กลุ่มงานใหญ่ที่แตกเป็น stories/tasks ได้
+title: "[Epic] "
+labels:
+  - type:epic
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: เป้าหมายธุรกิจหรือผลิตภัณฑ์
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      placeholder: |
+        In scope:
+        - …
+        Out of scope:
+        - …
+  - type: textarea
+    id: child_issues
+    attributes:
+      label: Child Issues
+      description: ลิงก์ issue ย่อย (สร้างแล้วค่อยเติม)
+      placeholder: "- #…"

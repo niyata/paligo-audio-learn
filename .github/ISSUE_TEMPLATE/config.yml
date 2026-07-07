@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Paligo Scrum Board
+    url: https://github.com/users/niyata/projects/14
+    about: ดู backlog, sprint และสถานะงานทั้งหมด
+  - name: Agile Workflow (docs)
+    url: https://github.com/niyata/paligo-audio-learn/blob/new-dev/docs/agile/SCRUM-WORKFLOW.md
+    about: วิธีทำงานร่วมกัน — คุณ · Cursor AI · AI ตัวอื่น

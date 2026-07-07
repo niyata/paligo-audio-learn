@@ -1,0 +1,53 @@
+name: Bug
+description: พฤติกรรมผิดจากที่คาด
+title: "[Bug] "
+labels:
+  - bug
+body:
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - P0 — ใช้งานไม่ได้
+        - P1 — ใช้ได้แต่เสีย UX มาก
+        - P2 — minor
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - area:exam
+        - area:audio
+        - area:nav
+        - area:pipeline
+        - area:docs
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to Reproduce
+      placeholder: |
+        1. เปิด …
+        2. กด …
+        3. เห็น …
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser / OS
+      placeholder: Safari macOS, Chrome Android, …

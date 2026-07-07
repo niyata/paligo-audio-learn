@@ -1,0 +1,126 @@
+name: Scrum stale In Progress check
+
+on:
+  schedule:
+    # 09:00 ICT (02:00 UTC) every day
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+  projects: read
+
+env:
+  PROJECT_OWNER: niyata
+  PROJECT_NUMBER: "14"
+  STALE_DAYS: "3"
+
+jobs:
+  check-stale-in-progress:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Find stale In Progress items on Scrum board
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = process.env.PROJECT_OWNER;
+            const projectNumber = Number(process.env.PROJECT_NUMBER);
+            const staleDays = Number(process.env.STALE_DAYS);
+            const staleMs = staleDays * 24 * 60 * 60 * 1000;
+            const now = Date.now();
+            const marker = "<!-- scrum-stale-bot -->";
+
+            const query = `
+              query($login: String!, $number: Int!) {
+                user(login: $login) {
+                  projectV2(number: $number) {
+                    title
+                    items(first: 100) {
+                      nodes {
+                        updatedAt
+                        fieldValues(first: 20) {
+                          nodes {
+                            ... on ProjectV2ItemFieldSingleSelectValue {
+                              name
+                              field { ... on ProjectV2SingleSelectField { name } }
+                            }
+                          }
+                        }
+                        content {
+                          ... on Issue {
+                            number
+                            title
+                            url
+                            state
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            `;
+
+            const data = await github.graphql(query, { login: owner, number: projectNumber });
+            const project = data.user?.projectV2;
+            if (!project) {
+              core.setFailed(`Project ${owner}/${projectNumber} not found`);
+              return;
+            }
+
+            const stale = [];
+            for (const item of project.items.nodes) {
+              const issue = item.content;
+              if (!issue || issue.state !== "OPEN") continue;
+
+              const workflow = item.fieldValues.nodes.find(
+                (v) => v.field?.name === "Workflow"
+              )?.name;
+              if (workflow !== "In Progress") continue;
+
+              const updatedAt = new Date(item.updatedAt).getTime();
+              if (now - updatedAt < staleMs) continue;
+
+              stale.push({ ...issue, updatedAt: item.updatedAt, days: Math.floor((now - updatedAt) / staleMs) });
+            }
+
+            core.summary.addHeading(`Paligo Scrum — stale In Progress (>${staleDays}d)`);
+            if (stale.length === 0) {
+              core.summary.addRaw("No stale items. ✅");
+              return;
+            }
+
+            for (const issue of stale) {
+              core.summary.addRaw(`- [#${issue.number}](${issue.url}) — ${issue.title} (${issue.days}d)`);
+
+              const comments = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                per_page: 100,
+              });
+              const alreadyNotified = comments.data.some((c) => c.body?.includes(marker));
+              if (alreadyNotified) continue;
+
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: [
+                  marker,
+                  "## ⏰ Scrum reminder",
+                  "",
+                  `Issue อยู่คอลัมน์ **In Progress** บน [Paligo Scrum Board](https://github.com/users/${owner}/projects/${projectNumber}) มากกว่า **${staleDays} วัน** แล้ว (อัปเดตล่าสุด: ${issue.updatedAt}).`,
+                  "",
+                  "**ตัวเลือก:**",
+                  "- อัปเดตความคืบหน้า / Handoff comment",
+                  "- ย้ายกลับ **Ready** หรือ **Blocked**",
+                  "- ปิดถ้าไม่ทำแล้ว",
+                  "",
+                  "_Automated by `.github/workflows/scrum-stale-check.yml`_",
+                ].join("\n"),
+              });
+            }
+
+            core.summary.addRaw(`\nNotified on ${stale.length} issue(s).`);

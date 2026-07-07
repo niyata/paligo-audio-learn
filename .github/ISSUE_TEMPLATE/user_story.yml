@@ -1,0 +1,67 @@
+name: User Story
+description: ฟีเจอร์หรือการปรับปรุงที่มี business value ชัดเจน
+title: "[Story] "
+labels:
+  - type:story
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ใช้รูปแบบ: **As a** … **I want** … **So that** …
+        งานจะปรากฏบน [Paligo Scrum Board](https://github.com/users/niyata/projects/14)
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - P0 — ต้องทำก่อน (blocker / release)
+        - P1 — สำคัญ sprint นี้
+        - P2 — ทำเมื่อว่าง
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - area:exam
+        - area:audio
+        - area:nav
+        - area:pipeline
+        - area:docs
+    validations:
+      required: true
+  - type: dropdown
+    id: agent
+    attributes:
+      label: ใครรับงาน (Agent)
+      options:
+        - agent:human
+        - agent:cursor-ai
+        - agent:codex-ai
+        - agent:other-ai
+        - unassigned
+    validations:
+      required: true
+  - type: textarea
+    id: user_story
+    attributes:
+      label: User Story
+      placeholder: "As a นักเรียน, I want ดู stamp บนกระดาษ, So that เข้าใจผลตรวจได้ทันที"
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      description: รายการที่ต้องผ่านถึงจะ Done (checkbox)
+      placeholder: |
+        - [ ] …
+        - [ ] …
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes / Links
+      description: PRD, audit doc, screenshot
