@@ -1146,6 +1146,7 @@
     <script>
       (() => {
         const profileStorageKey = "paligo-exam-student-profile-v1";
+        const profileDraftStorageKey = "paligo-exam-student-profile-draft-v1";
         const numberedLinePattern = /^\s*(\d+)(?:[.)])?\s*(.*)$/;
         const numberedLinePrefix = " ".repeat(4);
         const numberedLineGap = " ".repeat(23);
@@ -1246,6 +1247,52 @@
           localStorage.setItem(profileStorageKey, JSON.stringify(profile));
         };
 
+        const loadProfileDraft = () => {
+          try {
+            const raw = localStorage.getItem(profileDraftStorageKey);
+            return raw ? JSON.parse(raw) : null;
+          } catch {
+            return null;
+          }
+        };
+
+        const readProfileFormValues = () => {
+          if (!profileForm) return null;
+
+          const formData = new FormData(profileForm);
+          return {
+            userRole: String(formData.get("userRole") || "student"),
+            prefix: String(formData.get("prefix") || ""),
+            firstName: String(formData.get("firstName") || "").trim(),
+            lastName: String(formData.get("lastName") || "").trim(),
+            monasticName: String(formData.get("monasticName") || "").trim(),
+            grade: String(formData.get("grade") || "4"),
+            teacherName: String(formData.get("teacherName") || "").trim(),
+            teacherRole: String(formData.get("teacherRole") || "teacher-reviewer"),
+            deliveryMethod: String(formData.get("deliveryMethod") || "line"),
+          };
+        };
+
+        const persistProfileDraft = () => {
+          const values = readProfileFormValues();
+          if (!values) return;
+
+          try {
+            localStorage.setItem(
+              profileDraftStorageKey,
+              JSON.stringify({ ...values, savedAt: new Date().toISOString() })
+            );
+          } catch {
+            /* ignore quota / privacy mode */
+          }
+        };
+
+        let profileDraftTimer;
+        const scheduleProfileDraftSave = () => {
+          clearTimeout(profileDraftTimer);
+          profileDraftTimer = setTimeout(persistProfileDraft, 250);
+        };
+
         const profileValidationMessages = {
           userRole: "กรุณาเลือกบทบาทผู้ใช้",
           prefix: "กรุณาเลือกคำนำหน้า",
@@ -1280,8 +1327,15 @@
         };
 
         const clearProfileFieldValidity = (name) => {
-          Array.from(profileForm?.elements[name] || []).forEach?.((field) => field.setCustomValidity(""));
-          if (profileForm?.elements[name]?.setCustomValidity) profileForm.elements[name].setCustomValidity("");
+          const field = profileForm?.elements[name];
+          if (!field) return;
+
+          if (isProfileRadioGroup(field)) {
+            Array.from(field).forEach((item) => item.setCustomValidity(""));
+          } else if (typeof field.setCustomValidity === "function") {
+            field.setCustomValidity("");
+          }
+
           clearProfileFieldInvalidState(name);
         };
 
@@ -1317,6 +1371,7 @@
           if (event.target?.name) {
             clearProfileFieldValidity(event.target.name);
             clearProfileError();
+            scheduleProfileDraftSave();
           }
         });
 
@@ -1324,10 +1379,12 @@
           if (event.target?.name) {
             clearProfileFieldValidity(event.target.name);
             clearProfileError();
+            scheduleProfileDraftSave();
           }
         });
 
         const dismissProfileWizard = () => {
+          persistProfileDraft();
           clearProfileError();
           document.body.classList.remove("needs-profile");
         };
@@ -1341,14 +1398,20 @@
 
           const userRole = profileForm.querySelector(`[name="userRole"][value="${profile.userRole || "student"}"]`);
           if (userRole) userRole.checked = true;
-          const prefix = profileForm.querySelector(`[name="prefix"][value="${profile.prefix}"]`);
+          const prefix = profile.prefix
+            ? profileForm.querySelector(`[name="prefix"][value="${profile.prefix}"]`)
+            : null;
           if (prefix) prefix.checked = true;
           ["firstName", "lastName", "monasticName", "teacherName", "teacherRole", "grade", "deliveryMethod"].forEach((name) => {
-            if (profile[name] && profileForm.elements[name]) profileForm.elements[name].value = profile[name];
+            if (profile[name] != null && profileForm.elements[name]) profileForm.elements[name].value = profile[name];
           });
         };
 
         let studentProfile = loadStudentProfile();
+        const profileDraft = loadProfileDraft();
+        if (studentProfile || profileDraft) {
+          setProfileFormValues(studentProfile || profileDraft);
+        }
         const currentProfileGrade = studentProfile?.grade || "4";
         const gradePicker = document.querySelector('[data-exam-picker="grade"]');
         if (gradePicker) {
@@ -1498,29 +1561,20 @@
           });
         });
 
-        profileForm?.addEventListener("submit", (event) => {
-          event.preventDefault();
-          if (!validateProfileForm()) return;
+        const saveProfileFromForm = () => {
+          if (!validateProfileForm()) return false;
 
-          const formData = new FormData(profileForm);
           studentProfile = {
-            userRole: String(formData.get("userRole") || "student"),
-            prefix: String(formData.get("prefix") || ""),
-            firstName: String(formData.get("firstName") || "").trim(),
-            lastName: String(formData.get("lastName") || "").trim(),
-            monasticName: String(formData.get("monasticName") || "").trim(),
-            grade: String(formData.get("grade") || "4"),
-            teacherName: String(formData.get("teacherName") || "").trim(),
-            teacherRole: String(formData.get("teacherRole") || "teacher-reviewer"),
-            deliveryMethod: String(formData.get("deliveryMethod") || "line"),
+            ...readProfileFormValues(),
             updatedAt: new Date().toISOString(),
           };
 
           try {
             saveStudentProfile(studentProfile);
+            persistProfileDraft();
           } catch {
             showProfileError("บันทึกโปรไฟล์ไม่ได้ — ตรวจสอบการอนุญาต localStorage ของเบราว์เซอร์");
-            return;
+            return false;
           }
 
           dismissProfileWizard();
@@ -1529,11 +1583,22 @@
             updatePickerCurrentValue(gradePicker, studentProfile.grade);
             selectPickerValue(gradePicker, studentProfile.grade);
           }
+
+          return true;
+        };
+
+        profileForm?.addEventListener("submit", (event) => {
+          event.preventDefault();
+          saveProfileFromForm();
         });
 
-        if (studentProfile) {
-          setProfileFormValues(studentProfile);
-        } else {
+        document.querySelector(".profile-save-button")?.addEventListener("click", (event) => {
+          if (event.defaultPrevented) return;
+          event.preventDefault();
+          saveProfileFromForm();
+        });
+
+        if (!studentProfile) {
           document.body.classList.add("needs-profile");
         }
 
