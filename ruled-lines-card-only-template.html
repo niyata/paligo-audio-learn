@@ -542,7 +542,7 @@
         overflow: visible;
       }
 
-      .exam-header-lines {
+      .exam-cover {
         background:
           repeating-linear-gradient(
             to bottom,
@@ -552,15 +552,110 @@
           var(--paper-bg);
         color: var(--exam-blue);
         display: grid;
-        font-size: var(--editor-font-size);
-        font-weight: 700;
-        line-height: var(--line-height);
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "Thonburi", sans-serif;
+        gap: 0;
         min-height: calc(var(--line-height) * 4);
         padding: 0 var(--paper-padding-inline);
         place-items: center;
         position: relative;
         text-align: center;
         z-index: 4;
+      }
+
+      .exam-header-lines {
+        display: contents;
+      }
+
+      .exam-cover-spacer {
+        min-height: var(--line-height);
+        width: 100%;
+      }
+
+      .exam-cover-meta,
+      .exam-cover-date {
+        align-items: center;
+        display: inline-flex;
+        flex-wrap: wrap;
+        font-size: calc(var(--editor-font-size) * 0.92);
+        font-weight: 600;
+        gap: 6px;
+        justify-content: center;
+        letter-spacing: 0.01em;
+        line-height: var(--line-height);
+        min-height: var(--line-height);
+        transform: translateY(var(--header-text-y-offset));
+      }
+
+      .exam-cover-meta-label,
+      .exam-cover-date-label {
+        color: color-mix(in srgb, var(--exam-blue) 78%, transparent);
+      }
+
+      .exam-cover-subject {
+        align-items: center;
+        display: flex;
+        justify-content: center;
+        min-height: calc(var(--line-height) * 1.35);
+        padding: 2px 0;
+        width: 100%;
+      }
+
+      .exam-subject-picker {
+        display: inline-flex;
+        max-width: 100%;
+        position: relative;
+      }
+
+      .exam-cover-subject-trigger {
+        appearance: none;
+        background: transparent;
+        border: 0;
+        border-radius: 10px;
+        color: var(--exam-blue);
+        cursor: pointer;
+        font: inherit;
+        font-size: clamp(1.02rem, 2.6vw, 1.28rem);
+        font-weight: 700;
+        letter-spacing: 0.015em;
+        line-height: 1.25;
+        max-width: min(100%, 28rem);
+        padding: 4px 10px;
+        text-align: center;
+        transition: background 140ms ease, box-shadow 140ms ease;
+      }
+
+      .exam-cover-subject-trigger:hover {
+        background: color-mix(in srgb, var(--exam-blue) 8%, transparent);
+      }
+
+      .exam-cover-subject-trigger:focus-visible {
+        box-shadow: 0 0 0 3px var(--paligo-focus-ring, rgba(31, 45, 137, 0.35));
+        outline: none;
+      }
+
+      .exam-subject-picker .picker-placeholder {
+        font-size: 0.72em;
+        opacity: 0.55;
+      }
+
+      .exam-subject-grid {
+        display: grid;
+        gap: 6px;
+        grid-template-columns: 1fr;
+        max-width: 100%;
+      }
+
+      .exam-subject-grid .exam-picker-option {
+        font-size: 0.92rem;
+        justify-content: flex-start;
+        min-height: 38px;
+        padding-inline: 12px;
+        text-align: left;
+        white-space: normal;
+      }
+
+      .exam-subject-popover {
+        min-width: min(92vw, 18rem);
       }
 
       .exam-footer-lines {
@@ -572,6 +667,13 @@
       .exam-header-line {
         min-height: var(--line-height);
         transform: translateY(var(--header-text-y-offset));
+      }
+
+      .exam-grade-line {
+        align-items: center;
+        display: inline-flex;
+        gap: 6px;
+        justify-content: center;
       }
 
       .exam-date-line {
@@ -1078,10 +1180,10 @@
       <section class="answer-card" aria-label="การ์ดพื้นที่เขียนคำตอบ">
         <div class="exam-page-stack">
           <article class="exam-page is-first" aria-label="กระดาษคำตอบหน้าแรก">
-            <div class="exam-header-lines" aria-label="หัวกระดาษหน้าแรก">
-              <div class="exam-header-line" aria-hidden="true"></div>
-              <div class="exam-header-line exam-grade-line">
-                <span>ประโยค ป.ธ.</span>
+            <div class="exam-cover" aria-label="หน้าปกสมุดคำตอบ">
+              <div class="exam-cover-spacer" aria-hidden="true"></div>
+              <div class="exam-cover-meta exam-grade-line">
+                <span class="exam-cover-meta-label">ประโยค ป.ธ.</span>
                 <div class="exam-picker exam-grade-picker" data-exam-picker="grade" data-current="4" data-default="4">
                   <button
                     class="exam-picker-trigger exam-grade-trigger"
@@ -1099,9 +1201,26 @@
                   </div>
                 </div>
               </div>
-              <div class="exam-header-line">แปลมคธเป็นไทย</div>
-              <div class="exam-header-line exam-date-line">
-                <span>สอบ วันที่</span>
+              <div class="exam-cover-subject">
+                <div class="exam-picker exam-subject-picker" data-exam-picker="subject" data-current="pali-to-thai" data-default="pali-to-thai">
+                  <button
+                    class="exam-cover-subject-trigger exam-picker-trigger"
+                    type="button"
+                    aria-label="เลือกวิชา"
+                    aria-haspopup="dialog"
+                    aria-expanded="false"
+                  >
+                    <span class="picker-value" data-picker-value></span>
+                    <span class="picker-placeholder" data-picker-placeholder>เลือกวิชา…</span>
+                  </button>
+                  <div class="exam-picker-popover exam-subject-popover" data-picker-popover hidden>
+                    <div class="exam-picker-title">วิชา</div>
+                    <div class="exam-picker-grid exam-subject-grid" data-picker-options></div>
+                  </div>
+                </div>
+              </div>
+              <div class="exam-cover-date exam-date-line">
+                <span class="exam-cover-date-label">สอบ วันที่</span>
                 <div class="exam-picker" data-exam-picker="day" data-min="1" data-max="31">
                   <button
                     class="exam-picker-trigger exam-date-day"
@@ -1323,6 +1442,18 @@
           "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม",
         ];
         const gradeValues = ["1-2", "3", "4", "5", "6", "7", "8", "9"];
+        const subjectOptions = [
+          { value: "pali-to-thai", label: "แปลมคธเป็นไทย" },
+          { value: "grammar", label: "ไวยากรณ์" },
+          { value: "sambandha-thai", label: "สัมพันธ์ไทย" },
+          { value: "burapapak", label: "บุรพภาค" },
+          { value: "thai-to-pali", label: "แปลไทยเป็นมคธ" },
+        ];
+        const getSubjectLabel = (value) =>
+          subjectOptions.find((item) => item.value === String(value))?.label || "ไม่ระบุวิชา";
+        const getPickerByType = (type) =>
+          Array.from(examPickers).find((picker) => picker.dataset.examPicker === type) || null;
+        const getPickerValue = (type) => getPickerByType(type)?.dataset.value || "";
         const queryParams = new URLSearchParams(window.location.search);
 
         const createId = (prefix) => {
@@ -2091,8 +2222,13 @@
           if (!trigger || !valueDisplay || !popover || !options) return;
 
           picker.dataset.value = String(value);
+          const isSubjectPicker = picker.dataset.examPicker === "subject";
           const isMonthPicker = picker.dataset.examPicker === "month";
-          valueDisplay.textContent = isMonthPicker ? thaiMonthNames[Number(value) - 1] : toThaiNumber(value);
+          valueDisplay.textContent = isSubjectPicker
+            ? getSubjectLabel(value)
+            : isMonthPicker
+              ? thaiMonthNames[Number(value) - 1]
+              : toThaiNumber(value);
           trigger.classList.add("has-value");
           trigger.setAttribute("aria-expanded", "false");
           popover.hidden = true;
@@ -2120,6 +2256,7 @@
           month: String(currentExamDate.getMonth() + 1),
           year: String(currentExamDate.getFullYear() + 543),
           grade: currentProfileGrade,
+          subject: "pali-to-thai",
         };
 
         examPickers.forEach((picker) => {
@@ -2128,6 +2265,7 @@
           const yearWindow = Number(picker.dataset.yearWindow || 0);
           const isMonthPicker = pickerType === "month";
           const isGradePicker = pickerType === "grade";
+          const isSubjectPicker = pickerType === "subject";
           const currentValue = picker.dataset.current || currentExamValues[pickerType] || "";
           const trigger = picker.querySelector(".exam-picker-trigger");
           const popover = picker.querySelector("[data-picker-popover]");
@@ -2138,6 +2276,8 @@
           let optionValues;
           if (isGradePicker) {
             optionValues = gradeValues.slice();
+          } else if (isSubjectPicker) {
+            optionValues = subjectOptions.map((item) => item.value);
           } else {
             const min = isMonthPicker ? 1 : (yearWindow ? currentBuddhistYear : Number(picker.dataset.min));
             const max = isMonthPicker ? 12 : (yearWindow ? currentBuddhistYear + yearWindow - 1 : Number(picker.dataset.max));
@@ -2150,7 +2290,11 @@
 
             option.className = "exam-picker-option";
             option.type = "button";
-            option.textContent = isMonthPicker ? thaiMonthNames[value - 1] : toThaiNumber(value);
+            option.textContent = isSubjectPicker
+              ? getSubjectLabel(value)
+              : isMonthPicker
+                ? thaiMonthNames[value - 1]
+                : toThaiNumber(value);
             option.dataset.value = String(value);
             if (String(value) === currentValue) {
               option.classList.add("is-current");
@@ -2159,12 +2303,16 @@
             option.addEventListener("click", (event) => {
               event.stopPropagation();
               selectPickerValue(picker, value);
+              updateBookBar();
               scheduleAutoSave();
             });
             options.append(option);
           });
 
           if (picker.dataset.default) selectPickerValue(picker, picker.dataset.default);
+          else if (currentExamValues[pickerType] && ["day", "month", "year"].includes(pickerType)) {
+            selectPickerValue(picker, currentExamValues[pickerType]);
+          }
 
           trigger.addEventListener("click", (event) => {
             event.stopPropagation();
@@ -2281,15 +2429,26 @@
           studentProfile?.monasticName ? `(${studentProfile.monasticName})` : "",
         ].filter(Boolean).join(" ") || "ไม่ระบุชื่อ";
 
+        const formatExamCoverDate = () => {
+          const day = getPickerValue("day");
+          const month = getPickerValue("month");
+          const year = getPickerValue("year");
+          if (!day || !month || !year) return "";
+          return `${toThaiNumber(day)} ${thaiMonthNames[Number(month) - 1]} ${toThaiNumber(year)}`;
+        };
+
         const getBookTitle = (draft) => {
           const grade = gradePicker?.dataset.value || studentProfile?.grade || "4";
-          const savedAt = new Date(draft?.savedAt || Date.now()).toLocaleDateString("th-TH", {
-            day: "numeric",
-            month: "short",
-            year: "numeric",
-          });
+          const subject = getSubjectLabel(getPickerValue("subject") || "pali-to-thai");
+          const examDate = formatExamCoverDate();
+          const savedAt = examDate
+            || new Date(draft?.savedAt || Date.now()).toLocaleDateString("th-TH", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            });
 
-          return `สมุดคำตอบ ป.ธ. ${toThaiNumber(grade)} · ${savedAt}`;
+          return `สมุดคำตอบ ป.ธ. ${toThaiNumber(grade)} · ${subject} · ${savedAt}`;
         };
 
         const buildDraftSnapshot = () => ({
@@ -2320,6 +2479,8 @@
             title: existing?.title || getBookTitle(draft),
             studentName: getStudentDisplayName(),
             grade: gradePicker?.dataset.value || studentProfile?.grade || "4",
+            subject: getPickerValue("subject") || "pali-to-thai",
+            subjectLabel: getSubjectLabel(getPickerValue("subject") || "pali-to-thai"),
             deliveryMethod: studentProfile?.deliveryMethod || "line",
             status: existing?.status || BOOK_STATUS.draft,
             revision: nextRevision,
