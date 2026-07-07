@@ -31,6 +31,7 @@ create_label "area:audio" "24715b" "Audio practice"
 create_label "area:nav" "9a6a10" "Navigation shell"
 create_label "area:pipeline" "6f42c1" "PDF / build pipeline"
 create_label "area:docs" "0075ca" "Documentation"
+create_label "workflow:in-progress" "5319e7" "On Scrum board: In Progress column"
 create_label "status:blocked" "b60205" "Blocked"
 create_label "status:ready-for-dev" "0e8a16" "Ready for development"
 

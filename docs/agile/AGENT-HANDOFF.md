@@ -44,8 +44,9 @@
 ## หลังส่งงาน
 
 1. ย้าย issue → **Review** (มี PR) หรือ **Ready** (แค่ spec/decision)
-2. ใส่ Handoff comment
-3. อัปเดต acceptance criteria checkbox ที่ทำแล้ว
+2. เอา label `workflow:in-progress` ออกเมื่อไม่ active แล้ว
+3. ใส่ Handoff comment
+4. อัปเดต acceptance criteria checkbox ที่ทำแล้ว
 
 ---
 

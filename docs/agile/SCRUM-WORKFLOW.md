@@ -97,8 +97,8 @@ Issue ย้าย **QA → Done** เมื่อมีครบ:
 ## การทำงานกับ AI
 
 1. **เริ่ม session:** เปิด board → เลือก issue ใน **Ready** ที่ `agent:*` ตรงกับตัวเอง
-2. **เริ่มงาน:** ย้าย → **In Progress**, comment `Starting: …`
-3. **เปิด PR:** ลิงก์ `Closes #N`, ย้าย → **Review**
+2. **เริ่มงาน:** ย้าย → **In Progress**, ใส่ label `workflow:in-progress`, comment `Starting: …`
+3. **เปิด PR:** ลิงก์ `Closes #N`, ย้าย → **Review**, เอา label `workflow:in-progress` ออก
 4. **จบ:** PO ย้าย → **Done** หรือ AI comment สรุปแล้วรอ merge
 
 อ่านเพิ่ม: [`AGENT-HANDOFF.md`](./AGENT-HANDOFF.md) · [`AGENTS.md`](../../AGENTS.md)
