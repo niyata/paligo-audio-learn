@@ -201,7 +201,11 @@
         justify-content: center;
         padding: 18px;
         position: fixed;
-        z-index: 50;
+        z-index: 250;
+      }
+
+      .cover-modal[hidden] {
+        display: none !important;
       }
 
       .cover-modal.is-open {
@@ -298,6 +302,94 @@
         margin-top: 14px;
       }
 
+      .export-cover-mount .book-cover {
+        border: 1px solid rgba(31, 45, 137, 0.14);
+        border-radius: 12px;
+        min-height: 148px;
+      }
+
+      .export-cover-meta {
+        color: var(--muted);
+        font-size: 0.84rem;
+        font-weight: 700;
+        margin-top: 10px;
+        text-align: center;
+      }
+
+      .cover-modal-card.is-wide {
+        max-width: 680px;
+        width: min(100%, 680px);
+      }
+
+      .export-all-toolbar {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: space-between;
+        margin-bottom: 12px;
+      }
+
+      .export-all-select-all {
+        align-items: center;
+        color: var(--exam-blue);
+        cursor: pointer;
+        display: inline-flex;
+        font-size: 0.88rem;
+        font-weight: 700;
+        gap: 8px;
+      }
+
+      .export-all-summary {
+        color: var(--muted);
+        font-size: 0.82rem;
+        font-weight: 700;
+      }
+
+      .export-all-list {
+        display: grid;
+        gap: 10px;
+        max-height: min(62vh, 520px);
+        overflow: auto;
+        padding-right: 2px;
+      }
+
+      .export-all-item {
+        align-items: start;
+        border: 1px solid rgba(31, 45, 137, 0.14);
+        border-radius: 12px;
+        cursor: pointer;
+        display: grid;
+        gap: 10px;
+        grid-template-columns: auto minmax(0, 1fr);
+        padding: 10px;
+      }
+
+      .export-all-item:has(input:checked) {
+        border-color: rgba(31, 45, 137, 0.32);
+        box-shadow: 0 0 0 2px rgba(31, 45, 137, 0.08);
+      }
+
+      .export-all-item input {
+        accent-color: var(--exam-blue);
+        height: 18px;
+        margin-top: 12px;
+        width: 18px;
+      }
+
+      .export-all-item .book-cover {
+        border-radius: 10px;
+        min-height: 96px;
+        padding: 10px 12px;
+      }
+
+      .export-all-item-meta {
+        color: var(--muted);
+        font-size: 0.8rem;
+        font-weight: 700;
+        margin-top: 6px;
+      }
+
       @media (max-width: 720px) {
         .books-header {
           grid-template-columns: 1fr;
@@ -314,7 +406,7 @@
       <header class="books-header">
         <div>
           <h1 class="books-title">สมุดข้อสอบ</h1>
-          <p class="books-subtitle" data-summary>สมุดคำตอบ ๑ รอบสอบ = ๑ เล่ม แยกข้อมูลไม่ให้ทับกัน</p>
+          <p class="books-subtitle" data-summary>สมุดคำตอบ 1 รอบสอบ = 1 เล่ม แยกข้อมูลไม่ให้ทับกัน</p>
         </div>
         <div class="button-row">
           <button class="button is-primary" type="button" data-open-cover-modal>สร้างสมุดใหม่</button>
@@ -334,6 +426,7 @@
       <section class="empty-state" data-empty-state hidden>
         <strong>ยังไม่มีสมุดข้อสอบ</strong>
         <span>กดสร้างสมุดใหม่เพื่อเริ่มทำข้อสอบรอบแรก</span>
+        <a class="button" href="seed-demo-books.html">โหลดสมุดตัวอย่าง 3 เล่ม</a>
       </section>
     </main>
 
@@ -344,26 +437,11 @@
         <div class="cover-form">
           <label class="cover-field">
             <span class="cover-label">ประโยค ป.ธ.</span>
-            <select class="cover-select" name="grade" required>
-              <option value="1-2">๑-๒</option>
-              <option value="3">๓</option>
-              <option value="4" selected>๔</option>
-              <option value="5">๕</option>
-              <option value="6">๖</option>
-              <option value="7">๗</option>
-              <option value="8">๘</option>
-              <option value="9">๙</option>
-            </select>
+            <select class="cover-select" name="grade" required data-cover-grade></select>
           </label>
           <label class="cover-field">
             <span class="cover-label">วิชา</span>
-            <select class="cover-select" name="subject" required>
-              <option value="pali-to-thai" selected>แปลมคธเป็นไทย</option>
-              <option value="grammar">ไวยากรณ์</option>
-              <option value="sambandha-thai">สัมพันธ์ไทย</option>
-              <option value="burapapak">บุรพภาค</option>
-              <option value="thai-to-pali">แปลไทยเป็นมคธ</option>
-            </select>
+            <select class="cover-select" name="subject" required data-cover-subject></select>
           </label>
           <div class="cover-field">
             <span class="cover-label">วันสอบ</span>
@@ -375,7 +453,7 @@
           </div>
           <div class="cover-preview" data-cover-preview aria-live="polite">
             <div class="cover-preview-meta" data-preview-grade>ประโยค ป.ธ. ๔</div>
-            <div class="cover-preview-subject" data-preview-subject>แปลมคธเป็นไทย</div>
+            <div class="cover-preview-subject" data-preview-subject>วิชา แปลมคธเป็นไทย</div>
             <div class="cover-preview-meta" data-preview-date>สอบ วันที่ —</div>
           </div>
         </div>
@@ -386,18 +464,56 @@
       </form>
     </div>
 
+    <div class="cover-modal" data-export-modal hidden aria-hidden="true">
+      <div class="cover-modal-card" role="dialog" aria-labelledby="export-modal-title" aria-modal="true">
+        <h2 class="cover-modal-title" id="export-modal-title">ยืนยันการส่งออกสมุด</h2>
+        <p class="cover-modal-note">ตรวจสอบหน้าปกสมุดคำตอบก่อนดาวน์โหลดไฟล์</p>
+        <div class="export-cover-mount" data-export-cover-mount></div>
+        <p class="export-cover-meta" data-export-cover-meta></p>
+        <div class="cover-modal-actions">
+          <button class="button" type="button" data-close-export-modal>ยกเลิก</button>
+          <button class="button is-primary" type="button" data-confirm-export>ยืนยันส่งออก</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="cover-modal" data-export-all-modal hidden aria-hidden="true">
+      <div class="cover-modal-card is-wide" role="dialog" aria-labelledby="export-all-modal-title" aria-modal="true">
+        <h2 class="cover-modal-title" id="export-all-modal-title">ส่งออกสมุดที่เลือก</h2>
+        <p class="cover-modal-note">เลือกหน้าปกสมุดที่ต้องการส่งออก แล้วกดยืนยัน</p>
+        <div class="export-all-toolbar">
+          <label class="export-all-select-all">
+            <input type="checkbox" data-export-all-select-all checked />
+            เลือกทั้งหมด
+          </label>
+          <span class="export-all-summary" data-export-all-summary>เลือก 0 / 0 เล่ม</span>
+        </div>
+        <div class="export-all-list" data-export-all-list></div>
+        <div class="cover-modal-actions">
+          <button class="button" type="button" data-close-export-all-modal>ยกเลิก</button>
+          <button class="button is-primary" type="button" data-confirm-export-all>ยืนยันส่งออก</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="paligo-config.js"></script>
+    <script src="paligo-inbox-client.js"></script>
     <script src="paligo-exam-shared.js"></script>
     <script src="paligo-nav-config.js"></script>
     <script src="sidebar-nav.js"></script>
     <script>
       (() => {
+        if (!window.PaligoExamShared) {
+          window.alert("โหลดระบบสมุดข้อสอบไม่ครบ — ลองรีเฟรชหน้า (Cmd+Shift+R)");
+          return;
+        }
+
         const {
           KEYS,
           getList,
           setList,
           downloadJson,
           toThaiNumber,
-          toThaiPercent,
           importReviewPayload,
           importBookTransfer,
           buildBookTransfer,
@@ -406,7 +522,25 @@
           normalizeBookStatus,
           BOOK_STATUS,
           formatThaiDateTime,
+          migrateExamBooksList,
+          SUBJECT_OPTIONS: subjectOptions,
+          getSubjectOptionsForGrade,
+          getGradesForSubject,
         } = window.PaligoExamShared;
+        const formatStatusDateTime =
+          typeof formatThaiDateTime === "function"
+            ? formatThaiDateTime
+            : (value) => {
+                if (!value) return "—";
+                return new Date(value).toLocaleString("th-TH", {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                });
+              };
+        const formatStatusPercent = (value) => `${Math.round(Number(value) || 0)}%`;
         const grid = document.querySelector("[data-book-grid]");
         const emptyState = document.querySelector("[data-empty-state]");
         const summary = document.querySelector("[data-summary]");
@@ -417,6 +551,15 @@
         const previewGrade = document.querySelector("[data-preview-grade]");
         const previewSubject = document.querySelector("[data-preview-subject]");
         const previewDate = document.querySelector("[data-preview-date]");
+        const exportModal = document.querySelector("[data-export-modal]");
+        const exportCoverMount = document.querySelector("[data-export-cover-mount]");
+        const exportCoverMeta = document.querySelector("[data-export-cover-meta]");
+        const exportAllModal = document.querySelector("[data-export-all-modal]");
+        const exportAllList = document.querySelector("[data-export-all-list]");
+        const exportAllSelectAll = document.querySelector("[data-export-all-select-all]");
+        const exportAllSummary = document.querySelector("[data-export-all-summary]");
+        const confirmExportAllButton = document.querySelector("[data-confirm-export-all]");
+        let pendingExportBook = null;
 
         const createId = (prefix) => {
           const random = window.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -440,28 +583,95 @@
           "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม",
           "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม",
         ];
-        const subjectOptions = [
-          { value: "pali-to-thai", label: "แปลมคธเป็นไทย" },
-          { value: "grammar", label: "ไวยากรณ์" },
-          { value: "sambandha-thai", label: "สัมพันธ์ไทย" },
-          { value: "burapapak", label: "บุรพภาค" },
-          { value: "thai-to-pali", label: "แปลไทยเป็นมคธ" },
+        const gradeOptions = [
+          { value: "1-2", label: "๑-๒" },
+          { value: "3", label: "๓" },
+          { value: "4", label: "๔" },
+          { value: "5", label: "๕" },
+          { value: "6", label: "๖" },
+          { value: "7", label: "๗" },
+          { value: "8", label: "๘" },
+          { value: "9", label: "๙" },
         ];
+        const getAllowedSubjectsForGrade = (grade) => getSubjectOptionsForGrade(grade);
+
+        const getAllowedGradesForSubject = (subjectValue) => {
+          const allowed = getGradesForSubject(subjectValue);
+          return gradeOptions.filter((item) => allowed.includes(item.value));
+        };
+
+        const syncCoverFormOptions = ({ preferredGrade, preferredSubject } = {}) => {
+          if (!coverForm) return;
+
+          const gradeSelect = coverForm.elements.grade;
+          const subjectSelect = coverForm.elements.subject;
+          let grade = String(preferredGrade || gradeSelect.value || "4");
+          let subject = String(preferredSubject || subjectSelect.value || "pali-to-thai");
+
+          if (!getAllowedSubjectsForGrade(grade).some((item) => item.value === subject)) {
+            subject = getAllowedSubjectsForGrade(grade)[0]?.value || "pali-to-thai";
+          }
+          if (!getAllowedGradesForSubject(subject).some((item) => item.value === grade)) {
+            grade = getAllowedGradesForSubject(subject)[0]?.value || "4";
+          }
+
+          gradeSelect.replaceChildren();
+          getAllowedGradesForSubject(subject).forEach((item) => {
+            const option = document.createElement("option");
+            option.value = item.value;
+            option.textContent = item.label;
+            option.selected = item.value === grade;
+            gradeSelect.append(option);
+          });
+
+          subjectSelect.replaceChildren();
+          getAllowedSubjectsForGrade(grade).forEach((item) => {
+            const option = document.createElement("option");
+            option.value = item.value;
+            option.textContent = item.label;
+            option.selected = item.value === subject;
+            subjectSelect.append(option);
+          });
+
+          updateCoverPreview();
+        };
 
         const getPickerValue = (book, type) =>
           book.draft?.pickers?.find((item) => item.type === type)?.value || "";
 
+        const findSubjectOption = ({ value, label } = {}) => {
+          if (value) {
+            const byValue = subjectOptions.find((item) => item.value === String(value));
+            if (byValue) return byValue;
+          }
+          if (label) {
+            const normalized = String(label).trim();
+            return subjectOptions.find((item) => item.label === normalized) || null;
+          }
+          return null;
+        };
+
         const getSubjectLabel = (book) => {
-          if (book.subjectLabel) return book.subjectLabel;
-          const value = book.subject || getPickerValue(book, "subject");
-          const match = subjectOptions.find((item) => item.value === value);
-          if (match) return match.label;
-          const titleParts = String(book.title || "")
+          const direct = findSubjectOption({
+            value: book?.subject || getPickerValue(book, "subject"),
+            label: book?.subjectLabel,
+          });
+          if (direct) return direct.label;
+
+          const titleParts = String(book?.title || "")
             .split("·")
-            .map((part) => part.trim());
-          if (titleParts.length >= 2 && !titleParts[1].startsWith("สมุด")) return titleParts[1];
+            .map((part) => part.trim())
+            .filter(Boolean);
+
+          for (const part of titleParts) {
+            const fromTitle = findSubjectOption({ label: part });
+            if (fromTitle) return fromTitle.label;
+          }
+
           return "แปลมคธเป็นไทย";
         };
+
+        const formatCoverSubjectLine = (label) => `วิชา ${label || "แปลมคธเป็นไทย"}`;
 
         const getCoverGrade = (book) => book.grade || getPickerValue(book, "grade") || "-";
 
@@ -472,12 +682,24 @@
           if (day && month && year) {
             return `${toThaiNumber(day)} ${thaiMonthNames[Number(month) - 1]} ${toThaiNumber(year)}`;
           }
+
+          const titleParts = String(book?.title || "")
+            .split("·")
+            .map((part) => part.trim())
+            .filter(Boolean);
+          if (titleParts.length >= 3) {
+            const maybeDate = titleParts[titleParts.length - 1];
+            if (maybeDate && !findSubjectOption({ label: maybeDate })) return toThaiNumber(maybeDate);
+          }
+
           if (book.updatedAt) {
-            return new Date(book.updatedAt).toLocaleDateString("th-TH", {
-              day: "numeric",
-              month: "long",
-              year: "numeric",
-            });
+            return toThaiNumber(
+              new Date(book.updatedAt).toLocaleDateString("th-TH", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })
+            );
           }
           return "—";
         };
@@ -493,7 +715,7 @@
           subject.className = "book-cover-subject";
           date.className = "book-cover-date";
           grade.textContent = `ประโยค ป.ธ. ${toThaiNumber(getCoverGrade(book))}`;
-          subject.textContent = getSubjectLabel(book);
+          subject.textContent = formatCoverSubjectLine(getSubjectLabel(book));
           date.textContent = `สอบ วันที่ ${getCoverDateLabel(book)}`;
           cover.append(grade, subject, date);
           return cover;
@@ -508,7 +730,7 @@
           const month = String(formData.get("month") || "");
           const year = String(formData.get("year") || "");
           if (previewGrade) previewGrade.textContent = `ประโยค ป.ธ. ${toThaiNumber(grade)}`;
-          if (previewSubject) previewSubject.textContent = subject;
+          if (previewSubject) previewSubject.textContent = formatCoverSubjectLine(subject);
           if (previewDate) {
             previewDate.textContent =
               day && month && year
@@ -523,7 +745,7 @@
           coverForm.elements.day.value = String(now.getDate());
           coverForm.elements.month.value = String(now.getMonth() + 1);
           coverForm.elements.year.value = String(now.getFullYear() + 543);
-          updateCoverPreview();
+          syncCoverFormOptions({ preferredGrade: "4", preferredSubject: "pali-to-thai" });
           coverModal.hidden = false;
           coverModal.classList.add("is-open");
           coverModal.setAttribute("aria-hidden", "false");
@@ -534,6 +756,121 @@
           coverModal.hidden = true;
           coverModal.classList.remove("is-open");
           coverModal.setAttribute("aria-hidden", "true");
+        };
+
+        const openExportModal = (book) => {
+          if (!exportModal || !exportCoverMount) return;
+          pendingExportBook = book;
+          exportCoverMount.replaceChildren(buildBookCover(book));
+          if (exportCoverMeta) {
+            exportCoverMeta.textContent = `${book.studentName || "ไม่ระบุชื่อ"} · ${getStatusLabel(normalizeBookStatus(book.status))} · revision ${book.revision || 1}`;
+          }
+          exportModal.hidden = false;
+          exportModal.classList.add("is-open");
+          exportModal.setAttribute("aria-hidden", "false");
+        };
+
+        const closeExportModal = () => {
+          if (!exportModal) return;
+          pendingExportBook = null;
+          exportModal.hidden = true;
+          exportModal.classList.remove("is-open");
+          exportModal.setAttribute("aria-hidden", "true");
+        };
+
+        const confirmExportBook = () => {
+          if (!pendingExportBook) return;
+          const book = pendingExportBook;
+          downloadJson(`${book.id}.paligo-book.json`, {
+            schema: "paligo.exam.answerBookExport.v1",
+            exportedAt: new Date().toISOString(),
+            ownerId: getOwnerId(),
+            book,
+          });
+          closeExportModal();
+        };
+
+        const getSortedBooks = () =>
+          getBooks().sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0));
+
+        const updateExportAllSelection = () => {
+          if (!exportAllList) return;
+          const itemChecks = Array.from(exportAllList.querySelectorAll("[data-export-book-id]"));
+          const checked = itemChecks.filter((input) => input.checked);
+          if (exportAllSelectAll) {
+            exportAllSelectAll.checked = checked.length === itemChecks.length && itemChecks.length > 0;
+            exportAllSelectAll.indeterminate = checked.length > 0 && checked.length < itemChecks.length;
+          }
+          if (exportAllSummary) {
+            exportAllSummary.textContent = `เลือก ${checked.length} / ${itemChecks.length} เล่ม`;
+          }
+          if (confirmExportAllButton) {
+            confirmExportAllButton.disabled = checked.length === 0;
+          }
+        };
+
+        const renderExportAllList = (books) => {
+          if (!exportAllList) return;
+          exportAllList.replaceChildren();
+
+          books.forEach((book) => {
+            const item = document.createElement("label");
+            const checkbox = document.createElement("input");
+            const main = document.createElement("div");
+            const meta = document.createElement("div");
+
+            item.className = "export-all-item";
+            checkbox.type = "checkbox";
+            checkbox.checked = true;
+            checkbox.dataset.exportBookId = book.id;
+            checkbox.addEventListener("change", updateExportAllSelection);
+            main.append(buildBookCover(book));
+            meta.className = "export-all-item-meta";
+            meta.textContent = `${book.studentName || "ไม่ระบุชื่อ"} · ${getStatusLabel(normalizeBookStatus(book.status))} · revision ${book.revision || 1}`;
+            main.append(meta);
+            item.append(checkbox, main);
+            exportAllList.append(item);
+          });
+
+          updateExportAllSelection();
+        };
+
+        const openExportAllModal = () => {
+          const books = getSortedBooks();
+          if (!books.length) {
+            window.alert("ยังไม่มีสมุดให้ส่งออก");
+            return;
+          }
+          if (!exportAllModal) return;
+          renderExportAllList(books);
+          exportAllModal.hidden = false;
+          exportAllModal.classList.add("is-open");
+          exportAllModal.setAttribute("aria-hidden", "false");
+        };
+
+        const closeExportAllModal = () => {
+          if (!exportAllModal) return;
+          exportAllModal.hidden = true;
+          exportAllModal.classList.remove("is-open");
+          exportAllModal.setAttribute("aria-hidden", "true");
+          if (exportAllList) exportAllList.replaceChildren();
+        };
+
+        const confirmExportAll = () => {
+          if (!exportAllList) return;
+          const selectedIds = new Set(
+            Array.from(exportAllList.querySelectorAll("[data-export-book-id]:checked")).map((input) => input.dataset.exportBookId)
+          );
+          const books = getBooks().filter((book) => selectedIds.has(book.id));
+          if (!books.length) return;
+
+          downloadJson("paligo-exam-books-backup.paligo-backup.json", {
+            schema: "paligo.exam.answerBooksBackup.v1",
+            exportedAt: new Date().toISOString(),
+            ownerId: getOwnerId(),
+            books,
+          });
+          closeExportAllModal();
         };
 
         const createBookWithCover = (formData) => {
@@ -590,78 +927,86 @@
         };
 
         const renderBooks = () => {
-          const books = getBooks().sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0));
-          grid.innerHTML = "";
+          if (!grid || !emptyState || !summary) return;
+
+          let books = [];
+          try {
+            books = typeof migrateExamBooksList === "function" ? migrateExamBooksList() : getBooks();
+            books = [...books].sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0));
+          } catch (error) {
+            console.error("โหลดรายการสมุดไม่สำเร็จ", error);
+          }
+
+          grid.replaceChildren();
           emptyState.hidden = books.length > 0;
-          summary.textContent = `มีสมุดข้อสอบ ${toThaiNumber(books.length)} เล่ม · พร้อมส่งออกเพื่อย้ายเครื่อง`;
+          summary.textContent = `มีสมุดข้อสอบ ${books.length} เล่ม · พร้อมส่งออกเพื่อย้ายเครื่อง`;
 
           books.forEach((book) => {
-            const review = book.review || getReviewForBook(book.id);
-            const article = document.createElement("article");
-            const body = document.createElement("div");
-            const title = document.createElement("h2");
-            const meta = document.createElement("div");
-            const status = document.createElement("span");
-            const reviewNote = document.createElement("div");
-            const actions = document.createElement("div");
-            const open = document.createElement("a");
-            const exportBook = document.createElement("button");
+            try {
+              const review = book.review || getReviewForBook(book.id);
+              const article = document.createElement("article");
+              const body = document.createElement("div");
+              const title = document.createElement("h2");
+              const meta = document.createElement("div");
+              const status = document.createElement("span");
+              const reviewNote = document.createElement("div");
+              const actions = document.createElement("div");
+              const open = document.createElement("a");
+              const exportBook = document.createElement("button");
 
-            article.className = "book-card";
-            body.className = "book-card-body";
-            title.className = "book-title";
-            meta.className = "book-meta";
-            status.className = "book-status";
-            reviewNote.className = "book-meta";
-            actions.className = "button-row";
-            open.className = "button is-primary";
-            exportBook.className = "button";
-            exportBook.type = "button";
+              article.className = "book-card";
+              body.className = "book-card-body";
+              title.className = "book-title";
+              meta.className = "book-meta";
+              status.className = "book-status";
+              reviewNote.className = "book-meta";
+              actions.className = "button-row";
+              open.className = "button is-primary";
+              exportBook.className = "button";
+              exportBook.type = "button";
 
-            title.textContent = book.studentName || "ไม่ระบุชื่อ";
-            meta.textContent = `แก้ไข ${formatThaiDateTime(book.updatedAt)} · revision ${toThaiNumber(book.revision || 1)}`;
-            if (review?.score?.percent != null) {
-              status.textContent = getStatusLabel(BOOK_STATUS.reviewed);
-              reviewNote.textContent = `คะแนน ${toThaiPercent(review.score.percent)} · ตรวจ ${formatThaiDateTime(review.reviewedAt)}`;
-            } else {
-              status.textContent = getStatusLabel(normalizeBookStatus(book.status));
-            }
-            open.href = `ruled-lines-card-only-template.html?bookId=${encodeURIComponent(book.id)}`;
-            open.textContent = "เปิดเล่ม";
-            open.addEventListener("click", () => {
-              localStorage.setItem(KEYS.activeBook, book.id);
-            });
-            exportBook.textContent = "ส่งออกเล่มนี้";
-            exportBook.addEventListener("click", () => {
-              downloadJson(`${book.id}.paligo-book.json`, {
-                schema: "paligo.exam.answerBookExport.v1",
-                exportedAt: new Date().toISOString(),
-                ownerId: getOwnerId(),
-                book,
-              });
-            });
-
-            const transferOut = document.createElement("button");
-            transferOut.className = "button";
-            transferOut.type = "button";
-            transferOut.textContent =
-              normalizeBookStatus(book.status) === BOOK_STATUS.reviewed ? "โอนกลับ (→ นักเรียน)" : "โอนไป (→ ผู้ตรวจ)";
-            transferOut.addEventListener("click", () => {
-              try {
-                const direction =
-                  normalizeBookStatus(book.status) === BOOK_STATUS.reviewed ? "to-student" : "to-reviewer";
-                downloadJson(`${book.id}.${direction}.paligo-transfer.json`, buildBookTransfer(book.id, direction));
-              } catch (error) {
-                window.alert(error.message || "ส่งออกแพ็กเกจโอนไม่ได้");
+              title.textContent = book.studentName || "ไม่ระบุชื่อ";
+              meta.textContent = `แก้ไข ${formatStatusDateTime(book.updatedAt)} · revision ${book.revision || 1}`;
+              if (review?.score?.percent != null) {
+                status.textContent = getStatusLabel(BOOK_STATUS.reviewed);
+                reviewNote.textContent = `คะแนน ${formatStatusPercent(review.score.percent)} · ตรวจ ${formatStatusDateTime(review.reviewedAt)}`;
+              } else {
+                status.textContent = getStatusLabel(normalizeBookStatus(book.status));
               }
-            });
+              open.href = `ruled-lines-card-only-template.html?bookId=${encodeURIComponent(book.id)}`;
+              open.textContent = "เปิดเล่ม";
+              open.addEventListener("click", () => {
+                localStorage.setItem(KEYS.activeBook, book.id);
+              });
+              exportBook.textContent = "ส่งออกเล่มนี้";
+              exportBook.addEventListener("click", () => {
+                openExportModal(book);
+              });
 
-            actions.append(open, exportBook, transferOut);
-            body.append(title, meta, status);
-            if (reviewNote.textContent) body.append(reviewNote);
-            body.append(actions);
-            article.append(buildBookCover(book), body);
-            grid.append(article);
+              const transferOut = document.createElement("button");
+              transferOut.className = "button";
+              transferOut.type = "button";
+              transferOut.textContent =
+                normalizeBookStatus(book.status) === BOOK_STATUS.reviewed ? "โอนกลับ (→ นักเรียน)" : "โอนไป (→ ผู้ตรวจ)";
+              transferOut.addEventListener("click", () => {
+                try {
+                  const direction =
+                    normalizeBookStatus(book.status) === BOOK_STATUS.reviewed ? "to-student" : "to-reviewer";
+                  downloadJson(`${book.id}.${direction}.paligo-transfer.json`, buildBookTransfer(book.id, direction));
+                } catch (error) {
+                  window.alert(error.message || "ส่งออกแพ็กเกจโอนไม่ได้");
+                }
+              });
+
+              actions.append(open, exportBook, transferOut);
+              body.append(title, meta, status);
+              if (reviewNote.textContent) body.append(reviewNote);
+              body.append(actions);
+              article.append(buildBookCover(book), body);
+              grid.append(article);
+            } catch (error) {
+              console.error("แสดงการ์ดสมุดไม่สำเร็จ", book?.id, error);
+            }
           });
         };
 
@@ -678,7 +1023,7 @@
           }
 
           const conflicts = incoming.filter((item) => books.some((book) => book.id === item.id));
-          if (conflicts.length && !window.confirm(`มีสมุด id เดิม ${toThaiNumber(conflicts.length)} เล่ม — แทนที่ข้อมูลเดิมหรือไม่?`)) {
+          if (conflicts.length && !window.confirm(`มีสมุด id เดิม ${conflicts.length} เล่ม — แทนที่ข้อมูลเดิมหรือไม่?`)) {
             return;
           }
 
@@ -689,14 +1034,70 @@
           window.alert("นำเข้าสมุดข้อสอบแล้ว");
         };
 
-        document.querySelector("[data-export-all]")?.addEventListener("click", () => {
-          downloadJson("paligo-exam-books-backup.paligo-backup.json", {
-            schema: "paligo.exam.answerBooksBackup.v1",
-            exportedAt: new Date().toISOString(),
-            ownerId: getOwnerId(),
-            books: getBooks(),
+        document.querySelector("[data-export-all]")?.addEventListener("click", openExportAllModal);
+
+        if (coverForm?.elements.month) {
+          thaiMonthNames.forEach((name, index) => {
+            const option = document.createElement("option");
+            option.value = String(index + 1);
+            option.textContent = name;
+            coverForm.elements.month.append(option);
           });
+        }
+
+        document.querySelector("[data-open-cover-modal]")?.addEventListener("click", openCoverModal);
+        document.querySelector("[data-close-cover-modal]")?.addEventListener("click", closeCoverModal);
+        coverModal?.addEventListener("click", (event) => {
+          if (event.target === coverModal) closeCoverModal();
         });
+        exportModal?.addEventListener("click", (event) => {
+          if (event.target === exportModal) closeExportModal();
+        });
+        exportAllModal?.addEventListener("click", (event) => {
+          if (event.target === exportAllModal) closeExportAllModal();
+        });
+        document.querySelector("[data-close-export-modal]")?.addEventListener("click", closeExportModal);
+        document.querySelector("[data-close-export-all-modal]")?.addEventListener("click", closeExportAllModal);
+        document.querySelector("[data-confirm-export]")?.addEventListener("click", confirmExportBook);
+        document.querySelector("[data-confirm-export-all]")?.addEventListener("click", confirmExportAll);
+        exportAllSelectAll?.addEventListener("change", () => {
+          if (!exportAllList) return;
+          exportAllList.querySelectorAll("[data-export-book-id]").forEach((input) => {
+            input.checked = exportAllSelectAll.checked;
+          });
+          updateExportAllSelection();
+        });
+        document.addEventListener("keydown", (event) => {
+          if (event.key !== "Escape") return;
+          if (exportAllModal?.classList.contains("is-open")) closeExportAllModal();
+          else if (exportModal?.classList.contains("is-open")) closeExportModal();
+          else if (coverModal?.classList.contains("is-open")) closeCoverModal();
+        });
+        coverForm?.addEventListener("input", updateCoverPreview);
+        coverForm?.addEventListener("change", (event) => {
+          if (event.target?.name === "grade") {
+            syncCoverFormOptions({ preferredGrade: event.target.value });
+            return;
+          }
+          if (event.target?.name === "subject") {
+            syncCoverFormOptions({ preferredSubject: event.target.value });
+            return;
+          }
+          updateCoverPreview();
+        });
+        coverForm?.addEventListener("submit", (event) => {
+          event.preventDefault();
+          const bookId = createBookWithCover(new FormData(coverForm));
+          closeCoverModal();
+          window.location.href = `ruled-lines-card-only-template.html?bookId=${encodeURIComponent(bookId)}`;
+        });
+
+        try {
+          syncCoverFormOptions({ preferredGrade: "4", preferredSubject: "pali-to-thai" });
+        } catch (error) {
+          console.error("ตั้งค่าแบบฟอร์มสร้างสมุดไม่สำเร็จ", error);
+        }
+
         importFile?.addEventListener("change", async () => {
           const file = importFile.files?.[0];
           if (!file) return;
@@ -734,31 +1135,11 @@
         });
         window.addEventListener("pageshow", renderBooks);
         renderBooks();
-
-        if (coverForm?.elements.month) {
-          thaiMonthNames.forEach((name, index) => {
-            const option = document.createElement("option");
-            option.value = String(index + 1);
-            option.textContent = name;
-            coverForm.elements.month.append(option);
-          });
-        }
-
-        document.querySelector("[data-open-cover-modal]")?.addEventListener("click", openCoverModal);
-        document.querySelector("[data-close-cover-modal]")?.addEventListener("click", closeCoverModal);
-        coverModal?.addEventListener("click", (event) => {
-          if (event.target === coverModal) closeCoverModal();
-        });
-        coverForm?.addEventListener("input", updateCoverPreview);
-        coverForm?.addEventListener("change", updateCoverPreview);
-        coverForm?.addEventListener("submit", (event) => {
-          event.preventDefault();
-          const bookId = createBookWithCover(new FormData(coverForm));
-          closeCoverModal();
-          window.location.href = `ruled-lines-card-only-template.html?bookId=${encodeURIComponent(bookId)}`;
-        });
       })();
       PaligoSidebar.autoInit();
+      document.querySelectorAll("[data-cover-modal], [data-export-modal], [data-export-all-modal]").forEach((node) => {
+        document.body.appendChild(node);
+      });
     </script>
   </body>
 </html>

@@ -1,0 +1,42 @@
+---
+description: ตรวจสอบ regression เมื่อแก้หรือเพิ่มฟีเจอร์ — ห้ามทำโค้ดอื่นพังนอกขอบเขตคำสั่ง
+globs: "**/*.{html,js,css,py,md}"
+alwaysApply: true
+---
+
+# Paligo Change Audit
+
+ใช้กฎนี้ทุกครั้งที่มีคำสั่ง **แก้งาน** หรือ **เพิ่มงาน** ใน repo นี้
+
+## ขอบเขตการแก้
+
+- แก้เฉพาะไฟล์/ฟีเจอร์ที่คำสั่งระบุโดยตรง
+- **ห้าม** refactor หรือปรับพฤติกรรมส่วนอื่น "ไปด้วย" ถ้าไม่ได้สั่ง
+- ยกเว้น: คำสั่งให้แก้เรื่องนั้นโดยตรง หรือคำสั่งให้ **รีวิวโค้ด** แล้วสั่งแก้ข้อผิดพลาดให้ใช้งานได้จริง
+
+## ก่อนจบงาน — audit checklist
+
+1. **Regression ฟีเจอร์ที่เกี่ยวข้อง** — ทดสอบ flow หลักที่ไฟล์นั้นรับผิดชอบ (ไม่ใช่แค่ diff ที่ขอ)
+2. **Init / event binding** — หน้า HTML ต้อง bind listener ก่อน render ที่อาจ throw; อย่าให้ error ตอนโหลดทำให้ปุ่มทั้งหน้าใช้ไม่ได้
+3. **localStorage / schema** — ข้อมูลเก่าในเครื่องต้องยังอ่านได้; ถ้าเปลี่ยนรูปแบบให้มี migration ไม่ลบข้อมูลเงียบๆ
+4. **Shell / modal** — หลัง `PaligoSidebar.autoInit()` modal overlay ต้องอยู่ `body` และ z-index สูงกว่า topbar/sidebar
+5. **ตัวเลขไทย vs อารบิก**
+   - **เลขไทย** — เนื้อหาบทเรียน/สมุดสอบ: หน้าปก, หัวกระดาษ, วันสอบบนกระดาษ, คะแนน stamp บนกระดาษ
+   - **เลขอารบิก** — status, tech spec, web UI: `revision`, ประวัติแก้ไข, summary, modal, book bar, pagination
+   - UI meta ใช้ `formatThaiDateTime()` · หน้าปก/กระดาษใช้ `formatBookDateTime()` / `toThaiNumber()`
+6. **Shared API** — ถ้าเรียกจาก `paligo-exam-shared.js` ต้องมี fallback เมื่อ cache เก่า หรือ export ครบทุกหน้าที่ใช้
+
+## เมื่อพบบั๊กนอก scope
+
+- รายงานสั้นๆ ให้ user ทราบ
+- **อย่าแก้** จนกว่าจะได้รับคำสั่ง หรืออยู่ในงานรีวิวที่สั่งให้แก้จนใช้ได้จริง
+
+## หลังแก้ — smoke test ขั้นต่ำ
+
+| หน้า | ตรวจ |
+|------|------|
+| `exam-books.html` | แสดงสมุดเก่า · สร้างสมุดใหม่ · ส่งออก · นำเข้า |
+| `ruled-lines-card-only-template.html` | เปิดเล่ม · autosave · ส่งตรวจ |
+| `exam-reviewer-console.html` | นำเข้า · stamp · ส่งคืน |
+
+Local: `python3 -m http.server 8765` แล้ว hard refresh (Cmd+Shift+R)

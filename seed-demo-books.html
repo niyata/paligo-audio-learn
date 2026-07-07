@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Seed demo books · Paligo</title>
+  </head>
+  <body>
+    <p>กำลังสร้างสมุดตัวอย่าง 3 เล่ม…</p>
+    <script src="paligo-exam-shared.js"></script>
+    <script>
+      (() => {
+        const { KEYS, BOOK_STATUS, getList, setList } = window.PaligoExamShared;
+
+        const createId = (prefix) =>
+          `${prefix}-${window.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`}`;
+
+        const ensureOwnerId = () => {
+          const existing = localStorage.getItem(KEYS.owner);
+          if (existing) return existing;
+          const ownerId = createId("owner");
+          localStorage.setItem(KEYS.owner, ownerId);
+          return ownerId;
+        };
+
+        const thaiMonthNames = [
+          "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน",
+          "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม",
+          "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม",
+        ];
+
+        const buildBook = ({ id, grade, subject, subjectLabel, day, month, year, studentName, minutesAgo = 0 }) => {
+          const now = new Date(Date.now() - minutesAgo * 60_000);
+          const iso = now.toISOString();
+          const ownerId = ensureOwnerId();
+          const bookId = id || createId("book");
+          const examDateLabel = `${day} ${thaiMonthNames[Number(month) - 1]} ${year}`;
+
+          return {
+            id: bookId,
+            schema: "paligo.exam.answerBook.v1",
+            ownerId,
+            title: `สมุดคำตอบ ป.ธ. ${grade} · ${subjectLabel} · ${examDateLabel}`,
+            studentName,
+            grade,
+            subject,
+            subjectLabel,
+            status: BOOK_STATUS.draft,
+            revision: 1,
+            createdAt: iso,
+            updatedAt: iso,
+            draft: {
+              schema: "paligo.exam.answerBookDraft.v1",
+              ownerId,
+              bookId,
+              lineHeight: "22",
+              page: 0,
+              profile: null,
+              pickers: [
+                { type: "grade", value: grade },
+                { type: "subject", value: subject },
+                { type: "day", value: day },
+                { type: "month", value: month },
+                { type: "year", value: year },
+              ],
+              pages: [""],
+              annotations: [],
+              savedAt: iso,
+            },
+          };
+        };
+
+        const samples = [
+          buildBook({
+            id: "book-demo-pali-to-thai-4",
+            grade: "4",
+            subject: "pali-to-thai",
+            subjectLabel: "แปลมคธเป็นไทย",
+            day: "7",
+            month: "7",
+            year: "2569",
+            studentName: "พระมหา ถาวร จิรวโรสส (นิยตชโย)",
+            minutesAgo: 2,
+          }),
+          buildBook({
+            id: "book-demo-grammar-3",
+            grade: "3",
+            subject: "grammar",
+            subjectLabel: "ไวยากรณ์",
+            day: "7",
+            month: "7",
+            year: "2569",
+            studentName: "พระมหา ถาวร จิรวโรสส (นิยตชโย)",
+            minutesAgo: 8,
+          }),
+          buildBook({
+            id: "book-demo-sambandha-3",
+            grade: "3",
+            subject: "sambandha-thai",
+            subjectLabel: "สัมพันธ์ไทย",
+            day: "7",
+            month: "7",
+            year: "2569",
+            studentName: "พระมหา ถาวร จิรวโรสส (นิยตชโย)",
+            minutesAgo: 15,
+          }),
+        ];
+
+        const existing = getList(KEYS.books);
+        const demoIds = new Set(samples.map((book) => book.id));
+        const merged = existing.filter((book) => !demoIds.has(book.id));
+        merged.unshift(...samples);
+        setList(KEYS.books, merged);
+        localStorage.setItem(KEYS.activeBook, samples[0].id);
+
+        window.location.replace("exam-books.html");
+      })();
+    </script>
+  </body>
+</html>

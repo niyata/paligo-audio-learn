@@ -139,6 +139,7 @@ flowchart LR
 3. แสดง book identity ตลอดใน editor และก่อนตรวจ
 4. Freeze หลังส่งตรวจ (readonly จนกดยืนยันแก้)
 5. เมนูแก้ที่ `paligo-nav-config.js` เท่านั้น
+6. **Change audit** — แก้/เพิ่มฟีเจอร์แล้วต้อง smoke test flow ที่เกี่ยวข้อง; อย่า regression นอก scope (`.cursor/rules/paligo-change-audit.mdc`)
 
 ---
 

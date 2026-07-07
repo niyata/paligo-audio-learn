@@ -109,6 +109,8 @@ Issue ย้าย **QA → Done** เมื่อมีครบ:
 
 สร้าง milestone ชื่อ `Sprint YYYY-Www` (เช่น `Sprint 2026-W28`) แล้ว assign issues ใน sprint นั้น
 
+**Inbox v1 backlog:** [`inbox-sprint-backlog.md`](./inbox-sprint-backlog.md) · seed: `./scripts/seed-inbox-sprint.sh`
+
 ---
 
 ## Bootstrap ครั้งแรก

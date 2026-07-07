@@ -17,10 +17,12 @@
 | Audio / PDF | `scripts/`, `pali-audio-hightlight.html` | `docs/system-architecture-overview.md` |
 | Navigation shell | `sidebar-nav.*`, `paligo-nav-config.js` | `docs/navigation-and-shell-prd.md` |
 | Agile | `.github/`, `docs/agile/` | `docs/agile/SCRUM-WORKFLOW.md` |
+| Inbox API | `workers/`, `paligo-config.js`, `paligo-inbox-client.js` | `docs/agile/inbox-sprint-backlog.md` |
 
 ## กฎสำคัญ
 
 - **Minimize scope** — diff เล็ก ตรง issue
+- **Change audit** — ก่อนจบงาน ตรวจ regression ฟีเจอร์ที่เกี่ยวข้อง; ห้ามทำโค้ดนอกคำสั่งพัง (ดู `.cursor/rules/paligo-change-audit.mdc`)
 - **ไม่ commit** จน user ขอ
 - **Shell ทุกหน้า user-facing** — ใช้ `PaligoSidebar.autoInit()`
 - **Exam handoff** — ใช้ `paligo-exam-shared.js` + book transfer schemas
@@ -31,7 +33,14 @@
 ```bash
 python3 -m http.server 8765
 # เปิด http://localhost:8765/exam-books.html
+
+# Inbox API (Phase 0+)
+cd workers && npm install && npm run dev
+# API: http://localhost:8787/v1/health
+# Browser: PaligoInboxClient.healthCheck()
 ```
+
+Domains: `paligo.com` (landing) · `app.paligo.com` (Pages) · `api.paligo.com` (Workers) — ดู `docs/deploy-cloudflare.md`
 
 ## เมื่อจบงาน
 

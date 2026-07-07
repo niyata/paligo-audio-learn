@@ -32,6 +32,13 @@
     return String(value ?? "").replace(/\d/g, (digit) => thaiDigits[Number(digit)] || digit);
   }
 
+  function toArabicDigits(value) {
+    return String(value ?? "").replace(/[๐-๙]/g, (digit) => {
+      const index = thaiDigits.indexOf(digit);
+      return index >= 0 ? String(index) : digit;
+    });
+  }
+
   function toThaiPercent(value) {
     const rounded = Math.round(Number(value) || 0);
     return `${toThaiNumber(rounded)}%`;
@@ -286,6 +293,146 @@
     });
   }
 
+  /** Book/cover-facing dates — Thai digits (exam paper & cover only). */
+  function formatBookDateTime(value) {
+    return toThaiNumber(formatThaiDateTime(value));
+  }
+
+  const SUBJECT_OPTIONS = [
+    { value: "pali-to-thai", label: "แปลมคธเป็นไทย" },
+    { value: "grammar", label: "ไวยากรณ์" },
+    { value: "thai-to-pali", label: "แปลไทยเป็นมคธ" },
+    { value: "sambandha-thai", label: "สัมพันธ์ไทย" },
+    { value: "burapapak", label: "บุรพภาค" },
+    { value: "chanda-magadhi", label: "แต่งฉันท์มคธ" },
+    { value: "compose-thai-to-magadhi", label: "แต่งไทยเป็นมคธ" },
+  ];
+
+  /** หลักสูตรแม่กองบาลีสนามหลวง — วิชาที่เลือกได้ต่อชั้น ป.ธ. */
+  const SUBJECTS_BY_GRADE = {
+    "1-2": ["grammar", "pali-to-thai"],
+    "3": ["grammar", "pali-to-thai", "burapapak"],
+    "4": ["thai-to-pali", "pali-to-thai"],
+    "5": ["thai-to-pali", "pali-to-thai"],
+    "6": ["thai-to-pali", "pali-to-thai"],
+    "7": ["thai-to-pali", "pali-to-thai"],
+    "8": ["chanda-magadhi", "thai-to-pali", "pali-to-thai"],
+    "9": ["compose-thai-to-magadhi", "thai-to-pali", "pali-to-thai"],
+  };
+
+  const SUBJECT_LABELS = Object.fromEntries(SUBJECT_OPTIONS.map((item) => [item.value, item.label]));
+
+  function getSubjectOption(value) {
+    return (
+      SUBJECT_OPTIONS.find((item) => item.value === String(value)) ||
+      SUBJECT_OPTIONS.find((item) => item.value === "pali-to-thai")
+    );
+  }
+
+  function getSubjectLabelByValue(value) {
+    return getSubjectOption(value)?.label || "แปลมคธเป็นไทย";
+  }
+
+  function getSubjectOptionsForGrade(grade) {
+    const allowedValues = SUBJECTS_BY_GRADE[String(grade)] || ["pali-to-thai"];
+    return allowedValues
+      .map((value) => SUBJECT_OPTIONS.find((item) => item.value === value))
+      .filter(Boolean);
+  }
+
+  function getGradesForSubject(subjectValue) {
+    const grades = Object.entries(SUBJECTS_BY_GRADE)
+      .filter(([, subjects]) => subjects.includes(String(subjectValue)))
+      .map(([grade]) => grade);
+    return grades.length ? grades : Object.keys(SUBJECTS_BY_GRADE);
+  }
+
+  function normalizePickerValue(type, value) {
+    if (value == null || value === "") return value;
+    if (type === "grade") return toArabicDigits(String(value)).trim();
+    if (type === "day" || type === "month" || type === "year") return toArabicDigits(String(value)).trim();
+    return String(value);
+  }
+
+  function inferSubjectFromTitle(title) {
+    const parts = String(title || "")
+      .split("·")
+      .map((part) => part.trim())
+      .filter(Boolean);
+    if (parts.length >= 3) {
+      const maybeSubject = parts[parts.length - 2];
+      const entry = Object.entries(SUBJECT_LABELS).find(([, label]) => label === maybeSubject);
+      if (entry) return { subject: entry[0], subjectLabel: entry[1] };
+    }
+    for (const part of parts) {
+      const entry = Object.entries(SUBJECT_LABELS).find(([, label]) => label === part);
+      if (entry) return { subject: entry[0], subjectLabel: entry[1] };
+    }
+    return null;
+  }
+
+  function inferGradeFromTitle(title) {
+    const match = String(title || "").match(/ป\.?\s*ธ\.?\s*([๐-๙0-9\-]+)/);
+    return match ? normalizePickerValue("grade", match[1]) : "";
+  }
+
+  /** Keep legacy/local books readable after display and schema tweaks. */
+  function normalizeExamBookRecord(book) {
+    if (!book || typeof book !== "object") return book;
+
+    const next = { ...book };
+    let changed = false;
+    const mark = (patch) => {
+      Object.assign(next, patch);
+      changed = true;
+    };
+
+    const gradeFromTitle = inferGradeFromTitle(next.title);
+    const normalizedGrade = normalizePickerValue("grade", next.grade || gradeFromTitle || "");
+    if (normalizedGrade && normalizedGrade !== next.grade) {
+      mark({ grade: normalizedGrade });
+    }
+
+    const inferredSubject = inferSubjectFromTitle(next.title);
+    if (!next.subject && inferredSubject) {
+      mark({ subject: inferredSubject.subject, subjectLabel: inferredSubject.subjectLabel });
+    } else if (next.subject && !next.subjectLabel && SUBJECT_LABELS[next.subject]) {
+      mark({ subjectLabel: SUBJECT_LABELS[next.subject] });
+    }
+
+    if (next.draft && typeof next.draft === "object") {
+      const draft = { ...next.draft };
+      if (Array.isArray(draft.pickers)) {
+        const pickers = draft.pickers.map((picker) => {
+          if (!picker || typeof picker !== "object") return picker;
+          const value = normalizePickerValue(picker.type, picker.value);
+          if (value === picker.value) return picker;
+          changed = true;
+          return { ...picker, value };
+        });
+        draft.pickers = pickers;
+      }
+      if (draft !== next.draft) next.draft = draft;
+    }
+
+    return changed ? next : book;
+  }
+
+  function migrateExamBooksList() {
+    const books = getList(KEYS.books);
+    if (!books.length) return books;
+
+    let changed = false;
+    const migrated = books.map((book) => {
+      const next = normalizeExamBookRecord(book);
+      if (next !== book) changed = true;
+      return next;
+    });
+
+    if (changed) setList(KEYS.books, migrated);
+    return migrated;
+  }
+
   window.PaligoExamShared = {
     KEYS,
     BOOK_STATUS,
@@ -293,6 +440,7 @@
     setList,
     downloadJson,
     toThaiNumber,
+    toArabicDigits,
     toThaiPercent,
     normalizeBookStatus,
     getStatusLabel,
@@ -310,5 +458,15 @@
     importBookTransfer,
     buildBookTransfer,
     formatThaiDateTime,
+    formatBookDateTime,
+    normalizeExamBookRecord,
+    migrateExamBooksList,
+    SUBJECT_OPTIONS,
+    SUBJECTS_BY_GRADE,
+    SUBJECT_LABELS,
+    getSubjectOption,
+    getSubjectLabelByValue,
+    getSubjectOptionsForGrade,
+    getGradesForSubject,
   };
 })();

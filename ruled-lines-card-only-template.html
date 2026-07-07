@@ -681,6 +681,17 @@
         z-index: 12;
       }
 
+      .exam-subject-line {
+        align-items: center;
+        display: inline-flex;
+        gap: 4px;
+        justify-content: center;
+        min-height: var(--line-height);
+        position: relative;
+        white-space: nowrap;
+        z-index: 11;
+      }
+
       .exam-grade-trigger {
         min-width: 0;
         padding-left: 0;
@@ -689,6 +700,15 @@
 
       .exam-grade-grid {
         grid-template-columns: repeat(4, minmax(40px, 1fr));
+      }
+
+      .exam-subject-trigger {
+        min-width: 12ch;
+        text-align: left;
+      }
+
+      .exam-subject-grid {
+        grid-template-columns: minmax(168px, 1fr);
       }
 
       .exam-picker-option {
@@ -743,6 +763,10 @@
         padding: 0 var(--paper-padding-inline);
         text-align: center;
         transform: translateY(var(--header-text-y-offset));
+      }
+
+      .prefilled-answer-line[hidden] {
+        display: none !important;
       }
 
       .ruled-editor-frame {
@@ -1099,7 +1123,30 @@
                   </div>
                 </div>
               </div>
-              <div class="exam-header-line">แปลมคธเป็นไทย</div>
+              <div class="exam-header-line exam-subject-line">
+                <span>วิชา </span>
+                <div
+                  class="exam-picker exam-subject-picker"
+                  data-exam-picker="subject"
+                  data-current="pali-to-thai"
+                  data-default="pali-to-thai"
+                >
+                  <button
+                    class="exam-picker-trigger exam-subject-trigger"
+                    type="button"
+                    aria-label="เลือกวิชา"
+                    aria-haspopup="dialog"
+                    aria-expanded="false"
+                  >
+                    <span class="picker-value" data-picker-value></span>
+                    <span class="picker-placeholder" data-picker-placeholder>........</span>
+                  </button>
+                  <div class="exam-picker-popover" data-picker-popover hidden>
+                    <div class="exam-picker-title">วิชา</div>
+                    <div class="exam-picker-grid exam-subject-grid" data-picker-options></div>
+                  </div>
+                </div>
+              </div>
               <div class="exam-header-line exam-date-line">
                 <span>สอบ วันที่</span>
                 <div class="exam-picker" data-exam-picker="day" data-min="1" data-max="31">
@@ -1154,9 +1201,9 @@
             </div>
             <div class="exam-emphasis-line" aria-hidden="true"></div>
             <div class="ruled-editor-frame">
-              <div class="prefilled-answer-line">แปลโดยพยัญชนะ</div>
+              <div class="prefilled-answer-line" data-prefilled-answer-line hidden aria-hidden="true">แปลโดยพยัญชนะ</div>
               <textarea
-                class="ruled-editor is-after-prefilled"
+                class="ruled-editor"
                 aria-label="พื้นที่เขียนคำตอบหน้าแรก"
                 data-auto-indent="numbered-homework"
                 data-page-editor="0"
@@ -1211,6 +1258,8 @@
     <div class="number-area-tooltip" role="tooltip" data-number-area-tooltip hidden>
       กด Tab หรือ เริ่มพิมพ์อักขระ สร้างย่อหน้าอัตโนมัติ
     </div>
+    <script src="paligo-config.js"></script>
+    <script src="paligo-inbox-client.js"></script>
     <script src="paligo-exam-shared.js"></script>
     <script src="paligo-exam-paper.js"></script>
     <script src="paligo-nav-config.js"></script>
@@ -1323,6 +1372,12 @@
           "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม",
         ];
         const gradeValues = ["1-2", "3", "4", "5", "6", "7", "8", "9"];
+        const {
+          SUBJECT_OPTIONS: subjectOptions,
+          getSubjectOptionsForGrade: getAllowedSubjectsForGrade,
+          getSubjectLabelByValue,
+          getSubjectOption,
+        } = window.PaligoExamShared;
         const queryParams = new URLSearchParams(window.location.search);
 
         const createId = (prefix) => {
@@ -1545,6 +1600,8 @@
         }
         const currentProfileGrade = studentProfile?.grade || "4";
         const gradePicker = document.querySelector('[data-exam-picker="grade"]');
+        const subjectPicker = document.querySelector('[data-exam-picker="subject"]');
+        const prefilledAnswerLine = document.querySelector("[data-prefilled-answer-line]");
         if (gradePicker) {
           gradePicker.dataset.current = currentProfileGrade;
           gradePicker.dataset.default = currentProfileGrade;
@@ -1605,7 +1662,7 @@
           const status = normalizeBookStatus(book?.status);
           if (bookBarTitle) bookBarTitle.textContent = book?.title || activeSubmission?.bookTitle || "สมุดคำตอบ";
           if (bookBarMeta) {
-            bookBarMeta.textContent = `${getStudentDisplayName() || activeSubmission?.studentName || "ไม่ระบุชื่อ"} · revision ${toThaiNumber(book?.revision || activeSubmission?.bookRevision || 1)} · ป.ธ. ${toThaiNumber(book?.grade || studentProfile?.grade || "-")}`;
+            bookBarMeta.textContent = `${getStudentDisplayName() || activeSubmission?.studentName || "ไม่ระบุชื่อ"} · revision ${book?.revision || activeSubmission?.bookRevision || 1} · ป.ธ. ${toThaiNumber(book?.grade || studentProfile?.grade || "-")}`;
           }
           if (bookBarStatus) {
             bookBarStatus.textContent = review ? getStatusLabel(BOOK_STATUS.reviewed) : getStatusLabel(status);
@@ -1678,7 +1735,7 @@
         const showSubmitModal = (submission) => {
           if (!submitModal) return;
           lastSubmissionPackage = submission;
-          submitModalMeta.textContent = `${submission.bookTitle} · revision ${toThaiNumber(submission.bookRevision)} · ${formatThaiDateTime(submission.submittedAt)}`;
+          submitModalMeta.textContent = `${submission.bookTitle} · revision ${submission.bookRevision} · ${formatThaiDateTime(submission.submittedAt)}`;
           if (reviewerLink) {
             reviewerLink.href = `exam-reviewer-console.html?submissionId=${encodeURIComponent(submission.id)}`;
           }
@@ -1964,6 +2021,23 @@
           });
         };
 
+        const shouldShowPrefilledByConsonant = () => {
+          const grade = String(gradePicker?.dataset.value || "");
+          const subject = String(subjectPicker?.dataset.value || "");
+          return (grade === "1-2" || grade === "3") && subject === "pali-to-thai";
+        };
+
+        const syncPrefilledAnswerLine = () => {
+          const firstPageEditor = editors[0];
+          if (!prefilledAnswerLine || !firstPageEditor) return;
+
+          const show = shouldShowPrefilledByConsonant();
+          prefilledAnswerLine.hidden = !show;
+          prefilledAnswerLine.setAttribute("aria-hidden", String(!show));
+          firstPageEditor.classList.toggle("is-after-prefilled", show);
+          balanceCurrentPageLines();
+        };
+
         const bindEditor = (editor) => {
           if (editor.dataset.editorBound === "true") return;
           editor.dataset.editorBound = "true";
@@ -2091,8 +2165,14 @@
           if (!trigger || !valueDisplay || !popover || !options) return;
 
           picker.dataset.value = String(value);
-          const isMonthPicker = picker.dataset.examPicker === "month";
-          valueDisplay.textContent = isMonthPicker ? thaiMonthNames[Number(value) - 1] : toThaiNumber(value);
+          const pickerType = picker.dataset.examPicker;
+          const isMonthPicker = pickerType === "month";
+          const isSubjectPicker = pickerType === "subject";
+          valueDisplay.textContent = isSubjectPicker
+            ? getSubjectLabelByValue(value)
+            : isMonthPicker
+              ? thaiMonthNames[Number(value) - 1]
+              : toThaiNumber(value);
           trigger.classList.add("has-value");
           trigger.setAttribute("aria-expanded", "false");
           popover.hidden = true;
@@ -2120,11 +2200,53 @@
           month: String(currentExamDate.getMonth() + 1),
           year: String(currentExamDate.getFullYear() + 543),
           grade: currentProfileGrade,
+          subject: getCurrentBook()?.subject || "pali-to-thai",
+        };
+
+        const rebuildSubjectPickerOptions = (preferredValue) => {
+          if (!subjectPicker) return;
+
+          const grade = gradePicker?.dataset.value || currentProfileGrade || "4";
+          const allowed = getAllowedSubjectsForGrade(grade);
+          let value = preferredValue || subjectPicker.dataset.value || subjectPicker.dataset.default || "pali-to-thai";
+          if (!allowed.some((item) => item.value === value)) {
+            value = allowed[0]?.value || "pali-to-thai";
+          }
+
+          const trigger = subjectPicker.querySelector(".exam-picker-trigger");
+          const popover = subjectPicker.querySelector("[data-picker-popover]");
+          const options = subjectPicker.querySelector("[data-picker-options]");
+          if (!trigger || !popover || !options) return;
+
+          options.replaceChildren();
+          allowed.forEach(({ value: optionValue, label }) => {
+            const option = document.createElement("button");
+
+            option.className = "exam-picker-option";
+            option.type = "button";
+            option.textContent = label;
+            option.dataset.value = optionValue;
+            if (optionValue === value) {
+              option.classList.add("is-current");
+              option.setAttribute("aria-current", "true");
+            }
+            option.addEventListener("click", (event) => {
+              event.stopPropagation();
+              selectPickerValue(subjectPicker, optionValue);
+              scheduleAutoSave();
+            });
+            options.append(option);
+          });
+
+          selectPickerValue(subjectPicker, value);
+          updatePickerCurrentValue(subjectPicker, value);
+          syncPrefilledAnswerLine();
         };
 
         examPickers.forEach((picker) => {
           const currentBuddhistYear = currentExamDate.getFullYear() + 543;
           const pickerType = picker.dataset.examPicker;
+          if (pickerType === "subject") return;
           const yearWindow = Number(picker.dataset.yearWindow || 0);
           const isMonthPicker = pickerType === "month";
           const isGradePicker = pickerType === "grade";
@@ -2159,6 +2281,7 @@
             option.addEventListener("click", (event) => {
               event.stopPropagation();
               selectPickerValue(picker, value);
+              if (isGradePicker) rebuildSubjectPickerOptions();
               scheduleAutoSave();
             });
             options.append(option);
@@ -2180,6 +2303,28 @@
             event.stopPropagation();
           });
         });
+
+        if (subjectPicker) {
+          rebuildSubjectPickerOptions(currentExamValues.subject);
+
+          const trigger = subjectPicker.querySelector(".exam-picker-trigger");
+          const popover = subjectPicker.querySelector("[data-picker-popover]");
+          const options = subjectPicker.querySelector("[data-picker-options]");
+
+          trigger?.addEventListener("click", (event) => {
+            event.stopPropagation();
+            const willOpen = popover.hidden;
+
+            closePickers(subjectPicker);
+            popover.hidden = !willOpen;
+            trigger.setAttribute("aria-expanded", String(willOpen));
+            if (willOpen) options.querySelector(".exam-picker-option")?.focus();
+          });
+
+          subjectPicker.addEventListener("click", (event) => {
+            event.stopPropagation();
+          });
+        }
 
         document.addEventListener("click", (event) => {
           if (!(event.target instanceof Element)) return;
@@ -2281,15 +2426,23 @@
           studentProfile?.monasticName ? `(${studentProfile.monasticName})` : "",
         ].filter(Boolean).join(" ") || "ไม่ระบุชื่อ";
 
+        const getExamDateLabel = () => {
+          const dayPicker = document.querySelector('[data-exam-picker="day"]');
+          const monthPicker = document.querySelector('[data-exam-picker="month"]');
+          const yearPicker = document.querySelector('[data-exam-picker="year"]');
+          const day = dayPicker?.dataset.value || "";
+          const month = monthPicker?.dataset.value || "";
+          const year = yearPicker?.dataset.value || "";
+          if (day && month && year) {
+            return `${toThaiNumber(day)} ${thaiMonthNames[Number(month) - 1]} ${toThaiNumber(year)}`;
+          }
+          return new Date().toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "numeric" });
+        };
+
         const getBookTitle = (draft) => {
           const grade = gradePicker?.dataset.value || studentProfile?.grade || "4";
-          const savedAt = new Date(draft?.savedAt || Date.now()).toLocaleDateString("th-TH", {
-            day: "numeric",
-            month: "short",
-            year: "numeric",
-          });
-
-          return `สมุดคำตอบ ป.ธ. ${toThaiNumber(grade)} · ${savedAt}`;
+          const subjectLabel = getSubjectLabelByValue(subjectPicker?.dataset.value || "pali-to-thai");
+          return `สมุดคำตอบ ป.ธ. ${toThaiNumber(grade)} · ${subjectLabel} · ${getExamDateLabel()}`;
         };
 
         const buildDraftSnapshot = () => ({
@@ -2313,13 +2466,17 @@
           const books = getStoredList(booksStorageKey);
           const existing = books.find((book) => book.id === currentBookId);
           const nextRevision = Number(existing?.revision || 0) + 1;
+          const subjectValue = subjectPicker?.dataset.value || existing?.subject || "pali-to-thai";
+          const subjectLabel = getSubjectLabelByValue(subjectValue);
           const nextBook = {
             id: currentBookId,
             schema: "paligo.exam.answerBook.v1",
             ownerId: localOwnerId,
-            title: existing?.title || getBookTitle(draft),
+            title: getBookTitle(draft),
             studentName: getStudentDisplayName(),
             grade: gradePicker?.dataset.value || studentProfile?.grade || "4",
+            subject: subjectValue,
+            subjectLabel,
             deliveryMethod: studentProfile?.deliveryMethod || "line",
             status: existing?.status || BOOK_STATUS.draft,
             revision: nextRevision,
@@ -2476,6 +2633,7 @@
             if (gradePicker) {
               updatePickerCurrentValue(gradePicker, studentProfile.grade);
               selectPickerValue(gradePicker, studentProfile.grade);
+              rebuildSubjectPickerOptions();
             }
             saveDraft({ silent: true });
             updateBookBar();
@@ -2550,8 +2708,19 @@
             draft.pickers?.forEach(({ type, value }) => {
               if (!value) return;
               const picker = Array.from(examPickers).find((item) => item.dataset.examPicker === type);
+              if (picker?.dataset.examPicker === "subject") {
+                rebuildSubjectPickerOptions(value);
+                return;
+              }
               if (picker) selectPickerValue(picker, value);
             });
+
+            const book = getCurrentBook();
+            if (book?.subject && !draft.pickers?.some((item) => item.type === "subject")) {
+              rebuildSubjectPickerOptions(book.subject);
+            }
+
+            syncPrefilledAnswerLine();
 
             annotations = Array.isArray(draft.annotations) ? draft.annotations : [];
             renderAnnotations();
@@ -2816,6 +2985,7 @@
           restoreDraft();
           loadReviewLayerForStudent();
         }
+        syncPrefilledAnswerLine();
         applyPermissions();
       })();
       PaligoSidebar.autoInit();

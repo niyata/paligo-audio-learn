@@ -110,6 +110,8 @@
       </section>
     </div>
 
+    <script src="paligo-config.js"></script>
+    <script src="paligo-inbox-client.js"></script>
     <script src="paligo-exam-shared.js"></script>
     <script src="paligo-nav-config.js"></script>
     <script src="sidebar-nav.js"></script>
@@ -148,7 +150,7 @@
               <p class="paligo-local-note">
                 ตรวจเมื่อ ${formatThaiDateTime(review.reviewedAt)} ·
                 โดย ${review.teacherName || "ผู้ตรวจ"} ·
-                revision ${toThaiNumber(review.bookRevision || "—")}
+                revision ${review.bookRevision ?? "—"}
               </p>
               <div class="paligo-review-stamp-list">
                 ${scoreStamps

@@ -309,6 +309,8 @@
       </section>
     </main>
 
+    <script src="paligo-config.js"></script>
+    <script src="paligo-inbox-client.js"></script>
     <script src="paligo-exam-shared.js"></script>
     <script src="paligo-nav-config.js"></script>
     <script src="sidebar-nav.js"></script>
@@ -377,7 +379,7 @@
           preflight.hidden = false;
           preflightTitle.textContent = currentSubmission.bookTitle || "สมุดคำตอบ";
           preflightBookId.textContent = currentSubmission.bookId || "—";
-          preflightRevision.textContent = toThaiNumber(currentSubmission.bookRevision || "—");
+          preflightRevision.textContent = String(currentSubmission.bookRevision ?? "—");
           preflightSubmitted.textContent = formatThaiDateTime(currentSubmission.submittedAt);
         };
         const renderSubmissions = () => {
