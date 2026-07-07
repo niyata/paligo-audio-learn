@@ -210,8 +210,35 @@
         box-shadow: 0 0 0 2px rgba(31, 45, 137, 0.18);
       }
 
+      .profile-wizard-error {
+        background: rgba(176, 32, 32, 0.08);
+        border: 1px solid rgba(176, 32, 32, 0.28);
+        border-radius: 5px;
+        color: #8b1a1a;
+        font-size: 0.88rem;
+        font-weight: 700;
+        margin: 0 0 14px;
+        padding: 8px 10px;
+      }
+
+      .profile-wizard-error[hidden] {
+        display: none;
+      }
+
+      .profile-field.is-invalid .profile-label {
+        color: #8b1a1a;
+      }
+
+      .profile-field.is-invalid .profile-input,
+      .profile-field.is-invalid .profile-select,
+      .profile-field.is-invalid .profile-choice {
+        border-color: rgba(176, 32, 32, 0.45);
+        box-shadow: 0 0 0 2px rgba(176, 32, 32, 0.12);
+      }
+
       .profile-wizard-actions {
         display: flex;
+        gap: 10px;
         justify-content: flex-end;
         margin-top: 18px;
       }
@@ -881,6 +908,7 @@
         <button class="profile-close-button" type="button" data-profile-dismiss aria-label="ปิดหน้าตั้งค่า">×</button>
         <h1 class="profile-wizard-title">ตั้งค่าผู้เรียน</h1>
         <p class="profile-wizard-note">บันทึกไว้ในเครื่องนี้ ใช้งานออฟไลน์ได้ และใช้เตรียมช่องทางส่งตรวจ</p>
+        <p class="profile-wizard-error" data-profile-error hidden role="alert"></p>
         <div class="profile-wizard-grid">
           <div class="profile-field is-wide">
             <span class="profile-label">บทบาทผู้ใช้</span>
@@ -1174,6 +1202,7 @@
         const pageStatus = document.querySelector("[data-page-status]");
         const profileForm = document.querySelector("[data-profile-form]");
         const profileDismissButtons = document.querySelectorAll("[data-profile-dismiss]");
+        const profileError = document.querySelector("[data-profile-error]");
         const thaiDigits = new Map([
           ["0", "๐"],
           ["1", "๑"],
@@ -1225,32 +1254,58 @@
           deliveryMethod: "กรุณาเลือกช่องทางส่งตรวจ",
         };
 
+        const isProfileRadioGroup = (field) => Boolean(field?.length && field[0]?.type === "radio");
+
+        const getProfileFieldContainer = (name) =>
+          profileForm?.querySelector(`[name="${name}"]`)?.closest(".profile-field") || null;
+
+        const clearProfileFieldInvalidState = (name) => {
+          getProfileFieldContainer(name)?.classList.remove("is-invalid");
+        };
+
+        const setProfileFieldInvalidState = (name) => {
+          getProfileFieldContainer(name)?.classList.add("is-invalid");
+        };
+
+        const showProfileError = (message) => {
+          if (!profileError) return;
+          profileError.textContent = message;
+          profileError.hidden = false;
+        };
+
+        const clearProfileError = () => {
+          if (!profileError) return;
+          profileError.textContent = "";
+          profileError.hidden = true;
+        };
+
         const clearProfileFieldValidity = (name) => {
           Array.from(profileForm?.elements[name] || []).forEach?.((field) => field.setCustomValidity(""));
           if (profileForm?.elements[name]?.setCustomValidity) profileForm.elements[name].setCustomValidity("");
-        };
-
-        const setProfileFieldInvalid = (field, message) => {
-          field.setCustomValidity(message);
-          field.reportValidity();
-          field.focus();
+          clearProfileFieldInvalidState(name);
         };
 
         const validateProfileForm = () => {
           if (!profileForm) return true;
 
+          clearProfileError();
           Object.keys(profileValidationMessages).forEach(clearProfileFieldValidity);
 
           for (const [name, message] of Object.entries(profileValidationMessages)) {
             const field = profileForm.elements[name];
-            const fields = field instanceof RadioNodeList ? Array.from(field) : [field];
-            const firstField = fields.find(Boolean);
-            const hasValue = field instanceof RadioNodeList
+            const isRadioGroup = isProfileRadioGroup(field);
+            const fields = isRadioGroup ? Array.from(field) : [field];
+            const hasValue = isRadioGroup
               ? fields.some((item) => item.checked)
               : String(field?.value || "").trim().length > 0;
 
-            if (!hasValue && firstField) {
-              setProfileFieldInvalid(firstField, message);
+            if (!hasValue) {
+              setProfileFieldInvalidState(name);
+              showProfileError(message);
+              const focusTarget = isRadioGroup
+                ? fields.find((item) => item.checked) || fields[0]
+                : field;
+              focusTarget?.focus?.();
               return false;
             }
           }
@@ -1259,14 +1314,21 @@
         };
 
         profileForm?.addEventListener("input", (event) => {
-          if (event.target?.name) clearProfileFieldValidity(event.target.name);
+          if (event.target?.name) {
+            clearProfileFieldValidity(event.target.name);
+            clearProfileError();
+          }
         });
 
         profileForm?.addEventListener("change", (event) => {
-          if (event.target?.name) clearProfileFieldValidity(event.target.name);
+          if (event.target?.name) {
+            clearProfileFieldValidity(event.target.name);
+            clearProfileError();
+          }
         });
 
         const dismissProfileWizard = () => {
+          clearProfileError();
           document.body.classList.remove("needs-profile");
         };
 
@@ -1454,12 +1516,19 @@
             updatedAt: new Date().toISOString(),
           };
 
-          saveStudentProfile(studentProfile);
+          try {
+            saveStudentProfile(studentProfile);
+          } catch {
+            showProfileError("บันทึกโปรไฟล์ไม่ได้ — ตรวจสอบการอนุญาต localStorage ของเบราว์เซอร์");
+            return;
+          }
+
+          dismissProfileWizard();
+
           if (gradePicker) {
             updatePickerCurrentValue(gradePicker, studentProfile.grade);
             selectPickerValue(gradePicker, studentProfile.grade);
           }
-          document.body.classList.remove("needs-profile");
         });
 
         if (studentProfile) {
