@@ -6,7 +6,7 @@
 
 เป้าหมายหลักคือช่วยลดภาระการท่องจำ เพิ่มความเข้าใจโครงสร้างภาษา และทำให้การฝึกแปลบาลีเป็นไทยหรือไทยเป็นบาลีเข้าถึงง่ายขึ้นบน iOS — **โดยยึดหลักสูตรบาลีสนามหลวง** (corpus ตามชั้น, อัธยาหาร, ศ/ส/ป, แปลสองชั้น) ไม่ใช่แอปเรียนภาษาทั่วไป
 
-> **Track แยก:** PRD นี้ = **แอป iOS ระยะยาว** · **Paligo web + Inbox** → [`docs/agile/inbox-sprint-backlog.md`](agile/inbox-sprint-backlog.md) · **PALI-AI (Cloud Code)** → [`docs/pali-ai/CLOUD-CODE-ALIGNMENT.md`](pali-ai/CLOUD-CODE-ALIGNMENT.md)
+> **Track แยก:** PRD นี้ = **แอป iOS ระยะยาว** · **Paligo web + Inbox** → [`docs/agile/inbox-sprint-backlog.md`](agile/inbox-sprint-backlog.md) · **จับคู่ครูตรวจ (Web)** → [`docs/prd-teacher-matching-onboarding.md`](prd-teacher-matching-onboarding.md) · **PALI-AI (Cloud Code)** → [`docs/pali-ai/CLOUD-CODE-ALIGNMENT.md`](pali-ai/CLOUD-CODE-ALIGNMENT.md)
 
 ## กลุ่มผู้ใช้เป้าหมาย
 
@@ -126,6 +126,7 @@ AI / ติวเตอร์ในแอป **ห้ามให้เฉลย
 - การค้นคำบาลีมักต้องรู้รูปศัพท์ตั้งต้นก่อน จึงค้นได้แม่น
 - ข้อสอบเก่าและเฉลยกระจายอยู่หลายแหล่ง
 - ผู้เรียนขาดระบบติดตามความก้าวหน้าและการทบทวนแบบเป็นรอบ
+- **(Paligo Web)** อยากเรียนและส่งข้อสอบตรวจได้ แต่ **ยังไม่มีอาจารย์ในระบบ** — ดู [`prd-teacher-matching-onboarding.md`](prd-teacher-matching-onboarding.md)
 
 
 
@@ -223,6 +224,29 @@ AI / ติวเตอร์ในแอป **ห้ามให้เฉลย
 
 - ซ้อมสอบด้วยเกณฑ์เดียวกับข้อสอบจริงสนามหลวง
 - ไม่ให้คะแนนผิดเพราะ penalize คำอัธยาหารที่ถูกต้อง
+
+
+
+## Paligo Web — Track แยก (สมุดข้อสอบ + Inbox)
+
+> สเปคเต็ม inbox loop: [`exam-inbox-v1-spec.md`](exam-inbox-v1-spec.md) · Backlog: [`agile/inbox-sprint-backlog.md`](agile/inbox-sprint-backlog.md)
+
+### Pain point: ไม่มีครูตรวจ
+
+นักเรียนใช้สมุดดิจิทัลได้แล้ว แต่ยังส่งตรวจไม่ได้เพราะไม่มีผู้ตรวจในระบบ — **PRD:** [`prd-teacher-matching-onboarding.md`](prd-teacher-matching-onboarding.md)
+
+| แนวทาง | สรุป |
+|--------|------|
+| Supply | Seed ครูล่วงหน้า · นักเรียนเลือกจากรายการ |
+| Demand | เชิญครูผ่าน LINE Flex + `shareTargetPicker` |
+| Onboarding | Invite wizard นำทางครูใหม่ |
+| หลายครู | รับคำเชิญพร้อมกัน · แบ่งภาระตอนส่งตรวจ |
+
+### ฟีเจอร์ Web ที่มี / กำลังทำ
+
+- สมุดข้อสอบ ruled lines · autosave · ส่งตรวจ
+- Inbox API (Workers + D1) · จับคู่ invite code
+- Phase 8.5+: discipleship · LINE invite · wizard ครู
 
 
 
