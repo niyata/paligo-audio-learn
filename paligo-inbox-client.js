@@ -74,7 +74,17 @@
 
   function isInboxFeatureEnabled() {
     const cfg = getConfig();
-    return cfg.features?.inbox !== false;
+    if (cfg.features?.inbox === false) return false;
+
+    try {
+      const cached = JSON.parse(global.sessionStorage?.getItem("paligo-platform-flags-v1") || "null");
+      const flags = cached?.flags;
+      if (flags && flags.inboxEnabled === false) return false;
+    } catch {
+      /* ignore */
+    }
+
+    return true;
   }
 
   /**
@@ -264,8 +274,64 @@
     return safeRequest("/me", { method: "GET" });
   }
 
+  async function updateMe({ displayName, email, profileJson } = {}) {
+    const json = {};
+    if (displayName !== undefined) json.displayName = displayName;
+    if (email !== undefined) json.email = email;
+    if (profileJson !== undefined) json.profileJson = profileJson;
+    const payload = await safeRequest("/me", { method: "PATCH", json });
+    if (payload?.user) {
+      const session = getSession();
+      if (session?.sessionToken) {
+        setSession({
+          sessionToken: session.sessionToken,
+          expiresAt: session.expiresAt,
+          user: payload.user,
+        });
+      }
+    }
+    return payload;
+  }
+
+  async function changePin({ currentPin, newPin }) {
+    return safeRequest("/me/change-pin", {
+      method: "POST",
+      json: { currentPin, newPin },
+    });
+  }
+
+  async function getPlatformFlags() {
+    return safeRequest("/platform/flags", { method: "GET", auth: false });
+  }
+
+  async function getAdminPanel() {
+    return safeRequest("/admin/panel", { method: "GET" });
+  }
+
+  async function patchAdminSettings(flags) {
+    const payload = await safeRequest("/admin/settings", {
+      method: "PATCH",
+      json: { flags },
+    });
+    try {
+      global.sessionStorage?.removeItem("paligo-platform-flags-v1");
+    } catch {
+      /* ignore */
+    }
+    return payload;
+  }
+
   async function createInvite() {
     return safeRequest("/pairings/invite", { method: "POST" });
+  }
+
+  /** ค้นหาครู/ผู้ตรวจในระบบ — คืน { reviewers: [] } พร้อม handle offline (โยน error ให้ UI จัดการ fallback) */
+  async function searchReviewers(query, { limit = 10 } = {}) {
+    const params = new URLSearchParams();
+    if (query) params.set("q", String(query).trim());
+    if (limit) params.set("limit", String(limit));
+    const suffix = params.toString() ? `?${params.toString()}` : "";
+    return safeRequest(`/reviewers/search${suffix}`, { method: "GET" });
   }
 
   async function joinPairing(inviteCode) {
@@ -315,8 +381,14 @@
     login,
     logout,
     getMe,
+    updateMe,
+    changePin,
+    getPlatformFlags,
+    getAdminPanel,
+    patchAdminSettings,
     createInvite,
     joinPairing,
+    searchReviewers,
     canUseInbox,
     pushPackage,
     listInbox,

@@ -2,10 +2,12 @@
  * Route dispatch — Phase 2
  */
 
-import { handleLogin, handleLogout, handleMe, handleRegister, requireUser } from "./auth.js";
+import { handleChangePin, handleLogin, handleLogout, handleMe, handlePatchMe, handleRegister, requireUser } from "./auth.js";
+import { handleGetAdminPanel, handleGetPlatformFlags, handlePatchAdminSettings } from "./platform.js";
 import { handleClaimInbox, handleGetInbox } from "./inbox.js";
 import { handlePostPackage } from "./packages.js";
 import { handlePairingInvite, handlePairingJoin } from "./pairing.js";
+import { handleSearchReviewers } from "./reviewers.js";
 import { errorResponse, jsonResponse } from "./http.js";
 
 const SERVICE_NAME = "paligo-inbox-api";
@@ -30,8 +32,15 @@ export async function handleV1(request, env) {
   if (path === "/v1/auth/login" && method === "POST") return handleLogin(request, env);
   if (path === "/v1/auth/logout" && method === "POST") return handleLogout(request, env);
   if (path === "/v1/me" && method === "GET") return handleMe(request, env);
+  if (path === "/v1/me" && method === "PATCH") return handlePatchMe(request, env);
+  if (path === "/v1/me/change-pin" && method === "POST") return handleChangePin(request, env);
+  if (path === "/v1/platform/flags" && method === "GET") return handleGetPlatformFlags(request, env);
+  if (path === "/v1/admin/panel" && method === "GET") return handleGetAdminPanel(request, env);
+  if (path === "/v1/admin/settings" && method === "PATCH") return handlePatchAdminSettings(request, env);
   if (path === "/v1/pairings/invite" && method === "POST") return handlePairingInvite(request, env);
   if (path === "/v1/pairings/join" && method === "POST") return handlePairingJoin(request, env);
+
+  if (path === "/v1/reviewers/search" && method === "GET") return handleSearchReviewers(request, env);
 
   if (path === "/v1/inbox" && method === "GET") return handleGetInbox(request, env);
 

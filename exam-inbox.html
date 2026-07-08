@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>กล่องข้อความ Inbox · Paligo</title>
+    <title>กล่องข้อความ · Paligo</title>
     <link rel="stylesheet" href="paligo-design-tokens.css" />
     <link rel="stylesheet" href="sidebar-nav.css" />
     <link rel="stylesheet" href="paligo-exam-ui.css" />
@@ -16,11 +16,38 @@
         margin: 0;
         min-height: 100vh;
       }
+
+      .inbox-sync-status {
+        align-items: center;
+        background: rgba(154, 106, 16, 0.14);
+        color: #8a5e0e;
+        display: flex;
+        flex-wrap: wrap;
+        font-size: 0.84rem;
+        font-weight: 700;
+        gap: 10px;
+        justify-content: space-between;
+        padding: 8px 14px;
+      }
+
+      .inbox-sync-status[hidden] {
+        display: none;
+      }
+
+      .inbox-sync-status.is-online {
+        background: rgba(36, 113, 91, 0.12);
+        color: #1f553f;
+      }
+
+      .inbox-sync-status__retry {
+        min-height: 34px;
+        padding: 6px 12px;
+      }
     </style>
   </head>
   <body>
     <div class="inbox-chat-shell" data-inbox-shell hidden>
-      <section class="inbox-chat-layout" aria-label="แชท Inbox">
+      <section class="inbox-chat-layout" aria-label="แชทกล่องข้อความ">
         <header class="inbox-chat-header">
           <div>
             <h1 class="inbox-chat-header__title" data-chat-peer-name>กล่องข้อความ</h1>
@@ -32,11 +59,18 @@
           </div>
         </header>
 
+        <div class="inbox-sync-status" data-sync-status hidden role="status">
+          <span data-sync-status-text></span>
+          <button class="paligo-btn inbox-sync-status__retry" type="button" data-sync-retry>ลองเชื่อมต่อใหม่</button>
+        </div>
+
         <div class="inbox-chat-thread" data-chat-thread aria-live="polite"></div>
 
         <footer class="inbox-chat-composer" data-chat-composer>
           <div class="inbox-chat-composer__tools">
-            <button class="paligo-btn" type="button" data-open-book-menu hidden>📚 สมุดข้อสอบ</button>
+            <button class="paligo-btn" type="button" data-open-book-menu hidden onclick="window.PaligoExamInboxUI?.openBookSheet?.()" aria-label="เลือกสมุดข้อสอบเพื่อส่งตรวจ">
+            📚 สมุดข้อสอบ
+          </button>
             <a class="paligo-btn is-ghost" href="exam-books.html" data-link-books hidden>จัดการสมุด</a>
             <a class="paligo-btn is-ghost" href="exam-reviewer-console.html" data-link-review hidden>เปิดตรวจ</a>
           </div>
@@ -55,7 +89,7 @@
 
     <section class="inbox-chat-gate" data-inbox-gate hidden>
       <div class="paligo-review-card">
-        <h2 class="paligo-book-bar__title">กล่องข้อความ Inbox</h2>
+        <h2 class="paligo-book-bar__title">กล่องข้อความ</h2>
         <p class="paligo-local-note" data-gate-message>กำลังตรวจสอบบัญชี…</p>
         <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px">
           <a class="paligo-btn is-primary" href="exam-account.html">เข้าสู่ระบบ</a>
@@ -64,23 +98,72 @@
       </div>
     </section>
 
-    <div class="inbox-book-sheet" data-book-sheet hidden aria-hidden="true">
+    <div class="inbox-book-sheet" data-book-sheet data-paligo-overlay hidden aria-hidden="true">
       <div class="inbox-book-sheet__panel" role="dialog" aria-labelledby="book-sheet-title">
         <h2 class="inbox-book-sheet__title" id="book-sheet-title">เลือกสมุดเพื่อส่งตรวจ</h2>
-        <p class="paligo-local-note">เลือกสมุด — ระบบจะส่งตรวจและส่ง card ให้ครูในแชท (เหมือน LINE Flex)</p>
+        <p class="paligo-local-note">เลือกสมุด → ยืนยันส่งตรวจ — card จะปรากฏในแชท (คลิกขวาที่ card เพื่อยกเลิกการส่ง)</p>
+        <div class="inbox-book-sheet__toolbar" data-book-sheet-toolbar hidden>
+          <label class="inbox-book-sheet__search">
+            <span class="inbox-book-sheet__search-label">ค้นหา</span>
+            <input
+              class="inbox-book-sheet__search-input"
+              type="search"
+              placeholder="ชื่อสมุด วิชา ชั้น วันสอบ…"
+              data-book-sheet-search
+              autocomplete="off"
+              enterkeyhint="search"
+            />
+          </label>
+          <div class="inbox-book-sheet__filters">
+            <label class="inbox-book-sheet__filter">
+              <span class="inbox-book-sheet__filter-label">สถานะ</span>
+              <select class="inbox-book-sheet__filter-select" data-book-sheet-filter-status aria-label="กรองตามสถานะ">
+                <option value="">ทุกสถานะ</option>
+                <option value="draft">ฉบับร่าง</option>
+                <option value="under_review">อยู่ระหว่างตรวจ</option>
+              </select>
+            </label>
+            <label class="inbox-book-sheet__filter">
+              <span class="inbox-book-sheet__filter-label">วิชา</span>
+              <select class="inbox-book-sheet__filter-select" data-book-sheet-filter-subject aria-label="กรองตามวิชา">
+                <option value="">ทุกวิชา</option>
+              </select>
+            </label>
+            <button class="paligo-btn is-ghost inbox-book-sheet__filter-reset" type="button" data-book-sheet-filter-reset hidden>
+              ล้าง
+            </button>
+          </div>
+        </div>
+        <p class="inbox-book-sheet__filter-empty paligo-local-note" data-book-sheet-filter-empty hidden>
+          ไม่พบสมุดตามที่ค้นหา — ลองเปลี่ยนคำค้นหาหรือล้างตัวกรอง
+        </p>
         <div class="inbox-book-sheet__list" data-book-sheet-list></div>
-        <button class="paligo-btn" type="button" data-close-book-sheet>ปิด</button>
+        <div class="inbox-book-sheet__footer">
+          <div class="inbox-book-sheet__confirm" data-book-sheet-confirm hidden>
+            <p class="inbox-book-sheet__confirm-text" data-book-sheet-confirm-text></p>
+            <div class="inbox-book-sheet__confirm-actions">
+              <button class="paligo-btn is-primary" type="button" data-book-sheet-confirm-send>ยืนยันส่งตรวจ</button>
+              <button class="paligo-btn" type="button" data-book-sheet-clear-selection>เปลี่ยนสมุด</button>
+            </div>
+          </div>
+          <button class="paligo-btn is-ghost inbox-book-sheet__close" type="button" data-close-book-sheet>ปิด</button>
+        </div>
       </div>
     </div>
+
+    <div class="inbox-chat-context-menu" data-chat-context-menu data-paligo-overlay hidden role="menu" aria-label="เมนูข้อความ"></div>
 
     <script src="paligo-config.js"></script>
     <script src="paligo-inbox-client.js"></script>
     <script src="paligo-exam-shared.js"></script>
     <script src="paligo-exam-submit.js"></script>
     <script src="paligo-exam-book-cover.js"></script>
+    <script src="paligo-profile.js"></script>
     <script src="paligo-inbox-chat.js"></script>
     <script src="paligo-nav-config.js"></script>
+    <script src="paligo-platform.js"></script>
     <script src="sidebar-nav.js"></script>
+    <script src="paligo-shell-init.js"></script>
     <script>
       (() => {
         const {
@@ -92,9 +175,16 @@
           BOOK_STATUS,
           migrateExamBooksList,
           sortBooksNewestFirst,
+          toArabicDigits,
+          getSubjectLabelByValue,
+          SUBJECT_OPTIONS,
+          getCancelSubmitState,
+          cancelBookSubmit,
+          importBookTransfer,
         } = window.PaligoExamShared;
         const chat = window.PaligoInboxChat;
         const cover = window.PaligoExamBookCover;
+        const profile = window.PaligoProfile;
 
         const shell = document.querySelector("[data-inbox-shell]");
         const gate = document.querySelector("[data-inbox-gate]");
@@ -105,15 +195,342 @@
         const chatInput = document.querySelector("[data-chat-input]");
         const bookSheet = document.querySelector("[data-book-sheet]");
         const bookSheetList = document.querySelector("[data-book-sheet-list]");
+        const bookSheetToolbar = document.querySelector("[data-book-sheet-toolbar]");
+        const bookSheetSearch = document.querySelector("[data-book-sheet-search]");
+        const bookSheetFilterStatus = document.querySelector("[data-book-sheet-filter-status]");
+        const bookSheetFilterSubject = document.querySelector("[data-book-sheet-filter-subject]");
+        const bookSheetFilterReset = document.querySelector("[data-book-sheet-filter-reset]");
+        const bookSheetFilterEmpty = document.querySelector("[data-book-sheet-filter-empty]");
+        const bookSheetConfirm = document.querySelector("[data-book-sheet-confirm]");
+        const bookSheetConfirmText = document.querySelector("[data-book-sheet-confirm-text]");
+        const bookSheetConfirmSend = document.querySelector("[data-book-sheet-confirm-send]");
+        const bookSheetClearSelection = document.querySelector("[data-book-sheet-clear-selection]");
+        const chatContextMenu = document.querySelector("[data-chat-context-menu]");
         const openBookMenu = document.querySelector("[data-open-book-menu]");
         const linkBooks = document.querySelector("[data-link-books]");
         const linkReview = document.querySelector("[data-link-review]");
         const composer = document.querySelector("[data-chat-composer]");
 
+        const subjectOptions = () => SUBJECT_OPTIONS || [];
+
+        const getSheetRefs = () => ({
+          sheet: document.querySelector("[data-book-sheet]"),
+          list: document.querySelector("[data-book-sheet-list]"),
+          toolbar: document.querySelector("[data-book-sheet-toolbar]"),
+          search: document.querySelector("[data-book-sheet-search]"),
+          filterStatus: document.querySelector("[data-book-sheet-filter-status]"),
+          filterSubject: document.querySelector("[data-book-sheet-filter-subject]"),
+          filterReset: document.querySelector("[data-book-sheet-filter-reset]"),
+          filterEmpty: document.querySelector("[data-book-sheet-filter-empty]"),
+          confirm: document.querySelector("[data-book-sheet-confirm]"),
+          confirmText: document.querySelector("[data-book-sheet-confirm-text]"),
+          confirmSend: document.querySelector("[data-book-sheet-confirm-send]"),
+          clearSelection: document.querySelector("[data-book-sheet-clear-selection]"),
+        });
+
+        const ensureOverlayPortals = () => {
+          const { sheet } = getSheetRefs();
+          const menu = document.querySelector("[data-chat-context-menu]");
+          if (sheet && sheet.parentElement !== document.body) document.body.append(sheet);
+          if (menu && menu.parentElement !== document.body) document.body.append(menu);
+        };
+
         let session = null;
         let pairingContext = null;
         let threadId = "main";
         let role = null;
+
+        const PAIRING_CACHE_KEY = "paligo-inbox-pairing-cache-v1";
+        const cachePairingContext = (userId, ctx) => {
+          if (!userId || !ctx) return;
+          try {
+            localStorage.setItem(PAIRING_CACHE_KEY, JSON.stringify({ userId, ctx }));
+          } catch {}
+        };
+        const loadCachedPairingContext = (userId) => {
+          try {
+            const raw = JSON.parse(localStorage.getItem(PAIRING_CACHE_KEY) || "null");
+            return raw && raw.userId === userId ? raw.ctx : null;
+          } catch {
+            return null;
+          }
+        };
+        let sheetBooks = [];
+        let sheetSearchQuery = "";
+        let sheetFilterStatus = "";
+        let sheetFilterSubject = "";
+        let sheetSelectedBookId = null;
+        let contextMenuMessage = null;
+
+        const getPickerValue = (book, type) =>
+          book?.draft?.pickers?.find((item) => item.type === type)?.value || "";
+
+        const getBookSubjectValue = (book) => {
+          const options = subjectOptions();
+          const raw = book?.subject || getPickerValue(book, "subject");
+          if (raw && options.some((item) => item.value === String(raw))) return String(raw);
+          const label = book?.subjectLabel || cover?.getSubjectLabel?.(book) || "";
+          return options.find((item) => item.label === label)?.value || "";
+        };
+
+        const normalizeSheetSearch = (value) => toArabicDigits(String(value || "").trim().toLowerCase());
+
+        const buildBookSearchHaystack = (book) => {
+          const status = normalizeBookStatus(book.status);
+          const subjectValue = getBookSubjectValue(book);
+          const subjectLabel =
+            book.subjectLabel || getSubjectLabelByValue?.(subjectValue) || cover?.getSubjectLabel?.(book) || "";
+          const grade = cover?.getCoverGrade?.(book) || book.grade || "";
+          const dateLabel = cover?.getCoverDateLabel?.(book, (v) => String(v ?? "")) || "";
+          const day = getPickerValue(book, "day");
+          const month = getPickerValue(book, "month");
+          const year = getPickerValue(book, "year");
+          return normalizeSheetSearch(
+            [
+              book.title,
+              book.studentName,
+              grade,
+              `ป.ธ. ${grade}`,
+              subjectValue,
+              subjectLabel,
+              cover?.formatCoverSubjectLine?.(subjectLabel),
+              getStatusLabel(status),
+              status,
+              `revision ${book.revision || 1}`,
+              dateLabel,
+              day,
+              month,
+              year,
+            ]
+              .filter(Boolean)
+              .join(" ")
+          );
+        };
+
+        const matchesBookSheetFilters = (book) => {
+          const status = normalizeBookStatus(book.status);
+          if (sheetFilterStatus && status !== sheetFilterStatus) return false;
+          if (sheetFilterSubject && getBookSubjectValue(book) !== sheetFilterSubject) return false;
+          if (!sheetSearchQuery) return true;
+          return buildBookSearchHaystack(book).includes(sheetSearchQuery);
+        };
+
+        const syncBookSheetFilterOptions = () => {
+          const refs = getSheetRefs();
+          if (!refs.filterSubject) return;
+
+          const subjectValues = [
+            ...new Set(sheetBooks.map(getBookSubjectValue).filter(Boolean)),
+          ].sort((a, b) => {
+            const labelA = getSubjectLabelByValue?.(a) || a;
+            const labelB = getSubjectLabelByValue?.(b) || b;
+            return labelA.localeCompare(labelB, "th");
+          });
+
+          if (sheetFilterSubject && !subjectValues.includes(sheetFilterSubject)) {
+            sheetFilterSubject = "";
+          }
+
+          refs.filterSubject.replaceChildren();
+          const allOption = document.createElement("option");
+          allOption.value = "";
+          allOption.textContent = "ทุกวิชา";
+          refs.filterSubject.append(allOption);
+          subjectValues.forEach((value) => {
+            const option = document.createElement("option");
+            option.value = value;
+            option.textContent = getSubjectLabelByValue?.(value) || value;
+            refs.filterSubject.append(option);
+          });
+          refs.filterSubject.value = sheetFilterSubject;
+        };
+
+        const updateBookSheetFilterUi = () => {
+          const hasActiveFilter =
+            Boolean(sheetSearchQuery) || Boolean(sheetFilterStatus) || Boolean(sheetFilterSubject);
+          const refs = getSheetRefs();
+          if (refs.filterReset) refs.filterReset.hidden = !hasActiveFilter;
+        };
+
+        const resetBookSheetFilters = ({ rerender = true } = {}) => {
+          const refs = getSheetRefs();
+          sheetSearchQuery = "";
+          sheetFilterStatus = "";
+          sheetFilterSubject = "";
+          if (refs.search) refs.search.value = "";
+          if (refs.filterStatus) refs.filterStatus.value = "";
+          if (refs.filterSubject) refs.filterSubject.value = "";
+          updateBookSheetFilterUi();
+          if (rerender) renderBookSheetList();
+        };
+
+        const getReviewerLabel = () => pairingContext?.pairing?.reviewerDisplayName || "ครู";
+
+        const clearSheetSelection = () => {
+          const refs = getSheetRefs();
+          sheetSelectedBookId = null;
+          if (refs.confirm) refs.confirm.hidden = true;
+          refs.list?.querySelectorAll(".inbox-book-pick.is-selected").forEach((item) => {
+            item.classList.remove("is-selected");
+            item.setAttribute("aria-pressed", "false");
+          });
+        };
+
+        const selectSheetBook = (bookId) => {
+          const refs = getSheetRefs();
+          sheetSelectedBookId = bookId;
+          refs.list?.querySelectorAll(".inbox-book-pick").forEach((item) => {
+            const selected = item.dataset.bookId === bookId;
+            item.classList.toggle("is-selected", selected);
+            item.setAttribute("aria-pressed", String(selected));
+          });
+
+          const book = sheetBooks.find((item) => item.id === bookId);
+          if (!book || !refs.confirm || !refs.confirmText) return;
+
+          const status = normalizeBookStatus(book.status);
+          const actionLabel =
+            status === BOOK_STATUS.underReview ? "ส่งให้ครูอีกครั้ง" : "ส่งตรวจ";
+          refs.confirmText.textContent = `「${book.title || "สมุดข้อสอบ"}」 — ${actionLabel}ให้ ${getReviewerLabel()}`;
+          if (refs.confirmSend) {
+            refs.confirmSend.textContent =
+              status === BOOK_STATUS.underReview ? "ยืนยันส่งอีกครั้ง" : "ยืนยันส่งตรวจ";
+          }
+          refs.confirm.hidden = false;
+        };
+
+        const confirmSendSelectedBook = async () => {
+          const book = sheetBooks.find((item) => item.id === sheetSelectedBookId);
+          if (!book) return;
+
+          const status = normalizeBookStatus(book.status);
+          await sendBookFromChat(
+            {
+              bookId: book.id,
+              book: bookSnapshot(book),
+              bookStatus: book.status,
+              subtitle: `revision ${book.revision || 1}`,
+            },
+            {
+              pushOnly: status === BOOK_STATUS.underReview,
+              skipConfirm: true,
+            }
+          );
+        };
+
+        const appendBookPick = (book) => {
+          const refs = getSheetRefs();
+          if (!refs.list) return;
+
+          const pick = document.createElement("button");
+          pick.type = "button";
+          pick.className = "inbox-book-pick";
+          pick.dataset.bookId = book.id;
+          pick.setAttribute("aria-pressed", String(sheetSelectedBookId === book.id));
+          if (sheetSelectedBookId === book.id) pick.classList.add("is-selected");
+          if (cover?.buildBookCoverElement) pick.append(cover.buildBookCoverElement(book, { portrait: true }));
+
+          const status = normalizeBookStatus(book.status);
+          const meta = document.createElement("div");
+          meta.className = "inbox-book-pick__meta";
+
+          const title = document.createElement("div");
+          title.className = "inbox-book-pick__title";
+          title.textContent = book.title || "สมุดข้อสอบ";
+
+          const statusRow = document.createElement("div");
+          statusRow.className = "inbox-book-pick__status";
+          const badge = document.createElement("span");
+          badge.className = "inbox-book-pick__badge";
+          if (status === BOOK_STATUS.underReview) badge.classList.add("is-under-review");
+          badge.textContent = getStatusLabel(status);
+          const revision = document.createElement("span");
+          revision.textContent = `revision ${book.revision || 1}`;
+          statusRow.append(badge, revision);
+
+          meta.append(title, statusRow);
+          pick.setAttribute("aria-label", `${book.title || "สมุดข้อสอบ"} · ${getStatusLabel(status)}`);
+          pick.append(meta);
+          pick.addEventListener("click", () => selectSheetBook(book.id));
+          refs.list.append(pick);
+        };
+
+        const renderBookSheetList = () => {
+          const refs = getSheetRefs();
+          if (!refs.list) return;
+
+          const filtered = sheetBooks.filter(matchesBookSheetFilters);
+          refs.list.replaceChildren();
+          updateBookSheetFilterUi();
+
+          if (refs.filterEmpty) {
+            refs.filterEmpty.hidden = filtered.length > 0 || !sheetBooks.length;
+          }
+
+          if (!sheetBooks.length) {
+            const empty = document.createElement("p");
+            empty.className = "paligo-local-note";
+            empty.textContent = "ยังไม่มีสมุดข้อสอบ — สร้างสมุดใหม่ก่อน";
+            refs.list.append(empty);
+            return;
+          }
+
+          if (!filtered.length) {
+            const empty = document.createElement("p");
+            empty.className = "paligo-local-note";
+            empty.textContent = "ไม่พบสมุดตามที่ค้นหา — ลองเปลี่ยนคำค้นหาหรือล้างตัวกรอง";
+            refs.list.append(empty);
+            return;
+          }
+
+          refs.list.hidden = false;
+          filtered.forEach(appendBookPick);
+          if (sheetSelectedBookId && !filtered.some((book) => book.id === sheetSelectedBookId)) {
+            clearSheetSelection();
+          } else if (sheetSelectedBookId) {
+            selectSheetBook(sheetSelectedBookId);
+          }
+        };
+
+        const openBookSheet = () => {
+          ensureOverlayPortals();
+          const refs = getSheetRefs();
+          if (!refs.sheet || !refs.list) {
+            console.error("[inbox] book sheet nodes missing");
+            window.alert("เปิดรายการสมุดไม่ได้ — รีเฟรชหน้าแล้วลองใหม่");
+            return;
+          }
+
+          try {
+            resetBookSheetFilters({ rerender: false });
+            clearSheetSelection();
+            sheetBooks = getBooks().filter((book) => normalizeBookStatus(book.status) !== BOOK_STATUS.reviewed);
+
+            if (refs.toolbar) refs.toolbar.hidden = !sheetBooks.length;
+            syncBookSheetFilterOptions();
+            renderBookSheetList();
+
+            refs.sheet.hidden = false;
+            refs.sheet.removeAttribute("hidden");
+            refs.sheet.classList.add("is-open");
+            refs.sheet.setAttribute("aria-hidden", "false");
+            window.requestAnimationFrame(() => refs.search?.focus());
+          } catch (error) {
+            console.error("[inbox] openBookSheet failed", error);
+            window.alert(error.message || "เปิดรายการสมุดไม่ได้");
+          }
+        };
+
+        const closeBookSheet = () => {
+          const refs = getSheetRefs();
+          if (!refs.sheet) return;
+          refs.sheet.hidden = true;
+          refs.sheet.setAttribute("hidden", "");
+          refs.sheet.classList.remove("is-open");
+          refs.sheet.setAttribute("aria-hidden", "true");
+          resetBookSheetFilters({ rerender: false });
+          clearSheetSelection();
+        };
 
         const showGate = (message) => {
           shell.hidden = true;
@@ -152,6 +569,8 @@
               }
             : null,
         });
+
+        const resolveSenderAvatarUrl = () => profile?.resolveSessionAvatar?.() || "";
 
         const inboxMetaFromItem = (item) => ({
           bookTitle: item.bookTitle,
@@ -197,7 +616,7 @@
               });
             } else if (status === BOOK_STATUS.underReview) {
               actions.push({
-                label: message.inboxPushed ? "ส่งแล้ว" : "ส่ง inbox อีกครั้ง",
+                label: message.inboxPushed ? "ส่งแล้ว" : "ส่งอีกครั้ง",
                 primary: !message.inboxPushed,
                 disabled: Boolean(message.inboxPushed),
                 onClick: () => sendBookFromChat(message, { pushOnly: true }),
@@ -239,7 +658,13 @@
             statusLabel: getStatusLabel(status),
             subtitle: message.subtitle || `revision ${book.revision || message.bookRevision || 1}`,
             actions,
-            senderName: message.senderName || "",
+            senderName:
+              message.senderName ||
+              (message.direction === "out" ? pairingContext?.user?.displayName : "") ||
+              "",
+            senderAvatarUrl:
+              message.senderAvatarUrl ||
+              (message.direction === "out" ? resolveSenderAvatarUrl() : ""),
           });
         };
 
@@ -251,7 +676,7 @@
             empty.className = "inbox-chat-empty";
             empty.innerHTML =
               role === "student"
-                ? "<span>ยังไม่มีข้อความ</span><span>กด「📚 สมุดข้อสอบ」เพื่อส่งสมุดให้ครู</span>"
+                ? "<span>ยังไม่มีข้อความ</span><span>กด「สมุดข้อสอบ」เพื่อส่งให้ครู</span>"
                 : "<span>ยังไม่มีงานส่งเข้ามา</span><span>รอนักเรียนส่งสมุดในแชท</span>";
             threadEl.append(empty);
             return;
@@ -268,6 +693,24 @@
           });
           paintThread();
         };
+
+        /** สถานะ sync แบบชั่วคราว (ไม่บันทึกลงประวัติแชท) */
+        const setSyncStatus = (text, kind = "offline") => {
+          const bar = document.querySelector("[data-sync-status]");
+          if (!bar) return;
+          const label = bar.querySelector("[data-sync-status-text]");
+          const retry = bar.querySelector("[data-sync-retry]");
+          if (!text) {
+            bar.hidden = true;
+            return;
+          }
+          bar.hidden = false;
+          bar.classList.toggle("is-online", kind === "online");
+          if (label) label.textContent = text;
+          if (retry) retry.hidden = kind === "online";
+        };
+
+        let isOfflineMode = false;
 
         const sendTextMessage = () => {
           const text = String(chatInput?.value || "").trim();
@@ -302,6 +745,20 @@
             return;
           }
 
+          if (!options.skipConfirm) {
+            const status = normalizeBookStatus(book.status);
+            const actionLabel =
+              options.pushOnly || status === BOOK_STATUS.underReview
+                ? "ส่งให้ครูอีกครั้ง"
+                : "ส่งตรวจ";
+            const title = book.title || "สมุดข้อสอบ";
+            if (
+              !window.confirm(`ยืนยัน${actionLabel}「${title}」ให้ ${getReviewerLabel()} หรือไม่?`)
+            ) {
+              return;
+            }
+          }
+
           try {
             let result;
             if (options.pushOnly) {
@@ -325,17 +782,127 @@
               book: bookSnapshot(fresh),
               bookStatus: BOOK_STATUS.underReview,
               subtitle: `revision ${fresh?.revision || 1} · ${result.push?.intendedRecipientLabel || "ครู"}`,
+              senderAvatarUrl: resolveSenderAvatarUrl(),
               inboxPushed: Boolean(result.push || result.mode === "submit_and_push" || result.mode === "push_only"),
               inboxItemId: result.push?.inboxItemId,
               inboxStatus: "pending",
               at: new Date().toISOString(),
             });
-            appendSystem(result.message || "ส่งสมุดเข้า inbox แล้ว");
+            appendSystem(result.message || "ส่งตรวจแล้ว");
             paintThread();
             closeBookSheet();
           } catch (error) {
             window.alert(error.message || "ส่งสมุดไม่สำเร็จ");
           }
+        };
+
+        const hideChatContextMenu = () => {
+          if (!chatContextMenu) return;
+          chatContextMenu.hidden = true;
+          chatContextMenu.replaceChildren();
+          contextMenuMessage = null;
+        };
+
+        const cancelBookSendFromChat = async (message) => {
+          const bookId = message.bookId || message.book?.id;
+          const book = getBookById(bookId) || message.book;
+          if (!book) {
+            window.alert("ไม่พบสมุดในเครื่อง");
+            return;
+          }
+
+          const cancelState = getCancelSubmitState(book, "student");
+          if (!cancelState.canCancel) {
+            window.alert(cancelState.tooltip || "ยกเลิกการส่งไม่ได้");
+            return;
+          }
+
+          const title = book.title || message.book?.title || "สมุดข้อสอบ";
+          if (!window.confirm(`ยกเลิกส่งตรวจ「${title}」หรือไม่?\n\nสมุดจะกลับเป็นฉบับร่างและแก้ไขได้อีกครั้ง`)) {
+            return;
+          }
+
+          try {
+            const updated = cancelBookSubmit(bookId);
+            chat.upsertMessage(threadId, {
+              ...message,
+              book: bookSnapshot(updated),
+              bookStatus: BOOK_STATUS.draft,
+              subtitle: `ยกเลิกส่งตรวจแล้ว · revision ${updated.revision || 1}`,
+              inboxPushed: false,
+              inboxStatus: "cancelled",
+              cancelledAt: new Date().toISOString(),
+            });
+            appendSystem(`ยกเลิกส่งตรวจ「${title}」แล้ว — กลับเป็นฉบับร่าง`);
+            paintThread();
+          } catch (error) {
+            window.alert(error.message || "ยกเลิกการส่งไม่สำเร็จ");
+          }
+        };
+
+        const removeBookMessageFromChat = (message) => {
+          if (!message?.id) return;
+          const title = message.book?.title || "สมุดข้อสอบ";
+          if (!window.confirm(`ลบการ์ด「${title}」ออกจากแชทหรือไม่?`)) return;
+          chat.removeMessage(threadId, message.id);
+          appendSystem(`ลบ card「${title}」ออกจากแชทแล้ว`);
+          paintThread();
+        };
+
+        const showChatContextMenu = (event, message) => {
+          if (!chatContextMenu || role !== "student") return;
+          event.preventDefault();
+          hideChatContextMenu();
+
+          const book = getBookById(message.bookId || message.book?.id) || message.book || {};
+          const status = normalizeBookStatus(book.status || message.bookStatus);
+          const cancelState = getCancelSubmitState(book, "student");
+          const items = [];
+
+          if (message.direction === "out" && status === BOOK_STATUS.underReview) {
+            items.push({
+              label: "ยกเลิกการส่งตรวจ",
+              disabled: !cancelState.canCancel,
+              title: cancelState.tooltip || "",
+              onClick: () => cancelBookSendFromChat(message),
+            });
+          }
+
+          if (
+            message.direction === "out" &&
+            status === BOOK_STATUS.draft &&
+            !message.inboxPushed
+          ) {
+            items.push({
+              label: "ลบออกจากแชท",
+              onClick: () => removeBookMessageFromChat(message),
+            });
+          }
+
+          if (!items.length) return;
+
+          contextMenuMessage = message;
+          items.forEach((item) => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "inbox-chat-context-menu__item";
+            btn.textContent = item.label;
+            btn.disabled = Boolean(item.disabled);
+            if (item.title) btn.title = item.title;
+            btn.addEventListener("click", () => {
+              hideChatContextMenu();
+              item.onClick?.();
+            });
+            chatContextMenu.append(btn);
+          });
+
+          const menuWidth = 220;
+          const menuHeight = items.length * 42 + 8;
+          const left = Math.min(event.clientX, window.innerWidth - menuWidth - 8);
+          const top = Math.min(event.clientY, window.innerHeight - menuHeight - 8);
+          chatContextMenu.style.left = `${left}px`;
+          chatContextMenu.style.top = `${top}px`;
+          chatContextMenu.hidden = false;
         };
 
         const claimInboxCard = async (message) => {
@@ -394,6 +961,7 @@
                 bookStatus: isReturn ? BOOK_STATUS.reviewed : BOOK_STATUS.underReview,
                 subtitle: isReturn ? "ผลตรวจจากครู" : `revision ${item.bookRevision || 1}`,
                 senderName: item.fromDisplayName || (isReturn ? "ครู" : "นักเรียน"),
+                senderAvatarUrl: item.fromAvatarUrl || "",
                 inboxItemId: item.id,
                 inboxDirection: item.direction,
                 inboxStatus: item.status || "pending",
@@ -403,60 +971,14 @@
               else chat.appendMessage(threadId, payload);
             });
             paintThread();
+            isOfflineMode = false;
+            setSyncStatus("");
           } catch (error) {
-            if (error.status !== 401) appendSystem(error.message || "โหลด inbox ไม่สำเร็จ");
+            if (error.status === 401) throw error;
+            // ออฟไลน์/ sync ไม่สำเร็จ — ใช้สถานะชั่วคราว ไม่บันทึกซ้ำลงประวัติแชท
+            isOfflineMode = true;
+            setSyncStatus("ออฟไลน์ — แสดงข้อมูลในเครื่อง", "offline");
           }
-        };
-
-        const openBookSheet = () => {
-          if (!bookSheet || !bookSheetList) return;
-          const books = getBooks().filter((book) => normalizeBookStatus(book.status) !== BOOK_STATUS.reviewed);
-          bookSheetList.replaceChildren();
-
-          if (!books.length) {
-            const empty = document.createElement("p");
-            empty.className = "paligo-local-note";
-            empty.textContent = "ยังไม่มีสมุด — สร้างที่หน้าสมุดข้อสอบก่อน";
-            bookSheetList.append(empty);
-          }
-
-          books.forEach((book) => {
-            const pick = document.createElement("button");
-            pick.type = "button";
-            pick.className = "inbox-book-pick";
-            if (cover?.buildBookCoverElement) pick.append(cover.buildBookCoverElement(book, { compact: true }));
-            const meta = document.createElement("div");
-            meta.className = "inbox-flex-card__body";
-            meta.innerHTML = `<div class="inbox-flex-card__title">${book.title || "สมุดคำตอบ"}</div><div class="inbox-flex-card__meta">${getStatusLabel(normalizeBookStatus(book.status))} · revision ${book.revision || 1}</div>`;
-            pick.append(meta);
-            pick.addEventListener("click", async () => {
-              const msgId = upsertBookMessage({
-                bookId: book.id,
-                book: bookSnapshot(book),
-                bookStatus: book.status,
-                subtitle: `revision ${book.revision || 1}`,
-                at: new Date().toISOString(),
-              });
-              paintThread();
-              const message = chat.getMessages(threadId).find((m) => m.id === msgId);
-              const st = normalizeBookStatus(book.status);
-              await sendBookFromChat(message, {
-                pushOnly: st === BOOK_STATUS.underReview,
-              });
-            });
-            bookSheetList.append(pick);
-          });
-
-          bookSheet.hidden = false;
-          bookSheet.classList.add("is-open");
-          bookSheet.setAttribute("aria-hidden", "false");
-        };
-
-        const closeBookSheet = () => {
-          if (!bookSheet) return;
-          bookSheet.hidden = true;
-          bookSheet.classList.remove("is-open");
-          bookSheet.setAttribute("aria-hidden", "true");
         };
 
         const configureRoleUi = () => {
@@ -477,24 +999,49 @@
             if (peerMeta) {
               peerMeta.textContent =
                 students.length > 1
-                  ? `Inbox รวม ${students.length} คน · รับงานจากแชท`
-                  : "รับสมุดที่ส่งเข้ามา · กดรับเข้าคลังบน card";
+                  ? `กล่องข้อความรวม ${students.length} คน`
+                  : "รับสมุดที่ส่งเข้ามา · กดรับเข้าคลังบนการ์ด";
             }
             if (composer) composer.querySelector("[data-open-book-menu]")?.setAttribute("hidden", "");
           }
         };
 
         const bootstrap = async () => {
+          const platform = window.PaligoPlatform;
+          if (platform?.boot) {
+            const { inboxAllowed } = await platform.boot();
+            if (!inboxAllowed) {
+              showGate(
+                "กล่องข้อความปิดชั่วคราว — ใช้「โอนไฟล์ขั้นสูง」ในบัญชีแทน"
+              );
+              return;
+            }
+          } else if (!PaligoInboxClient.isInboxFeatureEnabled()) {
+            showGate("กล่องข้อความปิดชั่วคราว");
+            return;
+          }
+
+          let apiReady = true;
           try {
             await PaligoInboxClient.ensureApiReady();
-          } catch (error) {
-            showGate(error.message || "Inbox API ไม่พร้อม");
+          } catch {
+            apiReady = false;
+          }
+
+          // ออฟไลน์: ถ้ามี session แคชไว้ ให้เปิดประวัติในเครื่องได้ ไม่ block ทั้งหน้า
+          if (!apiReady) {
+            const cached = PaligoInboxClient.getSession?.();
+            if (!cached?.user) {
+              showGate("ออฟไลน์ — เข้าสู่ระบบที่บัญชีก่อน");
+              return;
+            }
+            bootLocalSession(cached, { offline: true });
             return;
           }
 
           session = await PaligoInboxClient.ensureAuthenticatedSession();
           if (!session?.user) {
-            showGate("เข้าสู่ระบบก่อนใช้กล่องข้อความ — สมัคร/ล็อกอินที่บัญชี Inbox");
+            showGate("เข้าสู่ระบบก่อน — สมัครหรือล็อกอินที่บัญชี");
             return;
           }
 
@@ -502,8 +1049,9 @@
 
           try {
             pairingContext = await PaligoInboxClient.getMe();
+            cachePairingContext(session.user.id, pairingContext);
           } catch {
-            pairingContext = null;
+            pairingContext = loadCachedPairingContext(session.user.id);
           }
 
           const reviewerId = pairingContext?.pairing?.reviewerUserId || "peer";
@@ -513,7 +1061,7 @@
               : `student-${session.user.id}-${reviewerId}`;
 
           if (role === "student" && !pairingContext?.pairing) {
-            showGate("ยังไม่ได้จับคู่ครู — ไปที่บัญชี Inbox แท็บจับคู่ก่อนส่งสมุด");
+            showGate("ยังไม่ได้จับคู่ครู — ไปที่บัญชี แท็บจับคู่");
             return;
           }
 
@@ -523,24 +1071,168 @@
           paintThread();
         };
 
-        document.querySelector("[data-send-text]")?.addEventListener("click", sendTextMessage);
-        chatInput?.addEventListener("keydown", (event) => {
-          if (event.key === "Enter" && !event.shiftKey) {
-            event.preventDefault();
-            sendTextMessage();
+        /** เปิดหน้าจาก session ที่แคชไว้ (ไม่ผ่าน API) — แสดงประวัติในเครื่อง */
+        const bootLocalSession = (cached, { offline = false } = {}) => {
+          session = cached;
+          role = cached.user.role;
+          pairingContext = loadCachedPairingContext(cached.user.id);
+          const reviewerId = pairingContext?.pairing?.reviewerUserId || "peer";
+          threadId =
+            role === "reviewer"
+              ? `reviewer-inbox-${cached.user.id}`
+              : `student-${cached.user.id}-${reviewerId}`;
+
+          showChat();
+          configureRoleUi();
+          paintThread();
+          if (offline) {
+            isOfflineMode = true;
+            setSyncStatus("ออฟไลน์ — แสดงข้อมูลในเครื่อง", "offline");
           }
-        });
-        openBookMenu?.addEventListener("click", openBookSheet);
-        document.querySelector("[data-close-book-sheet]")?.addEventListener("click", closeBookSheet);
-        bookSheet?.addEventListener("click", (event) => {
-          if (event.target === bookSheet) closeBookSheet();
-        });
-        document.querySelector("[data-refresh-chat]")?.addEventListener("click", async () => {
+        };
+
+        /** ลองเชื่อมต่อใหม่จากปุ่ม retry — ไม่สร้างข้อความซ้ำในประวัติ */
+        const retrySync = async () => {
+          setSyncStatus("กำลังลองเชื่อมต่อ…", "offline");
+          try {
+            await PaligoInboxClient.ensureApiReady();
+          } catch {
+            setSyncStatus("ยังออฟไลน์ — แสดงข้อมูลในเครื่อง", "offline");
+            return;
+          }
+          const fresh = await PaligoInboxClient.ensureAuthenticatedSession();
+          if (!fresh?.user) {
+            setSyncStatus("เชื่อมต่อได้ — เข้าสู่ระบบที่บัญชี", "offline");
+            return;
+          }
+          session = fresh;
+          role = fresh.user.role;
+          try {
+            pairingContext = await PaligoInboxClient.getMe();
+            cachePairingContext(fresh.user.id, pairingContext);
+          } catch {
+            pairingContext = loadCachedPairingContext(fresh.user.id);
+          }
+          const reviewerId = pairingContext?.pairing?.reviewerUserId || "peer";
+          threadId =
+            role === "reviewer"
+              ? `reviewer-inbox-${fresh.user.id}`
+              : `student-${fresh.user.id}-${reviewerId}`;
+          configureRoleUi();
           await syncInboxToChat();
           paintThread();
-        });
+          if (!isOfflineMode) setSyncStatus("เชื่อมต่อแล้ว — sync ล่าสุด", "online");
+        };
 
+        const bindInboxUi = () => {
+          ensureOverlayPortals();
+          const root = document.getElementById("paligoMainContent") || document.body;
+
+          if (!document.body.dataset.inboxSheetUiBound) {
+            document.body.dataset.inboxSheetUiBound = "true";
+
+            document.body.addEventListener("click", (event) => {
+              if (event.target.closest("[data-open-book-menu]")) {
+                event.preventDefault();
+                openBookSheet();
+                return;
+              }
+              if (event.target.closest("[data-close-book-sheet]")) {
+                event.preventDefault();
+                closeBookSheet();
+                return;
+              }
+              if (event.target.closest("[data-book-sheet-filter-reset]")) {
+                event.preventDefault();
+                resetBookSheetFilters();
+                return;
+              }
+              if (event.target.closest("[data-book-sheet-confirm-send]")) {
+                event.preventDefault();
+                confirmSendSelectedBook();
+                return;
+              }
+              if (event.target.closest("[data-book-sheet-clear-selection]")) {
+                event.preventDefault();
+                clearSheetSelection();
+                return;
+              }
+
+              const sheet = document.querySelector("[data-book-sheet]");
+              if (sheet?.classList.contains("is-open") && event.target === sheet) {
+                closeBookSheet();
+              }
+            });
+
+            document.body.addEventListener("input", (event) => {
+              const search = event.target.closest("[data-book-sheet-search]");
+              if (!search) return;
+              sheetSearchQuery = normalizeSheetSearch(search.value);
+              renderBookSheetList();
+            });
+
+            document.body.addEventListener("change", (event) => {
+              if (event.target.matches("[data-book-sheet-filter-status]")) {
+                sheetFilterStatus = event.target.value;
+                renderBookSheetList();
+              }
+              if (event.target.matches("[data-book-sheet-filter-subject]")) {
+                sheetFilterSubject = event.target.value;
+                renderBookSheetList();
+              }
+            });
+
+            document.body.addEventListener("keydown", (event) => {
+              if (event.key === "Escape" && event.target.closest("[data-book-sheet-search]")) {
+                event.preventDefault();
+                closeBookSheet();
+              }
+            });
+          }
+
+          root.querySelector("[data-send-text]")?.addEventListener("click", sendTextMessage);
+          root.querySelector("[data-refresh-chat]")?.addEventListener("click", async () => {
+            await retrySync();
+          });
+          root.querySelector("[data-sync-retry]")?.addEventListener("click", async () => {
+            await retrySync();
+          });
+
+          const input = root.querySelector("[data-chat-input]");
+          input?.addEventListener("keydown", (event) => {
+            if (event.key === "Enter" && !event.shiftKey) {
+              event.preventDefault();
+              sendTextMessage();
+            }
+          });
+
+          const thread = root.querySelector("[data-chat-thread]");
+          thread?.addEventListener("contextmenu", (event) => {
+            const card = event.target.closest(".inbox-flex-card[data-message-id]");
+            if (!card) return;
+            const message = chat.getMessages(threadId).find((item) => item.id === card.dataset.messageId);
+            if (!message || message.type !== "book") return;
+            showChatContextMenu(event, message);
+          });
+        };
+
+        document.addEventListener("click", (event) => {
+          if (!chatContextMenu || chatContextMenu.hidden) return;
+          if (event.target.closest("[data-chat-context-menu]")) return;
+          hideChatContextMenu();
+        });
+        document.addEventListener("keydown", (event) => {
+          if (event.key === "Escape") hideChatContextMenu();
+        });
+        window.addEventListener("scroll", hideChatContextMenu, true);
+
+        window.PaligoExamInboxUI = { openBookSheet, closeBookSheet };
+
+        hideChatContextMenu();
         PaligoSidebar.autoInit();
+        ensureOverlayPortals();
+        bindInboxUi();
+        closeBookSheet();
         bootstrap();
       })();
     </script>

@@ -128,6 +128,7 @@
         gap: 0;
         overflow: hidden;
         padding: 0;
+        position: relative;
       }
 
       .book-cover {
@@ -456,6 +457,143 @@
         white-space: nowrap;
       }
 
+      .books-view-tabs {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 8px;
+        box-shadow: 0 18px 46px rgba(74, 44, 10, 0.1);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 8px;
+      }
+
+      .books-view-tabs[hidden] {
+        display: none;
+      }
+
+      .books-view-tab {
+        appearance: none;
+        background: transparent;
+        border: 0;
+        border-radius: 8px;
+        color: var(--muted);
+        cursor: pointer;
+        flex: 1 1 auto;
+        font: inherit;
+        font-size: 0.84rem;
+        font-weight: 800;
+        min-height: 44px;
+        padding: 8px 12px;
+        transition: background 0.15s ease, color 0.15s ease;
+      }
+
+      .books-view-tab:hover {
+        background: rgba(31, 45, 137, 0.08);
+        color: var(--exam-blue);
+      }
+
+      .books-view-tab.is-active {
+        background: rgba(31, 45, 137, 0.14);
+        color: var(--exam-blue);
+      }
+
+      .books-view-tab:focus-visible {
+        outline: 2px solid var(--exam-blue);
+        outline-offset: 2px;
+      }
+
+      .books-selection-toolbar {
+        align-items: center;
+        background: rgba(31, 45, 137, 0.08);
+        border: 1px solid rgba(31, 45, 137, 0.18);
+        border-radius: 8px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: space-between;
+        padding: 10px 12px;
+      }
+
+      .books-selection-toolbar[hidden] {
+        display: none;
+      }
+
+      .books-selection-count {
+        color: var(--exam-blue);
+        font-size: 0.88rem;
+        font-weight: 800;
+      }
+
+      .books-selection-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .book-card.is-selected {
+        box-shadow: 0 0 0 2px rgba(31, 45, 137, 0.45);
+      }
+
+      .book-card-toolbar {
+        display: flex;
+        gap: 6px;
+        justify-content: space-between;
+        padding: 8px 10px 0;
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 100%;
+        z-index: 2;
+      }
+
+      .book-card-select,
+      .book-card-favorite {
+        align-items: center;
+        appearance: none;
+        background: rgba(255, 250, 240, 0.92);
+        border: 1px solid rgba(31, 45, 137, 0.18);
+        border-radius: 999px;
+        color: var(--exam-blue);
+        cursor: pointer;
+        display: inline-flex;
+        font-size: 1rem;
+        justify-content: center;
+        line-height: 1;
+        min-height: 44px;
+        min-width: 44px;
+        padding: 0;
+        transition: background 0.15s ease, transform 0.12s ease;
+      }
+
+      .book-card-select:hover,
+      .book-card-favorite:hover {
+        background: #fff;
+      }
+
+      .book-card-select:focus-visible,
+      .book-card-favorite:focus-visible {
+        outline: 2px solid var(--exam-blue);
+        outline-offset: 2px;
+      }
+
+      .book-card-select.is-checked {
+        background: var(--exam-blue);
+        border-color: var(--exam-blue);
+        color: #fff;
+      }
+
+      .book-card-favorite.is-favorite {
+        background: rgba(180, 40, 60, 0.12);
+        border-color: rgba(180, 40, 60, 0.35);
+        color: #b4283c;
+      }
+
+      .book-card-favorite:active,
+      .book-card-select:active {
+        transform: scale(0.96);
+      }
+
       @media (max-width: 720px) {
         .books-header {
           grid-template-columns: 1fr;
@@ -472,6 +610,20 @@
         .filter-reset {
           justify-self: start;
         }
+
+        .books-selection-toolbar {
+          align-items: stretch;
+          flex-direction: column;
+        }
+
+        .books-selection-actions {
+          width: 100%;
+        }
+
+        .books-selection-actions .button {
+          flex: 1 1 calc(50% - 4px);
+          justify-content: center;
+        }
       }
     </style>
   </head>
@@ -480,15 +632,31 @@
       <header class="books-header">
         <div>
           <h1 class="books-title">สมุดข้อสอบ</h1>
-          <p class="books-subtitle" data-summary>สมุดคำตอบ 1 รอบสอบ = 1 เล่ม แยกข้อมูลไม่ให้ทับกัน</p>
+          <p class="books-subtitle" data-summary>รอบสอบ 1 ครั้ง = 1 เล่ม — ข้อมูลแยกกันไม่ทับ</p>
         </div>
         <div class="button-row">
           <button class="button is-primary" type="button" data-open-cover-modal>สร้างสมุดใหม่</button>
-          <a class="button" href="exam-inbox.html">กล่องข้อความ</a>
+          <a class="button" href="exam-inbox.html" data-paligo-inbox-feature>กล่องข้อความ</a>
           <a class="button" href="exam-account.html">บัญชี</a>
           <a class="button" href="exam-review-results.html">ผลตรวจของฉัน</a>
         </div>
       </header>
+      <nav class="books-view-tabs" data-books-view-tabs hidden aria-label="มุมมองคลังสมุด">
+        <button class="books-view-tab is-active" type="button" data-books-view="all" aria-pressed="true">ทั้งหมด</button>
+        <button class="books-view-tab" type="button" data-books-view="favorites" aria-pressed="false">เล่มโปรด</button>
+        <button class="books-view-tab" type="button" data-books-view="hidden" aria-pressed="false">ซ่อนแล้ว</button>
+        <button class="books-view-tab" type="button" data-books-view="trash" aria-pressed="false">ถังทิ้ง</button>
+      </nav>
+      <div class="books-selection-toolbar" data-books-selection-toolbar hidden>
+        <span class="books-selection-count" data-books-selection-count>เลือกแล้ว 0 เล่ม</span>
+        <div class="books-selection-actions">
+          <button class="button" type="button" data-bulk-favorite>เพิ่มเล่มโปรด</button>
+          <button class="button" type="button" data-bulk-unfavorite>เอาออกจากเล่มโปรด</button>
+          <button class="button" type="button" data-bulk-hide>ซ่อนในคลัง</button>
+          <button class="button" type="button" data-bulk-trash>ทิ้งสมุด</button>
+          <button class="button is-primary" type="button" data-bulk-clear-selection>ยกเลิกการเลือก</button>
+        </div>
+      </div>
       <section class="books-filters" data-books-filters hidden aria-label="ตัวกรองสมุดข้อสอบ">
         <label class="filter-field">
           <span class="filter-label">วิชา</span>
@@ -510,7 +678,7 @@
       </section>
       <section class="empty-state" data-empty-state hidden>
         <strong>ยังไม่มีสมุดข้อสอบ</strong>
-        <span>กดสร้างสมุดใหม่เพื่อเริ่มทำข้อสอบรอบแรก</span>
+        <span>สร้างสมุดใหม่เพื่อเริ่มใช้งาน</span>
         <a class="button" href="seed-demo-books.html">โหลดสมุดตัวอย่าง 3 เล่ม</a>
       </section>
     </main>
@@ -518,7 +686,7 @@
     <div class="cover-modal" data-cover-modal hidden aria-hidden="true">
       <form class="cover-modal-card" data-cover-form>
         <h2 class="cover-modal-title">สร้างสมุดใหม่</h2>
-        <p class="cover-modal-note">เลือกชั้น วิชา และวันสอบ — ระบบจะสร้างหน้าปกสมุดคำตอบให้ทันที</p>
+        <p class="cover-modal-note">เลือกชั้น วิชา และวันสอบ</p>
         <div class="cover-form">
           <label class="cover-field">
             <span class="cover-label">ประโยค ป.ธ.</span>
@@ -544,7 +712,7 @@
         </div>
         <div class="cover-modal-actions">
           <button class="button" type="button" data-close-cover-modal>ยกเลิก</button>
-          <button class="button is-primary" type="submit">สร้างและเปิดเล่ม</button>
+          <button class="button is-primary" type="submit">สร้างและเปิดสมุด</button>
         </div>
       </form>
     </div>
@@ -566,7 +734,9 @@
     <script src="paligo-exam-submit.js"></script>
     <script src="paligo-exam-date-picker.js"></script>
     <script src="paligo-nav-config.js"></script>
+    <script src="paligo-platform.js"></script>
     <script src="sidebar-nav.js"></script>
+    <script src="paligo-shell-init.js"></script>
     <script>
       (() => {
         if (!window.PaligoExamShared) {
@@ -594,6 +764,7 @@
           SUBJECT_OPTIONS: subjectOptions,
           getSubjectOptionsForGrade,
           getGradesForSubject,
+          buildStudentProfileSnapshot,
         } = window.PaligoExamShared;
 
         const roleGuard = guardExamPageRole({ page: "student" });
@@ -633,6 +804,179 @@
         const bookAlertTitle = document.querySelector("[data-book-alert-title]");
         const bookAlertMessage = document.querySelector("[data-book-alert-message]");
         const bookAlertSecondary = document.querySelector("[data-book-alert-secondary]");
+        const viewTabsBar = document.querySelector("[data-books-view-tabs]");
+        const viewTabButtons = document.querySelectorAll("[data-books-view]");
+        const selectionToolbar = document.querySelector("[data-books-selection-toolbar]");
+        const selectionCountEl = document.querySelector("[data-books-selection-count]");
+        const bulkFavoriteBtn = document.querySelector("[data-bulk-favorite]");
+        const bulkUnfavoriteBtn = document.querySelector("[data-bulk-unfavorite]");
+        const bulkHideBtn = document.querySelector("[data-bulk-hide]");
+        const bulkTrashBtn = document.querySelector("[data-bulk-trash]");
+        const bulkClearBtn = document.querySelector("[data-bulk-clear-selection]");
+
+        let libraryView = "all";
+        const selectedBookIds = new Set();
+
+        const isBookTrashed = (book) => Boolean(book?.trashedAt);
+        const isBookHidden = (book) => Boolean(book?.hiddenAt) && !isBookTrashed(book);
+        const isBookFavorite = (book) => Boolean(book?.isFavorite) && !isBookTrashed(book);
+
+        const matchesLibraryView = (book) => {
+          if (libraryView === "trash") return isBookTrashed(book);
+          if (isBookTrashed(book)) return false;
+          if (libraryView === "hidden") return isBookHidden(book);
+          if (libraryView === "favorites") return isBookFavorite(book) && !isBookHidden(book);
+          return !isBookHidden(book);
+        };
+
+        const updateSelectionToolbar = () => {
+          const count = selectedBookIds.size;
+          if (selectionToolbar) selectionToolbar.hidden = count === 0;
+          if (selectionCountEl) selectionCountEl.textContent = `เลือกแล้ว ${count} เล่ม`;
+          const inTrashView = libraryView === "trash";
+          if (bulkFavoriteBtn) bulkFavoriteBtn.hidden = inTrashView;
+          if (bulkUnfavoriteBtn) bulkUnfavoriteBtn.hidden = inTrashView;
+          if (bulkHideBtn) bulkHideBtn.hidden = inTrashView || libraryView === "hidden";
+          if (bulkTrashBtn) bulkTrashBtn.hidden = inTrashView;
+        };
+
+        const clearSelection = () => {
+          selectedBookIds.clear();
+          updateSelectionToolbar();
+        };
+
+        const toggleBookSelection = (bookId) => {
+          if (selectedBookIds.has(bookId)) selectedBookIds.delete(bookId);
+          else selectedBookIds.add(bookId);
+          updateSelectionToolbar();
+        };
+
+        const setLibraryView = (view) => {
+          libraryView = view;
+          viewTabButtons.forEach((tab) => {
+            const active = tab.dataset.booksView === view;
+            tab.classList.toggle("is-active", active);
+            tab.setAttribute("aria-pressed", active ? "true" : "false");
+          });
+          clearSelection();
+          renderBooks({ skipDatePickerSync: true });
+        };
+
+        const patchBooks = (mutator) => {
+          const books = getBooks().map((book) => {
+            const patch = mutator(book);
+            return patch ? { ...book, ...patch, updatedAt: new Date().toISOString() } : book;
+          });
+          setBooks(books);
+          return books;
+        };
+
+        const patchBooksByIds = (ids, patchFactory) => {
+          const idSet = new Set(ids);
+          patchBooks((book) => (idSet.has(book.id) ? patchFactory(book) : null));
+        };
+
+        const ensureActiveBookStillVisible = (affectedIds) => {
+          const activeId = readRaw(KEYS.activeBook);
+          if (!activeId || !affectedIds.includes(activeId)) return;
+          const active = getBooks().find((item) => item.id === activeId);
+          if (!active || isBookTrashed(active) || isBookHidden(active)) {
+            writeRaw(KEYS.activeBook, "");
+          }
+        };
+
+        const toggleBookFavorite = (bookId) => {
+          patchBooks((book) => {
+            if (book.id !== bookId || isBookTrashed(book)) return null;
+            return { isFavorite: !book.isFavorite };
+          });
+          renderBooks({ skipDatePickerSync: true });
+        };
+
+        const showBookConfirm = ({ title, message, confirmLabel, onConfirm }) => {
+          if (!bookAlertModal || !bookAlertTitle || !bookAlertMessage) {
+            if (window.confirm(message || title)) onConfirm?.();
+            return;
+          }
+          bookAlertTitle.textContent = title || "ยืนยัน";
+          bookAlertMessage.textContent = message || "";
+          const closeBtn = document.querySelector("[data-close-book-alert]");
+          if (bookAlertSecondary) {
+            bookAlertSecondary.hidden = false;
+            bookAlertSecondary.textContent = "ยกเลิก";
+            bookAlertSecondary.onclick = () => closeBookAlert();
+          }
+          if (closeBtn) {
+            closeBtn.textContent = confirmLabel || "ยืนยัน";
+            closeBtn.onclick = () => {
+              closeBookAlert();
+              onConfirm?.();
+            };
+          }
+          bookAlertModal.hidden = false;
+          bookAlertModal.classList.add("is-open");
+          bookAlertModal.setAttribute("aria-hidden", "false");
+        };
+
+        const bulkFavorite = (value) => {
+          const ids = [...selectedBookIds];
+          if (!ids.length) return;
+          patchBooksByIds(ids, () => ({ isFavorite: value }));
+          clearSelection();
+          renderBooks({ skipDatePickerSync: true });
+        };
+
+        const bulkHide = () => {
+          const ids = [...selectedBookIds].filter((id) => {
+            const book = getBooks().find((item) => item.id === id);
+            return book && !isBookTrashed(book);
+          });
+          if (!ids.length) return;
+          showBookConfirm({
+            title: "ซ่อนในคลัง",
+            message: `ซ่อน ${ids.length} เล่มจากมุมมองปกติ — ดูได้ใน「ซ่อนแล้ว」`,
+            confirmLabel: "ซ่อนในคลัง",
+            onConfirm: () => {
+              const now = new Date().toISOString();
+              patchBooksByIds(ids, () => ({ hiddenAt: now }));
+              ensureActiveBookStillVisible(ids);
+              clearSelection();
+              renderBooks({ skipDatePickerSync: true });
+            },
+          });
+        };
+
+        const bulkTrash = () => {
+          const ids = [...selectedBookIds].filter((id) => {
+            const book = getBooks().find((item) => item.id === id);
+            return book && !isBookTrashed(book);
+          });
+          if (!ids.length) return;
+          showBookConfirm({
+            title: "ทิ้งสมุด",
+            message: `ทิ้ง ${ids.length} เล่มเข้าถังทิ้ง — ข้อมูลยังอยู่ในเครื่อง`,
+            confirmLabel: "ทิ้งสมุด",
+            onConfirm: () => {
+              const now = new Date().toISOString();
+              patchBooksByIds(ids, () => ({ trashedAt: now, hiddenAt: null }));
+              ensureActiveBookStillVisible(ids);
+              clearSelection();
+              renderBooks({ skipDatePickerSync: true });
+            },
+          });
+        };
+
+        viewTabButtons.forEach((tab) => {
+          tab.addEventListener("click", () => setLibraryView(tab.dataset.booksView || "all"));
+        });
+        bulkFavoriteBtn?.addEventListener("click", () => bulkFavorite(true));
+        bulkUnfavoriteBtn?.addEventListener("click", () => bulkFavorite(false));
+        bulkHideBtn?.addEventListener("click", bulkHide);
+        bulkTrashBtn?.addEventListener("click", bulkTrash);
+        bulkClearBtn?.addEventListener("click", () => {
+          clearSelection();
+          renderBooks({ skipDatePickerSync: true });
+        });
 
         const showBookAlert = ({ title, message, secondaryAction = null }) => {
           if (!bookAlertModal || !bookAlertTitle || !bookAlertMessage) {
@@ -655,6 +999,11 @@
           bookAlertModal.hidden = false;
           bookAlertModal.classList.add("is-open");
           bookAlertModal.setAttribute("aria-hidden", "false");
+          const closeBtn = document.querySelector("[data-close-book-alert]");
+          if (closeBtn) {
+            closeBtn.textContent = "ตกลง";
+            closeBtn.onclick = () => closeBookAlert();
+          }
         };
 
         const closeBookAlert = () => {
@@ -662,9 +1011,17 @@
           bookAlertModal.hidden = true;
           bookAlertModal.classList.remove("is-open");
           bookAlertModal.setAttribute("aria-hidden", "true");
+          const closeBtn = document.querySelector("[data-close-book-alert]");
+          if (closeBtn) {
+            closeBtn.textContent = "ตกลง";
+            closeBtn.onclick = () => closeBookAlert();
+          }
+          if (bookAlertSecondary) {
+            bookAlertSecondary.hidden = true;
+            bookAlertSecondary.onclick = null;
+          }
         };
 
-        document.querySelector("[data-close-book-alert]")?.addEventListener("click", closeBookAlert);
         bookAlertModal?.addEventListener("click", (event) => {
           if (event.target === bookAlertModal) closeBookAlert();
         });
@@ -686,7 +1043,7 @@
                 message: result.message,
                 secondaryAction:
                   result.reason === "not_logged_in" || result.reason === "no_profile"
-                    ? { label: "บัญชี Inbox", href: "exam-account.html" }
+                    ? { label: "บัญชี", href: "exam-account.html" }
                     : result.bookId && result.reason === "empty"
                       ? {
                           label: "เปิดสมุด",
@@ -698,7 +1055,7 @@
             }
             showBookAlert({
               title: result.partial ? "ส่งตรวจแล้ว (บางส่วน)" : "ส่งตรวจแล้ว",
-              message: result.message || "ส่งโทเค็นสมุดเข้า inbox ครูแล้ว — คำตอบถูกล็อก",
+              message: result.message || "ส่งตรวจแล้ว — คำตอบถูกล็อกชั่วคราว",
             });
             renderBooks();
           } catch (error) {
@@ -1073,12 +1430,15 @@
               ? `${toThaiNumber(day)} ${thaiMonthNames[Number(month) - 1]} ${toThaiNumber(year)}`
               : new Date(now).toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "numeric" });
           const bookId = createId("book");
+          const savedProfile =
+            typeof buildStudentProfileSnapshot === "function" ? buildStudentProfileSnapshot() : null;
+          const draftProfile = savedProfile ? { ...savedProfile, grade } : null;
           const book = {
             id: bookId,
             schema: "paligo.exam.answerBook.v1",
             ownerId,
             title: `สมุดคำตอบ ป.ธ. ${toThaiNumber(grade)} · ${subjectLabel} · ${examDateLabel}`,
-            studentName: "ไม่ระบุชื่อ",
+            studentName: savedProfile?.studentName || "ไม่ระบุชื่อ",
             grade,
             subject,
             subjectLabel,
@@ -1092,7 +1452,7 @@
               bookId,
               lineHeight: "30",
               page: 0,
-              profile: null,
+              profile: draftProfile,
               pickers: [
                 { type: "grade", value: grade },
                 { type: "subject", value: subject },
@@ -1121,29 +1481,45 @@
             console.error("โหลดรายการสมุดไม่สำเร็จ", error);
           }
 
-          syncFilterOptions(allBooks, { skipDatePickerSync });
-          const books = allBooks.filter(matchesBookFilters);
+          const visibleInView = allBooks.filter(matchesLibraryView);
+          if (viewTabsBar) viewTabsBar.hidden = allBooks.length === 0;
+
+          syncFilterOptions(visibleInView, { skipDatePickerSync });
+          const books = visibleInView.filter(matchesBookFilters);
           const isFiltered = Boolean(filterSubject) || filterDateMatch.mode !== "all";
 
           grid.replaceChildren();
           emptyState.hidden = allBooks.length > 0;
           if (filterEmptyState) {
-            filterEmptyState.hidden = !(allBooks.length > 0 && books.length === 0);
+            filterEmptyState.hidden = !(visibleInView.length > 0 && books.length === 0);
           }
           grid.hidden = books.length === 0;
 
+          const viewLabels = {
+            all: "ทั้งหมด",
+            favorites: "เล่มโปรด",
+            hidden: "ซ่อนแล้ว",
+            trash: "ถังทิ้ง",
+          };
+          const viewLabel = viewLabels[libraryView] || "ทั้งหมด";
+
           if (!allBooks.length) {
-            summary.textContent = "สมุดคำตอบ 1 รอบสอบ = 1 เล่ม แยกข้อมูลไม่ให้ทับกัน";
+            summary.textContent = "รอบสอบ 1 ครั้ง = 1 เล่ม — ข้อมูลแยกกันไม่ทับ";
           } else if (isFiltered) {
-            summary.textContent = `แสดง ${books.length} จาก ${allBooks.length} เล่ม · กดส่งตรวจเพื่อส่งโทเค็นเข้า inbox ครู`;
+            summary.textContent = `「${viewLabel}」แสดง ${books.length} จาก ${visibleInView.length} เล่ม`;
           } else {
-            summary.textContent = `มีสมุดข้อสอบ ${allBooks.length} เล่ม · กดส่งตรวจเพื่อส่งโทเค็นเข้า inbox ครู`;
+            summary.textContent = `「${viewLabel}」มี ${visibleInView.length} เล่ม`;
           }
+
+          updateSelectionToolbar();
 
           books.forEach((book) => {
             try {
               const review = book.review || getReviewForBook(book.id);
               const article = document.createElement("article");
+              const toolbar = document.createElement("div");
+              const selectBtn = document.createElement("button");
+              const favoriteBtn = document.createElement("button");
               const body = document.createElement("div");
               const title = document.createElement("h2");
               const meta = document.createElement("div");
@@ -1152,7 +1528,40 @@
               const actions = document.createElement("div");
               const open = document.createElement("a");
 
-              article.className = "book-card";
+              const isSelected = selectedBookIds.has(book.id);
+              const isTrashed = isBookTrashed(book);
+
+              article.className = `book-card${isSelected ? " is-selected" : ""}`;
+              toolbar.className = "book-card-toolbar";
+
+              selectBtn.type = "button";
+              selectBtn.className = `book-card-select${isSelected ? " is-checked" : ""}`;
+              selectBtn.setAttribute("aria-pressed", String(isSelected));
+              selectBtn.setAttribute("aria-label", isSelected ? "ยกเลิกเลือกสมุดนี้" : "เลือกสมุดนี้");
+              selectBtn.textContent = isSelected ? "✓" : "";
+              selectBtn.addEventListener("click", (event) => {
+                event.stopPropagation();
+                toggleBookSelection(book.id);
+                renderBooks({ skipDatePickerSync: true });
+              });
+
+              favoriteBtn.type = "button";
+              favoriteBtn.className = `book-card-favorite${isBookFavorite(book) ? " is-favorite" : ""}`;
+              favoriteBtn.setAttribute("aria-pressed", String(Boolean(book.isFavorite)));
+              favoriteBtn.setAttribute(
+                "aria-label",
+                book.isFavorite ? "เอาออกจากเล่มโปรด" : "เพิ่มเป็นเล่มโปรด"
+              );
+              favoriteBtn.textContent = book.isFavorite ? "♥" : "♡";
+              favoriteBtn.hidden = isTrashed;
+              favoriteBtn.addEventListener("click", (event) => {
+                event.stopPropagation();
+                toggleBookFavorite(book.id);
+              });
+
+              toolbar.append(selectBtn);
+              toolbar.append(favoriteBtn);
+
               body.className = "book-card-body";
               title.className = "book-title";
               meta.className = "book-meta";
@@ -1161,7 +1570,7 @@
               actions.className = "button-row";
               open.className = "button is-primary";
               open.href = `ruled-lines-card-only-template.html?bookId=${encodeURIComponent(book.id)}`;
-              open.textContent = "เปิดเล่ม";
+              open.textContent = "เปิดสมุด";
               open.addEventListener("click", () => {
                 writeRaw(KEYS.activeBook, book.id);
               });
@@ -1180,7 +1589,7 @@
               submitReview.className = "button is-primary";
               submitReview.type = "button";
               submitReview.textContent = "ส่งตรวจ";
-              submitReview.hidden = bookStatus === BOOK_STATUS.reviewed;
+              submitReview.hidden = bookStatus === BOOK_STATUS.reviewed || isTrashed;
               submitReview.addEventListener("click", () => {
                 const latest = getBooks().find((item) => item.id === book.id) || book;
                 const status = normalizeBookStatus(latest.status);
@@ -1197,7 +1606,7 @@
 
               const cancelState = getCancelSubmitState(book, "student");
               let cancelSubmitWrap = null;
-              if (cancelState.showButton) {
+              if (cancelState.showButton && !isTrashed) {
                 cancelSubmitWrap = document.createElement("span");
                 cancelSubmitWrap.className = "paligo-tooltip-host";
                 cancelSubmitWrap.title = cancelState.tooltip || "";
@@ -1225,12 +1634,13 @@
                 cancelSubmitWrap.append(cancelSubmit);
               }
 
-              actions.append(open, submitReview);
+              actions.append(open);
+              if (!isTrashed) actions.append(submitReview);
               if (cancelSubmitWrap) actions.append(cancelSubmitWrap);
               body.append(title, meta, status);
               if (reviewNote.textContent) body.append(reviewNote);
               body.append(actions);
-              article.append(buildBookCover(book), body);
+              article.append(toolbar, buildBookCover(book), body);
               grid.append(article);
             } catch (error) {
               console.error("แสดงการ์ดสมุดไม่สำเร็จ", book?.id, error);

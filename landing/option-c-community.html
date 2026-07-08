@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Paligo — บาลีใกล้บ้าน</title>
+    <meta name="description" content="ห้องเรียนบาลีที่เชื่อมครูและนักเรียนได้ — Paligo ชุมชนเรียนร่วมกัน" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --cream: #f8f0e3;
+        --paper: #fffdf8;
+        --green: #2d5a3d;
+        --green-soft: #e8f2e4;
+        --green-mid: #4a7c59;
+        --ink: #2a2a24;
+        --muted: rgba(42, 42, 36, 0.62);
+        --blue: #1f2d89;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        background: var(--cream);
+        color: var(--ink);
+        font-family: Sarabun, ui-sans-serif, system-ui, sans-serif;
+        line-height: 1.55;
+        margin: 0;
+      }
+
+      .proto-badge {
+        background: var(--green);
+        border-radius: 0 0 10px 10px;
+        color: #e8f2e4;
+        font-size: 0.75rem;
+        font-weight: 700;
+        left: 16px;
+        padding: 6px 12px;
+        position: fixed;
+        top: 0;
+        z-index: 50;
+      }
+
+      .proto-badge a {
+        color: #fff;
+        margin-left: 8px;
+      }
+
+      .header {
+        align-items: center;
+        display: flex;
+        justify-content: space-between;
+        margin: 0 auto;
+        max-width: 1080px;
+        padding: 52px 20px 0;
+      }
+
+      .logo {
+        align-items: center;
+        color: var(--green);
+        display: flex;
+        font-weight: 800;
+        gap: 8px;
+        text-decoration: none;
+      }
+
+      .logo__dot {
+        background: var(--green-mid);
+        border-radius: 50%;
+        height: 10px;
+        width: 10px;
+      }
+
+      .header__cta {
+        background: var(--green);
+        border-radius: 999px;
+        color: #fff;
+        font-weight: 700;
+        padding: 10px 18px;
+        text-decoration: none;
+      }
+
+      .hero {
+        margin: 0 auto;
+        max-width: 1080px;
+        padding: 40px 20px 24px;
+      }
+
+      .hero__grid {
+        align-items: center;
+        display: grid;
+        gap: 28px;
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .hero h1 {
+        font-size: clamp(1.9rem, 4vw, 2.7rem);
+        line-height: 1.15;
+        margin: 0 0 14px;
+      }
+
+      .hero__lead {
+        color: var(--muted);
+        font-size: 1.05rem;
+        margin: 0 0 20px;
+      }
+
+      .hero__actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .btn {
+        border-radius: 999px;
+        font-weight: 700;
+        padding: 12px 18px;
+        text-decoration: none;
+      }
+
+      .btn--green {
+        background: var(--green);
+        color: #fff;
+      }
+
+      .btn--outline {
+        border: 1px solid rgba(45, 90, 61, 0.3);
+        color: var(--green);
+      }
+
+      .map-card {
+        background: var(--paper);
+        border: 1px solid rgba(45, 90, 61, 0.15);
+        border-radius: 20px;
+        box-shadow: 0 20px 50px rgba(45, 90, 61, 0.1);
+        overflow: hidden;
+        padding: 20px;
+      }
+
+      .map-card__title {
+        color: var(--green);
+        font-size: 0.82rem;
+        font-weight: 800;
+        margin-bottom: 12px;
+      }
+
+      .map-dots {
+        display: grid;
+        gap: 10px;
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .map-dot {
+        background: var(--green-soft);
+        border: 1px dashed rgba(45, 90, 61, 0.25);
+        border-radius: 12px;
+        padding: 14px 10px;
+        text-align: center;
+      }
+
+      .map-dot strong {
+        color: var(--green);
+        display: block;
+        font-size: 0.95rem;
+      }
+
+      .map-dot span {
+        color: var(--muted);
+        font-size: 0.78rem;
+      }
+
+      .vision {
+        background: var(--green);
+        color: #fff;
+        margin-top: 8px;
+        padding: 28px 20px;
+      }
+
+      .vision__inner {
+        display: grid;
+        gap: 12px;
+        grid-template-columns: repeat(3, 1fr);
+        margin: 0 auto;
+        max-width: 1080px;
+        text-align: center;
+      }
+
+      .vision__item strong {
+        display: block;
+        font-size: 1.05rem;
+      }
+
+      .vision__item span {
+        font-size: 0.85rem;
+        opacity: 0.85;
+      }
+
+      .section {
+        margin: 0 auto;
+        max-width: 1080px;
+        padding: 40px 20px;
+      }
+
+      .section h2 {
+        font-size: 1.45rem;
+        margin: 0 0 18px;
+      }
+
+      .features {
+        display: grid;
+        gap: 14px;
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .feature {
+        background: var(--paper);
+        border-radius: 14px;
+        border: 1px solid rgba(45, 90, 61, 0.12);
+        padding: 18px;
+      }
+
+      .feature h3 {
+        font-size: 1rem;
+        margin: 0 0 6px;
+      }
+
+      .feature p {
+        color: var(--muted);
+        font-size: 0.9rem;
+        margin: 0;
+      }
+
+      .coming {
+        color: var(--green-mid);
+        font-size: 0.75rem;
+        font-weight: 700;
+      }
+
+      .quotes {
+        display: grid;
+        gap: 14px;
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .quote {
+        background: var(--green-soft);
+        border-radius: 14px;
+        padding: 18px;
+      }
+
+      .quote p {
+        font-style: italic;
+        margin: 0 0 10px;
+      }
+
+      .quote cite {
+        color: var(--muted);
+        font-size: 0.85rem;
+        font-style: normal;
+      }
+
+      footer {
+        border-top: 1px solid rgba(45, 90, 61, 0.12);
+        color: var(--muted);
+        font-size: 0.88rem;
+        padding: 28px 20px 40px;
+        text-align: center;
+      }
+
+      footer a {
+        color: var(--green);
+      }
+
+      @media (max-width: 800px) {
+        .hero__grid,
+        .features,
+        .quotes,
+        .vision__inner,
+        .map-dots {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="proto-badge">
+      ตัวอย่าง C — ชุมชน
+      <a href="index.html">ดูตัวอย่างอื่น</a>
+    </div>
+
+    <header class="header">
+      <a class="logo" href="#"><span class="logo__dot"></span> Paligo ชุมชน</a>
+      <a class="header__cta" href="https://app.paligo.jp/exam-account.html">เข้าร่วม</a>
+    </header>
+
+    <section class="hero">
+      <div class="hero__grid">
+        <div>
+          <h1>บาลีใกล้บ้าน —<br />ห้องเรียนที่เชื่อมกันได้</h1>
+          <p class="hero__lead">
+            ไม่ว่าจะเรียนที่วัด โรงเรียน หรือบ้าน — จับคู่ครู-ศิษย์ ส่งสมุดตรวจ รับผลกลับ
+            ในระบบที่ออกแบบให้ชุมชนเรียนร่วมกัน
+          </p>
+          <div class="hero__actions">
+            <a class="btn btn--green" href="https://app.paligo.jp/exam-account.html">สมัครบัญชีครู</a>
+            <a class="btn btn--outline" href="https://app.paligo.jp/exam-books.html">เข้าใช้งานนักเรียน</a>
+          </div>
+        </div>
+        <div class="map-card" aria-label="ตัวอย่างห้องเรียนในพื้นที่">
+          <div class="map-card__title">ห้องเรียนในชุมชน (ตัวอย่าง)</div>
+          <div class="map-dots">
+            <div class="map-dot">
+              <strong>ตำบล</strong>
+              <span>กลุ่มเรียนใกล้บ้าน</span>
+            </div>
+            <div class="map-dot">
+              <strong>อำเภอ</strong>
+              <span>ครูประจำเขต</span>
+            </div>
+            <div class="map-dot">
+              <strong>จังหวัด</strong>
+              <span>เครือข่ายโรงเรียน</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="vision">
+      <div class="vision__inner">
+        <div class="vision__item">
+          <strong>ห้องเรียน</strong>
+          <span>จัดกลุ่มนักเรียน-ครู</span>
+        </div>
+        <div class="vision__item">
+          <strong>พิกัดชุมชน</strong>
+          <span class="coming">เร็วๆ นี้ · Phase B</span>
+        </div>
+        <div class="vision__item">
+          <strong>กัลยาณมิตร</strong>
+          <span class="coming">เร็วๆ นี้ · Phase 9</span>
+        </div>
+      </div>
+    </div>
+
+    <section class="section">
+      <h2>สำหรับโรงเรียนและชุมชน</h2>
+      <div class="features">
+        <article class="feature">
+          <h3>จับคู่ครู–ศิษย์</h3>
+          <p>ครูสร้างรหัสเชิญ นักเรียนเข้าร่วมห้องเรียนได้ทันที</p>
+        </article>
+        <article class="feature">
+          <h3>Inbox ส่งสมุด</h3>
+          <p>ส่งงานในแชท เห็นสถานะชัด ไม่หลงในกลุ่มไลน์</p>
+        </article>
+        <article class="feature">
+          <h3>ผลตรวจกลับอัตโนมัติ</h3>
+          <p>ครู stamp คะแนน นักเรียน claim ผลในที่เดียว</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>เสียงจากชุมชน (ตัวอย่าง)</h2>
+      <div class="quotes">
+        <blockquote class="quote">
+          <p>“ส่งสมุดให้อาจารย์ได้โดยไม่ต้องไปวัดทุกครั้ง — นักเรียนต่างจังหวัดช่วยได้มาก”</p>
+          <cite>— ครูประจำชั้น (placeholder)</cite>
+        </blockquote>
+        <blockquote class="quote">
+          <p>“เห็นผลตรวจและคะแนนในที่เดียว ผู้ปกครองตามได้ง่ายขึ้น”</p>
+          <cite>— ผู้ปกครองนักเรียน (placeholder)</cite>
+        </blockquote>
+      </div>
+    </section>
+
+    <footer>
+      <p>
+        <strong>Paligo</strong> ·
+        <a href="https://app.paligo.jp/">app.paligo.jp</a>
+      </p>
+      <p>ตัวอย่าง landing Phase 5.4 — โทน「ห้องเรียนชุมชน」</p>
+    </footer>
+  </body>
+</html>

@@ -240,14 +240,15 @@
     <div class="account-shell">
       <section class="account-card">
         <h1 class="account-title">บัญชี Inbox</h1>
-        <p class="account-subtitle">สมัคร · เข้าสู่ระบบ · จับคู่ครู–นักเรียน (Phase 1)</p>
-        <p class="hint" data-api-status>กำลังตรวจ API…</p>
+        <p class="account-subtitle">สมัคร · เข้าสู่ระบบ · จับคู่ครู–นักเรียน</p>
+        <p class="hint" data-api-status>กำลังตรวจสอบ…</p>
 
         <div class="account-banner" data-account-banner hidden>
           <p class="account-banner__title" data-account-banner-title>เข้าสู่ระบบแล้ว</p>
           <p class="account-banner__meta" data-account-banner-meta></p>
           <div class="account-banner__actions">
-            <a class="button is-primary" data-account-primary-link hidden>เปิด Inbox</a>
+            <a class="button is-primary" href="exam-profile.html" data-account-profile-link hidden>โปรไฟล์</a>
+            <a class="button is-primary" data-account-primary-link hidden>เปิดกล่องข้อความ</a>
             <button class="button" type="button" data-account-show-me>ดูสถานะบัญชี</button>
             <button class="button" type="button" data-logout-banner>ออกจากระบบ</button>
           </div>
@@ -258,14 +259,14 @@
           <button class="tab" type="button" data-tab="register">สมัครบัญชี</button>
           <button class="tab" type="button" data-tab="pairing">จับคู่</button>
           <button class="tab" type="button" data-tab="me">สถานะ</button>
-          <button class="tab" type="button" data-tab="advanced">ขั้นสูง</button>
+          <button class="tab" type="button" data-tab="advanced" data-paligo-import-export-tab hidden>โอนไฟล์ขั้นสูง</button>
         </div>
 
         <div class="panel" data-panel="login">
           <form class="field-grid" data-login-form>
             <label>
-              User ID (จากตอนสมัคร)
-              <input name="userId" autocomplete="username" placeholder="uuid หรือเว้นว่างถ้าใช้อีเมล" />
+              รหัสผู้ใช้ (จากตอนสมัคร)
+              <input name="userId" autocomplete="username" placeholder="เว้นว่างได้ถ้าใช้อีเมล" />
             </label>
             <label>
               อีเมล (ถ้ามีตอนสมัคร)
@@ -291,11 +292,11 @@
             </label>
             <label>
               ชื่อแสดง
-              <input name="displayName" required minlength="2" placeholder="ชื่อบนปก/inbox" />
+              <input name="displayName" required minlength="2" placeholder="ชื่อที่แสดงในแอป" />
             </label>
             <label>
               อีเมล (ไม่บังคับ)
-              <input name="email" type="email" placeholder="ใช้ login แทน userId ได้" />
+              <input name="email" type="email" placeholder="ใช้แทนรหัสผู้ใช้ได้" />
             </label>
             <label>
               PIN (ตัวเลข 6 หลักขึ้นไป)
@@ -336,8 +337,8 @@
           </div>
         </div>
 
-        <div class="panel" data-panel="advanced" hidden>
-          <p class="hint">ส่งออก/นำเข้าสมุดข้อสอบ — สำรองข้อมูลหรือย้ายเครื่อง (ไม่ใช่การส่งตรวจ — ใช้ปุ่ม「ส่งตรวจ」ในรายการสมุดแทน)</p>
+        <div class="panel" data-panel="advanced" data-paligo-import-export hidden>
+          <p class="hint">โอนไฟล์สมุดข้อสอบ — สำรองหรือย้ายเครื่อง (ไม่ใช่การส่งตรวจ)</p>
           <div class="field-grid">
             <button class="button is-primary" type="button" data-adv-export-all>ส่งออกสมุดทั้งหมด (.json)</button>
             <label class="button file-button">
@@ -358,6 +359,7 @@
 
     <script src="paligo-config.js"></script>
     <script src="paligo-inbox-client.js"></script>
+    <script src="paligo-platform.js"></script>
     <script src="paligo-exam-shared.js"></script>
     <script src="paligo-nav-config.js"></script>
     <script src="sidebar-nav.js"></script>
@@ -387,6 +389,9 @@
       const accountBannerTitle = document.querySelector("[data-account-banner-title]");
       const accountBannerMeta = document.querySelector("[data-account-banner-meta]");
       const accountPrimaryLink = document.querySelector("[data-account-primary-link]");
+      const accountProfileLink = document.querySelector("[data-account-profile-link]");
+
+      const returnPath = new URLSearchParams(window.location.search).get("return");
 
       const roleLabels = {
         student: "นักเรียน",
@@ -498,7 +503,7 @@
         if (!books.length) {
           const empty = document.createElement("p");
           empty.className = "hint";
-          empty.textContent = "ยังไม่มีสมุดในเครื่อง";
+          empty.textContent = "ยังไม่มีสมุดข้อสอบ";
           advBookList.append(empty);
           return;
         }
@@ -554,7 +559,7 @@
       document.querySelector("[data-adv-export-all]")?.addEventListener("click", () => {
         const books = getBooks();
         if (!books.length) {
-          window.alert("ยังไม่มีสมุดให้ส่งออก");
+          window.alert("ยังไม่มีสมุดข้อสอบให้ส่งออก");
           return;
         }
         downloadJson("paligo-exam-books-backup.paligo-backup.json", {
@@ -624,15 +629,18 @@
         if (accountBannerMeta) {
           accountBannerMeta.textContent = `บทบาท ${roleLabels[user.role] || user.role} · User ID ${user.id}`;
         }
+        if (accountProfileLink) {
+          accountProfileLink.hidden = false;
+        }
         if (accountPrimaryLink) {
           if (user.role === "reviewer") {
             accountPrimaryLink.hidden = false;
             accountPrimaryLink.href = "exam-reviewer-console.html";
-            accountPrimaryLink.textContent = "เปิด Inbox งานส่งตรวจ";
+            accountPrimaryLink.textContent = "เปิดกล่องข้อความ";
           } else if (user.role === "student") {
             accountPrimaryLink.hidden = false;
             accountPrimaryLink.href = "exam-books.html";
-            accountPrimaryLink.textContent = "ไปสมุดข้อสอบของฉัน";
+            accountPrimaryLink.textContent = "ไปสมุดข้อสอบ";
           } else {
             accountPrimaryLink.hidden = true;
           }
@@ -672,6 +680,14 @@
         });
       });
 
+      function redirectAfterAuth() {
+        if (!returnPath || returnPath.includes("://")) return false;
+        const safe = returnPath.split("?")[0];
+        if (!safe.endsWith(".html")) return false;
+        window.location.href = returnPath;
+        return true;
+      }
+
       document.querySelector("[data-login-form]").addEventListener("submit", async (event) => {
         event.preventDefault();
         const form = event.currentTarget;
@@ -684,6 +700,7 @@
             pin: String(data.get("pin") || ""),
           });
           await refreshAccountSession();
+          if (redirectAfterAuth()) return;
           activateTab("me");
           showStatus(`เข้าสู่ระบบแล้ว: ${payload.user.displayName} (${roleLabels[payload.user.role] || payload.user.role})`);
         } catch (error) {
@@ -704,6 +721,7 @@
             pin: String(data.get("pin") || ""),
           });
           await refreshAccountSession();
+          if (redirectAfterAuth()) return;
           activateTab("me");
           showStatus(
             `สมัครสำเร็จ\nชื่อ: ${payload.user.displayName}\nUser ID: ${payload.user.id}\nบทบาท: ${roleLabels[payload.user.role] || payload.user.role}\n\nเก็บ User ID ไว้ถ้าไม่ได้ใส่อีเมล`
@@ -767,10 +785,25 @@
             if (session?.user) {
               activateTab("me");
             }
+            await PaligoPlatform?.boot?.({ user: session?.user });
           })
-          .catch((error) => {
-            apiStatus.textContent = error.message || "API ไม่พร้อม";
+          .catch(async (error) => {
+            apiStatus.textContent = `ออฟไลน์ — เครื่องมือโอนไฟล์ในเครื่องยังใช้ได้`;
             apiStatus.style.color = "#9a3412";
+            // ออฟไลน์: เปิดทางเข้าเครื่องมือ import/export ในเครื่องเป็นทางสำรอง
+            const cachedUser = PaligoInboxClient.getSession?.()?.user || null;
+            if (cachedUser) renderLoggedInBanner({ user: cachedUser });
+            try {
+              await PaligoPlatform?.boot?.({ user: cachedUser, offline: true });
+            } catch {
+              // fallback สุดท้าย — เผยแท็บโอนไฟล์แม้ platform boot ล้มเหลว
+              document
+                .querySelectorAll("[data-paligo-import-export], [data-paligo-import-export-tab]")
+                .forEach((node) => {
+                  node.hidden = false;
+                  node.setAttribute("aria-hidden", "false");
+                });
+            }
           });
       }
     </script>

@@ -49,6 +49,7 @@
     },
     /** ตั้งใน LINE Developers Console → LIFF → Endpoint URL ชี้ exam-line-liff.html */
     lineLiffId: global.PALIGO_LINE_LIFF_ID || "",
+    superAdminEmails: ["tha.std@paligo.jo", "tha.tc@paligo.jp"],
   };
 
   global.PALIGO_CONFIG = Object.freeze({

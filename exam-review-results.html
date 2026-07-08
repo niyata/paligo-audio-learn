@@ -92,7 +92,7 @@
         </p>
       </header>
 
-      <section class="results-panel">
+      <section class="results-panel" data-paligo-import-export hidden>
         <label class="field">
           <span>นำเข้าไฟล์ผลตรวจ</span>
           <input class="input" type="file" accept="application/json,.json,.paligo-review,.paligo-transfer" data-import-file />
@@ -106,12 +106,13 @@
       <section class="results-panel">
         <h2 class="results-title" style="font-size: 1.1rem">รายการผลตรวจ</h2>
         <div data-review-list></div>
-        <p class="empty-state" data-empty hidden>ยังไม่มีผลตรวจ — รอครูส่งไฟล์ `.paligo-review.json` แล้วนำเข้าที่นี่</p>
+        <p class="empty-state" data-empty hidden>ยังไม่มีผลตรวจ — รอครูส่งไฟล์แล้วนำเข้าที่นี่</p>
       </section>
     </div>
 
     <script src="paligo-config.js"></script>
     <script src="paligo-inbox-client.js"></script>
+    <script src="paligo-platform.js"></script>
     <script src="paligo-exam-shared.js"></script>
     <script src="paligo-exam-paper.js"></script>
     <script src="paligo-nav-config.js"></script>
@@ -155,7 +156,7 @@
             const highlightLabels = window.PaligoExamPaper?.ERROR_LABELS || {};
 
             card.innerHTML = `
-              <strong>${review.bookTitle || book?.title || "สมุดคำตอบ"}</strong>
+              <strong>${review.bookTitle || book?.title || "สมุดข้อสอบ"}</strong>
               <div class="paligo-review-card__score">${toThaiPercent(score.percent || 0)}</div>
               <p class="paligo-local-note">
                 ตรวจเมื่อ ${formatThaiDateTime(review.reviewedAt)} ·
@@ -218,6 +219,7 @@
         importBtn?.addEventListener("click", handleImport);
         importFile?.addEventListener("change", handleImport);
         renderReviews();
+        PaligoPlatform?.boot?.();
       })();
       PaligoSidebar.autoInit();
     </script>

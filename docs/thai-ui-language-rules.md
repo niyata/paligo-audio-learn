@@ -10,6 +10,8 @@
 - ชื่อเทคโนโลยีที่เป็นชื่อเฉพาะใช้ภาษาอังกฤษได้ เช่น `LINE Flex Message`, `Facebook inbox`, `localStorage`
 - ชื่อ API/implementation เช่น `shareTargetPicker` ไม่ควรแสดงใน UI หลัก เว้นแต่เป็นหน้าสำหรับนักพัฒนา
 
+ดู glossary และ state patterns เพิ่มเติม: `docs/agile/copy-standard.md`
+
 ## ตัวอย่างข้อความ validation
 
 - `กรุณาเลือกคำนำหน้า`

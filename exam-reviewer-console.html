@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="paligo-exam-ui.css" />
     <script defer src="paligo-config.js"></script>
     <script defer src="paligo-inbox-client.js"></script>
+    <script defer src="paligo-platform.js"></script>
     <script defer src="paligo-nav-config.js"></script>
     <script defer src="sidebar-nav.js"></script>
     <script defer src="paligo-shell-init.js"></script>
@@ -285,6 +286,7 @@
             <option value="reviewer">ผู้ตรวจ</option>
           </select>
         </label>
+        <div data-paligo-import-export hidden>
         <label class="field">
           <span>นำเข้า submission JSON</span>
           <input class="input" type="file" accept="application/json,.json,.paligo-submission" data-import-file />
@@ -298,9 +300,11 @@
           <button class="button" type="button" data-refresh-list>รีเฟรชรายการ</button>
         </div>
         <p class="status-note" data-status-note>เฉพาะงานที่นักเรียน<strong>ส่งตรวจแล้ว</strong> — รับจาก Inbox หรือนำเข้าไฟล์</p>
+        </div>
+        <p class="status-note" data-inbox-status-note>รับงานจากกล่องข้อความ — ไม่ต้องนำเข้าไฟล์</p>
         <h2 class="panel-title" style="font-size:1rem;margin-top:12px">Inbox</h2>
         <div class="button-row">
-          <button class="button is-primary" type="button" data-refresh-inbox>โหลด inbox</button>
+          <button class="button is-primary" type="button" data-refresh-inbox>โหลดงานใหม่</button>
         </div>
         <div class="submission-list" data-inbox-list></div>
         <h2 class="panel-title" style="font-size:1rem;margin-top:12px">คิวในเครื่อง</h2>
@@ -321,7 +325,7 @@
         </dl>
         <div class="score-summary">
           <span class="score-pill" data-score-percent>๐%</span>
-          <span class="status-note" data-score-detail>ยังไม่มี score stamp</span>
+          <span class="status-note" data-score-detail>ยังไม่มีคะแนน</span>
         </div>
         <div class="button-row">
           <label class="field">
@@ -502,7 +506,7 @@
           if (!inboxList) return;
 
           if (!window.PaligoInboxClient?.isInboxFeatureEnabled?.()) {
-            inboxList.innerHTML = "<p class='status-note'>Inbox ยังไม่เปิดใช้งานใน config</p>";
+            inboxList.innerHTML = "<p class='status-note'>กล่องข้อความยังไม่เปิดใช้งาน</p>";
             return;
           }
 
@@ -511,7 +515,7 @@
           try {
             await PaligoInboxClient.ensureApiReady?.();
           } catch (error) {
-            inboxList.innerHTML = `<p class='status-note'>${error.message || "ไม่พบ Inbox API"}</p>`;
+            inboxList.innerHTML = `<p class='status-note'>${error.message || "เชื่อมต่อไม่ได้"}</p>`;
             return;
           }
 
@@ -525,16 +529,16 @@
 
           if (session.user?.role !== "reviewer") {
             inboxList.innerHTML =
-              "<p class='status-note'>บัญชีนี้เป็นบทบาทนักเรียน — inbox ครูใช้บัญชีผู้ตรวจ · <a href='exam-account.html'>สลับบัญชี</a></p>";
+              "<p class='status-note'>บัญชีนี้เป็นนักเรียน — ใช้บัญชีผู้ตรวจแทน · <a href='exam-account.html'>สลับบัญชี</a></p>";
             return;
           }
 
-          inboxList.innerHTML = `<p class='status-note'>Inbox ของ ${session.user.displayName || "ครู"} — กำลังโหลด…</p>`;
+          inboxList.innerHTML = `<p class='status-note'>กำลังโหลด…</p>`;
           try {
             const data = await PaligoInboxClient.listInbox();
             const items = data.items || [];
             if (!items.length) {
-              inboxList.innerHTML = `<p class='status-note'>Inbox ของ ${session.user.displayName || "ครู"} — ไม่มีรายการรอรับ (ให้นักเรียนส่งตรวจจากสมุดหรือกล่องข้อความ)</p>`;
+              inboxList.innerHTML = `<p class='status-note'>ไม่มีงานรอรับ — ให้นักเรียนส่งตรวจจากสมุดหรือกล่องข้อความ</p>`;
               return;
             }
             inboxList.innerHTML = "";
@@ -574,7 +578,7 @@
                 "<p class='status-note'>เซสชันหมดอายุ — <a href='exam-account.html'>เข้าสู่ระบบใหม่</a></p>";
               return;
             }
-            inboxList.innerHTML = `<p class='status-note'>${error.message || "โหลด inbox ไม่สำเร็จ"}</p>`;
+            inboxList.innerHTML = `<p class='status-note'>${error.message || "โหลดไม่สำเร็จ"}</p>`;
           }
         };
 
@@ -584,7 +588,7 @@
           scorePercent.textContent = toThaiPercent(score.percent);
           scoreDetail.textContent = score.stampCount
             ? `${toThaiNumber(score.earned)} / ${toThaiNumber(score.max)} จาก ${toThaiNumber(score.stampCount)} stamp`
-            : "ยังไม่มี score stamp";
+            : "ยังไม่มีคะแนน";
         };
         const renderPreflight = () => {
           if (!currentSubmission) {
@@ -592,7 +596,7 @@
             return;
           }
           preflight.hidden = false;
-          preflightTitle.textContent = currentSubmission.bookTitle || "สมุดคำตอบ";
+          preflightTitle.textContent = currentSubmission.bookTitle || "สมุดข้อสอบ";
           preflightBookId.textContent = currentSubmission.bookId || "—";
           preflightRevision.textContent = String(currentSubmission.bookRevision ?? "—");
           preflightSubmitted.textContent = formatThaiDateTime(currentSubmission.submittedAt);
@@ -603,7 +607,7 @@
           if (!submissions.length) {
             const empty = document.createElement("p");
             empty.className = "status-note";
-            empty.textContent = "ยังไม่มีคิวในเครื่อง — กด «โหลด inbox» แล้วรับงาน หรือนำเข้า JSON";
+            empty.textContent = "ยังไม่มีคิว — โหลดงานใหม่หรือนำเข้าไฟล์";
             list.append(empty);
             return;
           }
@@ -804,9 +808,9 @@
                 setStatus(pushResult.message || "ส่งผลตรวจเข้า inbox นักเรียนแล้ว");
                 return;
               }
-              setStatus(`${pushResult.message || "ส่ง inbox ไม่สำเร็จ"} — ดาวน์โหลดไฟล์แทน`);
+              setStatus(`${pushResult.message || "ส่งไม่สำเร็จ"} — ดาวน์โหลดไฟล์แทน`);
             } catch (error) {
-              setStatus(`${error.message || "ส่ง inbox ไม่สำเร็จ"} — ดาวน์โหลดไฟล์แทน`);
+              setStatus(`${error.message || "ส่งไม่สำเร็จ"} — ดาวน์โหลดไฟล์แทน`);
             }
           }
 

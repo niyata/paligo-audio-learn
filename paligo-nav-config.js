@@ -31,22 +31,23 @@
         {
           label: "เริ่มทำข้อสอบ",
           href: "ruled-lines-card-only-template.html?newBook=1",
-          description: "สร้างสมุดคำตอบใหม่",
+          description: "สร้างสมุดข้อสอบใหม่",
         },
         {
           label: "สมุดข้อสอบของฉัน",
           href: "exam-books.html",
-          description: "เปิด ส่งออก หรือนำเข้าสมุด",
+          description: "จัดการสมุดข้อสอบ · ส่งตรวจ",
         },
         {
           label: "ทำต่อเล่มล่าสุด",
           href: "ruled-lines-card-only-template.html?resume=1",
-          description: "เปิดเล่มที่ทำค้างไว้",
+          description: "เปิดสมุดที่ค้างไว้",
         },
         {
           label: "กล่องข้อความ",
           href: "exam-inbox.html",
-          description: "แชทส่งสมุดให้ครู · card หน้าปกแบบ LINE",
+          description: "ส่งสมุดให้ครูในแชท",
+          requiresInbox: true,
         },
         {
           label: "ผลตรวจของฉัน",
@@ -54,9 +55,14 @@
           description: "นำเข้าไฟล์ผลตรวจจากครู",
         },
         {
+          label: "โปรไฟล์",
+          href: "exam-profile.html",
+          description: "ตั้งค่าชื่อบนปก · จับคู่ · บัญชี",
+        },
+        {
           label: "บัญชี Inbox",
           href: "exam-account.html",
-          description: "จัดการบัญชี · จับคู่ครู–นักเรียน (เข้าสู่ระบบแล้วจะจำไว้)",
+          description: "เข้าสู่ระบบ · สำรองข้อมูล",
         },
       ],
     },
@@ -70,6 +76,12 @@
           label: "Inbox แชท",
           href: "exam-inbox.html",
           description: "รับสมุดจากนักเรียนในรูปแบบแชท",
+          requiresInbox: true,
+        },
+        {
+          label: "โปรไฟล์",
+          href: "exam-profile.html",
+          description: "ตั้งค่าชื่อ · รหัสเชิญ · บัญชี",
         },
         {
           label: "Inbox งานส่งตรวจ",
@@ -146,6 +158,14 @@
       title: "บัญชี Inbox",
       section: "exam",
     },
+    "exam-profile.html": {
+      title: "โปรไฟล์",
+      section: "exam",
+    },
+    "exam-super-admin.html": {
+      title: "Super Admin",
+      section: "exam",
+    },
     "exam-reviewer-console.html": {
       title: "ตรวจข้อสอบ",
       section: "review",
@@ -172,6 +192,89 @@
     .filter(([, meta]) => meta.focusMode)
     .map(([name]) => name);
 
+  const INBOX_MENU = {
+    guest: [
+      {
+        label: "กล่องข้อความ",
+        href: "exam-inbox.html",
+        description: "ส่งสมุดให้ครู · แชท Inbox",
+        requiresInbox: true,
+      },
+      {
+        label: "โปรไฟล์",
+        href: "exam-profile.html",
+        description: "ตั้งค่าชื่อบนปก · จับคู่",
+      },
+      {
+        label: "เข้าสู่ระบบ",
+        href: "exam-account.html",
+        description: "บัญชี Inbox",
+      },
+    ],
+    student: [
+      {
+        label: "กล่องข้อความ",
+        href: "exam-inbox.html",
+        description: "แชทส่งสมุดให้ครู",
+        requiresInbox: true,
+      },
+      {
+        label: "โปรไฟล์",
+        href: "exam-profile.html",
+        description: "ตั้งค่าชื่อ · จับคู่ · บัญชี",
+      },
+      {
+        label: "สมุดข้อสอบ",
+        href: "exam-books.html",
+        description: "จัดการสมุดข้อสอบ",
+      },
+      {
+        label: "ผลตรวจของฉัน",
+        href: "exam-review-results.html",
+        description: "ดูผลตรวจจากครู",
+      },
+      {
+        label: "บัญชี Inbox",
+        href: "exam-account.html",
+        description: "เข้าสู่ระบบ · สำรองข้อมูล",
+      },
+    ],
+    reviewer: [
+      {
+        label: "โปรไฟล์",
+        href: "exam-profile.html",
+        description: "ตั้งค่าชื่อ · รหัสเชิญ",
+      },
+      {
+        label: "Inbox แชท",
+        href: "exam-inbox.html",
+        description: "รับสมุดจากนักเรียน",
+        requiresInbox: true,
+      },
+      {
+        label: "งานส่งตรวจ",
+        href: "exam-reviewer-console.html",
+        description: "รับงานเข้าคลังตรวจ",
+      },
+      {
+        label: "ตารางคะแนน",
+        href: "exam-leaderboard.html",
+        description: "ดูอันดับคะแนน",
+      },
+      {
+        label: "บัญชี Inbox",
+        href: "exam-account.html",
+        description: "เข้าสู่ระบบ · สำรองข้อมูล",
+      },
+    ],
+  };
+
+  function inboxMenuForRole(role) {
+    if (role === "reviewer") return INBOX_MENU.reviewer;
+    if (role === "student") return INBOX_MENU.student;
+    return INBOX_MENU.guest;
+  }
+
   function pageMeta(href) {
     const name = (href || "").split("?")[0].split("/").pop() || "";
     return PAGES[name] || null;
@@ -191,6 +294,8 @@
     menu: MENU,
     pages: PAGES,
     studyPageNames: STUDY_PAGE_NAMES,
+    inboxMenu: INBOX_MENU,
+    inboxMenuForRole,
     pageMeta,
     pageTitle,
   };

@@ -53,6 +53,11 @@
   color: var(--paligo-exam-blue);
 }
 
+.paligo-topbar__inbox-trigger {
+  border-color: var(--paligo-paper-border);
+  color: var(--paligo-exam-blue);
+}
+
 .paligo-topbar__hint {
   color: var(--paligo-muted);
 }

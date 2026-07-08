@@ -956,7 +956,7 @@
       <form class="profile-wizard-card" data-profile-form novalidate>
         <button class="profile-close-button" type="button" data-profile-dismiss aria-label="ปิดหน้าตั้งค่า">×</button>
         <h1 class="profile-wizard-title">ตั้งค่าผู้เรียน</h1>
-        <p class="profile-wizard-note">บันทึกไว้ในเครื่องนี้ ใช้งานออฟไลน์ได้ และใช้เตรียมช่องทางส่งตรวจ</p>
+        <p class="profile-wizard-note">บันทึกในเครื่อง — ใช้งานออฟไลน์และส่งตรวจได้</p>
         <p class="profile-wizard-error" data-profile-error hidden role="alert"></p>
         <div class="profile-wizard-grid">
           <div class="profile-field is-wide">
@@ -1034,14 +1034,14 @@
     <main class="template-shell">
       <div class="paligo-book-bar" data-book-bar>
         <div class="paligo-book-bar__main">
-          <h1 class="paligo-book-bar__title" data-book-bar-title>สมุดคำตอบ</h1>
+          <h1 class="paligo-book-bar__title" data-book-bar-title>สมุดข้อสอบ</h1>
           <p class="paligo-book-bar__meta" data-book-bar-meta>ฉบับร่าง</p>
         </div>
         <div class="paligo-book-bar__actions">
           <span class="paligo-tooltip-host" data-cancel-submit-wrap hidden>
             <button class="paligo-btn" type="button" data-cancel-submit>ยกเลิกส่งตรวจ</button>
           </span>
-          <span class="paligo-status-chip is-draft" data-book-bar-status>ฉบับร่าง</span>
+          <span class="paligo-status-chip is-draft" data-book-bar-status>ยังไม่ส่งตรวจ</span>
         </div>
       </div>
       <div class="paligo-permission-banner" data-permission-banner>ฉบับร่าง — แก้ไขคำตอบได้</div>
@@ -1294,7 +1294,7 @@
       <div class="paligo-modal" role="dialog" aria-labelledby="submit-modal-title" aria-modal="true">
         <h2 class="paligo-modal__title" id="submit-modal-title">ส่งเข้าแชต Inbox แล้ว</h2>
         <p class="paligo-modal__body">
-          ส่งตรวจแล้ว — สมุดนี้ถูกส่งเข้าแชต inbox ครู · คำตอบถูกล็อก
+          ส่งตรวจแล้ว — คำตอบถูกล็อกชั่วคราว
         </p>
         <div class="paligo-modal__meta" data-submit-modal-meta></div>
         <div class="paligo-modal__chat-preview" data-submit-chat-preview aria-label="ตัวอย่างข้อความในแชต"></div>
@@ -1669,6 +1669,7 @@
           persistProfileDraft();
           clearProfileError();
           document.body.classList.remove("needs-profile");
+          focusWritingEditorIfReady();
         };
 
         profileDismissButtons.forEach((button) => {
@@ -1773,9 +1774,17 @@
             return;
           }
 
+          const status = normalizeBookStatus(book?.status);
+          if (workspaceRole !== "student" || status === BOOK_STATUS.draft) {
+            cancelSubmitWrap.hidden = true;
+            cancelSubmitButton.textContent = "ยกเลิกส่งตรวจ";
+            return;
+          }
+
           const cancelState = getCancelSubmitState(book, workspaceRole);
           cancelSubmitWrap.hidden = !cancelState.showButton;
           cancelSubmitButton.disabled = cancelState.disabled;
+          cancelSubmitButton.textContent = "ยกเลิกส่งตรวจ";
           cancelSubmitWrap.title = cancelState.tooltip || "";
           cancelSubmitButton.title = cancelState.disabled ? "" : cancelState.tooltip;
         };
@@ -1804,12 +1813,14 @@
           const book = getCurrentBook();
           const review = getReviewForBook(currentBookId) || book?.review;
           const status = normalizeBookStatus(book?.status);
-          if (bookBarTitle) bookBarTitle.textContent = book?.title || activeSubmission?.bookTitle || "สมุดคำตอบ";
+          if (bookBarTitle) bookBarTitle.textContent = book?.title || activeSubmission?.bookTitle || "สมุดข้อสอบ";
           if (bookBarMeta) {
             bookBarMeta.textContent = `${getStudentDisplayName() || activeSubmission?.studentName || "ไม่ระบุชื่อ"} · revision ${book?.revision || activeSubmission?.bookRevision || 1} · ป.ธ. ${toThaiNumber(book?.grade || studentProfile?.grade || "-")}`;
           }
           if (bookBarStatus) {
-            bookBarStatus.textContent = review ? getStatusLabel(BOOK_STATUS.reviewed) : getStatusLabel(status);
+            const statusLabel =
+              !review && status === BOOK_STATUS.draft ? "ยังไม่ส่งตรวจ" : getStatusLabel(status);
+            bookBarStatus.textContent = review ? getStatusLabel(BOOK_STATUS.reviewed) : statusLabel;
             bookBarStatus.className = `paligo-status-chip ${
               review || status === BOOK_STATUS.reviewed
                 ? "is-reviewed"
@@ -1836,6 +1847,16 @@
                 : null,
             }
           );
+        };
+
+        const focusWritingEditorIfReady = () => {
+          if (reviewMode) return;
+          const book = getCurrentBook();
+          const perms = getBookPermissions(book || { status: BOOK_STATUS.draft }, workspaceRole);
+          if (!perms.canEditAnswer) return;
+          const editor = editors[currentPageIndex];
+          if (!editor || editor.readOnly) return;
+          editor.focus();
         };
 
         const getPermissionMessage = (book) => {
@@ -1894,7 +1915,7 @@
           lastSubmissionPackage = submission;
           submitModalMeta.textContent = `${submission.bookTitle} · revision ${submission.bookRevision} · ${formatThaiDateTime(submission.submittedAt)}`;
           if (result.partial) {
-            submitModalMeta.textContent += " · ส่ง inbox ไม่สำเร็จ — ลองจากกล่องข้อความ";
+            submitModalMeta.textContent += " · ส่งไม่สำเร็จ — ลองจากกล่องข้อความ";
           } else if (result.push?.intendedRecipientLabel) {
             submitModalMeta.textContent += ` · ส่งให้ ${result.push.intendedRecipientLabel}`;
           }
@@ -2238,8 +2259,17 @@
 
         const shouldJumpToParagraph = (editor) => {
           if (isCaretInNumberArea(editor)) return true;
-          const { line } = getLineContextAtCaret(editor);
-          return !line.trim();
+          const { line, caretInLine } = getLineContextAtCaret(editor);
+          if (!line.trim()) {
+            if (line.length > 0 && isLineAtBodyColumn(line, editor)) {
+              const editorCtx = measureFontContext(getComputedStyle(editor));
+              const caretPx = editorCtx.measureText(line.slice(0, caretInLine)).width;
+              const { bodyStartPx } = getMarginLayout(editor);
+              return caretPx < bodyStartPx - 0.5;
+            }
+            return true;
+          }
+          return false;
         };
 
         const caretAtParagraphColumn = (editor, lineText, insertedText = "") => {
@@ -2290,6 +2320,7 @@
           const lineEndIndex = value.indexOf("\n", pos);
           const lineEnd = lineEndIndex === -1 ? value.length : lineEndIndex;
           const line = value.slice(lineStart, lineEnd);
+          const caretInLine = pos - lineStart;
           const numbered = line.match(numberedLinePattern);
 
           if (numbered) {
@@ -2314,6 +2345,7 @@
             }
           } else if (!insertedText && !line.trim()) {
             insertAtSelection(editor, getMarginLayout(editor).bodyIndent);
+            editor.dispatchEvent(new Event("input", { bubbles: true }));
             syncNumberAreaTooltip(editor);
           } else if (insertedText) {
             const linePrefix = line.slice(0, caretInLine);
@@ -2324,6 +2356,7 @@
             const linePrefix = line.slice(0, caretInLine);
             const pad = spacesToParagraphColumn(editor, linePrefix);
             insertAtSelection(editor, pad);
+            editor.dispatchEvent(new Event("input", { bubbles: true }));
             syncNumberAreaTooltip(editor);
           }
 
@@ -2417,6 +2450,10 @@
         const bindEditor = (editor) => {
           if (editor.dataset.editorBound === "true") return;
           editor.dataset.editorBound = "true";
+
+          editor.addEventListener("mousedown", () => {
+            if (!editor.readOnly) editor.focus();
+          });
 
           editor.addEventListener("keydown", (event) => {
             if (editor.readOnly) {
@@ -3224,7 +3261,7 @@
           applyPermissions();
           const submission = result.submission || getLatestSubmissionForBook(currentBookId);
           if (submission) await showSubmitModal(submission, result);
-          setSaveStatus(result.message || "ส่งตรวจแล้ว — ส่งโทเค็นเข้า inbox ครู");
+          setSaveStatus(result.message || "ส่งตรวจแล้ว");
         };
 
         const saveProfileFromForm = () => {
@@ -3696,12 +3733,12 @@
             try {
               const pushResult = await PaligoExamSubmit.pushReviewToStudent(result.bookId);
               if (pushResult.ok) {
-                setSaveStatus(pushResult.message || "ส่งผลตรวจเข้า inbox นักเรียนแล้ว");
+                setSaveStatus(pushResult.message || "ส่งผลตรวจให้นักเรียนแล้ว");
                 return;
               }
-              setSaveStatus(`${pushResult.message || "ส่ง inbox ไม่สำเร็จ"} — ดาวน์โหลดไฟล์แทน`);
+              setSaveStatus(`${pushResult.message || "ส่งไม่สำเร็จ"} — ดาวน์โหลดไฟล์แทน`);
             } catch (error) {
-              setSaveStatus(`${error.message || "ส่ง inbox ไม่สำเร็จ"} — ดาวน์โหลดไฟล์แทน`);
+              setSaveStatus(`${error.message || "ส่งไม่สำเร็จ"} — ดาวน์โหลดไฟล์แทน`);
             }
           }
 
@@ -3713,11 +3750,11 @@
           } catch {
             /* transfer optional if book missing locally */
           }
-          setSaveStatus("ส่งคืนนักเรียนแล้ว — ให้นำเข้าที่ ผลตรวจของฉัน หรือรับจาก inbox");
+          setSaveStatus("ส่งคืนนักเรียนแล้ว — นำเข้าที่ผลตรวจของฉัน");
         });
 
         startNewRevisionButton?.addEventListener("click", () => {
-          if (!window.confirm("เริ่ม revision ใหม่ — คำตอบจะแก้ไขได้อีกครั้ง แต่ผลตรวจเดิมยังดูได้")) return;
+          if (!window.confirm("เริ่ม revision ใหม่ — แก้ไขคำตอบได้อีกครั้ง ผลตรวจเดิมยังดูได้")) return;
           upsertBookRecord(currentBookId, { status: BOOK_STATUS.draft });
           applyPermissions();
           setSaveStatus("เริ่ม revision ใหม่แล้ว");
@@ -3790,6 +3827,7 @@
         }
         syncPrefilledAnswerLine();
         applyPermissions();
+        focusWritingEditorIfReady();
       })();
       PaligoSidebar.autoInit();
     </script>

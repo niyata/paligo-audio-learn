@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Super Admin · Paligo</title>
+    <link rel="stylesheet" href="paligo-design-tokens.css" />
+    <link rel="stylesheet" href="sidebar-nav.css" />
+    <link rel="stylesheet" href="paligo-exam-ui.css" />
+    <style>
+      body {
+        background: var(--paligo-page-bg, #f8f0e3);
+        color: var(--paligo-ink, #343434);
+        font-family: Sarabun, ui-sans-serif, system-ui, sans-serif;
+        line-height: 1.5;
+        margin: 0;
+      }
+
+      .admin-shell {
+        display: grid;
+        gap: 16px;
+        margin: 0 auto;
+        max-width: 920px;
+        padding: 8px 0 40px;
+      }
+
+      .admin-card {
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid var(--paligo-paper-border);
+        border-radius: 12px;
+        box-shadow: 0 18px 46px rgba(74, 44, 10, 0.08);
+        padding: 18px;
+      }
+
+      .admin-hero {
+        align-items: flex-start;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        justify-content: space-between;
+        margin-bottom: 14px;
+      }
+
+      .admin-title {
+        color: #7a1f2d;
+        font-size: clamp(1.25rem, 3vw, 1.7rem);
+        font-weight: 800;
+        margin: 0 0 4px;
+      }
+
+      .admin-subtitle {
+        color: var(--paligo-muted);
+        font-size: 0.88rem;
+        font-weight: 700;
+        margin: 0;
+      }
+
+      .admin-badge {
+        background: rgba(122, 31, 45, 0.1);
+        border: 1px solid rgba(122, 31, 45, 0.24);
+        border-radius: 999px;
+        color: #7a1f2d;
+        font-size: 0.76rem;
+        font-weight: 800;
+        padding: 6px 10px;
+      }
+
+      .admin-grid {
+        display: grid;
+        gap: 12px;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      }
+
+      .admin-stat {
+        background: rgba(31, 45, 137, 0.05);
+        border: 1px solid rgba(31, 45, 137, 0.1);
+        border-radius: 10px;
+        padding: 12px 14px;
+      }
+
+      .admin-stat__label {
+        color: var(--paligo-muted);
+        font-size: 0.76rem;
+        font-weight: 800;
+      }
+
+      .admin-stat__value {
+        color: var(--paligo-exam-blue);
+        font-size: 1.35rem;
+        font-weight: 800;
+        margin-top: 4px;
+      }
+
+      .admin-section-title {
+        color: var(--paligo-exam-blue);
+        font-size: 0.95rem;
+        font-weight: 800;
+        margin: 0 0 10px;
+      }
+
+      .admin-toggle-list {
+        display: grid;
+        gap: 10px;
+      }
+
+      .admin-toggle {
+        align-items: center;
+        background: #fff;
+        border: 1px solid rgba(31, 45, 137, 0.12);
+        border-radius: 10px;
+        display: flex;
+        gap: 12px;
+        justify-content: space-between;
+        padding: 12px 14px;
+      }
+
+      .admin-toggle__text {
+        display: grid;
+        gap: 2px;
+      }
+
+      .admin-toggle__label {
+        font-size: 0.9rem;
+        font-weight: 800;
+      }
+
+      .admin-toggle__desc {
+        color: var(--paligo-muted);
+        font-size: 0.78rem;
+        font-weight: 600;
+      }
+
+      .admin-toggle input {
+        height: 18px;
+        width: 18px;
+      }
+
+      .admin-toggle.is-future {
+        opacity: 0.72;
+      }
+
+      .admin-note {
+        color: var(--paligo-muted);
+        font-size: 0.84rem;
+        font-weight: 600;
+        margin: 0 0 12px;
+      }
+
+      .admin-status {
+        background: rgba(31, 45, 137, 0.06);
+        border-radius: 8px;
+        font-size: 0.84rem;
+        font-weight: 700;
+        margin-top: 12px;
+        padding: 10px 12px;
+      }
+
+      .admin-status.is-error {
+        background: rgba(180, 35, 47, 0.1);
+        color: #8f1d28;
+      }
+
+      .admin-status.is-success {
+        background: rgba(36, 113, 91, 0.12);
+        color: #1f553f;
+      }
+
+      .admin-future-grid {
+        display: grid;
+        gap: 10px;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      }
+
+      .admin-future-card {
+        background: rgba(52, 52, 52, 0.04);
+        border: 1px dashed rgba(31, 45, 137, 0.2);
+        border-radius: 10px;
+        padding: 12px 14px;
+      }
+
+      .admin-future-card h3 {
+        font-size: 0.88rem;
+        margin: 0 0 6px;
+      }
+
+      .admin-future-card p {
+        color: var(--paligo-muted);
+        font-size: 0.78rem;
+        font-weight: 600;
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="admin-shell" data-admin-shell hidden>
+      <section class="admin-card">
+        <div class="admin-hero">
+          <div>
+            <h1 class="admin-title">แผงควบคุม Super Admin</h1>
+            <p class="admin-subtitle" data-admin-user-meta>—</p>
+          </div>
+          <span class="admin-badge">SUPER ADMIN</span>
+        </div>
+
+        <div class="admin-grid" data-admin-stats>
+          <div class="admin-stat">
+            <div class="admin-stat__label">ผู้ใช้ทั้งหมด</div>
+            <div class="admin-stat__value" data-stat-users>—</div>
+          </div>
+          <div class="admin-stat">
+            <div class="admin-stat__label">จับคู่ active</div>
+            <div class="admin-stat__value" data-stat-pairings>—</div>
+          </div>
+          <div class="admin-stat">
+            <div class="admin-stat__label">Inbox รอรับ</div>
+            <div class="admin-stat__value" data-stat-inbox>—</div>
+          </div>
+          <div class="admin-stat">
+            <div class="admin-stat__label">API</div>
+            <div class="admin-stat__value" data-stat-api>—</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="admin-card">
+        <h2 class="admin-section-title">สวิตช์ระบบ (มีผลทันที)</h2>
+        <p class="admin-note">
+          ปิด Import/Export เป็นค่าเริ่มต้น — ผู้ใช้ทั่วไปจะไม่เห็นเมนูย้ายไฟล์ JSON · Super Admin เห็นเสมอ
+        </p>
+        <div class="admin-toggle-list" data-toggle-list></div>
+        <div class="admin-actions" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px">
+          <button class="paligo-btn is-primary" type="button" data-save-settings>บันทึกการตั้งค่า</button>
+          <button class="paligo-btn" type="button" data-refresh-panel>รีเฟรชสถานะ</button>
+          <a class="paligo-btn is-ghost" href="exam-profile.html">โปรไฟล์</a>
+        </div>
+        <p class="admin-status" data-admin-status hidden></p>
+      </section>
+
+      <section class="admin-card">
+        <h2 class="admin-section-title">แผน Phase ถัดไป (ออกแบบแล้ว · ยังไม่ implement)</h2>
+        <div class="admin-future-grid">
+          <article class="admin-future-card">
+            <h3>LINE Webhook</h3>
+            <p>Reply-only · คิวแจ้งครู · verify signature · endpoint `/v1/line/webhook`</p>
+          </article>
+          <article class="admin-future-card">
+            <h3>LINE Messaging API</h3>
+            <p>Channel secret/token · Flex template · Rich Menu «การบ้านใหม่»</p>
+          </article>
+          <article class="admin-future-card">
+            <h3>Inbox Ops</h3>
+            <p>คิว pending · claim rate · pairing audit · maintenance banner</p>
+          </article>
+          <article class="admin-future-card">
+            <h3>Notifications</h3>
+            <p>LINE reply queue · in-app toast · email fallback (optional)</p>
+          </article>
+        </div>
+        <p class="admin-note" style="margin-top: 12px">
+          รายละเอียดเต็ม: <code>docs/super-admin-control-panel.md</code>
+        </p>
+      </section>
+    </div>
+
+    <script src="paligo-config.js"></script>
+    <script src="paligo-inbox-client.js"></script>
+    <script src="paligo-platform.js"></script>
+    <script src="paligo-nav-config.js"></script>
+    <script src="sidebar-nav.js"></script>
+    <script>
+      (() => {
+        const platform = window.PaligoPlatform;
+        const client = window.PaligoInboxClient;
+        const shell = document.querySelector("[data-admin-shell]");
+        const toggleList = document.querySelector("[data-toggle-list]");
+        const statusEl = document.querySelector("[data-admin-status]");
+
+        const TOGGLES = [
+          {
+            key: "importExportEnabled",
+            label: "Import / Export ไฟล์ JSON",
+            desc: "สำรองสมุด · นำเข้า submission/review · แพ็กเกจโอน",
+            live: true,
+          },
+          {
+            key: "inboxEnabled",
+            label: "Inbox API",
+            desc: "ส่งสมุดผ่านแชท · claim · packages",
+            live: true,
+          },
+          {
+            key: "notificationsEnabled",
+            label: "การแจ้งเตือนในแอป",
+            desc: "ข้อความระบบในแชท / banner",
+            live: true,
+          },
+          {
+            key: "lineWebhookEnabled",
+            label: "LINE Webhook",
+            desc: "รับ event จาก LINE OA (Phase 8)",
+            live: false,
+          },
+          {
+            key: "lineMessagingEnabled",
+            label: "LINE Messaging API",
+            desc: "ส่ง Flex แบบ reply (ไม่ push)",
+            live: false,
+          },
+          {
+            key: "lineNotifyQueueEnabled",
+            label: "คิวแจ้งครูทาง LINE",
+            desc: "PALIGO SEND token + deferred reply",
+            live: false,
+          },
+          {
+            key: "maintenanceMode",
+            label: "โหมดบำรุงรักษา",
+            desc: "แสดง banner ปิดระบบชั่วคราว",
+            live: false,
+          },
+          {
+            key: "debugApiLogs",
+            label: "Debug API logs",
+            desc: "บันทึก request เพิ่ม (dev only)",
+            live: false,
+          },
+        ];
+
+        let panel = null;
+        let draftFlags = { ...platform.DEFAULT_FLAGS };
+
+        const showStatus = (message, type = "") => {
+          statusEl.hidden = !message;
+          statusEl.textContent = message || "";
+          statusEl.classList.toggle("is-error", type === "error");
+          statusEl.classList.toggle("is-success", type === "success");
+        };
+
+        const renderToggles = () => {
+          toggleList.replaceChildren();
+          TOGGLES.forEach((item) => {
+            const row = document.createElement("label");
+            row.className = `admin-toggle${item.live ? "" : " is-future"}`;
+            row.innerHTML = `
+              <span class="admin-toggle__text">
+                <span class="admin-toggle__label">${item.label}${item.live ? "" : " · เร็วๆ นี้"}</span>
+                <span class="admin-toggle__desc">${item.desc}</span>
+              </span>
+              <input type="checkbox" data-flag-key="${item.key}" ${draftFlags[item.key] ? "checked" : ""} ${item.live ? "" : "disabled"} />
+            `;
+            toggleList.append(row);
+          });
+        };
+
+        const readDraftFlags = () => {
+          toggleList.querySelectorAll("[data-flag-key]").forEach((input) => {
+            if (input.disabled) return;
+            draftFlags[input.dataset.flagKey] = input.checked;
+          });
+          return draftFlags;
+        };
+
+        const paintPanel = (payload) => {
+          panel = payload;
+          draftFlags = { ...platform.DEFAULT_FLAGS, ...(payload.flags || {}) };
+          const user = payload.user;
+          document.querySelector("[data-admin-user-meta]").textContent =
+            `${user.displayName || "—"} · ${user.email || "ไม่มีอีเมล"} · ${user.role}`;
+          document.querySelector("[data-stat-users]").textContent = payload.stats?.users ?? "—";
+          document.querySelector("[data-stat-pairings]").textContent = payload.stats?.activePairings ?? "—";
+          document.querySelector("[data-stat-inbox]").textContent = payload.stats?.inboxPending ?? "—";
+          document.querySelector("[data-stat-api]").textContent = payload.health?.ok ? "พร้อม" : "ผิดพลาด";
+          renderToggles();
+        };
+
+        const refreshPanel = async () => {
+          const payload = await client.getAdminPanel();
+          paintPanel(payload);
+        };
+
+        document.querySelector("[data-save-settings]")?.addEventListener("click", async () => {
+          try {
+            readDraftFlags();
+            await client.patchAdminSettings(draftFlags);
+            await platform.boot({ force: true });
+            await refreshPanel();
+            showStatus("บันทึกการตั้งค่าแล้ว — ผู้ใช้ทั่วไปจะเห็น/ไม่เห็น Import-Export ตามสวิตช์", "success");
+          } catch (error) {
+            showStatus(error.message || "บันทึกไม่สำเร็จ", "error");
+          }
+        });
+
+        document.querySelector("[data-refresh-panel]")?.addEventListener("click", async () => {
+          try {
+            await refreshPanel();
+            showStatus("รีเฟรชแล้ว", "success");
+          } catch (error) {
+            showStatus(error.message || "รีเฟรชไม่สำเร็จ", "error");
+          }
+        });
+
+        (async () => {
+          try {
+            await client.ensureApiReady();
+          } catch (error) {
+            showStatus(error.message || "API ไม่พร้อม", "error");
+          }
+          const user = await platform.ensureSuperAdminPage();
+          if (!user) return;
+          shell.hidden = false;
+          try {
+            await refreshPanel();
+          } catch (error) {
+            showStatus(error.message || "โหลดแผงควบคุมไม่สำเร็จ", "error");
+          }
+          PaligoSidebar.autoInit();
+        })();
+      })();
+    </script>
+  </body>
+</html>

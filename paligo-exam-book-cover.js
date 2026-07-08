@@ -89,7 +89,35 @@
 
   /**
    * @param {object} book
-   * @param {{ compact?: boolean }} [options]
+   * @param {{ compact?: boolean, avatarUrl?: string, avatarName?: string }} [options]
+   */
+  function buildAvatarElement(avatarUrl, avatarName, compact) {
+    const wrap = document.createElement("div");
+    wrap.className = compact ? "book-cover-avatar is-compact" : "book-cover-avatar";
+    const label = String(avatarName || "").trim();
+
+    if (avatarUrl) {
+      const img = document.createElement("img");
+      img.className = "book-cover-avatar__img";
+      img.src = avatarUrl;
+      img.alt = label ? `รูปโปรไฟล์ ${label}` : "รูปโปรไฟล์";
+      img.loading = "lazy";
+      img.decoding = "async";
+      wrap.append(img);
+      return wrap;
+    }
+
+    const initial = document.createElement("span");
+    initial.className = "book-cover-avatar__initial";
+    initial.setAttribute("aria-hidden", "true");
+    initial.textContent = label ? label.charAt(0).toUpperCase() : "?";
+    wrap.append(initial);
+    return wrap;
+  }
+
+  /**
+   * @param {object} book
+   * @param {{ compact?: boolean, portrait?: boolean, avatarUrl?: string, avatarName?: string }} [options]
    */
   function buildBookCoverElement(book, options = {}) {
     const shared = getShared();
@@ -99,7 +127,16 @@
     const subject = document.createElement("div");
     const date = document.createElement("div");
 
-    cover.className = options.compact ? "book-cover is-compact" : "book-cover";
+    const classes = ["book-cover"];
+    if (options.compact) classes.push("is-compact");
+    if (options.portrait) classes.push("is-portrait");
+    cover.className = classes.join(" ");
+    if (options.avatarUrl || options.avatarName) {
+      cover.classList.add("has-avatar");
+      cover.append(
+        buildAvatarElement(options.avatarUrl || "", options.avatarName || book?.studentName || "", options.compact)
+      );
+    }
     grade.className = "book-cover-grade";
     subject.className = "book-cover-subject";
     date.className = "book-cover-date";

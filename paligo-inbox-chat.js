@@ -56,6 +56,12 @@
     return message;
   }
 
+  function removeMessage(threadId, messageId) {
+    const messages = getMessages(threadId).filter((item) => item.id !== messageId);
+    saveMessages(threadId, messages);
+    return messages;
+  }
+
   function formatTime(iso) {
     if (!iso) return "";
     return new Date(iso).toLocaleString("th-TH", {
@@ -93,6 +99,16 @@
           }
         : null,
     };
+  }
+
+  function resolveSenderAvatarUrl() {
+    const profileApi = global.PaligoProfile;
+    if (!profileApi?.resolveSessionAvatar) return "";
+    try {
+      return profileApi.resolveSessionAvatar() || "";
+    } catch {
+      return "";
+    }
   }
 
   function resolveThreadId({ role, userId, reviewerUserId }) {
@@ -151,6 +167,7 @@
       book: bookSnapshot(fresh),
       bookStatus: underReview,
       subtitle: `revision ${fresh?.revision || submission?.bookRevision || 1} · ${result?.push?.intendedRecipientLabel || "ครู"}`,
+      senderAvatarUrl: resolveSenderAvatarUrl(),
       inboxPushed: Boolean(
         result?.push || result?.mode === "submit_and_push" || result?.mode === "push_only"
       ),
@@ -202,6 +219,7 @@
       subtitle = "",
       actions = [],
       senderName = "",
+      senderAvatarUrl = "",
     } = options;
 
     const shared = global.PaligoExamShared;
@@ -216,6 +234,10 @@
     row.className = `inbox-chat__row is-${message.direction || "out"} is-card`;
     card.className = "inbox-flex-card";
     card.dataset.messageId = message.id || "";
+    card.dataset.bookId = message.bookId || book?.id || "";
+    if (message.direction === "out") {
+      card.title = "คลิกขวาเพื่อยกเลิกการส่ง (ถ้ายังอยู่ในช่วงเวลา)";
+    }
 
     if (senderName && message.direction === "in") {
       const sender = document.createElement("div");
@@ -226,13 +248,21 @@
 
     header.className = "inbox-flex-card__hero";
     if (book && coverApi?.buildBookCoverElement) {
-      header.append(coverApi.buildBookCoverElement(book, { compact: true }));
+      const avatarName = senderName || book?.studentName || "";
+      const avatarUrl = senderAvatarUrl || message.senderAvatarUrl || "";
+      header.append(
+        coverApi.buildBookCoverElement(book, {
+          compact: true,
+          avatarUrl,
+          avatarName,
+        })
+      );
     }
 
     body.className = "inbox-flex-card__body";
     const title = document.createElement("div");
     title.className = "inbox-flex-card__title";
-    title.textContent = book?.title || book?.bookTitle || "สมุดคำตอบ";
+    title.textContent = book?.title || book?.bookTitle || "สมุดข้อสอบ";
     body.append(title);
 
     if (subtitle) {
@@ -284,6 +314,7 @@
         subtitle: message.subtitle || "",
         actions: [],
         senderName: message.senderName || "",
+        senderAvatarUrl: message.senderAvatarUrl || "",
       });
     }
     return null;
@@ -307,6 +338,7 @@
     appendMessage,
     appendSystemMessage,
     upsertMessage,
+    removeMessage,
     bookSnapshot,
     resolveThreadId,
     resolveThreadIdForSession,

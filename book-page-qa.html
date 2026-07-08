@@ -646,7 +646,7 @@
   <body>
     <main class="qa-shell">
       <header class="qa-card">
-        <h1 class="qa-title" data-book-title>Book Page QA</h1>
+        <h1 class="qa-title" data-book-title>ตรวจหน้าเล่ม (QA)</h1>
         <p class="qa-note">เทียบ PDF ต้นฉบับกับ HTML ที่แปลงแล้ว และบันทึกสถานะตรวจสอบลง footnote ของแต่ละหน้า</p>
       </header>
 
@@ -758,11 +758,13 @@
           <button class="qa-button qa-button--pending" type="button" data-set-status="pending">รอตรวจสอบ</button>
           <button class="qa-button qa-button--verified" type="button" data-set-status="verified">ยืนยันถูกต้อง</button>
           <button class="qa-button qa-button--issue" type="button" data-set-status="issue">พบปัญหา</button>
+          <span data-paligo-import-export hidden>
           <button class="qa-button" type="button" data-export-verification>ดาวน์โหลด verification.json</button>
           <label class="qa-button" style="display: inline-grid; place-items: center">
             นำเข้า verification.json
             <input type="file" accept=".json,application/json" hidden data-import-verification />
           </label>
+          </span>
         </div>
         <label class="qa-field" style="margin-top: 10px">
           <span class="qa-label">หมายเหตุปัญหา / ข้อสังเกต</span>
@@ -1396,8 +1398,14 @@
         }
       })();
     </script>
+    <script src="paligo-config.js"></script>
+    <script src="paligo-inbox-client.js"></script>
+    <script src="paligo-platform.js"></script>
     <script src="paligo-nav-config.js"></script>
     <script src="sidebar-nav.js"></script>
-    <script>PaligoSidebar.autoInit();</script>
+    <script>
+      PaligoSidebar.autoInit();
+      PaligoPlatform?.boot?.();
+    </script>
   </body>
 </html>

@@ -1811,20 +1811,24 @@
 
             if (event.key === "Tab") {
               event.preventDefault();
-              jumpToParagraphFromNumberArea(editor);
+              if (isCaretInNumberArea(editor)) {
+                jumpToParagraphFromNumberArea(editor);
+              } else {
+                insertAtSelection(editor, computeContinuationIndent(editor));
+                editor.dispatchEvent(new Event("input", { bubbles: true }));
+              }
               return;
             }
 
             if (
               isCaretInNumberArea(editor) &&
-              event.key.length === 1 &&
               !event.ctrlKey &&
               !event.metaKey &&
               !event.altKey &&
-              !/^\d$/.test(event.key)
+              (event.key === " " || event.key === "Spacebar" || (event.key.length === 1 && !/^\d$/.test(event.key)))
             ) {
               event.preventDefault();
-              jumpToParagraphFromNumberArea(editor, event.key);
+              jumpToParagraphFromNumberArea(editor, event.key === " " || event.key === "Spacebar" ? "" : event.key);
             }
           });
 
@@ -1986,6 +1990,8 @@
         });
       })();
     </script>
+    <script src="paligo-config.js"></script>
+    <script src="paligo-inbox-client.js"></script>
     <script src="paligo-nav-config.js"></script>
     <script src="sidebar-nav.js"></script>
     <script>PaligoSidebar.autoInit();</script>

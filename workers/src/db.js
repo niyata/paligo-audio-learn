@@ -27,7 +27,7 @@ export async function getUserBySession(db, sessionId) {
   const now = new Date().toISOString();
   const row = await db
     .prepare(
-      `SELECT u.id, u.role, u.display_name, u.email, u.created_at
+      `SELECT u.id, u.role, u.display_name, u.email, u.created_at, u.profile_json, u.is_super_admin
        FROM sessions s
        JOIN users u ON u.id = s.user_id
        WHERE s.id = ?1 AND s.expires_at > ?2`
@@ -40,7 +40,7 @@ export async function getUserBySession(db, sessionId) {
 export async function getUserById(db, userId) {
   const row = await db
     .prepare(
-      `SELECT id, role, display_name, email, created_at FROM users WHERE id = ?1`
+      `SELECT id, role, display_name, email, created_at, profile_json, is_super_admin FROM users WHERE id = ?1`
     )
     .bind(userId)
     .first();
@@ -69,13 +69,62 @@ export async function getUserByIdWithSecret(db, userId) {
 }
 
 function mapUser(row) {
+  let profileJson = null;
+  if (row.profile_json) {
+    try {
+      profileJson = JSON.parse(row.profile_json);
+    } catch {
+      profileJson = null;
+    }
+  }
   return {
     id: row.id,
     role: row.role,
     displayName: row.display_name,
     email: row.email || null,
     createdAt: row.created_at,
+    profileJson,
+    isSuperAdmin: Boolean(row.is_super_admin),
   };
+}
+
+export async function updateUserProfile(db, userId, { displayName, email, profileJson }) {
+  const sets = [];
+  const values = [];
+  let index = 1;
+
+  if (displayName !== undefined) {
+    sets.push(`display_name = ?${index}`);
+    values.push(displayName);
+    index += 1;
+  }
+  if (email !== undefined) {
+    sets.push(`email = ?${index}`);
+    values.push(email || null);
+    index += 1;
+  }
+  if (profileJson !== undefined) {
+    sets.push(`profile_json = ?${index}`);
+    values.push(profileJson ? JSON.stringify(profileJson) : null);
+    index += 1;
+  }
+
+  if (!sets.length) return getUserById(db, userId);
+
+  values.push(userId);
+  await db
+    .prepare(`UPDATE users SET ${sets.join(", ")} WHERE id = ?${index}`)
+    .bind(...values)
+    .run();
+
+  return getUserById(db, userId);
+}
+
+export async function updateUserPin(db, userId, passwordHash, salt) {
+  await db
+    .prepare(`UPDATE users SET password_hash = ?1, password_salt = ?2 WHERE id = ?3`)
+    .bind(passwordHash, salt, userId)
+    .run();
 }
 
 export { mapUser };

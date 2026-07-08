@@ -239,11 +239,13 @@
         </table>
         <div class="empty-state" data-empty-state hidden>
           <strong>ยังไม่มีผลตรวจในช่วงนี้</strong>
-          <span>เมื่อครูกดบันทึกการตรวจ ระบบจะเพิ่มผลคะแนนจาก score stamps เข้ากระดานนี้</span>
+          <span>เมื่อครูบันทึกผลตรวจ คะแนนจะแสดงที่นี่</span>
         </div>
       </section>
     </main>
 
+    <script src="paligo-config.js"></script>
+    <script src="paligo-inbox-client.js"></script>
     <script src="paligo-nav-config.js"></script>
     <script src="sidebar-nav.js"></script>
     <script>
@@ -353,7 +355,7 @@
 
           tbody.innerHTML = "";
           emptyState.hidden = rows.length > 0;
-          summary.textContent = `${rangeLabels[range]} · ${toThaiNumber(rows.length)} ผลตรวจ · คิดจาก stamp คะแนนเท่านั้น`;
+          summary.textContent = `${rangeLabels[range]} · ${toThaiNumber(rows.length)} ผลตรวจ`;
 
           rows.forEach((result, index) => {
             const tr = document.createElement("tr");

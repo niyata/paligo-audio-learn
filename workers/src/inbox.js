@@ -4,6 +4,21 @@
 
 import { requireUser } from "./auth.js";
 import { errorResponse, jsonResponse } from "./http.js";
+import { assertInboxOperational } from "./platform.js";
+
+/**
+ * @param {unknown} profileJson
+ */
+function avatarFromProfileJson(profileJson) {
+  if (!profileJson) return null;
+  try {
+    const parsed = typeof profileJson === "string" ? JSON.parse(profileJson) : profileJson;
+    const url = String(parsed?.avatarUrl || "").trim();
+    return url.startsWith("data:image/") ? url : null;
+  } catch {
+    return null;
+  }
+}
 
 /**
  * @param {Record<string, unknown>} row
@@ -20,6 +35,7 @@ function mapInboxItem(row) {
     bookId: row.book_id,
     bookRevision: row.book_revision,
     fromDisplayName: row.from_display_name,
+    fromAvatarUrl: avatarFromProfileJson(row.from_profile_json),
     createdAt: row.created_at,
     expiresAt: row.expires_at,
   };
@@ -35,10 +51,13 @@ export async function handleGetInbox(request, env) {
     return errorResponse(request, "not_authenticated", "ยังไม่ได้เข้าสู่ระบบ", 401);
   }
 
+  const blocked = await assertInboxOperational(request, env, user);
+  if (blocked) return blocked;
+
   const result = await env.DB.prepare(
     `SELECT i.id, i.status, i.intended_recipient_label, i.book_title, i.subject, i.grade,
             i.created_at, i.expires_at, p.direction, p.book_id, p.book_revision,
-            u.display_name AS from_display_name
+            u.display_name AS from_display_name, u.profile_json AS from_profile_json
      FROM inbox_items i
      INNER JOIN packages p ON p.id = i.package_id
      INNER JOIN users u ON u.id = i.from_user_id
@@ -63,6 +82,9 @@ export async function handleClaimInbox(request, env, inboxId) {
   if (!user) {
     return errorResponse(request, "not_authenticated", "ยังไม่ได้เข้าสู่ระบบ", 401);
   }
+
+  const blocked = await assertInboxOperational(request, env, user);
+  if (blocked) return blocked;
 
   const row = await env.DB.prepare(
     `SELECT i.id, i.to_user_id, i.from_user_id, i.status, i.intended_recipient_label,

@@ -19,7 +19,7 @@
     const taglineEl = document.querySelector(".paligo-home__tagline");
     if (titleEl && brand.title) titleEl.textContent = brand.title;
     if (taglineEl && brand.subtitle) {
-      taglineEl.textContent = `${brand.subtitle} — เลือกเมนูด้านล่างเพื่อเริ่มต้น`;
+      taglineEl.textContent = brand.subtitle || "เรียนบาลีออนไลน์";
     }
 
     const sorted = [...config.menu].sort((a, b) => (a.priority || 0) - (b.priority || 0));
@@ -36,7 +36,7 @@
         <span class="paligo-home__section-icon" aria-hidden="true">${getIcon(section.icon)}</span>
         <div>
           <h2 class="paligo-home__section-title" id="home-section-${section.id}">${section.label}</h2>
-          <p class="paligo-home__section-caption">เมนูหลัก · ${section.children.length} รายการ</p>
+          <p class="paligo-home__section-caption">${section.children.length} รายการ</p>
         </div>`;
 
       const grid = document.createElement("div");

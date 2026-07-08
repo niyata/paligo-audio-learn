@@ -18,6 +18,9 @@
     const controller = global.PaligoSidebar.autoInit();
     global.__paligoSidebarController = controller;
     controller?.resetAccordionToActive?.();
+    if (global.PaligoPlatform?.boot) {
+      global.PaligoPlatform.boot().catch(() => {});
+    }
     return controller;
   }
 

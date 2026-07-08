@@ -15,7 +15,21 @@
     chevronLeft: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>',
     chevronRight: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>',
     menu: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>',
+    inbox: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 5h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-5 3V7a2 2 0 0 1 2-2Z"/><path d="M8 10h8M8 14h5"/></svg>',
+    settings: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>',
   };
+
+  const SUPER_ADMIN_EMAILS = new Set(["tha.std@paligo.jo", "tha.tc@paligo.jp"]);
+
+  function isSuperAdminUser(user) {
+    if (!user) return false;
+    if (typeof window !== "undefined" && window.PaligoPlatform?.isSuperAdmin) {
+      return window.PaligoPlatform.isSuperAdmin(user);
+    }
+    if (user.isSuperAdmin) return true;
+    const email = String(user.email || "").trim().toLowerCase();
+    return SUPER_ADMIN_EMAILS.has(email);
+  }
 
   function resolveMenu(options) {
     return options.menu || window.PaligoNavConfig?.menu || [];
@@ -87,7 +101,8 @@
       .map((item) => {
         const itemRef = normalizeHref(item.href);
         const active = itemRef === activeRef ? " is-active" : "";
-        return `<li><a class="paligo-nav__sublink${active}" href="${item.href}">${item.label}</a></li>`;
+        const inboxAttr = item.requiresInbox ? ' data-paligo-inbox-feature' : "";
+        return `<li><a class="paligo-nav__sublink${active}" href="${item.href}"${inboxAttr}>${item.label}</a></li>`;
       })
       .join("");
   }
@@ -98,17 +113,55 @@
     return trimmed.charAt(0).toUpperCase();
   }
 
+  function buildAdminSidebarLink(activeRef) {
+    const session =
+      typeof window !== "undefined" ? window.PaligoInboxClient?.getSession?.() : null;
+    if (!isSuperAdminUser(session?.user)) return "";
+
+    const adminRef = normalizeHref("exam-super-admin.html");
+    const active = adminRef === activeRef ? " is-active" : "";
+    return `
+      <a
+        class="paligo-sidebar__admin-link${active}"
+        href="exam-super-admin.html"
+        data-tooltip="ตั้งค่าระบบ · Super Admin"
+        aria-label="ตั้งค่าระบบ"
+      >
+        <span class="paligo-sidebar__admin-icon" aria-hidden="true">${icon("settings")}</span>
+        <span class="paligo-sidebar__admin-label">ตั้งค่าระบบ</span>
+      </a>`;
+  }
+
+  function buildAdminTopbarLink(activeRef) {
+    const session =
+      typeof window !== "undefined" ? window.PaligoInboxClient?.getSession?.() : null;
+    if (!isSuperAdminUser(session?.user)) return "";
+
+    const adminRef = normalizeHref("exam-super-admin.html");
+    const active = adminRef === activeRef ? " is-active" : "";
+    return `
+      <a
+        class="paligo-topbar__admin${active}"
+        href="exam-super-admin.html"
+        aria-label="ตั้งค่าระบบ"
+        title="ตั้งค่าระบบ · Super Admin"
+      >
+        <span class="paligo-topbar__admin-icon" aria-hidden="true">${icon("settings")}</span>
+        <span class="paligo-topbar__admin-label">ตั้งค่าระบบ</span>
+      </a>`;
+  }
+
   function buildProfileBlock() {
     const session =
       typeof window !== "undefined" ? window.PaligoInboxClient?.getSession?.() : null;
     const user = session?.user;
     const roleLabels = { student: "นักเรียน", reviewer: "ครู/ผู้ตรวจ" };
 
-    const homeHref = resolveHomeHref();
+    const profileHref = user ? "exam-profile.html" : "exam-account.html";
 
     if (!user) {
       return `
-        <a class="paligo-sidebar__profile paligo-sidebar__profile--guest" href="${homeHref}" data-tooltip="หน้าแรก" aria-label="กลับหน้าแรก">
+        <a class="paligo-sidebar__profile paligo-sidebar__profile--guest" href="${profileHref}" data-tooltip="เข้าสู่ระบบ" aria-label="เข้าสู่ระบบ">
           <span class="paligo-sidebar__avatar" aria-hidden="true">?</span>
           <span class="paligo-sidebar__profile-text">
             <span class="paligo-sidebar__profile-name">เข้าสู่ระบบ</span>
@@ -119,8 +172,9 @@
 
     const name = user.displayName || "ไม่ระบุชื่อ";
     const role = roleLabels[user.role] || user.role || "";
+    const profileTooltip = `โปรไฟล์ · ${name}`;
     return `
-      <a class="paligo-sidebar__profile" href="${homeHref}" data-tooltip="หน้าแรก · ${name}" aria-label="กลับหน้าแรก">
+      <a class="paligo-sidebar__profile" href="${profileHref}" data-tooltip="${profileTooltip}" aria-label="เปิดโปรไฟล์">
         <span class="paligo-sidebar__avatar" aria-hidden="true">${profileInitial(name)}</span>
         <span class="paligo-sidebar__profile-text">
           <span class="paligo-sidebar__profile-name">${name}</span>
@@ -149,7 +203,8 @@
       .map((item) => {
         const itemRef = normalizeHref(item.href);
         const active = itemRef === activeRef ? " is-active" : "";
-        return `<a class="paligo-sidebar__flyout-link${active}" href="${item.href}">${item.label}</a>`;
+        const inboxAttr = item.requiresInbox ? ' data-paligo-inbox-feature' : "";
+        return `<a class="paligo-sidebar__flyout-link${active}" href="${item.href}"${inboxAttr}>${item.label}</a>`;
       })
       .join("");
   }
@@ -192,6 +247,7 @@
           </nav>
         </div>
         <div class="paligo-sidebar__footer">
+          ${buildAdminSidebarLink(activeRef)}
           <button
             class="paligo-sidebar__toggle"
             id="paligoSidebarToggle"
@@ -210,7 +266,66 @@
       <div class="paligo-sidebar-backdrop" id="paligoSidebarBackdrop" hidden></div>`;
   }
 
-  function renderTopbar(pageTitle) {
+  function buildInboxTopbarBlock(activeRef) {
+    const session =
+      typeof window !== "undefined" ? window.PaligoInboxClient?.getSession?.() : null;
+    const user = session?.user;
+    const role = user?.role || "guest";
+    const roleLabels = { student: "นักเรียน", reviewer: "ครู/ผู้ตรวจ", guest: "ยังไม่ได้เข้าสู่ระบบ" };
+    const items =
+      window.PaligoNavConfig?.inboxMenuForRole?.(role) ||
+      window.PaligoNavConfig?.inboxMenu?.guest ||
+      [];
+
+    const headMeta = user
+      ? `${user.displayName || "ไม่ระบุชื่อ"} · ${roleLabels[role] || role}`
+      : roleLabels.guest;
+
+    const links = items
+      .map((item) => {
+        const itemRef = normalizeHref(item.href);
+        const active = itemRef === activeRef ? " is-active" : "";
+        const description = item.description
+          ? `<span class="paligo-topbar__inbox-link-desc">${item.description}</span>`
+          : "";
+        const inboxAttr = item.requiresInbox ? ' data-paligo-inbox-feature' : "";
+        return `<a class="paligo-topbar__inbox-link${active}" href="${item.href}"${inboxAttr}><span class="paligo-topbar__inbox-link-label">${item.label}</span>${description}</a>`;
+      })
+      .join("");
+
+    const adminInboxLink = isSuperAdminUser(user)
+      ? `<a class="paligo-topbar__inbox-link paligo-topbar__inbox-link--admin${normalizeHref("exam-super-admin.html") === activeRef ? " is-active" : ""}" href="exam-super-admin.html"><span class="paligo-topbar__inbox-link-label">ตั้งค่าระบบ</span><span class="paligo-topbar__inbox-link-desc">Super Admin · สวิตช์ฟีเจอร์</span></a>`
+      : "";
+
+    return `
+      <div class="paligo-topbar__inbox" data-paligo-inbox-menu>
+        <button
+          class="paligo-topbar__inbox-trigger"
+          id="paligoInboxMenuTrigger"
+          type="button"
+          aria-expanded="false"
+          aria-controls="paligoInboxMenuPanel"
+          aria-haspopup="menu"
+          aria-label="เมนู Inbox"
+          title="Inbox"
+        >
+          <span class="paligo-topbar__inbox-icon" aria-hidden="true">${icon("inbox")}</span>
+          <span class="paligo-topbar__inbox-badge" data-paligo-inbox-badge${user ? "" : " hidden"} aria-hidden="true"></span>
+        </button>
+        <div class="paligo-topbar__inbox-panel" id="paligoInboxMenuPanel" role="menu" aria-label="เมนู Inbox" hidden>
+          <div class="paligo-topbar__inbox-head">
+            <span class="paligo-topbar__inbox-head-title">Inbox</span>
+            <span class="paligo-topbar__inbox-head-meta">${headMeta}</span>
+          </div>
+          <div class="paligo-topbar__inbox-links">
+            ${adminInboxLink}
+            ${links}
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function renderTopbar(pageTitle, activeRef) {
     return `
       <header class="paligo-topbar">
         <button
@@ -224,7 +339,11 @@
           ${icon("menu")}
         </button>
         <h1 class="paligo-topbar__title">${pageTitle}</h1>
-        <span class="paligo-topbar__hint">⌘B / Ctrl+B พับเมนู</span>
+        <div class="paligo-topbar__actions">
+          <span class="paligo-topbar__hint">⌘B / Ctrl+B พับเมนู</span>
+          ${buildAdminTopbarLink(activeRef)}
+          ${buildInboxTopbarBlock(activeRef)}
+        </div>
       </header>`;
   }
 
@@ -243,6 +362,9 @@
     this.backdrop = document.getElementById("paligoSidebarBackdrop");
     this.tooltip = document.getElementById("paligoSidebarTooltip");
     this.flyout = document.getElementById("paligoSidebarFlyout");
+    this.inboxMenuTrigger = document.getElementById("paligoInboxMenuTrigger");
+    this.inboxMenuPanel = document.getElementById("paligoInboxMenuPanel");
+    this.inboxMenuOpen = false;
 
     this.bindEvents();
     this.applyState(false);
@@ -394,6 +516,28 @@
     this.openAccordion(trigger);
   };
 
+  PaligoSidebarController.prototype.closeInboxMenu = function () {
+    if (!this.inboxMenuPanel || !this.inboxMenuOpen) return;
+    this.inboxMenuOpen = false;
+    this.inboxMenuPanel.hidden = true;
+    this.inboxMenuPanel.classList.remove("is-open");
+    this.inboxMenuTrigger?.setAttribute("aria-expanded", "false");
+  };
+
+  PaligoSidebarController.prototype.openInboxMenu = function () {
+    if (!this.inboxMenuPanel || !this.inboxMenuTrigger) return;
+    this.closeFlyout();
+    this.inboxMenuOpen = true;
+    this.inboxMenuPanel.hidden = false;
+    this.inboxMenuPanel.classList.add("is-open");
+    this.inboxMenuTrigger.setAttribute("aria-expanded", "true");
+  };
+
+  PaligoSidebarController.prototype.toggleInboxMenu = function () {
+    if (this.inboxMenuOpen) this.closeInboxMenu();
+    else this.openInboxMenu();
+  };
+
   PaligoSidebarController.prototype.bindEvents = function () {
     const self = this;
 
@@ -410,12 +554,37 @@
       if (event.key === "Escape") {
         self.closeFlyout();
         self.closeMobile();
+        self.closeInboxMenu();
         self.hideTooltip();
       }
     });
 
+    this.inboxMenuTrigger?.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      self.toggleInboxMenu();
+    });
+
+    this.inboxMenuPanel?.addEventListener("click", (event) => {
+      if (event.target.closest(".paligo-topbar__inbox-link")) {
+        self.closeInboxMenu();
+      }
+    });
+
+    document.addEventListener("click", (event) => {
+      if (!self.inboxMenuOpen) return;
+      if (
+        event.target.closest("[data-paligo-inbox-menu]") ||
+        event.target.closest("#paligoInboxMenuPanel")
+      ) {
+        return;
+      }
+      self.closeInboxMenu();
+    });
+
     window.matchMedia(MOBILE_QUERY).addEventListener("change", () => {
       self.closeFlyout();
+      self.closeInboxMenu();
       self.hideTooltip();
       self.closeMobile();
       self.applyState(false);
@@ -443,31 +612,17 @@
     });
 
     this.sidebar?.addEventListener("mouseover", (event) => {
-      if (self.sidebar.classList.contains("is-collapsed")) {
-        const anchor = event.target.closest("[data-tooltip]");
-        if (!anchor) return;
-        self.showTooltip(anchor.dataset.tooltip || "", anchor);
-        return;
-      }
-
-      const section = event.target.closest(".paligo-nav__section");
-      if (!section) return;
-      const trigger = section.querySelector(".paligo-nav__trigger");
-      if (!trigger) return;
-      self.openAccordion(trigger);
+      if (!self.sidebar.classList.contains("is-collapsed")) return;
+      const anchor = event.target.closest("[data-tooltip]");
+      if (!anchor) return;
+      self.showTooltip(anchor.dataset.tooltip || "", anchor);
     });
 
     this.sidebar?.addEventListener("mouseout", (event) => {
-      if (self.sidebar.classList.contains("is-collapsed")) {
-        const anchor = event.target.closest("[data-tooltip]");
-        if (!anchor) return;
-        self.hideTooltip();
-      }
-    });
-
-    this.sidebar?.querySelector(".paligo-sidebar__scroll")?.addEventListener("mouseleave", () => {
-      if (self.sidebar.classList.contains("is-collapsed")) return;
-      self.resetAccordionToActive();
+      if (!self.sidebar.classList.contains("is-collapsed")) return;
+      const anchor = event.target.closest("[data-tooltip]");
+      if (!anchor) return;
+      self.hideTooltip();
     });
 
     document.addEventListener("click", (event) => {
@@ -492,6 +647,17 @@
     });
   };
 
+  const BODY_OVERLAY_SELECTOR =
+    "[data-paligo-overlay], [data-book-sheet], [data-chat-context-menu]";
+
+  function isBodyOverlayNode(node) {
+    return (
+      node.nodeType === Node.ELEMENT_NODE &&
+      typeof node.matches === "function" &&
+      node.matches(BODY_OVERLAY_SELECTOR)
+    );
+  }
+
   function wrapExistingContent(options) {
     const body = document.body;
     if (body.dataset.paligoShell === "ready") return;
@@ -500,14 +666,20 @@
     const activeRef = normalizeHref(options.activeHref) || currentPageRef();
     const menu = resolveMenu(options);
     const brand = resolveBrand(options);
-    const preservedNodes = [...body.childNodes];
+    const preservedNodes = [];
+    const overlayNodes = [];
+
+    for (const node of body.childNodes) {
+      if (isBodyOverlayNode(node)) overlayNodes.push(node);
+      else preservedNodes.push(node);
+    }
 
     const wrapper = document.createElement("div");
     wrapper.className = "paligo-app";
     wrapper.innerHTML = `
       ${renderSidebar(menu, activeRef, brand)}
       <div class="paligo-main">
-        ${renderTopbar(pageTitle)}
+        ${renderTopbar(pageTitle, activeRef)}
         <div class="paligo-content" id="paligoMainContent"></div>
       </div>`;
 
@@ -515,6 +687,7 @@
     preservedNodes.forEach((node) => contentHost.appendChild(node));
 
     body.replaceChildren(wrapper);
+    overlayNodes.forEach((node) => body.appendChild(node));
     body.dataset.paligoShell = "ready";
   }
 

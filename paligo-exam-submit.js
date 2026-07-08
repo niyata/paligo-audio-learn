@@ -25,7 +25,7 @@
       return {
         ok: false,
         reason: "not_logged_in",
-        message: "เข้าสู่ระบบ Paligo Inbox (บทบาทนักเรียน) ก่อนส่งตรวจ",
+        message: "เข้าสู่ระบบ (นักเรียน) ก่อนส่งตรวจ",
         bookId,
       };
     }
@@ -56,7 +56,7 @@
         mode: "submit_only",
         submission: result.submission,
         book: shared.getBookById(bookId),
-        message: `ส่งตรวจแล้ว แต่ส่ง inbox ไม่สำเร็จ — ${error.message || "ลองใหม่จากกล่องข้อความ"}`,
+        message: `ส่งตรวจแล้ว แต่ส่งไม่สำเร็จ — ${error.message || "ลองจากกล่องข้อความ"}`,
         error,
       };
     }
@@ -99,7 +99,7 @@
       return {
         ok: false,
         reason: "push_failed",
-        message: error.message || "ส่ง inbox ไม่สำเร็จ",
+        message: error.message || "ส่งไม่สำเร็จ",
         bookId,
       };
     }
@@ -116,7 +116,7 @@
         return {
           ok: false,
           reason: "not_reviewer",
-          message: "เข้าสู่ระบบ Paligo Inbox (บทบาทครู/ผู้ตรวจ) ก่อนส่งผลกลับ",
+          message: "เข้าสู่ระบบ (ผู้ตรวจ) ก่อนส่งผลกลับ",
           bookId,
         };
       }
@@ -133,7 +133,7 @@
         return {
           ok: false,
           reason: "push_failed",
-          message: error.message || "ส่ง inbox ไม่สำเร็จ",
+          message: error.message || "ส่งไม่สำเร็จ",
           bookId,
           error,
         };

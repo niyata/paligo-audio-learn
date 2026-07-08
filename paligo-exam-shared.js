@@ -274,10 +274,41 @@
     }
   }
 
+  function normalizeAvatarUrl(value) {
+    const url = String(value || "").trim();
+    return url.startsWith("data:image/") ? url : "";
+  }
+
+  function saveStudentProfile(profile) {
+    const payload = {
+      userRole: profile?.userRole || "student",
+      prefix: String(profile?.prefix || "").trim(),
+      firstName: String(profile?.firstName || "").trim(),
+      lastName: String(profile?.lastName || "").trim(),
+      monasticName: String(profile?.monasticName || "").trim(),
+      grade: String(profile?.grade || "4").trim(),
+      teacherName: String(profile?.teacherName || "").trim(),
+      teacherRole: profile?.teacherRole || "teacher-reviewer",
+      teacherUserId: String(profile?.teacherUserId || "").trim(),
+      teacherDisplayName: String(profile?.teacherDisplayName || "").trim(),
+      teacherInstitution: String(profile?.teacherInstitution || "").trim(),
+      deliveryMethod: profile?.deliveryMethod || "line",
+      displayAlias: String(profile?.displayAlias || "").trim(),
+      avatarUrl: normalizeAvatarUrl(profile?.avatarUrl),
+      updatedAt: new Date().toISOString(),
+    };
+    writeRaw(KEYS.studentProfile, JSON.stringify(payload));
+    return payload;
+  }
+
   function saveReviewerProfile(profile) {
     const payload = {
+      prefix: String(profile?.prefix || "").trim(),
       name: String(profile?.name || "").trim(),
+      institution: String(profile?.institution || "").trim(),
       role: profile?.role || "teacher-reviewer",
+      displayAlias: String(profile?.displayAlias || "").trim(),
+      avatarUrl: normalizeAvatarUrl(profile?.avatarUrl),
       updatedAt: new Date().toISOString(),
     };
     writeRaw(KEYS.reviewerProfile, JSON.stringify(payload));
@@ -363,23 +394,60 @@
     return payload;
   }
 
-  function resolveStudentProfileForSubmit() {
-    const local = getStudentProfile();
-    if (local?.studentName?.trim()) return local;
+  /** สร้างชื่อผู้เรียนจากส่วนประกอบ (prefix + ชื่อ + สกุล + ฉายา) หรือ studentName เดิม */
+  function deriveStudentName(profile) {
+    if (!profile) return "";
+    const legacy = String(profile.studentName || "").trim();
+    if (legacy) return legacy;
+    const parts = [profile.prefix, profile.firstName, profile.lastName]
+      .map((part) => String(part || "").trim())
+      .filter(Boolean);
+    let base = parts.join(" ").trim();
+    const monastic = String(profile.monasticName || "").trim();
+    if (monastic) base = base ? `${base} (${monastic})` : monastic;
+    return base || String(profile.displayAlias || "").trim();
+  }
 
+  /** รวม profile snapshot สำหรับส่งตรวจ/สร้างสมุด — local เป็นหลัก, server เติมช่องว่าง */
+  function buildStudentProfileSnapshot() {
+    const local = getStudentProfile();
     const inboxUser =
       typeof window !== "undefined" ? window.PaligoInboxClient?.getSession?.()?.user : null;
-    if (inboxUser?.role === "student" && inboxUser.displayName?.trim()) {
-      return {
-        studentName: inboxUser.displayName.trim(),
-        grade: local?.grade || "4",
-        teacherRole: local?.teacherRole || "teacher-reviewer",
-        teacherName: local?.teacherName || "",
-        deliveryMethod: local?.deliveryMethod || "line",
-        inboxUserId: inboxUser.id,
-      };
-    }
-    return null;
+    const serverProfile =
+      inboxUser?.role === "student" && inboxUser.profileJson && typeof inboxUser.profileJson === "object"
+        ? inboxUser.profileJson
+        : null;
+
+    if (!local && !serverProfile && !inboxUser) return null;
+
+    const merged = { ...(serverProfile || {}), ...(local || {}) };
+    const studentName =
+      deriveStudentName(merged) ||
+      (inboxUser?.role === "student" ? String(inboxUser.displayName || "").trim() : "");
+    if (!studentName) return null;
+
+    const snapshot = {
+      studentName,
+      prefix: String(merged.prefix || "").trim(),
+      firstName: String(merged.firstName || "").trim(),
+      lastName: String(merged.lastName || "").trim(),
+      monasticName: String(merged.monasticName || "").trim(),
+      grade: String(merged.grade || "4").trim(),
+      teacherName: String(merged.teacherName || "").trim(),
+      teacherRole: merged.teacherRole || "teacher-reviewer",
+      teacherUserId: String(merged.teacherUserId || "").trim(),
+      teacherDisplayName: String(merged.teacherDisplayName || "").trim(),
+      teacherInstitution: String(merged.teacherInstitution || "").trim(),
+      deliveryMethod: merged.deliveryMethod || "line",
+      displayAlias: String(merged.displayAlias || "").trim(),
+      avatarUrl: normalizeAvatarUrl(merged.avatarUrl),
+    };
+    if (inboxUser?.id) snapshot.inboxUserId = inboxUser.id;
+    return snapshot;
+  }
+
+  function resolveStudentProfileForSubmit() {
+    return buildStudentProfileSnapshot();
   }
 
   function createSubmissionId() {
@@ -899,8 +967,11 @@
     getCancelSubmitState,
     cancelBookSubmit,
     getStudentProfile,
+    saveStudentProfile,
     getReviewerProfile,
     saveReviewerProfile,
+    deriveStudentName,
+    buildStudentProfileSnapshot,
     resolveReviewerProfileForConsole,
     syncReviewQueueFromBooks,
     listActiveSubmissions,

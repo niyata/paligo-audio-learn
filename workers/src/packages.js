@@ -6,6 +6,7 @@ import { createId } from "./crypto.js";
 import { getUserById } from "./db.js";
 import { requireUser } from "./auth.js";
 import { errorResponse, jsonResponse, parseJsonBody } from "./http.js";
+import { assertInboxOperational } from "./platform.js";
 
 /**
  * @param {D1Database} db
@@ -49,6 +50,9 @@ export async function handlePostPackage(request, env) {
     return errorResponse(request, "not_authenticated", "ยังไม่ได้เข้าสู่ระบบ", 401);
   }
 
+  const blocked = await assertInboxOperational(request, env, user);
+  if (blocked) return blocked;
+
   const body = await parseJsonBody(request);
   if (!body || body.schema !== "paligo.exam.bookTransfer.v1") {
     return errorResponse(request, "invalid_package", "ต้องเป็น paligo.exam.bookTransfer.v1", 400);
@@ -67,8 +71,9 @@ export async function handlePostPackage(request, env) {
   const bookRevision = Number(body.submission?.bookRevision || body.book?.revision || body.review?.bookRevision || 1);
   const submissionId = body.submission?.id || null;
   const answerHash = body.submission?.answerHash || null;
+  // book_title ต้องเป็นชื่อสมุด/ข้อสอบจริง — ไม่ใช่ชื่อนักเรียน (ชื่อผู้ส่งอยู่ใน from_user/profile)
   const bookTitle =
-    body.book?.studentName || body.submission?.bookTitle || body.book?.title || body.review?.bookTitle || "สมุดข้อสอบ";
+    body.submission?.bookTitle || body.book?.title || body.review?.bookTitle || "สมุดข้อสอบ";
   const subject = body.book?.subject || body.submission?.subject || body.review?.subject || "";
   const grade = body.book?.grade || body.submission?.grade || body.review?.grade || "";
 
