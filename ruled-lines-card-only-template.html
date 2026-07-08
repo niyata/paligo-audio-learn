@@ -2203,6 +2203,14 @@
           };
         };
 
+        const isLineAtBodyColumn = (line, editor) => {
+          if (!line.length) return false;
+          const editorCtx = measureFontContext(getComputedStyle(editor));
+          const { bodyStartPx } = getMarginLayout(editor);
+          const leading = line.match(/^(\s*)/)?.[1] || "";
+          return editorCtx.measureText(leading).width >= bodyStartPx - 0.5;
+        };
+
         const isCaretInNumberArea = (editor) => {
           const { line, caretInLine } = getLineContextAtCaret(editor);
           const editorCtx = measureFontContext(getComputedStyle(editor));
@@ -2210,6 +2218,12 @@
           const numbered = line.match(numberedLinePattern);
 
           if (numbered) {
+            if (!String(numbered[2] || "").trim()) {
+              const gutterEndPx = editorCtx.measureText(
+                formatNumberedHomeworkLine(editor, numbered[1], "")
+              ).width;
+              return caretPx <= gutterEndPx + 0.5;
+            }
             const numberAreaEndPx = editorCtx.measureText(formatNumberedLine(editor, numbered[1], "")).width;
             return caretPx < numberAreaEndPx;
           }
@@ -2220,6 +2234,32 @@
 
           const paragraphColumnPx = getParagraphColumnPx(editor);
           return caretPx < paragraphColumnPx && leading[2].length > 0;
+        };
+
+        const shouldJumpToParagraph = (editor) => {
+          if (isCaretInNumberArea(editor)) return true;
+          const { line } = getLineContextAtCaret(editor);
+          return !line.trim();
+        };
+
+        const caretAtParagraphColumn = (editor, lineText, insertedText = "") => {
+          const numbered = lineText.match(numberedLinePattern);
+          if (numbered) {
+            const body = `${numbered[2] || ""}${insertedText}`;
+            return formatNumberedLine(editor, numbered[1], body).length;
+          }
+          const { bodyIndent } = getMarginLayout(editor);
+          return bodyIndent.length + insertedText.length;
+        };
+
+        const lineStartOffset = (text, lineIndex) => {
+          if (lineIndex <= 0) return 0;
+          const lines = text.split("\n");
+          let offset = 0;
+          for (let i = 0; i < lineIndex; i += 1) {
+            offset += lines[i].length + 1;
+          }
+          return offset;
         };
 
         const positionNumberAreaTooltip = (editor) => {
@@ -2244,20 +2284,51 @@
         };
 
         const jumpToParagraphFromNumberArea = (editor, insertedText = "") => {
-          const { line, caretInLine } = getLineContextAtCaret(editor);
-          const linePrefix = line.slice(0, caretInLine);
-          const pad = spacesToParagraphColumn(editor, linePrefix);
-          insertAtSelection(editor, pad + insertedText);
-          hideNumberAreaTooltip();
-          // With a typed character the normalizer keeps the line; a bare Tab inserts
-          // only indent spaces, which normalizeValue would trimEnd away — so skip the
-          // normalizing input dispatch and just sync state, leaving the caret in the paragraph.
-          if (insertedText) {
+          const value = editor.value;
+          const pos = editor.selectionStart;
+          const lineStart = value.lastIndexOf("\n", pos - 1) + 1;
+          const lineEndIndex = value.indexOf("\n", pos);
+          const lineEnd = lineEndIndex === -1 ? value.length : lineEndIndex;
+          const line = value.slice(lineStart, lineEnd);
+          const numbered = line.match(numberedLinePattern);
+
+          if (numbered) {
+            const draftLine = formatNumberedLine(
+              editor,
+              numbered[1],
+              `${numbered[2] || ""}${insertedText}`
+            );
+            const draftValue = `${value.slice(0, lineStart)}${draftLine}${value.slice(lineEnd)}`;
+            const caretPos = lineStart + formatNumberedLine(editor, numbered[1], insertedText).length;
+
+            isApplyingSpill = true;
+            try {
+              const result = applyEditorContentWithSpill(editor, draftValue, caretPos, caretPos);
+              if (result.focusPageIndex !== currentPageIndex) showPage(result.focusPageIndex);
+              result.editor.focus();
+              result.editor.setSelectionRange(result.selectionStart, result.selectionEnd);
+              maybePrepareNextPage(result.editor);
+              syncNumberAreaTooltip(result.editor);
+            } finally {
+              isApplyingSpill = false;
+            }
+          } else if (!insertedText && !line.trim()) {
+            insertAtSelection(editor, getMarginLayout(editor).bodyIndent);
+            syncNumberAreaTooltip(editor);
+          } else if (insertedText) {
+            const linePrefix = line.slice(0, caretInLine);
+            const pad = spacesToParagraphColumn(editor, linePrefix);
+            insertAtSelection(editor, pad + insertedText);
             editor.dispatchEvent(new Event("input", { bubbles: true }));
           } else {
+            const linePrefix = line.slice(0, caretInLine);
+            const pad = spacesToParagraphColumn(editor, linePrefix);
+            insertAtSelection(editor, pad);
             syncNumberAreaTooltip(editor);
-            scheduleAutoSave();
           }
+
+          hideNumberAreaTooltip();
+          scheduleAutoSave();
         };
 
         const syncNumberAreaTooltip = (editor) => {
@@ -2330,11 +2401,32 @@
           renderAnnotations();
         };
 
+        const getReadonlyEditHint = () => {
+          const book = getCurrentBook();
+          const status = normalizeBookStatus(book?.status);
+          if (reviewMode) return "โหมดตรวจ — คำตอบถูกล็อก · แตะบรรทัดเพื่อ stamp";
+          if (status === BOOK_STATUS.underReview) {
+            return "สมุดถูกล็อกระหว่างส่งตรวจ — กด「ยกเลิกการส่ง」หรือรอผลตรวจ";
+          }
+          if (status === BOOK_STATUS.reviewed) {
+            return "ได้รับผลตรวจแล้ว — กด「ทำรอบใหม่」เพื่อแก้คำตอบ";
+          }
+          return "คำตอบถูกล็อกในสถานะนี้";
+        };
+
         const bindEditor = (editor) => {
           if (editor.dataset.editorBound === "true") return;
           editor.dataset.editorBound = "true";
 
           editor.addEventListener("keydown", (event) => {
+            if (editor.readOnly) {
+              if (event.key === "Tab" || event.key === " " || event.key === "Spacebar") {
+                event.preventDefault();
+                setSaveStatus(getReadonlyEditHint());
+              }
+              return;
+            }
+
             if (event.key === "Enter") {
               event.preventDefault();
               const pageIndex = Number(editor.dataset.pageEditor || 0);
@@ -2356,12 +2448,17 @@
 
             if (event.key === "Tab") {
               event.preventDefault();
-              jumpToParagraphFromNumberArea(editor);
+              if (shouldJumpToParagraph(editor)) {
+                jumpToParagraphFromNumberArea(editor);
+              } else {
+                insertAtSelection(editor, getMarginLayout(editor).bodyIndent);
+                editor.dispatchEvent(new Event("input", { bubbles: true }));
+              }
               return;
             }
 
             if (
-              isCaretInNumberArea(editor) &&
+              shouldJumpToParagraph(editor) &&
               !event.ctrlKey &&
               !event.metaKey &&
               !event.altKey &&
@@ -2689,6 +2786,22 @@
           return composed + String(bodyText || "").trimStart();
         };
 
+        /** เลขข้อเท่านั้น — ยังไม่ขยายไปคอลัมน์ย่อหน้า (รอ Tab หรือพิมพ์ตัวอักษร) */
+        const formatNumberedHomeworkLine = (editor, numberStr, bodyText = "", rawLine = null) => {
+          const body = String(bodyText ?? "");
+          if (!body.trim()) {
+            if (rawLine != null) {
+              const editorCtx = measureFontContext(getComputedStyle(editor));
+              const paragraphColumnPx = getParagraphColumnPx(editor);
+              if (editorCtx.measureText(rawLine).width >= paragraphColumnPx - 1) {
+                return formatNumberedLine(editor, numberStr, "");
+              }
+            }
+            return buildNumberPrefix(editor, String(numberStr));
+          }
+          return formatNumberedLine(editor, numberStr, body);
+        };
+
         const spacesToParagraphColumn = (editor, linePrefix = "") => {
           const editorCtx = measureFontContext(getComputedStyle(editor));
           const paragraphColumnPx = getParagraphColumnPx(editor);
@@ -2700,10 +2813,13 @@
 
         /** ป้องกันตัวอักษร (ที่ไม่ใช่เลขข้อ) อยู่นอกเส้นคั่นหน้า — เฉพาะเลขข้อสอบใน gutter ได้ */
         const enforceMarginBoundaries = (line, editor) => {
-          if (!line.trim()) return "";
+          if (!line.trim()) {
+            if (isLineAtBodyColumn(line, editor)) return line;
+            return "";
+          }
 
           const numbered = line.match(numberedLinePattern);
-          if (numbered) return formatNumberedLine(editor, numbered[1], numbered[2]);
+          if (numbered) return formatNumberedHomeworkLine(editor, numbered[1], numbered[2], line);
 
           const editorCtx = measureFontContext(getComputedStyle(editor));
           const { bodyStartPx, bodyIndent } = getMarginLayout(editor);
@@ -2729,12 +2845,20 @@
         };
 
         const normalizeLine = (line, indent, editor) => {
-          if (!line.trim()) return "";
+          if (!line.trim()) {
+            if (line.length === 0) return "";
+            if (isLineAtBodyColumn(line, editor)) return line;
+            if (indent && line === indent) return line;
+            return "";
+          }
 
           const numbered = line.match(numberedLinePattern);
-          if (numbered) return formatNumberedLine(editor, numbered[1], numbered[2]);
+          if (numbered) return formatNumberedHomeworkLine(editor, numbered[1], numbered[2], line);
 
-          return `${indent}${line.replace(/^\s+/, "")}`;
+          if (isLineAtBodyColumn(line, editor)) return line;
+
+          const { bodyIndent } = getMarginLayout(editor);
+          return bodyIndent + line.trimStart();
         };
 
         const createMeasureContext = (editor) => {
@@ -2748,7 +2872,10 @@
         };
 
         const wrapLineToEditor = (line, editor, indent) => {
-          if (!line.trim()) return [""];
+          if (!line.trim()) {
+            if (line.length > 0 && isLineAtBodyColumn(line, editor)) return [line];
+            return [""];
+          }
 
           const context = createMeasureContext(editor);
           const wrapped = [];
@@ -2775,7 +2902,7 @@
             current = candidate;
           });
 
-          wrapped.push(current.trimEnd());
+          wrapped.push(current);
           return wrapped;
         };
 
