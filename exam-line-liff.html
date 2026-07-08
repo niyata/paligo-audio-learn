@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Paligo · LINE</title>
+    <link rel="stylesheet" href="paligo-design-tokens.css" />
+    <link rel="stylesheet" href="paligo-exam-ui.css" />
+    <link rel="stylesheet" href="paligo-line-liff.css" />
+    <style>
+      body {
+        background: var(--paligo-page-bg, #f8f0e3);
+        color: var(--paligo-ink, #343434);
+        font-family: Sarabun, ui-sans-serif, system-ui, sans-serif;
+        line-height: 1.5;
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="line-liff-shell" data-line-liff-shell hidden>
+      <header class="line-liff-header">
+        <div>
+          <h1 class="line-liff-header__title" data-line-liff-role-title>Paligo Inbox</h1>
+          <p class="paligo-local-note" data-line-liff-status style="margin: 4px 0 0">กำลังโหลด…</p>
+        </div>
+        <button class="line-liff-notify-btn" type="button" data-line-liff-notify-btn aria-label="การแจ้งเตือน">
+          <span class="line-liff-notify-btn__icon" aria-hidden="true">🔔</span>
+          <span class="line-liff-notify-btn__label">แจ้งเตือน</span>
+          <span class="line-liff-notify-badge" data-line-liff-notify-badge aria-live="polite"></span>
+        </button>
+      </header>
+
+      <section class="line-liff-panel" data-line-liff-notify-panel hidden>
+        <p class="paligo-local-note" style="margin: 0 0 8px">
+          ตัวเลขอัปเดตจาก <strong>script push</strong> (โหลด inbox ใหม่) — ไม่ใช่ LINE Messaging push
+        </p>
+        <button class="paligo-btn" type="button" data-line-liff-refresh>โหลดใหม่</button>
+      </section>
+
+      <section class="line-liff-panel" style="margin-top: 12px">
+        <h2 class="line-liff-header__title" style="font-size: 1rem; margin: 0 0 8px">รายการล่าสุด</h2>
+        <div data-line-liff-list></div>
+        <p class="paligo-local-note" data-line-liff-empty hidden>ยังไม่มีรายการ — ส่งสมุดจากเว็บก่อน</p>
+      </section>
+    </section>
+
+    <section class="line-liff-shell" data-line-liff-gate>
+      <div class="line-liff-panel">
+        <h1 class="line-liff-header__title">Paligo × LINE</h1>
+        <p class="paligo-local-note" data-line-liff-gate-msg>เข้าสู่ระบบ Paligo Inbox ก่อนใช้ LIFF</p>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px">
+          <a class="paligo-btn is-primary" href="exam-account.html">บัญชี Inbox</a>
+          <a class="paligo-btn" href="exam-books.html">สมุดข้อสอบ</a>
+        </div>
+      </div>
+    </section>
+
+    <div class="line-liff-toast" data-line-liff-toast role="status" aria-live="polite"></div>
+
+    <script src="paligo-config.js"></script>
+    <script src="paligo-inbox-client.js"></script>
+    <script src="paligo-exam-shared.js"></script>
+    <script src="paligo-line-liff-notify.js"></script>
+    <script src="paligo-line-liff.js"></script>
+  </body>
+</html>

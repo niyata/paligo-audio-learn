@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://paligo.local/schemas/corpus-sentence.v1.json",
+  "title": "KB_corpus sentence annotation",
+  "description": "หนึ่งประโยคจากตำรา (เช่น ธรรมบท ภาค ๑) สำหรับ Audio Sync + Anaphora + APPROVER",
+  "type": "object",
+  "required": ["sentence_id", "corpus", "grade", "type", "magadhi", "anaphora_chain"],
+  "properties": {
+    "sentence_id": {
+      "type": "string",
+      "description": "Stable ID เช่น dhp1_v1_s001"
+    },
+    "corpus": {
+      "type": "string",
+      "description": "เช่น ธมฺมปทฏฺฐกถา_ภาค1"
+    },
+    "grade": {
+      "type": "string",
+      "description": "ชั้น ป.ธ. เช่น 1-2, 4"
+    },
+    "type": {
+      "enum": ["prose", "verse"],
+      "description": "คาถา = verse (1 บาท = 1 บรรทัด สำหรับนับ ป)"
+    },
+    "magadhi": {
+      "type": "string",
+      "description": "ข้อความบาลีอักษรไทย"
+    },
+    "translationLiteral": { "type": "string" },
+    "translationIdiomatic": { "type": "string" },
+    "anaphora_chain": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["token", "refers_to", "display"],
+        "properties": {
+          "token": { "type": "string", "description": "โส, สา, …" },
+          "refers_to": { "type": "string", "description": "sentence_id หรือ token id ของ antecedent" },
+          "display": { "type": "string", "description": "โส (ชโน)" }
+        }
+      }
+    },
+    "audio": {
+      "type": "object",
+      "properties": {
+        "url": { "type": "string" },
+        "word_timestamps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["word", "start", "end"],
+            "properties": {
+              "word": { "type": "string" },
+              "start": { "type": "number" },
+              "end": { "type": "number" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

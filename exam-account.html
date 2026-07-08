@@ -158,6 +158,82 @@
         font-size: 0.82rem;
         margin: 0;
       }
+
+      .account-banner {
+        background: rgba(31, 45, 137, 0.08);
+        border: 1px solid rgba(31, 45, 137, 0.16);
+        border-radius: 8px;
+        display: grid;
+        gap: 10px;
+        margin-bottom: 16px;
+        padding: 12px 14px;
+      }
+
+      .account-banner[hidden] {
+        display: none !important;
+      }
+
+      .account-banner__title {
+        color: var(--exam-blue);
+        font-size: 0.95rem;
+        font-weight: 900;
+        margin: 0;
+      }
+
+      .account-banner__meta {
+        color: var(--muted);
+        font-size: 0.84rem;
+        font-weight: 700;
+        margin: 0;
+      }
+
+      .account-banner__actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .adv-book-list {
+        display: grid;
+        gap: 8px;
+        margin-top: 8px;
+      }
+
+      .adv-book-item {
+        align-items: center;
+        background: var(--paper-bg);
+        border: 1px solid rgba(31, 45, 137, 0.16);
+        border-radius: 6px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: space-between;
+        padding: 10px 12px;
+      }
+
+      .adv-book-item__meta {
+        color: var(--muted);
+        font-size: 0.82rem;
+        font-weight: 700;
+      }
+
+      .adv-book-item__actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .file-button {
+        cursor: pointer;
+        display: inline-block;
+        position: relative;
+      }
+
+      .file-button input[type="file"] {
+        inset: 0;
+        opacity: 0;
+        position: absolute;
+      }
     </style>
   </head>
   <body>
@@ -165,12 +241,24 @@
       <section class="account-card">
         <h1 class="account-title">บัญชี Inbox</h1>
         <p class="account-subtitle">สมัคร · เข้าสู่ระบบ · จับคู่ครู–นักเรียน (Phase 1)</p>
+        <p class="hint" data-api-status>กำลังตรวจ API…</p>
+
+        <div class="account-banner" data-account-banner hidden>
+          <p class="account-banner__title" data-account-banner-title>เข้าสู่ระบบแล้ว</p>
+          <p class="account-banner__meta" data-account-banner-meta></p>
+          <div class="account-banner__actions">
+            <a class="button is-primary" data-account-primary-link hidden>เปิด Inbox</a>
+            <button class="button" type="button" data-account-show-me>ดูสถานะบัญชี</button>
+            <button class="button" type="button" data-logout-banner>ออกจากระบบ</button>
+          </div>
+        </div>
 
         <div class="tab-row" role="tablist">
           <button class="tab is-active" type="button" data-tab="login">เข้าสู่ระบบ</button>
           <button class="tab" type="button" data-tab="register">สมัครบัญชี</button>
           <button class="tab" type="button" data-tab="pairing">จับคู่</button>
           <button class="tab" type="button" data-tab="me">สถานะ</button>
+          <button class="tab" type="button" data-tab="advanced">ขั้นสูง</button>
         </div>
 
         <div class="panel" data-panel="login">
@@ -189,6 +277,7 @@
             </label>
             <button class="button is-primary" type="submit">เข้าสู่ระบบ</button>
           </form>
+          <p class="hint">ช่วงทดสอบ: ระบบจำอีเมลและ PIN ในเบราว์เซอร์นี้</p>
         </div>
 
         <div class="panel" data-panel="register" hidden>
@@ -210,7 +299,15 @@
             </label>
             <label>
               PIN (ตัวเลข 6 หลักขึ้นไป)
-              <input name="pin" inputmode="numeric" required minlength="6" pattern="\\d{6,}" />
+              <input
+                name="pin"
+                inputmode="numeric"
+                autocomplete="new-password"
+                required
+                minlength="6"
+                pattern="[0-9]{6,}"
+                title="ใส่ตัวเลข 6 หลักขึ้นไป"
+              />
             </label>
             <button class="button is-primary" type="submit">สมัครบัญชี</button>
           </form>
@@ -239,19 +336,276 @@
           </div>
         </div>
 
+        <div class="panel" data-panel="advanced" hidden>
+          <p class="hint">ส่งออก/นำเข้าสมุดข้อสอบ — สำรองข้อมูลหรือย้ายเครื่อง (ไม่ใช่การส่งตรวจ — ใช้ปุ่ม「ส่งตรวจ」ในรายการสมุดแทน)</p>
+          <div class="field-grid">
+            <button class="button is-primary" type="button" data-adv-export-all>ส่งออกสมุดทั้งหมด (.json)</button>
+            <label class="button file-button">
+              นำเข้าสมุด / แบ็กอัพ
+              <input type="file" accept=".json,application/json" data-adv-import-book />
+            </label>
+            <label class="button file-button">
+              นำเข้าแพ็กเกจโอน / ผลตรวจ
+              <input type="file" accept=".json,application/json" data-adv-import-transfer />
+            </label>
+            <div class="adv-book-list" data-adv-book-list></div>
+          </div>
+        </div>
+
         <div class="status-box" data-status hidden></div>
       </section>
     </div>
 
     <script src="paligo-config.js"></script>
     <script src="paligo-inbox-client.js"></script>
+    <script src="paligo-exam-shared.js"></script>
     <script src="paligo-nav-config.js"></script>
     <script src="sidebar-nav.js"></script>
     <script>
+      const {
+        KEYS,
+        getList,
+        setList,
+        readRaw,
+        downloadJson,
+        importReviewPayload,
+        importBookTransfer,
+        buildBookTransfer,
+        getStatusLabel,
+        normalizeBookStatus,
+        BOOK_STATUS,
+        migrateExamBooksList,
+        sortBooksNewestFirst,
+        upsertBookInList,
+      } = window.PaligoExamShared;
+
       const tabs = document.querySelectorAll("[data-tab]");
       const panels = document.querySelectorAll("[data-panel]");
       const statusEl = document.querySelector("[data-status]");
       const meOutput = document.querySelector("[data-me-output]");
+      const accountBanner = document.querySelector("[data-account-banner]");
+      const accountBannerTitle = document.querySelector("[data-account-banner-title]");
+      const accountBannerMeta = document.querySelector("[data-account-banner-meta]");
+      const accountPrimaryLink = document.querySelector("[data-account-primary-link]");
+
+      const roleLabels = {
+        student: "นักเรียน",
+        reviewer: "ครู/ผู้ตรวจ",
+      };
+
+      const TEST_CREDS_KEY = "paligo-inbox-test-credentials-v1";
+      const loginForm = document.querySelector("[data-login-form]");
+      const registerForm = document.querySelector("[data-register-form]");
+
+      function loadTestCredentials() {
+        try {
+          return JSON.parse(localStorage.getItem(TEST_CREDS_KEY) || "null") || {};
+        } catch {
+          return {};
+        }
+      }
+
+      function saveTestCredentials(patch) {
+        const next = { ...loadTestCredentials(), ...patch };
+        localStorage.setItem(TEST_CREDS_KEY, JSON.stringify(next));
+      }
+
+      function readFormCredentials(form) {
+        if (!form) return {};
+        const data = new FormData(form);
+        return {
+          userId: String(data.get("userId") || "").trim(),
+          email: String(data.get("email") || "").trim(),
+          pin: String(data.get("pin") || ""),
+          role: String(data.get("role") || "").trim(),
+          displayName: String(data.get("displayName") || "").trim(),
+        };
+      }
+
+      function applyTestCredentialsToForms() {
+        const saved = loadTestCredentials();
+        if (loginForm) {
+          if (saved.userId) loginForm.elements.userId.value = saved.userId;
+          if (saved.email) loginForm.elements.email.value = saved.email;
+          if (saved.pin) loginForm.elements.pin.value = saved.pin;
+        }
+        if (registerForm) {
+          if (saved.role) registerForm.elements.role.value = saved.role;
+          if (saved.displayName) registerForm.elements.displayName.value = saved.displayName;
+          if (saved.email) registerForm.elements.email.value = saved.email;
+          if (saved.pin) registerForm.elements.pin.value = saved.pin;
+        }
+      }
+
+      function persistTestCredentialsFromForm(form) {
+        saveTestCredentials(readFormCredentials(form));
+      }
+
+      function wireTestCredentialPersistence(form) {
+        if (!form) return;
+        form.addEventListener("input", () => persistTestCredentialsFromForm(form));
+        form.addEventListener("change", () => persistTestCredentialsFromForm(form));
+      }
+
+      applyTestCredentialsToForms();
+      wireTestCredentialPersistence(loginForm);
+      wireTestCredentialPersistence(registerForm);
+
+      const advBookList = document.querySelector("[data-adv-book-list]");
+      const getBooks = () => getList(KEYS.books);
+      const setBooks = (books) => setList(KEYS.books, books);
+      const getOwnerId = () => readRaw(KEYS.owner) || "";
+
+      function importBookPayload(payload) {
+        const books = getBooks();
+        const incoming = [];
+
+        if (payload?.schema === "paligo.exam.answerBookExport.v1" && payload.book) incoming.push(payload.book);
+        if (payload?.schema === "paligo.exam.answerBooksBackup.v1" && Array.isArray(payload.books)) {
+          incoming.push(...payload.books);
+        }
+
+        if (!incoming.length) {
+          window.alert("ไฟล์นี้ไม่ใช่ไฟล์สมุดข้อสอบที่รองรับ");
+          return;
+        }
+
+        const conflicts = incoming.filter((item) => books.some((book) => book.id === item.id));
+        if (conflicts.length && !window.confirm(`มีสมุด id เดิม ${conflicts.length} เล่ม — แทนที่ข้อมูลเดิมหรือไม่?`)) {
+          return;
+        }
+
+        let merged = books.filter((book) => !incoming.some((item) => item.id === book.id));
+        incoming.forEach((book) => {
+          merged = upsertBookInList(merged, book);
+        });
+        setBooks(sortBooksNewestFirst(merged));
+        renderAdvancedBookList();
+        showStatus("นำเข้าสมุดข้อสอบแล้ว");
+      }
+
+      function renderAdvancedBookList() {
+        if (!advBookList) return;
+        advBookList.replaceChildren();
+
+        let books = [];
+        try {
+          books = typeof migrateExamBooksList === "function" ? migrateExamBooksList() : sortBooksNewestFirst(getBooks());
+        } catch {
+          books = getBooks();
+        }
+
+        if (!books.length) {
+          const empty = document.createElement("p");
+          empty.className = "hint";
+          empty.textContent = "ยังไม่มีสมุดในเครื่อง";
+          advBookList.append(empty);
+          return;
+        }
+
+        books.forEach((book) => {
+          const row = document.createElement("div");
+          row.className = "adv-book-item";
+          const info = document.createElement("div");
+          const title = document.createElement("strong");
+          const meta = document.createElement("div");
+          title.textContent = book.studentName || book.title || book.id;
+          meta.className = "adv-book-item__meta";
+          meta.textContent = `${getStatusLabel(normalizeBookStatus(book.status))} · revision ${book.revision || 1}`;
+          info.append(title, meta);
+
+          const actions = document.createElement("div");
+          actions.className = "adv-book-item__actions";
+
+          const exportBtn = document.createElement("button");
+          exportBtn.className = "button";
+          exportBtn.type = "button";
+          exportBtn.textContent = "ส่งออกเล่มนี้";
+          exportBtn.addEventListener("click", () => {
+            downloadJson(`${book.id}.paligo-book.json`, {
+              schema: "paligo.exam.answerBookExport.v1",
+              exportedAt: new Date().toISOString(),
+              ownerId: getOwnerId(),
+              book,
+            });
+          });
+
+          const transferBtn = document.createElement("button");
+          transferBtn.className = "button";
+          transferBtn.type = "button";
+          transferBtn.textContent =
+            normalizeBookStatus(book.status) === BOOK_STATUS.reviewed ? "โอนกลับ" : "โอนไป";
+          transferBtn.addEventListener("click", () => {
+            try {
+              const direction =
+                normalizeBookStatus(book.status) === BOOK_STATUS.reviewed ? "to-student" : "to-reviewer";
+              downloadJson(`${book.id}.${direction}.paligo-transfer.json`, buildBookTransfer(book.id, direction));
+            } catch (error) {
+              window.alert(error.message || "ส่งออกแพ็กเกจโอนไม่ได้");
+            }
+          });
+
+          actions.append(exportBtn, transferBtn);
+          row.append(info, actions);
+          advBookList.append(row);
+        });
+      }
+
+      document.querySelector("[data-adv-export-all]")?.addEventListener("click", () => {
+        const books = getBooks();
+        if (!books.length) {
+          window.alert("ยังไม่มีสมุดให้ส่งออก");
+          return;
+        }
+        downloadJson("paligo-exam-books-backup.paligo-backup.json", {
+          schema: "paligo.exam.answerBooksBackup.v1",
+          exportedAt: new Date().toISOString(),
+          ownerId: getOwnerId(),
+          books,
+        });
+        showStatus(`ส่งออกสมุด ${books.length} เล่มแล้ว`);
+      });
+
+      document.querySelector("[data-adv-import-book]")?.addEventListener("change", async (event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+        try {
+          importBookPayload(JSON.parse(await file.text()));
+        } catch {
+          showStatus("อ่านไฟล์ไม่ได้ กรุณาตรวจสอบไฟล์อีกครั้ง", true);
+        } finally {
+          event.target.value = "";
+        }
+      });
+
+      document.querySelector("[data-adv-import-transfer]")?.addEventListener("change", async (event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+        try {
+          const payload = JSON.parse(await file.text());
+          if (payload.schema === "paligo.exam.bookTransfer.v1") {
+            importBookTransfer(payload);
+          } else if (payload.schema === "paligo.exam.review.v1") {
+            importReviewPayload(payload);
+          } else {
+            importBookPayload(payload);
+            return;
+          }
+          renderAdvancedBookList();
+          showStatus("นำเข้าแพ็กเกจแล้ว");
+        } catch (error) {
+          showStatus(error.message || "อ่านไฟล์ไม่ได้", true);
+        } finally {
+          event.target.value = "";
+        }
+      });
+
+      function activateTab(name) {
+        tabs.forEach((item) => item.classList.toggle("is-active", item.dataset.tab === name));
+        panels.forEach((panel) => {
+          panel.hidden = panel.dataset.panel !== name;
+        });
+      }
 
       function showStatus(message, isError = false) {
         statusEl.hidden = false;
@@ -259,12 +613,62 @@
         statusEl.classList.toggle("is-error", isError);
       }
 
+      function renderLoggedInBanner(session) {
+        const user = session?.user;
+        if (!user || !accountBanner) return;
+
+        accountBanner.hidden = false;
+        if (accountBannerTitle) {
+          accountBannerTitle.textContent = `เข้าสู่ระบบแล้ว: ${user.displayName || "ไม่ระบุชื่อ"}`;
+        }
+        if (accountBannerMeta) {
+          accountBannerMeta.textContent = `บทบาท ${roleLabels[user.role] || user.role} · User ID ${user.id}`;
+        }
+        if (accountPrimaryLink) {
+          if (user.role === "reviewer") {
+            accountPrimaryLink.hidden = false;
+            accountPrimaryLink.href = "exam-reviewer-console.html";
+            accountPrimaryLink.textContent = "เปิด Inbox งานส่งตรวจ";
+          } else if (user.role === "student") {
+            accountPrimaryLink.hidden = false;
+            accountPrimaryLink.href = "exam-books.html";
+            accountPrimaryLink.textContent = "ไปสมุดข้อสอบของฉัน";
+          } else {
+            accountPrimaryLink.hidden = true;
+          }
+        }
+      }
+
+      async function refreshAccountSession() {
+        const session = await PaligoInboxClient.ensureAuthenticatedSession();
+        if (session?.user) {
+          renderLoggedInBanner(session);
+          if (meOutput) {
+            meOutput.textContent = JSON.stringify(session.user, null, 2);
+          }
+        } else if (accountBanner) {
+          accountBanner.hidden = true;
+        }
+        return session;
+      }
+
+      document.querySelector("[data-account-show-me]")?.addEventListener("click", () => {
+        activateTab("me");
+        refreshAccountSession();
+      });
+
+      document.querySelector("[data-logout-banner]")?.addEventListener("click", async () => {
+        await PaligoInboxClient.logout();
+        if (accountBanner) accountBanner.hidden = true;
+        if (meOutput) meOutput.textContent = "ออกจากระบบแล้ว";
+        showStatus("ออกจากระบบแล้ว");
+        activateTab("login");
+      });
+
       tabs.forEach((tab) => {
         tab.addEventListener("click", () => {
-          tabs.forEach((item) => item.classList.toggle("is-active", item === tab));
-          panels.forEach((panel) => {
-            panel.hidden = panel.dataset.panel !== tab.dataset.tab;
-          });
+          activateTab(tab.dataset.tab);
+          if (tab.dataset.tab === "advanced") renderAdvancedBookList();
         });
       });
 
@@ -272,13 +676,16 @@
         event.preventDefault();
         const form = event.currentTarget;
         const data = new FormData(form);
+        persistTestCredentialsFromForm(form);
         try {
           const payload = await PaligoInboxClient.login({
             userId: String(data.get("userId") || "").trim() || null,
             email: String(data.get("email") || "").trim() || null,
             pin: String(data.get("pin") || ""),
           });
-          showStatus(`เข้าสู่ระบบแล้ว: ${payload.user.displayName} (${payload.user.role})`);
+          await refreshAccountSession();
+          activateTab("me");
+          showStatus(`เข้าสู่ระบบแล้ว: ${payload.user.displayName} (${roleLabels[payload.user.role] || payload.user.role})`);
         } catch (error) {
           showStatus(error.message || "เข้าสู่ระบบไม่สำเร็จ", true);
         }
@@ -288,6 +695,7 @@
         event.preventDefault();
         const form = event.currentTarget;
         const data = new FormData(form);
+        persistTestCredentialsFromForm(form);
         try {
           const payload = await PaligoInboxClient.register({
             role: String(data.get("role")),
@@ -295,8 +703,10 @@
             email: String(data.get("email") || "").trim() || null,
             pin: String(data.get("pin") || ""),
           });
+          await refreshAccountSession();
+          activateTab("me");
           showStatus(
-            `สมัครสำเร็จ\nชื่อ: ${payload.user.displayName}\nUser ID: ${payload.user.id}\nบทบาท: ${payload.user.role}\n\nเก็บ User ID ไว้ถ้าไม่ได้ใส่อีเมล`
+            `สมัครสำเร็จ\nชื่อ: ${payload.user.displayName}\nUser ID: ${payload.user.id}\nบทบาท: ${roleLabels[payload.user.role] || payload.user.role}\n\nเก็บ User ID ไว้ถ้าไม่ได้ใส่อีเมล`
           );
         } catch (error) {
           showStatus(error.message || "สมัครไม่สำเร็จ", true);
@@ -326,6 +736,11 @@
 
       document.querySelector("[data-refresh-me]").addEventListener("click", async () => {
         try {
+          const session = await refreshAccountSession();
+          if (!session?.user) {
+            meOutput.textContent = "ยังไม่ได้เข้าสู่ระบบ";
+            return;
+          }
           const payload = await PaligoInboxClient.getMe();
           meOutput.textContent = JSON.stringify(payload, null, 2);
         } catch (error) {
@@ -335,11 +750,29 @@
 
       document.querySelector("[data-logout]").addEventListener("click", async () => {
         await PaligoInboxClient.logout();
+        if (accountBanner) accountBanner.hidden = true;
         meOutput.textContent = "ออกจากระบบแล้ว";
         showStatus("ออกจากระบบแล้ว");
+        activateTab("login");
       });
 
       PaligoSidebar.autoInit();
+
+      const apiStatus = document.querySelector("[data-api-status]");
+      if (apiStatus) {
+        PaligoInboxClient.ensureApiReady()
+          .then(async (base) => {
+            apiStatus.textContent = `API พร้อม: ${base}`;
+            const session = await refreshAccountSession();
+            if (session?.user) {
+              activateTab("me");
+            }
+          })
+          .catch((error) => {
+            apiStatus.textContent = error.message || "API ไม่พร้อม";
+            apiStatus.style.color = "#9a3412";
+          });
+      }
     </script>
   </body>
 </html>

@@ -33,6 +33,7 @@
 - `docs/exam-scoring-leaderboard-plan.md`
 - `docs/thai-ui-language-rules.md`
 - `docs/pali-learning-app-prd-roadmap.md`
+- `docs/pali-ai/CLOUD-CODE-ALIGNMENT.md` — Paligo web vs Cloud Code PALI-AI
 
 ## Domain Model
 

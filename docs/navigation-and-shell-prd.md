@@ -93,6 +93,8 @@
 </script>
 ```
 
+`paligo-sidebar__brand` (โลโก้ Paligo + ชื่อแอป) ต้องแสดงในทุกหน้าที่ใช้ shell — รวมถึงตอน sidebar พับ (เหลือโลโก้ P + tooltip)
+
 หรือกำหนดเอง:
 
 ```javascript

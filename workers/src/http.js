@@ -3,7 +3,7 @@
  */
 
 const ALLOWED_ORIGINS = [
-  "https://app.paligo.com",
+  "https://app.paligo.jp",
   "http://localhost:8765",
   "http://127.0.0.1:8765",
 ];

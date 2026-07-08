@@ -1,0 +1,66 @@
+---
+description: กฎเหล็กเครื่องมือตีเส้นบรรทัด — ห้ามทำให้ตำแหน่ง/ลบเส้นเพี้ยนเมื่อแก้ฟีเจอร์อื่น
+globs: "ruled-lines*.html"
+alwaysApply: false
+---
+
+# Paligo Annotation Lines (ตีเส้นบรรทัด)
+
+ฟีเจอร์นี้ **calibrated แล้ว** — ห้ามเปลี่ยนพฤติกรรมโดยไม่ได้รับคำสั่งชัดเจน
+
+## ไฟล์ที่เกี่ยวข้อง
+
+- `ruled-lines-card-only-template.html` (production)
+- `ruled-lines-template.html` (template อ้างอิง — ต้อง sync กับ card-only)
+
+## CSS variables (ห้ามลบ/เปลี่ยนชื่อโดยไม่ sync JS)
+
+| Variable | ค่าปัจจุบัน | หมายเหตุ |
+|----------|-------------|----------|
+| `--annotation-line-width` | `line-width + 0.4px + 0.5 * emphasis-line-width` | ความหนาเส้นที่ตี |
+| `--annotation-line-shift` | `0` | เลื่อนเป็นท่วน line-height |
+| `--annotation-line-nudge` | `-1px` | จูนตาคนให้ทับเส้นกระดาษ |
+| `--annotation-page-offset` | `0px` ปกติ · `line-height` เมื่อ `.has-prefilled-line` | **ห้าม** ใส่ `text-y-offset` เป็น offset |
+
+## สูตรตำแหน่ง (บังคับ — mirror กับ ruled-editor gradient)
+
+```css
+top: calc(
+  var(--annotation-page-offset, 0px) +
+  (var(--line-n, 1) + var(--annotation-line-shift, 0)) * var(--line-height) -
+  var(--line-width) -
+  var(--text-y-offset) +
+  var(--annotation-line-nudge, 0px)
+);
+```
+
+- ยึดจาก **`--line-width`** (ไม่ใช่ `--annotation-line-width`) เพื่อทับเส้นกระดาษหลัก
+- ลบ **`--text-y-offset`** เสมอ — background กระดาษ shift แล้ว ห้ามนับซ้ำใน offset
+
+## JS hit-test (ต้องตรงกับ CSS)
+
+`getAnnotationLineFromPointer()` ต้องใช้สูตรเดียวกัน:
+
+```js
+Math.round(
+  (relativeY - offset + lineWidth + textYOffset - nudge) / lineHeight
+) - shift
+```
+
+- Toggle: แตะเพิ่ม · แตะซ้ำลบ (`annotations` + `renderAnnotations()`)
+- `bindAnnotationCanvas` ต้อง bind ทุกหน้า รวมหน้าที่ `ensurePageCount` สร้างใหม่
+- `.annotation-lines` / `.annotation-line` ต้อง `pointer-events: none` — คลิกผ่าน `.annotation-canvas` เท่านั้น
+
+## ห้ามทำ (common regressions)
+
+- เปลี่ยน `--annotation-page-offset` เป็น `var(--text-y-offset)` บนหน้าแรก/ต่อเนื่อง
+- ใช้ `editor.getBoundingClientRect()` แทน `frame` โดยไม่ sync กับ CSS
+- ย้าย z-index ให้ `.review-canvas` บัง `.annotation-canvas` ตอน `is-annotating`
+- ลบ `has-prefilled-line` toggle ใน `syncPrefilledAnswerLine()` โดยไม่ปรับ offset
+
+## Smoke test ก่อนจบงาน (ถ้าแตะไฟล์ ruled-lines)
+
+1. กดปุ่มตีเส้น → แตะบรรทัด → เส้นทับเส้นกระดาษหลัก
+2. แตะเส้นเดิม → ลบได้
+3. หน้าถัดไป + หน้าแรก (มี/ไม่มี prefilled) ตำแหน่งตรงกัน
+4. reload แล้วเส้น `annotations` ยังอยู่

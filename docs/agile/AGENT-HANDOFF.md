@@ -37,7 +37,9 @@
 1. อ่าน issue + comments ทั้งหมด
 2. ดู [Scrum Board](https://github.com/users/niyata/projects/14) — อย่า duplicate งาน In Progress
 3. อ่าน `docs/exam-flow-ux-audit.md` ถ้า `area:exam`
-4. อย่า commit ถ้า user ไม่ขอ — อัปเดต issue comment แทน
+4. อ่าน **`docs/pali-ai/CLOUD-CODE-ALIGNMENT.md`** — แยก Track Paligo web vs Cloud Code PALI-AI
+5. Handoff Cloud Code: `docs/PALI-AI_HANDOFF_v2.md` · sync status: `docs/pali-ai/HANDOFF-STATUS.md`
+6. อย่า commit ถ้า user ไม่ขอ — อัปเดต issue comment แทน
 
 ---
 

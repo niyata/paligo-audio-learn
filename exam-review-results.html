@@ -113,12 +113,20 @@
     <script src="paligo-config.js"></script>
     <script src="paligo-inbox-client.js"></script>
     <script src="paligo-exam-shared.js"></script>
+    <script src="paligo-exam-paper.js"></script>
     <script src="paligo-nav-config.js"></script>
     <script src="sidebar-nav.js"></script>
     <script>
       (() => {
-        const { KEYS, getList, importReviewPayload, importBookTransfer, toThaiNumber, toThaiPercent, formatThaiDateTime, getBookById } =
+        const { KEYS, getList, guardExamPageRole, importReviewPayload, importBookTransfer, toThaiNumber, toThaiPercent, formatThaiDateTime, getBookById } =
           window.PaligoExamShared;
+
+        const roleGuard = guardExamPageRole({ page: "student" });
+        if (!roleGuard.ok) {
+          window.location.replace(roleGuard.redirect);
+          return;
+        }
+
         const importFile = document.querySelector("[data-import-file]");
         const importBtn = document.querySelector("[data-import-btn]");
         const status = document.querySelector("[data-status]");
@@ -143,6 +151,8 @@
             const score = review.score || {};
             const scoreStamps = review.scoreStamps || [];
             const errorStamps = review.errorStamps || [];
+            const textHighlights = review.textHighlights || [];
+            const highlightLabels = window.PaligoExamPaper?.ERROR_LABELS || {};
 
             card.innerHTML = `
               <strong>${review.bookTitle || book?.title || "สมุดคำตอบ"}</strong>
@@ -157,6 +167,12 @@
                   .map(
                     (stamp) =>
                       `<span class="paligo-review-stamp">ห.${toThaiNumber(stamp.page)} บ.${toThaiNumber(stamp.line)} · ${toThaiNumber(stamp.value)} ให้</span>`
+                  )
+                  .join("")}
+                ${textHighlights
+                  .map(
+                    (item) =>
+                      `<span class="paligo-review-stamp is-error">「${item.text || ""}」 · ${highlightLabels[item.kind] || item.kind}</span>`
                   )
                   .join("")}
                 ${errorStamps

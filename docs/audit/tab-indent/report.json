@@ -1,0 +1,63 @@
+{
+  "auditedAt": "2026-07-07T11:30:49.198Z",
+  "url": "http://127.0.0.1:8765/ruled-lines-card-only-template.html?bookId=book-d06b397f-964d-4ea3-9f26-bc31573e19fe",
+  "testText": "ทดสอบเลื่อนตัวอักษร",
+  "editorsBound": [
+    {
+      "page": "0",
+      "bound": true
+    },
+    {
+      "page": "1",
+      "bound": true
+    }
+  ],
+  "allEditorsBound": true,
+  "tabScenario": {
+    "name": "Tab after number",
+    "firstLine": "        1   ทดสอบเลื่อนตัวอักษร",
+    "aligned": true,
+    "layout": {
+      "bodyStartPx": 48.607933044433594,
+      "bodyIndentLen": 13,
+      "editorBound": true
+    },
+    "textPos": {
+      "textStartPx": 51.56782531738281,
+      "idx": 12,
+      "line": "        1   ทดสอบเลื่อนตัวอักษร"
+    },
+    "value": "        1   ทดสอบเลื่อนตัวอักษร"
+  },
+  "spaceScenario": {
+    "name": "Space after number",
+    "firstLine": "        1   ทดสอบเลื่อนตัวอักษร",
+    "aligned": true,
+    "layout": {
+      "bodyStartPx": 48.607933044433594,
+      "bodyIndentLen": 13,
+      "editorBound": true
+    },
+    "textPos": {
+      "textStartPx": 51.56782531738281,
+      "idx": 12,
+      "line": "        1   ทดสอบเลื่อนตัวอักษร"
+    },
+    "value": "        1   ทดสอบเลื่อนตัวอักษร"
+  },
+  "charJumpScenario": {
+    "line": "        1   ทดสอบเลื่อนตัวอักษร",
+    "aligned": true,
+    "textPos": {
+      "textStartPx": 51.56782531738281,
+      "idx": 12,
+      "line": "        1   ทดสอบเลื่อนตัวอักษร"
+    }
+  },
+  "pass": true,
+  "snapshots": [
+    "docs/audit/tab-indent/after-tab.png",
+    "docs/audit/tab-indent/after-space.png",
+    "docs/audit/tab-indent/final-audit-snapshot.png"
+  ]
+}

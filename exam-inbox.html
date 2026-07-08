@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>กล่องข้อความ Inbox · Paligo</title>
+    <link rel="stylesheet" href="paligo-design-tokens.css" />
+    <link rel="stylesheet" href="sidebar-nav.css" />
+    <link rel="stylesheet" href="paligo-exam-ui.css" />
+    <style>
+      body {
+        background: var(--paligo-page-bg, #f8f0e3);
+        color: var(--paligo-ink, #343434);
+        font-family: Sarabun, ui-sans-serif, system-ui, sans-serif;
+        line-height: 1.5;
+        margin: 0;
+        min-height: 100vh;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="inbox-chat-shell" data-inbox-shell hidden>
+      <section class="inbox-chat-layout" aria-label="แชท Inbox">
+        <header class="inbox-chat-header">
+          <div>
+            <h1 class="inbox-chat-header__title" data-chat-peer-name>กล่องข้อความ</h1>
+            <p class="inbox-chat-header__meta" data-chat-peer-meta>—</p>
+          </div>
+          <div class="inbox-chat-composer__tools">
+            <button class="paligo-btn" type="button" data-refresh-chat>โหลดใหม่</button>
+            <a class="paligo-btn is-ghost" href="exam-account.html">บัญชี</a>
+          </div>
+        </header>
+
+        <div class="inbox-chat-thread" data-chat-thread aria-live="polite"></div>
+
+        <footer class="inbox-chat-composer" data-chat-composer>
+          <div class="inbox-chat-composer__tools">
+            <button class="paligo-btn" type="button" data-open-book-menu hidden>📚 สมุดข้อสอบ</button>
+            <a class="paligo-btn is-ghost" href="exam-books.html" data-link-books hidden>จัดการสมุด</a>
+            <a class="paligo-btn is-ghost" href="exam-reviewer-console.html" data-link-review hidden>เปิดตรวจ</a>
+          </div>
+          <div class="inbox-chat-composer__row">
+            <textarea
+              class="inbox-chat-composer__input"
+              rows="1"
+              placeholder="พิมพ์ข้อความ…"
+              data-chat-input
+            ></textarea>
+            <button class="paligo-btn is-primary" type="button" data-send-text>ส่ง</button>
+          </div>
+        </footer>
+      </section>
+    </div>
+
+    <section class="inbox-chat-gate" data-inbox-gate hidden>
+      <div class="paligo-review-card">
+        <h2 class="paligo-book-bar__title">กล่องข้อความ Inbox</h2>
+        <p class="paligo-local-note" data-gate-message>กำลังตรวจสอบบัญชี…</p>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px">
+          <a class="paligo-btn is-primary" href="exam-account.html">เข้าสู่ระบบ</a>
+          <a class="paligo-btn" href="exam-books.html">สมุดข้อสอบ</a>
+        </div>
+      </div>
+    </section>
+
+    <div class="inbox-book-sheet" data-book-sheet hidden aria-hidden="true">
+      <div class="inbox-book-sheet__panel" role="dialog" aria-labelledby="book-sheet-title">
+        <h2 class="inbox-book-sheet__title" id="book-sheet-title">เลือกสมุดเพื่อส่งตรวจ</h2>
+        <p class="paligo-local-note">เลือกสมุด — ระบบจะส่งตรวจและส่ง card ให้ครูในแชท (เหมือน LINE Flex)</p>
+        <div class="inbox-book-sheet__list" data-book-sheet-list></div>
+        <button class="paligo-btn" type="button" data-close-book-sheet>ปิด</button>
+      </div>
+    </div>
+
+    <script src="paligo-config.js"></script>
+    <script src="paligo-inbox-client.js"></script>
+    <script src="paligo-exam-shared.js"></script>
+    <script src="paligo-exam-submit.js"></script>
+    <script src="paligo-exam-book-cover.js"></script>
+    <script src="paligo-inbox-chat.js"></script>
+    <script src="paligo-nav-config.js"></script>
+    <script src="sidebar-nav.js"></script>
+    <script>
+      (() => {
+        const {
+          KEYS,
+          getList,
+          getBookById,
+          getStatusLabel,
+          normalizeBookStatus,
+          BOOK_STATUS,
+          migrateExamBooksList,
+          sortBooksNewestFirst,
+        } = window.PaligoExamShared;
+        const chat = window.PaligoInboxChat;
+        const cover = window.PaligoExamBookCover;
+
+        const shell = document.querySelector("[data-inbox-shell]");
+        const gate = document.querySelector("[data-inbox-gate]");
+        const gateMessage = document.querySelector("[data-gate-message]");
+        const threadEl = document.querySelector("[data-chat-thread]");
+        const peerName = document.querySelector("[data-chat-peer-name]");
+        const peerMeta = document.querySelector("[data-chat-peer-meta]");
+        const chatInput = document.querySelector("[data-chat-input]");
+        const bookSheet = document.querySelector("[data-book-sheet]");
+        const bookSheetList = document.querySelector("[data-book-sheet-list]");
+        const openBookMenu = document.querySelector("[data-open-book-menu]");
+        const linkBooks = document.querySelector("[data-link-books]");
+        const linkReview = document.querySelector("[data-link-review]");
+        const composer = document.querySelector("[data-chat-composer]");
+
+        let session = null;
+        let pairingContext = null;
+        let threadId = "main";
+        let role = null;
+
+        const showGate = (message) => {
+          shell.hidden = true;
+          gate.hidden = false;
+          if (gateMessage) gateMessage.textContent = message;
+        };
+
+        const showChat = () => {
+          gate.hidden = true;
+          shell.hidden = false;
+        };
+
+        const getBooks = () => {
+          try {
+            const books =
+              typeof migrateExamBooksList === "function" ? migrateExamBooksList() : getList(KEYS.books);
+            return sortBooksNewestFirst(books);
+          } catch {
+            return sortBooksNewestFirst(getList(KEYS.books));
+          }
+        };
+
+        const bookSnapshot = (book) => ({
+          id: book.id,
+          title: book.title,
+          grade: book.grade,
+          subject: book.subject,
+          subjectLabel: book.subjectLabel,
+          status: book.status,
+          revision: book.revision || 1,
+          studentName: book.studentName,
+          updatedAt: book.updatedAt,
+          draft: book.draft
+            ? {
+                pickers: book.draft.pickers,
+              }
+            : null,
+        });
+
+        const inboxMetaFromItem = (item) => ({
+          bookTitle: item.bookTitle,
+          grade: item.grade,
+          subject: item.subject,
+          bookId: item.bookId,
+          bookRevision: item.bookRevision,
+        });
+
+        const renderBookCard = (message) => {
+          const book = message.book || {};
+          const status = normalizeBookStatus(book.status || message.bookStatus);
+          const actions = [];
+
+          if (role === "student") {
+            if (message.inboxDirection === "to-student") {
+              if (message.inboxItemId && message.inboxStatus === "pending") {
+                actions.push({
+                  label: "รับผลตรวจ",
+                  primary: true,
+                  onClick: () => claimInboxCard(message),
+                });
+              } else if (message.inboxStatus === "claimed") {
+                actions.push({
+                  label: "ดูผลตรวจ",
+                  primary: true,
+                  onClick: () => {
+                    window.location.href = "exam-review-results.html";
+                  },
+                });
+              }
+              actions.push({
+                label: "เปิดสมุด",
+                onClick: () => {
+                  window.location.href = `ruled-lines-card-only-template.html?bookId=${encodeURIComponent(book.id || message.bookId)}`;
+                },
+              });
+            } else if (status === BOOK_STATUS.draft) {
+              actions.push({
+                label: "ส่งตรวจ",
+                primary: true,
+                onClick: () => sendBookFromChat(message),
+              });
+            } else if (status === BOOK_STATUS.underReview) {
+              actions.push({
+                label: message.inboxPushed ? "ส่งแล้ว" : "ส่ง inbox อีกครั้ง",
+                primary: !message.inboxPushed,
+                disabled: Boolean(message.inboxPushed),
+                onClick: () => sendBookFromChat(message, { pushOnly: true }),
+              });
+            }
+            actions.push({
+              label: "เปิดสมุด",
+              onClick: () => {
+                window.location.href = `ruled-lines-card-only-template.html?bookId=${encodeURIComponent(book.id || message.bookId)}`;
+              },
+            });
+          }
+
+          if (role === "reviewer") {
+            if (message.inboxItemId && message.inboxStatus === "pending") {
+              actions.push({
+                label: "รับเข้าคลัง",
+                primary: true,
+                onClick: () => claimInboxCard(message),
+              });
+            } else if (message.inboxStatus === "claimed") {
+              actions.push({
+                label: "เปิดตรวจ",
+                primary: true,
+                onClick: () => {
+                  const submissionId = message.submissionId;
+                  const href = submissionId
+                    ? `exam-reviewer-console.html?submissionId=${encodeURIComponent(submissionId)}`
+                    : "exam-reviewer-console.html";
+                  window.location.href = href;
+                },
+              });
+            }
+          }
+
+          return chat.renderBookFlexCard({
+            message,
+            book,
+            statusLabel: getStatusLabel(status),
+            subtitle: message.subtitle || `revision ${book.revision || message.bookRevision || 1}`,
+            actions,
+            senderName: message.senderName || "",
+          });
+        };
+
+        const paintThread = () => {
+          const messages = chat.getMessages(threadId);
+          if (!messages.length) {
+            threadEl.replaceChildren();
+            const empty = document.createElement("div");
+            empty.className = "inbox-chat-empty";
+            empty.innerHTML =
+              role === "student"
+                ? "<span>ยังไม่มีข้อความ</span><span>กด「📚 สมุดข้อสอบ」เพื่อส่งสมุดให้ครู</span>"
+                : "<span>ยังไม่มีงานส่งเข้ามา</span><span>รอนักเรียนส่งสมุดในแชท</span>";
+            threadEl.append(empty);
+            return;
+          }
+          chat.renderThread(threadEl, messages, { renderBookCard });
+        };
+
+        const appendSystem = (text) => {
+          chat.appendMessage(threadId, {
+            id: chat.createId("msg"),
+            type: "system",
+            text,
+            at: new Date().toISOString(),
+          });
+          paintThread();
+        };
+
+        const sendTextMessage = () => {
+          const text = String(chatInput?.value || "").trim();
+          if (!text) return;
+          chat.appendMessage(threadId, {
+            id: chat.createId("msg"),
+            type: "text",
+            direction: "out",
+            text,
+            at: new Date().toISOString(),
+          });
+          chatInput.value = "";
+          paintThread();
+        };
+
+        const upsertBookMessage = (payload) => {
+          const existing = chat.getMessages(threadId).find((item) => item.bookId === payload.bookId && item.type === "book");
+          if (existing) {
+            chat.upsertMessage(threadId, { ...existing, ...payload, id: existing.id });
+            return existing.id;
+          }
+          const id = chat.createId("msg");
+          chat.appendMessage(threadId, { id, type: "book", direction: "out", ...payload });
+          return id;
+        };
+
+        const sendBookFromChat = async (message, options = {}) => {
+          const bookId = message.bookId || message.book?.id;
+          const book = getBookById(bookId) || message.book;
+          if (!book) {
+            window.alert("ไม่พบสมุดในเครื่อง");
+            return;
+          }
+
+          try {
+            let result;
+            if (options.pushOnly) {
+              result = await PaligoExamSubmit.pushExistingBookToInbox(bookId, { repush: true });
+            } else {
+              result = await PaligoExamSubmit.submitBookToInbox(bookId);
+              if (!result.ok && result.reason === "resubmit_confirm") {
+                if (!window.confirm(`${result.message} — ต้องการดำเนินการต่อหรือไม่?`)) return;
+                result = await PaligoExamSubmit.submitBookToInbox(bookId, { skipResubmitConfirm: true });
+              }
+            }
+
+            if (!result.ok) {
+              window.alert(result.message || "ส่งตรวจไม่ได้");
+              return;
+            }
+
+            const fresh = getBookById(bookId);
+            upsertBookMessage({
+              bookId,
+              book: bookSnapshot(fresh),
+              bookStatus: BOOK_STATUS.underReview,
+              subtitle: `revision ${fresh?.revision || 1} · ${result.push?.intendedRecipientLabel || "ครู"}`,
+              inboxPushed: Boolean(result.push || result.mode === "submit_and_push" || result.mode === "push_only"),
+              inboxItemId: result.push?.inboxItemId,
+              inboxStatus: "pending",
+              at: new Date().toISOString(),
+            });
+            appendSystem(result.message || "ส่งสมุดเข้า inbox แล้ว");
+            paintThread();
+            closeBookSheet();
+          } catch (error) {
+            window.alert(error.message || "ส่งสมุดไม่สำเร็จ");
+          }
+        };
+
+        const claimInboxCard = async (message) => {
+          if (!message.inboxItemId) return;
+          try {
+            const result = await PaligoInboxClient.claimInboxItem(message.inboxItemId);
+            importBookTransfer(result.bookTransfer);
+            const isReturn = result.bookTransfer?.direction === "to-student";
+            const nextStatus = isReturn ? BOOK_STATUS.reviewed : BOOK_STATUS.underReview;
+            chat.upsertMessage(threadId, {
+              ...message,
+              inboxStatus: "claimed",
+              inboxDirection: result.bookTransfer?.direction || message.inboxDirection,
+              bookStatus: nextStatus,
+              book: {
+                ...(message.book || {}),
+                status: nextStatus,
+              },
+              submissionId: result.bookTransfer?.submission?.id || null,
+            });
+            const title = message.book?.title || message.bookTitle || "สมุด";
+            appendSystem(
+              isReturn ? `รับผลตรวจ「${title}」แล้ว — ดูที่ ผลตรวจของฉัน` : `รับสมุด「${title}」เข้าคลังแล้ว`
+            );
+            paintThread();
+          } catch (error) {
+            window.alert(error.message || "รับเข้าคลังไม่สำเร็จ");
+          }
+        };
+
+        const syncInboxToChat = async () => {
+          if (role !== "reviewer" && role !== "student") return;
+          try {
+            const data = await PaligoInboxClient.listInbox();
+            const items = data.items || [];
+            items.forEach((item) => {
+              if (role === "reviewer" && item.direction !== "to-reviewer") return;
+              if (role === "student" && item.direction !== "to-student") return;
+
+              const isReturn = item.direction === "to-student";
+              const messageId = `inbox-${item.id}`;
+              const existing = chat.getMessages(threadId).find((m) => m.id === messageId);
+              const payload = {
+                id: messageId,
+                type: "book",
+                direction: "in",
+                bookId: item.bookId,
+                book: {
+                  id: item.bookId,
+                  title: item.bookTitle,
+                  grade: item.grade,
+                  subject: item.subject,
+                  revision: item.bookRevision,
+                  status: isReturn ? BOOK_STATUS.reviewed : BOOK_STATUS.underReview,
+                },
+                bookStatus: isReturn ? BOOK_STATUS.reviewed : BOOK_STATUS.underReview,
+                subtitle: isReturn ? "ผลตรวจจากครู" : `revision ${item.bookRevision || 1}`,
+                senderName: item.fromDisplayName || (isReturn ? "ครู" : "นักเรียน"),
+                inboxItemId: item.id,
+                inboxDirection: item.direction,
+                inboxStatus: item.status || "pending",
+                at: item.createdAt || new Date().toISOString(),
+              };
+              if (existing) chat.upsertMessage(threadId, { ...existing, ...payload });
+              else chat.appendMessage(threadId, payload);
+            });
+            paintThread();
+          } catch (error) {
+            if (error.status !== 401) appendSystem(error.message || "โหลด inbox ไม่สำเร็จ");
+          }
+        };
+
+        const openBookSheet = () => {
+          if (!bookSheet || !bookSheetList) return;
+          const books = getBooks().filter((book) => normalizeBookStatus(book.status) !== BOOK_STATUS.reviewed);
+          bookSheetList.replaceChildren();
+
+          if (!books.length) {
+            const empty = document.createElement("p");
+            empty.className = "paligo-local-note";
+            empty.textContent = "ยังไม่มีสมุด — สร้างที่หน้าสมุดข้อสอบก่อน";
+            bookSheetList.append(empty);
+          }
+
+          books.forEach((book) => {
+            const pick = document.createElement("button");
+            pick.type = "button";
+            pick.className = "inbox-book-pick";
+            if (cover?.buildBookCoverElement) pick.append(cover.buildBookCoverElement(book, { compact: true }));
+            const meta = document.createElement("div");
+            meta.className = "inbox-flex-card__body";
+            meta.innerHTML = `<div class="inbox-flex-card__title">${book.title || "สมุดคำตอบ"}</div><div class="inbox-flex-card__meta">${getStatusLabel(normalizeBookStatus(book.status))} · revision ${book.revision || 1}</div>`;
+            pick.append(meta);
+            pick.addEventListener("click", async () => {
+              const msgId = upsertBookMessage({
+                bookId: book.id,
+                book: bookSnapshot(book),
+                bookStatus: book.status,
+                subtitle: `revision ${book.revision || 1}`,
+                at: new Date().toISOString(),
+              });
+              paintThread();
+              const message = chat.getMessages(threadId).find((m) => m.id === msgId);
+              const st = normalizeBookStatus(book.status);
+              await sendBookFromChat(message, {
+                pushOnly: st === BOOK_STATUS.underReview,
+              });
+            });
+            bookSheetList.append(pick);
+          });
+
+          bookSheet.hidden = false;
+          bookSheet.classList.add("is-open");
+          bookSheet.setAttribute("aria-hidden", "false");
+        };
+
+        const closeBookSheet = () => {
+          if (!bookSheet) return;
+          bookSheet.hidden = true;
+          bookSheet.classList.remove("is-open");
+          bookSheet.setAttribute("aria-hidden", "true");
+        };
+
+        const configureRoleUi = () => {
+          if (role === "student") {
+            openBookMenu.hidden = false;
+            linkBooks.hidden = false;
+            linkReview.hidden = true;
+            if (peerName) peerName.textContent = pairingContext?.pairing?.reviewerDisplayName || "ครู";
+            if (peerMeta) peerMeta.textContent = "ส่งสมุดข้อสอบและข้อความให้ครู";
+          } else if (role === "reviewer") {
+            openBookMenu.hidden = true;
+            linkBooks.hidden = true;
+            linkReview.hidden = false;
+            const students = pairingContext?.students || [];
+            if (peerName) {
+              peerName.textContent = students.length === 1 ? students[0].studentDisplayName : "นักเรียนที่จับคู่";
+            }
+            if (peerMeta) {
+              peerMeta.textContent =
+                students.length > 1
+                  ? `Inbox รวม ${students.length} คน · รับงานจากแชท`
+                  : "รับสมุดที่ส่งเข้ามา · กดรับเข้าคลังบน card";
+            }
+            if (composer) composer.querySelector("[data-open-book-menu]")?.setAttribute("hidden", "");
+          }
+        };
+
+        const bootstrap = async () => {
+          try {
+            await PaligoInboxClient.ensureApiReady();
+          } catch (error) {
+            showGate(error.message || "Inbox API ไม่พร้อม");
+            return;
+          }
+
+          session = await PaligoInboxClient.ensureAuthenticatedSession();
+          if (!session?.user) {
+            showGate("เข้าสู่ระบบก่อนใช้กล่องข้อความ — สมัคร/ล็อกอินที่บัญชี Inbox");
+            return;
+          }
+
+          role = session.user.role;
+
+          try {
+            pairingContext = await PaligoInboxClient.getMe();
+          } catch {
+            pairingContext = null;
+          }
+
+          const reviewerId = pairingContext?.pairing?.reviewerUserId || "peer";
+          threadId =
+            role === "reviewer"
+              ? `reviewer-inbox-${session.user.id}`
+              : `student-${session.user.id}-${reviewerId}`;
+
+          if (role === "student" && !pairingContext?.pairing) {
+            showGate("ยังไม่ได้จับคู่ครู — ไปที่บัญชี Inbox แท็บจับคู่ก่อนส่งสมุด");
+            return;
+          }
+
+          showChat();
+          configureRoleUi();
+          await syncInboxToChat();
+          paintThread();
+        };
+
+        document.querySelector("[data-send-text]")?.addEventListener("click", sendTextMessage);
+        chatInput?.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" && !event.shiftKey) {
+            event.preventDefault();
+            sendTextMessage();
+          }
+        });
+        openBookMenu?.addEventListener("click", openBookSheet);
+        document.querySelector("[data-close-book-sheet]")?.addEventListener("click", closeBookSheet);
+        bookSheet?.addEventListener("click", (event) => {
+          if (event.target === bookSheet) closeBookSheet();
+        });
+        document.querySelector("[data-refresh-chat]")?.addEventListener("click", async () => {
+          await syncInboxToChat();
+          paintThread();
+        });
+
+        PaligoSidebar.autoInit();
+        bootstrap();
+      })();
+    </script>
+  </body>
+</html>

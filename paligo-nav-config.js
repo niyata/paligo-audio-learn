@@ -44,6 +44,11 @@
           description: "เปิดเล่มที่ทำค้างไว้",
         },
         {
+          label: "กล่องข้อความ",
+          href: "exam-inbox.html",
+          description: "แชทส่งสมุดให้ครู · card หน้าปกแบบ LINE",
+        },
+        {
           label: "ผลตรวจของฉัน",
           href: "exam-review-results.html",
           description: "นำเข้าไฟล์ผลตรวจจากครู",
@@ -51,7 +56,7 @@
         {
           label: "บัญชี Inbox",
           href: "exam-account.html",
-          description: "สมัคร เข้าสู่ระบบ จับคู่ครู–นักเรียน",
+          description: "จัดการบัญชี · จับคู่ครู–นักเรียน (เข้าสู่ระบบแล้วจะจำไว้)",
         },
       ],
     },
@@ -61,6 +66,16 @@
       icon: "review",
       priority: 3,
       children: [
+        {
+          label: "Inbox แชท",
+          href: "exam-inbox.html",
+          description: "รับสมุดจากนักเรียนในรูปแบบแชท",
+        },
+        {
+          label: "Inbox งานส่งตรวจ",
+          href: "exam-reviewer-console.html",
+          description: "รับงานที่นักเรียนส่งเข้ามา",
+        },
         {
           label: "ตรวจข้อสอบ",
           href: "exam-reviewer-console.html",
@@ -88,7 +103,13 @@
     },
   ];
 
+  const HOME_HREF = "index.html";
+
   const PAGES = {
+    "index.html": {
+      title: "หน้าแรก",
+      section: null,
+    },
     "pali-audio-hightlight.html": {
       title: "ฝึกแปลด้วยเสียง",
       section: "study",
@@ -111,6 +132,10 @@
     },
     "exam-books.html": {
       title: "สมุดข้อสอบของฉัน",
+      section: "exam",
+    },
+    "exam-inbox.html": {
+      title: "กล่องข้อความ",
       section: "exam",
     },
     "exam-review-results.html": {
@@ -137,6 +162,10 @@
       title: "ตัวอย่างเมนู",
       section: "prep",
     },
+    "seed-demo-books.html": {
+      title: "สร้างสมุดตัวอย่าง",
+      section: "exam",
+    },
   };
 
   const STUDY_PAGE_NAMES = Object.entries(PAGES)
@@ -154,6 +183,7 @@
   }
 
   window.PaligoNavConfig = {
+    homeHref: HOME_HREF,
     brand: {
       title: "Paligo",
       subtitle: "เรียนบาลีออนไลน์",

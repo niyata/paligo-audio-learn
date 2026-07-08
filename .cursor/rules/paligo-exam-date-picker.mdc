@@ -1,0 +1,36 @@
+---
+description: Date picker Paligo ต้องไฮไลท์วันนี้เสมอ
+globs: "**/*.{html,js,css}"
+alwaysApply: true
+---
+
+# Paligo Date Picker
+
+เมื่อสร้างระบบเลือกวันที่ (วันสอบ / กรอง / หน้าปก) ให้ใช้มาตรฐานเดียวกัน
+
+## โมดูลมาตรฐาน
+
+- `paligo-exam-date-picker.js` + `paligo-exam-picker.css`
+- อย่าสร้าง `<input type="date">` หรือ `<select>` วันที่แยกเอง ถ้าเป็นวันสอบแบบไทย (วัน · เดือน · พ.ศ.)
+
+## กฎไฮไลท์วันนี้ (บังคับ)
+
+ทุก date picker ต้องแสดง **วันนี้** ด้วย class `.is-current`:
+
+| ช่อง | เงื่อนไขไฮไลท์ |
+|------|----------------|
+| **พ.ศ.** | ปี พ.ศ. ปัจจุบัน |
+| **เดือน** | เดือนปัจจุบัน — เมื่อ context ปี = ปีนี้ (หรือยังไม่เลือกปี) |
+| **วัน** | วันที่ปัจจุบัน — เมื่อ context ปี+เดือน = เดือนนี้ |
+
+- อัปเดต `.is-current` ใหม่เมื่อเปลี่ยนปี/เดือนใน picker คู่กัน
+- ใช้ `PaligoExamDatePicker.getTodayParts()` / `isTodayPart()` ถ้าเขียน picker เอง
+- CSS: `.exam-picker-option.is-current` — ขอบวงเน้น (มีใน `paligo-exam-picker.css`)
+
+## สมุดข้อสอบ (หน้ากระดาษ)
+
+`ruled-lines-card-only-template.html` ใช้ `.is-current` อยู่แล้ว — อย่าลบเมื่อแก้ picker
+
+## กรองสมุด
+
+`exam-books.html` ใช้ `PaligoExamDatePicker.mount()` — ส่ง `examDateKeys` เพื่อไฮไลท์วันที่มีสมุด (`.has-exam` / `.no-exam`) คู่กับวันนี้

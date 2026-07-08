@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>หน้าแรก · Paligo</title>
+    <link rel="stylesheet" href="paligo-design-tokens.css" />
+    <link rel="stylesheet" href="sidebar-nav.css" />
+    <link rel="stylesheet" href="paligo-home.css" />
+    <style>
+      body {
+        color: var(--paligo-ink);
+        font-family: Sarabun, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        line-height: 1.5;
+        margin: 0;
+        min-height: 100vh;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="paligo-home">
+      <header class="paligo-home__hero">
+        <h1 class="paligo-home__title">Paligo</h1>
+        <p class="paligo-home__tagline">เรียนบาลีออนไลน์ — เลือกเมนูด้านล่างเพื่อเริ่มต้น</p>
+      </header>
+      <div id="paligo-home-sections" class="paligo-home__sections" aria-live="polite"></div>
+    </div>
+
+    <script src="paligo-config.js"></script>
+    <script src="paligo-inbox-client.js"></script>
+    <script src="paligo-nav-config.js"></script>
+    <script src="sidebar-nav.js"></script>
+    <script src="paligo-home.js"></script>
+    <script>
+      PaligoSidebar.autoInit();
+    </script>
+  </body>
+</html>

@@ -18,7 +18,7 @@
         --exam-blue: rgba(31, 45, 137, 0.72);
         --rule-color: var(--exam-blue);
         --margin-color: var(--exam-blue);
-        --line-height: 26px;
+        --line-height: 30px;
         --line-width: 0.75px;
         --emphasis-line-width: 1px;
         --number-gutter: 5ch;
@@ -362,16 +362,23 @@
       }
 
       /* ── Annotation (ruler / emphasis-line) tool ─────────────────── */
+      /* LOCKED: สูตรตำแหน่ง sync กับ getAnnotationLineFromPointer — ดู .cursor/rules/paligo-annotation-lines.mdc */
       :root {
-        --annotation-line-width: calc(var(--line-width) + 0.4px);
+        --annotation-line-width: calc(var(--line-width) + 0.4px + 0.5 * var(--emphasis-line-width));
+        --annotation-line-shift: 0;
+        --annotation-line-nudge: -1px;
       }
 
       .exam-page.is-first .ruled-editor-frame {
+        --annotation-page-offset: 0px;
+      }
+
+      .exam-page.is-first.has-prefilled-line .ruled-editor-frame {
         --annotation-page-offset: var(--line-height);
       }
 
       .exam-page.is-continuation .ruled-editor-frame {
-        --annotation-page-offset: var(--text-y-offset);
+        --annotation-page-offset: 0px;
       }
 
       .annotation-lines {
@@ -393,8 +400,10 @@
         right: 0;
         top: calc(
           var(--annotation-page-offset, 0px) +
-          var(--line-n, 1) * var(--line-height) -
-          var(--annotation-line-width)
+          (var(--line-n, 1) + var(--annotation-line-shift, 0)) * var(--line-height) -
+          var(--line-width) -
+          var(--text-y-offset) +
+          var(--annotation-line-nudge, 0px)
         );
         z-index: 3;
       }
@@ -756,13 +765,16 @@
           ),
           var(--paper-bg);
         color: var(--exam-blue);
+        flex: 0 0 auto;
         font-size: var(--editor-font-size);
         font-weight: 700;
         line-height: var(--line-height);
         min-height: var(--line-height);
         padding: 0 var(--paper-padding-inline);
+        pointer-events: none;
         text-align: center;
         transform: translateY(var(--header-text-y-offset));
+        user-select: none;
       }
 
       .prefilled-answer-line[hidden] {
@@ -770,7 +782,9 @@
       }
 
       .ruled-editor-frame {
+        display: flex;
         flex: 1 1 auto;
+        flex-direction: column;
         min-height: 0;
         position: relative;
         z-index: 1;
@@ -825,7 +839,8 @@
         font: inherit;
         font-size: var(--editor-font-size);
         font-weight: 400;
-        height: 100%;
+        flex: 1 1 auto;
+        height: auto;
         line-height: var(--line-height);
         min-height: 0;
         outline: none;
@@ -913,7 +928,7 @@
 
       @media (max-width: 640px) {
         :root {
-          --line-height: 22px;
+          --line-height: 30px;
           --number-gutter: 4.5ch;
           --editor-font-size: 12px;
           --paper-padding-block: 22px;
@@ -1023,26 +1038,25 @@
           <p class="paligo-book-bar__meta" data-book-bar-meta>ฉบับร่าง</p>
         </div>
         <div class="paligo-book-bar__actions">
+          <span class="paligo-tooltip-host" data-cancel-submit-wrap hidden>
+            <button class="paligo-btn" type="button" data-cancel-submit>ยกเลิกส่งตรวจ</button>
+          </span>
           <span class="paligo-status-chip is-draft" data-book-bar-status>ฉบับร่าง</span>
         </div>
       </div>
       <div class="paligo-permission-banner" data-permission-banner>ฉบับร่าง — แก้ไขคำตอบได้</div>
       <section class="review-toolbar" data-review-toolbar hidden aria-label="แผงตรวจบนกระดาษ">
-        <div class="review-toolbar__label">โหมดผู้ตรวจ — คำตอบถูกล็อก · แตะบรรทัดเพื่อ stamp หรือวางลายเซ็น</div>
+        <div class="review-toolbar__label">โหมดผู้ตรวจ — คำตอบถูกล็อก · stamp คะแนน · ไฮไลท์คำศัพท์ · ลงลายเซ็น</div>
         <div class="review-toolbar__row">
-          <button class="paligo-btn" type="button" data-review-stamp-mode>แตะบรรทัดเพื่อ stamp</button>
+          <button class="paligo-btn" type="button" data-review-stamp-mode>แตะบรรทัดเพื่อ stamp คะแนน</button>
           <button class="paligo-btn" type="button" data-score-stamp="1">๑ ให้</button>
           <button class="paligo-btn" type="button" data-score-stamp="2">๒ ให้</button>
           <button class="paligo-btn" type="button" data-score-stamp="3">๓ ให้</button>
-          <button class="paligo-btn" type="button" data-error-stamp="wrong-word">ผิดศัพท์</button>
-          <button class="paligo-btn" type="button" data-error-stamp="wrong-relation">ผิดสัมพันธ์</button>
-          <button class="paligo-btn" type="button" data-error-stamp="wrong-pa">ผิด ป.</button>
+          <button class="paligo-btn" type="button" data-highlight-mode>ไฮไลท์คำศัพท์</button>
+          <button class="paligo-btn" type="button" data-clear-all-stamps>ล้าง stamp ทั้งหมด</button>
         </div>
         <div class="review-toolbar__row">
-          <label class="paligo-btn" style="cursor: pointer">
-            อัปโหลดลายเซ็น
-            <input type="file" accept="image/png,image/jpeg,image/webp" data-signature-file hidden />
-          </label>
+          <button class="paligo-btn" type="button" data-open-signature-modal>ลงลายเซ็น</button>
           <button class="paligo-btn is-primary" type="button" data-save-review-paper>บันทึกการตรวจ</button>
           <button class="paligo-btn" type="button" data-return-review-paper>ส่งคืนนักเรียน</button>
         </div>
@@ -1060,10 +1074,10 @@
             min="22"
             max="35"
             step="1"
-            value="22"
+            value="30"
             data-line-height-control
           />
-          <output class="control-value" id="line-height-value" for="line-height-control">22px</output>
+          <output class="control-value" id="line-height-value" for="line-height-control">30px</output>
           <button class="pagination-button" type="button" data-page-prev>ก่อนหน้า</button>
           <output class="pagination-status" data-page-status>หน้า ๑ / ๒</output>
           <button class="pagination-button" type="button" data-page-next>ถัดไป</button>
@@ -1237,21 +1251,67 @@
         <div class="template-credit">Ruled paper template by niyatajayo · v1.0.0 · 2026-07-01</div>
       </section>
     </main>
+    <div class="paligo-modal-backdrop" data-highlight-picker-modal hidden>
+      <div class="paligo-modal" role="dialog" aria-labelledby="highlight-picker-title">
+        <h2 class="paligo-modal__title" id="highlight-picker-title">ใส่ข้อคิดเห็นในคำศัพท์</h2>
+        <p class="highlight-picker-quote" data-highlight-picker-quote></p>
+        <div class="paligo-modal__actions">
+          <button class="paligo-btn" type="button" data-highlight-kind="wrong-word">ผิดศัพท์</button>
+          <button class="paligo-btn" type="button" data-highlight-kind="wrong-relation">ผิดสัมพันธ์</button>
+          <button class="paligo-btn" type="button" data-highlight-kind="wrong-pa">ผิด ป.</button>
+          <button class="paligo-btn is-ghost" type="button" data-close-highlight-picker>ยกเลิก</button>
+        </div>
+      </div>
+    </div>
+    <div class="paligo-modal-backdrop" data-highlight-view-modal hidden>
+      <div class="paligo-modal" role="dialog" aria-labelledby="highlight-view-title">
+        <h2 class="paligo-modal__title" id="highlight-view-title" data-highlight-view-label>ข้อคิดเห็นจากผู้ตรวจ</h2>
+        <p class="highlight-picker-quote" data-highlight-view-quote></p>
+        <p class="paligo-modal__body" data-highlight-view-meta></p>
+        <div class="paligo-modal__actions">
+          <button class="paligo-btn is-primary" type="button" data-close-highlight-view>ตกลง</button>
+          <button class="paligo-btn is-ghost" type="button" data-remove-highlight hidden>ลบไฮไลท์นี้</button>
+        </div>
+      </div>
+    </div>
+    <div class="paligo-modal-backdrop" data-signature-modal hidden>
+      <div class="paligo-modal" role="dialog" aria-labelledby="signature-modal-title">
+        <h2 class="paligo-modal__title" id="signature-modal-title">ลงลายเซ็น</h2>
+        <p class="paligo-modal__body">อัปโหลดลายเซ็นครั้งเดียว — ใช้ลงในสมุดทุกเล่มได้ต่อเนื่อง</p>
+        <div class="signature-modal-preview is-empty" data-signature-preview>ยังไม่มีลายเซ็นที่บันทึก</div>
+        <label class="paligo-btn signature-upload-zone">
+          เลือกไฟล์ลายเซ็น (PNG/JPG)
+          <input type="file" accept="image/png,image/jpeg,image/webp" data-signature-file />
+        </label>
+        <div class="paligo-modal__actions is-row" style="margin-top: 16px">
+          <button class="paligo-btn is-primary" type="button" data-apply-signature>ใช้ลายเซ็นนี้ในหน้านี้</button>
+          <button class="paligo-btn" type="button" data-clear-saved-signature>ลบลายเซ็นที่บันทึก</button>
+          <button class="paligo-btn is-ghost" type="button" data-close-signature-modal>ปิด</button>
+        </div>
+      </div>
+    </div>
     <div class="paligo-modal-backdrop" data-submit-modal hidden>
-      <div class="paligo-modal" role="dialog" aria-labelledby="submit-modal-title">
-        <h2 class="paligo-modal__title" id="submit-modal-title">ส่งตรวจแล้ว</h2>
+      <div class="paligo-modal" role="dialog" aria-labelledby="submit-modal-title" aria-modal="true">
+        <h2 class="paligo-modal__title" id="submit-modal-title">ส่งเข้าแชต Inbox แล้ว</h2>
         <p class="paligo-modal__body">
-          ดาวน์โหลดไฟล์ส่งตรวจแล้ว — ส่งให้ครู/ผู้ตรวจ หรือเปิดตรวจบนเครื่องนี้ได้ทันที
+          ส่งตรวจแล้ว — สมุดนี้ถูกส่งเข้าแชต inbox ครู · คำตอบถูกล็อก
         </p>
         <div class="paligo-modal__meta" data-submit-modal-meta></div>
+        <div class="paligo-modal__chat-preview" data-submit-chat-preview aria-label="ตัวอย่างข้อความในแชต"></div>
         <div class="paligo-modal__actions">
-          <a class="paligo-btn is-primary" data-reviewer-link href="exam-reviewer-console.html">เปิดคิวตรวจ</a>
+          <a class="paligo-btn is-primary" href="exam-inbox.html">เปิดกล่องข้อความ</a>
           <a class="paligo-btn" data-paper-review-link href="#">ตรวจบนกระดาษ</a>
-          <button class="paligo-btn" type="button" data-export-transfer>ดาวน์โหลดแพ็กเกจโอน (→ ผู้ตรวจ)</button>
           <a class="paligo-btn" href="exam-review-results.html">ผลตรวจของฉัน</a>
           <a class="paligo-btn" href="exam-books.html">กลับสมุดข้อสอบ</a>
           <button class="paligo-btn is-ghost" type="button" data-close-submit-modal>ปิด</button>
         </div>
+        <details class="paligo-modal__advanced">
+          <summary>เพิ่มเติม — ดาวน์โหลดไฟล์ (ขั้นสูง)</summary>
+          <div class="paligo-modal__advanced-actions">
+            <button class="paligo-btn" type="button" data-download-submission>ดาวน์โหลด submission (.json)</button>
+            <button class="paligo-btn" type="button" data-export-transfer>ดาวน์โหลดแพ็กเกจโอน (→ ผู้ตรวจ)</button>
+          </div>
+        </details>
       </div>
     </div>
     <div class="toast-notice" role="status" aria-live="polite" data-toast-notice></div>
@@ -1261,23 +1321,32 @@
     <script src="paligo-config.js"></script>
     <script src="paligo-inbox-client.js"></script>
     <script src="paligo-exam-shared.js"></script>
+    <script src="paligo-exam-submit.js"></script>
+    <script src="paligo-exam-book-cover.js"></script>
+    <script src="paligo-inbox-chat.js"></script>
     <script src="paligo-exam-paper.js"></script>
     <script src="paligo-nav-config.js"></script>
     <script src="sidebar-nav.js"></script>
     <script>
       (() => {
+        const shared = window.PaligoExamShared;
+        if (!shared) {
+          window.alert("โหลดระบบสมุดข้อสอบไม่ครบ — ลองรีเฟรชหน้า (Cmd+Shift+R)");
+          return;
+        }
+        const { KEYS, getList, setList, readRaw, writeRaw, guardExamPageRole } = shared;
+
         const storageKey = "ruled-lines-card-only-draft-v1";
-        const profileStorageKey = "paligo-exam-student-profile-v1";
+        const profileStorageKey = KEYS.studentProfile;
         const profileDraftStorageKey = "paligo-exam-student-profile-draft-v1";
-        const submissionsStorageKey = "paligo-exam-submissions-v1";
-        const booksStorageKey = "paligo-exam-answer-books-v1";
-        const activeBookStorageKey = "paligo-exam-active-book-id-v1";
-        const ownerStorageKey = "paligo-exam-local-owner-id-v1";
+        const submissionsStorageKey = KEYS.submissions;
+        const booksStorageKey = KEYS.books;
+        const activeBookStorageKey = KEYS.activeBook;
+        const ownerStorageKey = KEYS.owner;
         const numberedLinePattern = /^\s*(\d+)(?:[.)])?\s*(.*)$/;
-        const numberedLinePrefix = " ".repeat(4);
-        const numberedLineGap = " ".repeat(23);
-        const wrapSafetyGap = 6;
-        const marginTextGapSteps = 1.5;
+        const wrapRightGap = 1;
+        const marginTextGapSteps = 0.5;
+        const numberMarginClearanceSteps = 0.4;
 
         const getNumberGutterCh = () => {
           const raw = getComputedStyle(document.documentElement).getPropertyValue("--number-gutter").trim();
@@ -1292,32 +1361,46 @@
           return context;
         };
 
-        // Space-only indent: right of the margin line by marginTextGapSteps character widths (editor font).
-        // Gutter position uses frame/body ch (same as CSS --number-gutter on ::before).
+        // เส้นคั่นหน้า — ใช้ font ของ frame ให้ตรง CSS ::before (--number-gutter ch)
+        const getMarginLinePx = (editor) => {
+          const frame = editor.closest(".ruled-editor-frame");
+          const frameStyles = frame ? getComputedStyle(frame) : getComputedStyle(document.body);
+          const frameCtx = measureFontContext(frameStyles);
+          return getNumberGutterCh() * frameCtx.measureText("0").width;
+        };
+
+        const getMarginLayout = (editor) => {
+          const editorStyles = getComputedStyle(editor);
+          const editorCtx = measureFontContext(editorStyles);
+          const marginLinePx = getMarginLinePx(editor);
+          const charStep = editorCtx.measureText("ก").width;
+          const bodyStartPx = marginLinePx + charStep * marginTextGapSteps;
+
+          let bodyIndent = "";
+          while (editorCtx.measureText(bodyIndent).width < bodyStartPx) bodyIndent += " ";
+
+          return { marginLinePx, bodyStartPx, bodyIndent, charStep };
+        };
+
         const computeContinuationIndent = (() => {
           let _cacheKey = null;
           let _cached = "";
-          return (editor) => {
+          const fn = (editor) => {
             const editorStyles = getComputedStyle(editor);
-            const frame = editor.closest(".ruled-editor-frame");
-            const frameStyles = frame ? getComputedStyle(frame) : getComputedStyle(document.body);
             const gutterCh = getNumberGutterCh();
-            const frameCtx = measureFontContext(frameStyles);
-            const editorCtx = measureFontContext(editorStyles);
-            const gutterPx = gutterCh * frameCtx.measureText("0").width;
-            const charStep = editorCtx.measureText("ก").width;
-            const targetPx = gutterPx + charStep * marginTextGapSteps;
-            const cacheKey = `${editorStyles.fontSize}|${gutterCh}|${targetPx}`;
+            const cacheKey = `${editorStyles.fontSize}|${gutterCh}|${marginTextGapSteps}|${numberMarginClearanceSteps}`;
 
             if (cacheKey === _cacheKey) return _cached;
 
-            let s = "";
-            while (editorCtx.measureText(s + " ").width < targetPx) s += " ";
-
+            _cached = getMarginLayout(editor).bodyIndent;
             _cacheKey = cacheKey;
-            _cached = s;
-            return s;
+            return _cached;
           };
+          fn.reset = () => {
+            _cacheKey = null;
+            _cached = "";
+          };
+          return fn;
         })();
         const minPageCount = 2;
         const maxPageCount = 8;
@@ -1332,12 +1415,27 @@
         const permissionBanner = document.querySelector("[data-permission-banner]");
         const reviewToolbar = document.querySelector("[data-review-toolbar]");
         const startNewRevisionButton = document.querySelector("[data-start-new-revision]");
+        const cancelSubmitWrap = document.querySelector("[data-cancel-submit-wrap]");
+        const cancelSubmitButton = document.querySelector("[data-cancel-submit]");
         const submitModal = document.querySelector("[data-submit-modal]");
         const submitModalMeta = document.querySelector("[data-submit-modal-meta]");
+        const submitChatPreview = document.querySelector("[data-submit-chat-preview]");
+        const pushInboxButton = document.querySelector("[data-push-inbox]");
         const reviewerLink = document.querySelector("[data-reviewer-link]");
         const paperReviewLink = document.querySelector("[data-paper-review-link]");
         const exportTransferButton = document.querySelector("[data-export-transfer]");
+        const downloadSubmissionButton = document.querySelector("[data-download-submission]");
         const signatureFileInput = document.querySelector("[data-signature-file]");
+        const signatureModal = document.querySelector("[data-signature-modal]");
+        const signaturePreview = document.querySelector("[data-signature-preview]");
+        const highlightPickerModal = document.querySelector("[data-highlight-picker-modal]");
+        const highlightPickerQuote = document.querySelector("[data-highlight-picker-quote]");
+        const highlightViewModal = document.querySelector("[data-highlight-view-modal]");
+        const highlightViewLabel = document.querySelector("[data-highlight-view-label]");
+        const highlightViewQuote = document.querySelector("[data-highlight-view-quote]");
+        const highlightViewMeta = document.querySelector("[data-highlight-view-meta]");
+        const removeHighlightButton = document.querySelector("[data-remove-highlight]");
+        const highlightModeButton = document.querySelector("[data-highlight-mode]");
         let examPages = Array.from(document.querySelectorAll(".exam-page"));
         const pagePrevButton = document.querySelector("[data-page-prev]");
         const pageNextButton = document.querySelector("[data-page-next]");
@@ -1379,6 +1477,18 @@
           getSubjectOption,
         } = window.PaligoExamShared;
         const queryParams = new URLSearchParams(window.location.search);
+        const wantsNewBook = queryParams.get("newBook") === "1";
+        const wantsResume = queryParams.get("resume") === "1";
+        const reviewMode = queryParams.get("mode") === "review";
+        const reviewSubmissionId = queryParams.get("submissionId");
+
+        const roleGuard = guardExamPageRole({ page: "student", reviewMode });
+        if (!roleGuard.ok) {
+          window.location.replace(roleGuard.redirect);
+          return;
+        }
+
+        const workspaceRole = reviewMode ? "reviewer" : "student";
 
         const createId = (prefix) => {
           const random = window.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -1386,43 +1496,29 @@
         };
 
         const getLocalOwnerId = () => {
-          const existing = localStorage.getItem(ownerStorageKey);
+          const existing = readRaw(ownerStorageKey);
           if (existing) return existing;
 
           const ownerId = createId("owner");
-          localStorage.setItem(ownerStorageKey, ownerId);
+          writeRaw(ownerStorageKey, ownerId);
           return ownerId;
         };
 
         const localOwnerId = getLocalOwnerId();
-        const wantsNewBook = queryParams.get("newBook") === "1";
-        const wantsResume = queryParams.get("resume") === "1";
-        const reviewMode = queryParams.get("mode") === "review";
-        const reviewSubmissionId = queryParams.get("submissionId");
-        const workspaceRole = reviewMode ? "reviewer" : "student";
         let currentBookId = wantsNewBook
           ? createId("book")
           : wantsResume
-            ? localStorage.getItem(activeBookStorageKey) || createId("book")
-            : queryParams.get("bookId") || localStorage.getItem(activeBookStorageKey) || createId("book");
-        localStorage.setItem(activeBookStorageKey, currentBookId);
+            ? readRaw(activeBookStorageKey) || createId("book")
+            : queryParams.get("bookId") || readRaw(activeBookStorageKey) || createId("book");
+        writeRaw(activeBookStorageKey, currentBookId);
 
-        const getStoredList = (key) => {
-          try {
-            const parsed = JSON.parse(localStorage.getItem(key) || "[]");
-            return Array.isArray(parsed) ? parsed : [];
-          } catch {
-            return [];
-          }
-        };
+        const getStoredList = (key) => getList(key);
 
-        const setStoredList = (key, value) => {
-          localStorage.setItem(key, JSON.stringify(value));
-        };
+        const setStoredList = (key, value) => setList(key, value);
 
         const loadStudentProfile = () => {
           try {
-            const raw = localStorage.getItem(profileStorageKey);
+            const raw = readRaw(profileStorageKey);
             return raw ? JSON.parse(raw) : null;
           } catch {
             return null;
@@ -1430,7 +1526,7 @@
         };
 
         const saveStudentProfile = (profile) => {
-          localStorage.setItem(profileStorageKey, JSON.stringify(profile));
+          writeRaw(profileStorageKey, JSON.stringify(profile));
         };
 
         const loadProfileDraft = () => {
@@ -1610,6 +1706,7 @@
         let currentPageIndex = 0;
         let saveStatusTimer;
         let autoSaveTimer;
+        let isApplyingSpill = false;
         let toastTimer;
 
         const setSaveStatus = (message) => {
@@ -1621,14 +1718,18 @@
           }, 2200);
         };
 
-        localStorage.setItem(activeBookStorageKey, currentBookId);
+        writeRaw(activeBookStorageKey, currentBookId);
 
         let activeSubmission = null;
         let scoreStamps = [];
         let errorStamps = [];
+        let textHighlights = [];
         let reviewSignature = null;
         let activeStampKind = null;
         let isReviewStamping = false;
+        let isHighlightMode = false;
+        let pendingHighlightSelection = null;
+        let savedReviewerSignature = null;
         let lastSubmissionPackage = null;
 
         const {
@@ -1637,6 +1738,8 @@
           getReviewForBook,
           getSavedReviewForSubmission,
           getBookPermissions,
+          getCancelSubmitState,
+          cancelBookSubmit,
           normalizeBookStatus,
           getStatusLabel,
           computeScore,
@@ -1644,17 +1747,58 @@
           saveReviewResult,
           upsertBookRecord,
           buildBookTransfer,
+          getLatestSubmissionForBook,
+          upsertBookInList,
+          getReviewerSignature,
+          saveReviewerSignature,
           downloadJson: sharedDownloadJson,
         } = window.PaligoExamShared;
         const {
+          ERROR_LABELS,
           renderAllReviewLayers,
           bindReviewCanvas,
+          bindHighlightSelection,
           upsertScoreStamp,
-          upsertErrorStamp,
+          upsertTextHighlight,
+          removeTextHighlight,
+          createHighlightId,
           indexToDisplayPage,
         } = window.PaligoExamPaper;
 
         const getCurrentBook = () => getStoredList(booksStorageKey).find((book) => book.id === currentBookId) || null;
+
+        const applyCancelSubmitButton = (book) => {
+          if (!cancelSubmitWrap || !cancelSubmitButton || reviewMode) {
+            cancelSubmitWrap?.toggleAttribute("hidden", true);
+            return;
+          }
+
+          const cancelState = getCancelSubmitState(book, workspaceRole);
+          cancelSubmitWrap.hidden = !cancelState.showButton;
+          cancelSubmitButton.disabled = cancelState.disabled;
+          cancelSubmitWrap.title = cancelState.tooltip || "";
+          cancelSubmitButton.title = cancelState.disabled ? "" : cancelState.tooltip;
+        };
+
+        const handleCancelSubmit = () => {
+          const book = getCurrentBook();
+          const cancelState = getCancelSubmitState(book, workspaceRole);
+          if (!cancelState.canCancel) return;
+          if (
+            !window.confirm(
+              "ยกเลิกส่งตรวจ — สมุดจะกลับเป็นฉบับร่างและแก้ไขคำตอบได้อีกครั้ง ต้องการดำเนินการต่อหรือไม่?"
+            )
+          ) {
+            return;
+          }
+          try {
+            cancelBookSubmit(currentBookId);
+            applyPermissions();
+            setSaveStatus("ยกเลิกส่งตรวจแล้ว — แก้ไขคำตอบได้อีกครั้ง");
+          } catch (error) {
+            setSaveStatus(error.message || "ยกเลิกส่งตรวจไม่ได้");
+          }
+        };
 
         const updateBookBar = () => {
           const book = getCurrentBook();
@@ -1677,11 +1821,21 @@
         };
 
         const renderReviewOverlays = () => {
-          renderAllReviewLayers(examPages, {
-            scoreStamps,
-            errorStamps,
-            signature: reviewSignature,
-          });
+          const canClickHighlights = reviewMode || normalizeBookStatus(getCurrentBook()?.status) === BOOK_STATUS.reviewed;
+          renderAllReviewLayers(
+            examPages,
+            {
+              scoreStamps,
+              errorStamps,
+              textHighlights,
+              signature: reviewSignature,
+            },
+            {
+              onHighlightClick: canClickHighlights
+                ? (item) => showHighlightViewModal(item, reviewMode)
+                : null,
+            }
+          );
         };
 
         const getPermissionMessage = (book) => {
@@ -1695,7 +1849,7 @@
             return "อยู่ระหว่างตรวจ — คำตอบถูกล็อกทั้งนักเรียนและผู้ตรวจ · รอผู้ตรวจ stamp และส่งคืน";
           }
           if (status === BOOK_STATUS.reviewed) {
-            return `ได้รับผลตรวจแล้ว — ดู stamp บนกระดาษได้ · คะแนน ${window.PaligoExamShared.toThaiPercent((getReviewForBook(currentBookId)?.score?.percent) || 0)}`;
+            return `ได้รับผลตรวจแล้ว — กดไฮไลท์บนกระดาษเพื่อดูข้อคิดเห็น · คะแนน ${window.PaligoExamShared.toThaiPercent((getReviewForBook(currentBookId)?.score?.percent) || 0)}`;
           }
           return perms.canEditAnswer ? "แก้ไขคำตอบได้" : "คำตอบถูกล็อก";
         };
@@ -1712,6 +1866,8 @@
 
           pageStack?.classList.toggle("is-readonly", answerLocked);
           pageStack?.classList.toggle("is-review-stamping", isReviewStamping && perms.canStamp);
+          pageStack?.classList.toggle("is-highlight-mode", isHighlightMode && reviewMode);
+          highlightModeButton?.classList.toggle("is-active", isHighlightMode);
           editors.forEach((editor) => {
             editor.readOnly = answerLocked;
           });
@@ -1719,6 +1875,7 @@
           submitReviewButton?.toggleAttribute("disabled", !perms.canSubmit);
           submitReviewButton?.toggleAttribute("hidden", reviewMode);
           startNewRevisionButton?.toggleAttribute("hidden", !perms.canStartNewRevision);
+          applyCancelSubmitButton(book);
           reviewToolbar?.toggleAttribute("hidden", !(reviewMode && (perms.canStamp || perms.canSign)));
 
           examPages.forEach((page) => {
@@ -1732,17 +1889,65 @@
 
         const applySubmittedLock = applyPermissions;
 
-        const showSubmitModal = (submission) => {
+        const showSubmitModal = async (submission, result = {}) => {
           if (!submitModal) return;
           lastSubmissionPackage = submission;
           submitModalMeta.textContent = `${submission.bookTitle} · revision ${submission.bookRevision} · ${formatThaiDateTime(submission.submittedAt)}`;
+          if (result.partial) {
+            submitModalMeta.textContent += " · ส่ง inbox ไม่สำเร็จ — ลองจากกล่องข้อความ";
+          } else if (result.push?.intendedRecipientLabel) {
+            submitModalMeta.textContent += ` · ส่งให้ ${result.push.intendedRecipientLabel}`;
+          }
           if (reviewerLink) {
             reviewerLink.href = `exam-reviewer-console.html?submissionId=${encodeURIComponent(submission.id)}`;
+            reviewerLink.hidden = true;
           }
           if (paperReviewLink) {
             paperReviewLink.href = `ruled-lines-card-only-template.html?mode=review&submissionId=${encodeURIComponent(submission.id)}`;
           }
+          pushInboxButton?.toggleAttribute("hidden", true);
+
+          if (submitChatPreview) {
+            submitChatPreview.replaceChildren();
+            try {
+              const book = getCurrentBook();
+              const chat = window.PaligoInboxChat;
+              let previewMessage = null;
+              if (chat?.recordBookSubmission) {
+                const recorded = await chat.recordBookSubmission({ book, result, submission });
+                previewMessage = recorded?.message || null;
+              }
+              if (!previewMessage && chat?.bookSnapshot) {
+                previewMessage = {
+                  id: "preview",
+                  type: "book",
+                  direction: "out",
+                  bookId: book?.id || currentBookId,
+                  book: chat.bookSnapshot(book),
+                  at: submission.submittedAt,
+                  subtitle: `revision ${submission.bookRevision || book?.revision || 1}`,
+                };
+              }
+              if (previewMessage && chat?.renderBookFlexCard) {
+                const card = chat.renderBookFlexCard({
+                  message: previewMessage,
+                  book: previewMessage.book || book,
+                  statusLabel: getStatusLabel(BOOK_STATUS.underReview),
+                  subtitle: previewMessage.subtitle || "",
+                  actions: [],
+                });
+                if (card) submitChatPreview.append(card);
+              }
+            } catch (error) {
+              console.warn("แสดงตัวอย่างแชตไม่สำเร็จ", error);
+            }
+          }
+
           submitModal.hidden = false;
+        };
+
+        const closeSubmitModal = () => {
+          if (submitModal) submitModal.hidden = true;
         };
 
         const showToast = (message) => {
@@ -1825,7 +2030,7 @@
           editors = Array.from(document.querySelectorAll('[data-auto-indent="numbered-homework"]'));
         };
 
-        // ── Annotation state ────────────────────────────────────────
+        // ── Annotation state (LOCKED — see .cursor/rules/paligo-annotation-lines.mdc) ──
         let annotations = []; // [{page: number, line: number (1-based)}]
         let isAnnotating = false;
 
@@ -1846,6 +2051,49 @@
           });
         };
 
+        const getAnnotationLineShift = () =>
+          Number.parseFloat(
+            getComputedStyle(document.documentElement).getPropertyValue("--annotation-line-shift").trim()
+          ) || 0;
+
+        const getAnnotationLineWidth = () =>
+          Number.parseFloat(
+            getComputedStyle(document.documentElement).getPropertyValue("--line-width").trim()
+          ) || 0.75;
+
+        const getTextYOffset = () =>
+          Number.parseFloat(
+            getComputedStyle(document.documentElement).getPropertyValue("--text-y-offset").trim()
+          ) || 0;
+
+        const getAnnotationLineNudge = () =>
+          Number.parseFloat(
+            getComputedStyle(document.documentElement).getPropertyValue("--annotation-line-nudge").trim()
+          ) || 0;
+
+        const getAnnotationLineFromPointer = (event, frame) => {
+          const lineHeight =
+            Number.parseFloat(
+              getComputedStyle(document.documentElement).getPropertyValue("--line-height").trim()
+            ) || 30;
+          const frameRect = frame.getBoundingClientRect();
+          const offset =
+            Number.parseFloat(
+              getComputedStyle(frame).getPropertyValue("--annotation-page-offset").trim()
+            ) || 0;
+          const relativeY = event.clientY - frameRect.top;
+          return (
+            Math.round(
+              (relativeY -
+                offset +
+                getAnnotationLineWidth() +
+                getTextYOffset() -
+                getAnnotationLineNudge()) /
+                lineHeight
+            ) - getAnnotationLineShift()
+          );
+        };
+
         const bindAnnotationCanvas = (canvas, pageIndex) => {
           if (canvas.dataset.annotationBound === "true") return;
           canvas.dataset.annotationBound = "true";
@@ -1856,17 +2104,9 @@
             if (!getBookPermissions(book, workspaceRole).canEditAnswer) return;
 
             const frame = canvas.closest(".ruled-editor-frame");
-            const editor = frame?.querySelector(".ruled-editor");
-            if (!frame || !editor) return;
+            if (!frame) return;
 
-            const lineHeight =
-              Number.parseFloat(
-                getComputedStyle(document.documentElement).getPropertyValue("--line-height").trim()
-              ) || 26;
-            const frameRect = frame.getBoundingClientRect();
-            const editorRect = editor.getBoundingClientRect();
-            const relativeY = e.clientY - editorRect.top;
-            const lineN = Math.ceil(relativeY / lineHeight);
+            const lineN = getAnnotationLineFromPointer(e, frame);
             const maxLines = pageIndex === 0 ? linesFirstPage : linesPerPage;
 
             if (lineN < 1 || lineN > maxLines) return;
@@ -1885,25 +2125,68 @@
           });
         };
 
+        const linesFirstPage =
+          parseInt(getComputedStyle(document.documentElement).getPropertyValue("--lines-first-page").trim()) || 29;
+        const linesPerPage =
+          parseInt(getComputedStyle(document.documentElement).getPropertyValue("--lines-per-page").trim()) || 33;
+
+        const getEditorInnerWidth = (editor) => {
+          const styles = getComputedStyle(editor);
+          const paddingLeft = Number.parseFloat(styles.paddingLeft) || 0;
+          const paddingRight = Number.parseFloat(styles.paddingRight) || 0;
+          let inner = editor.clientWidth - paddingLeft - paddingRight;
+          if (inner > 80) return inner;
+
+          const visibleEditor =
+            editors.find((item, index) => item.clientWidth > 80 && !examPages[index]?.hidden) || editors[0];
+          if (visibleEditor) {
+            const visibleStyles = getComputedStyle(visibleEditor);
+            inner =
+              visibleEditor.clientWidth -
+              (Number.parseFloat(visibleStyles.paddingLeft) || 0) -
+              (Number.parseFloat(visibleStyles.paddingRight) || 0);
+            if (inner > 80) return inner;
+          }
+
+          const paperWidth = getComputedStyle(document.documentElement).getPropertyValue("--paper-width").trim();
+          const cmMatch = paperWidth.match(/^([\d.]+)cm$/);
+          if (cmMatch) {
+            inner = (parseFloat(cmMatch[1]) / 2.54) * 96 - paddingLeft - paddingRight;
+          }
+          return Math.max(240, inner);
+        };
+
         const getEditorVisibleLineCount = (editor) => {
           const styles = getComputedStyle(editor);
-          const lineHeight = Number.parseFloat(styles.lineHeight) || Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--line-height")) || 22;
+          const lineHeight =
+            Number.parseFloat(styles.lineHeight) ||
+            Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--line-height")) ||
+            30;
           const paddingTop = Number.parseFloat(styles.paddingTop) || 0;
           const paddingBottom = Number.parseFloat(styles.paddingBottom) || 0;
-          // The prefilled-answer-line sits before the editor inside the same frame.
-          // editor.clientHeight = full frame height, but the editor starts one lineHeight
-          // below the prefilled element, so the visible writing area is reduced by lineHeight.
-          const prefilledOffset = editor.classList.contains("is-after-prefilled") ? lineHeight : 0;
-          const writableHeight = Math.max(lineHeight, editor.clientHeight - prefilledOffset - paddingTop - paddingBottom);
+          const writableHeight = editor.clientHeight - paddingTop - paddingBottom;
 
-          return Math.max(1, Math.floor(writableHeight / lineHeight));
+          if (writableHeight > lineHeight) {
+            return Math.max(1, Math.floor(writableHeight / lineHeight));
+          }
+
+          const pageIndex = Number(editor.dataset.pageEditor || 0);
+          return pageIndex === 0 ? linesFirstPage : linesPerPage;
         };
 
         const getCaretLineNumber = (editor) => editor.value.slice(0, editor.selectionStart).split("\n").length;
 
-        const linesFirstPage = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--lines-first-page").trim()) || 29;
-        const linesPerPage = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--lines-per-page").trim()) || 33;
-        const getMaxLines = (editor) => Number(editor.dataset.pageEditor || 0) === 0 ? linesFirstPage : linesPerPage;
+        const getMaxLines = (editor) => {
+          const pageIndex = Number(editor.dataset.pageEditor || 0);
+          const cssCap = pageIndex === 0 ? linesFirstPage : linesPerPage;
+          return Math.max(1, Math.min(getEditorVisibleLineCount(editor), cssCap));
+        };
+
+        const stripLeadingEmptyLines = (lines) => {
+          const copy = [...lines];
+          while (copy.length && !copy[0].trim()) copy.shift();
+          return copy;
+        };
 
         const numberAreaTooltip = document.querySelector("[data-number-area-tooltip]");
 
@@ -1922,31 +2205,31 @@
 
         const isCaretInNumberArea = (editor) => {
           const { line, caretInLine } = getLineContextAtCaret(editor);
+          const editorCtx = measureFontContext(getComputedStyle(editor));
+          const caretPx = editorCtx.measureText(line.slice(0, caretInLine)).width;
           const numbered = line.match(numberedLinePattern);
 
           if (numbered) {
-            const numberEnd = numberedLinePrefix.length + numbered[1].length;
-            return caretInLine <= numberEnd;
+            const numberAreaEndPx = editorCtx.measureText(formatNumberedLine(editor, numbered[1], "")).width;
+            return caretPx < numberAreaEndPx;
           }
 
           const partial = line.slice(0, caretInLine);
           const leading = partial.match(/^(\s*)(\d*)/);
           if (!leading) return false;
 
-          const numberEnd = leading[1].length + leading[2].length;
-          return caretInLine <= numberEnd && leading[2].length > 0;
+          const paragraphColumnPx = getParagraphColumnPx(editor);
+          return caretPx < paragraphColumnPx && leading[2].length > 0;
         };
 
         const positionNumberAreaTooltip = (editor) => {
           if (!numberAreaTooltip) return;
 
           const styles = getComputedStyle(editor);
-          const frame = editor.closest(".ruled-editor-frame");
-          const frameStyles = frame ? getComputedStyle(frame) : getComputedStyle(document.body);
-          const lineHeight = Number.parseFloat(styles.lineHeight) || 26;
+          const lineHeight = Number.parseFloat(styles.lineHeight) || 30;
           const paddingTop = Number.parseFloat(styles.paddingTop) || 0;
           const paddingLeft = Number.parseFloat(styles.paddingLeft) || 0;
-          const gutterPx = getNumberGutterCh() * measureFontContext(frameStyles).measureText("0").width;
+          const gutterPx = getMarginLinePx(editor);
           const rect = editor.getBoundingClientRect();
           const lineNum = getCaretLineNumber(editor);
 
@@ -1961,7 +2244,10 @@
         };
 
         const jumpToParagraphFromNumberArea = (editor, insertedText = "") => {
-          insertAtSelection(editor, computeContinuationIndent(editor) + insertedText);
+          const { line, caretInLine } = getLineContextAtCaret(editor);
+          const linePrefix = line.slice(0, caretInLine);
+          const pad = spacesToParagraphColumn(editor, linePrefix);
+          insertAtSelection(editor, pad + insertedText);
           hideNumberAreaTooltip();
           // With a typed character the normalizer keeps the line; a bare Tab inserts
           // only indent spaces, which normalizeValue would trimEnd away — so skip the
@@ -2009,7 +2295,7 @@
 
             window.requestAnimationFrame(() => {
               const styles = getComputedStyle(editor);
-              const lineHeight = Number.parseFloat(styles.lineHeight) || 22;
+              const lineHeight = Number.parseFloat(styles.lineHeight) || 30;
               const paddingTop = Number.parseFloat(styles.paddingTop) || 0;
               const paddingBottom = Number.parseFloat(styles.paddingBottom) || 0;
               const writableHeight = Math.max(0, editor.clientHeight - paddingTop - paddingBottom);
@@ -2021,21 +2307,27 @@
           });
         };
 
-        const shouldShowPrefilledByConsonant = () => {
+        const TRANSLATION_SUBJECTS = new Set(["pali-to-thai", "thai-to-pali"]);
+        const TRANSLATION_GRADES = new Set(["1-2", "3"]);
+
+        const shouldShowPrefilledTranslationLine = () => {
           const grade = String(gradePicker?.dataset.value || "");
           const subject = String(subjectPicker?.dataset.value || "");
-          return (grade === "1-2" || grade === "3") && subject === "pali-to-thai";
+          return TRANSLATION_GRADES.has(grade) && TRANSLATION_SUBJECTS.has(subject);
         };
 
         const syncPrefilledAnswerLine = () => {
           const firstPageEditor = editors[0];
+          const firstPage = examPages[0];
           if (!prefilledAnswerLine || !firstPageEditor) return;
 
-          const show = shouldShowPrefilledByConsonant();
+          const show = shouldShowPrefilledTranslationLine();
           prefilledAnswerLine.hidden = !show;
           prefilledAnswerLine.setAttribute("aria-hidden", String(!show));
           firstPageEditor.classList.toggle("is-after-prefilled", show);
+          firstPage?.classList.toggle("has-prefilled-line", show);
           balanceCurrentPageLines();
+          renderAnnotations();
         };
 
         const bindEditor = (editor) => {
@@ -2070,41 +2362,56 @@
 
             if (
               isCaretInNumberArea(editor) &&
-              event.key.length === 1 &&
               !event.ctrlKey &&
               !event.metaKey &&
               !event.altKey &&
               !/^\d$/.test(event.key)
             ) {
-              event.preventDefault();
-              jumpToParagraphFromNumberArea(editor, event.key);
+              if (event.key === " " || event.key === "Spacebar") {
+                event.preventDefault();
+                jumpToParagraphFromNumberArea(editor);
+                return;
+              }
+              if (event.key.length === 1) {
+                event.preventDefault();
+                jumpToParagraphFromNumberArea(editor, event.key);
+              }
             }
           });
 
           bindNumberAreaTooltip(editor);
 
           editor.addEventListener("input", () => {
+            if (isApplyingSpill) return;
+
             const before = editor.value;
             const selectionStart = editor.selectionStart;
             const selectionEnd = editor.selectionEnd;
             let after = normalizeValue(before, editor);
 
-            const maxLines = getMaxLines(editor);
-            const afterLines = after.split("\n");
-            if (afterLines.length > maxLines) after = afterLines.slice(0, maxLines).join("\n");
-
+            let selStart = selectionStart;
+            let selEnd = selectionEnd;
             if (after !== before) {
               const delta = after.length - before.length;
-              editor.value = after;
-              editor.setSelectionRange(
-                Math.max(0, Math.min(selectionStart + delta, after.length)),
-                Math.max(0, Math.min(selectionEnd + delta, after.length))
-              );
+              selStart = Math.max(0, Math.min(selectionStart + delta, after.length));
+              selEnd = Math.max(0, Math.min(selectionEnd + delta, after.length));
             }
 
-            maybePrepareNextPage(editor);
+            isApplyingSpill = true;
+            try {
+              const result = applyEditorContentWithSpill(editor, after, selStart, selEnd);
+              if (result.focusPageIndex !== currentPageIndex) {
+                showPage(result.focusPageIndex);
+              }
+              result.editor.focus();
+              result.editor.setSelectionRange(result.selectionStart, result.selectionEnd);
+              maybePrepareNextPage(result.editor);
+              syncNumberAreaTooltip(result.editor);
+            } finally {
+              isApplyingSpill = false;
+            }
+
             scheduleAutoSave();
-            syncNumberAreaTooltip(editor);
           });
         };
 
@@ -2119,7 +2426,7 @@
 
             pageStack.append(page);
             refreshPageCollections();
-            bindEditor(editors[editors.length - 1]);
+            editors.forEach(bindEditor);
             const newCanvas = page.querySelector("[data-annotation-canvas]");
             if (newCanvas) bindAnnotationCanvas(newCanvas, examPages.length - 1);
             didCreate = true;
@@ -2179,6 +2486,9 @@
           options.querySelectorAll(".exam-picker-option").forEach((item) => {
             item.classList.toggle("is-selected", item.dataset.value === String(value));
           });
+          if (pickerType === "subject" || pickerType === "grade") {
+            syncPrefilledAnswerLine();
+          }
         };
 
         const updatePickerCurrentValue = (picker, value) => {
@@ -2337,14 +2647,92 @@
           if (event.key === "Escape") {
             closePickers();
             dismissProfileWizard();
+            if (submitModal && !submitModal.hidden) closeSubmitModal();
           }
         });
 
-        const normalizeLine = (line, indent) => {
+        const getGutterWidthPx = (editor) => getMarginLinePx(editor);
+
+        const getBodyTextStartPx = (editor) => getMarginLayout(editor).bodyStartPx;
+
+        const getParagraphColumnPx = (editor) => {
+          const editorCtx = measureFontContext(getComputedStyle(editor));
+          return editorCtx.measureText(getMarginLayout(editor).bodyIndent).width;
+        };
+
+        /** เลขข้อชิดขวาใน gutter — อยู่นอกเส้นคั่น ใกล้เส้นแต่ไม่ล้ำ */
+        const buildNumberPrefix = (editor, digits) => {
+          const editorCtx = measureFontContext(getComputedStyle(editor));
+          const marginLinePx = getMarginLinePx(editor);
+          const charStep = editorCtx.measureText("0").width || editorCtx.measureText("ก").width;
+          const maxEndPx = marginLinePx - charStep * numberMarginClearanceSteps;
+
+          if (editorCtx.measureText(digits).width > maxEndPx) return digits;
+
+          let leading = "";
+          let best = digits;
+          while (editorCtx.measureText(leading + digits).width <= maxEndPx) {
+            best = leading + digits;
+            leading += " ";
+          }
+          return best;
+        };
+
+        /** บรรทัดมีเลข: prefix + gap → คอลัมน์ย่อหน้า (auto-indent หลังเลข) */
+        const formatNumberedLine = (editor, numberStr, bodyText) => {
+          const editorCtx = measureFontContext(getComputedStyle(editor));
+          const paragraphColumnPx = getParagraphColumnPx(editor);
+          const prefix = buildNumberPrefix(editor, String(numberStr));
+
+          let composed = prefix;
+          while (editorCtx.measureText(composed).width < paragraphColumnPx) composed += " ";
+          return composed + String(bodyText || "").trimStart();
+        };
+
+        const spacesToParagraphColumn = (editor, linePrefix = "") => {
+          const editorCtx = measureFontContext(getComputedStyle(editor));
+          const paragraphColumnPx = getParagraphColumnPx(editor);
+          const usedPx = editorCtx.measureText(linePrefix).width;
+          let pad = "";
+          while (usedPx + editorCtx.measureText(pad).width < paragraphColumnPx) pad += " ";
+          return pad;
+        };
+
+        /** ป้องกันตัวอักษร (ที่ไม่ใช่เลขข้อ) อยู่นอกเส้นคั่นหน้า — เฉพาะเลขข้อสอบใน gutter ได้ */
+        const enforceMarginBoundaries = (line, editor) => {
           if (!line.trim()) return "";
 
           const numbered = line.match(numberedLinePattern);
-          if (numbered) return `${numberedLinePrefix}${numbered[1]}${numberedLineGap}${numbered[2].trimStart()}`;
+          if (numbered) return formatNumberedLine(editor, numbered[1], numbered[2]);
+
+          const editorCtx = measureFontContext(getComputedStyle(editor));
+          const { bodyStartPx, bodyIndent } = getMarginLayout(editor);
+
+          for (let i = 0; i < line.length; i += 1) {
+            const ch = line[i];
+            if (ch === " " || /\d/.test(ch)) continue;
+
+            const posPx = editorCtx.measureText(line.slice(0, i + 1)).width;
+            if (posPx < bodyStartPx) {
+              const body = line.slice(i).replace(/^\s+/, "");
+              return body ? bodyIndent + body : line.slice(0, i).trimEnd();
+            }
+            break;
+          }
+
+          const leading = line.match(/^(\s*)/)?.[1] || "";
+          if (editorCtx.measureText(leading).width < bodyStartPx && line.trim()) {
+            return bodyIndent + line.replace(/^\s+/, "");
+          }
+
+          return line;
+        };
+
+        const normalizeLine = (line, indent, editor) => {
+          if (!line.trim()) return "";
+
+          const numbered = line.match(numberedLinePattern);
+          if (numbered) return formatNumberedLine(editor, numbered[1], numbered[2]);
 
           return `${indent}${line.replace(/^\s+/, "")}`;
         };
@@ -2359,28 +2747,28 @@
           return context;
         };
 
-        const getWritableWidth = (editor) => {
-          const styles = getComputedStyle(editor);
-          const paddingLeft = Number.parseFloat(styles.paddingLeft) || 0;
-          const paddingRight = Number.parseFloat(styles.paddingRight) || 0;
-
-          return Math.max(40, editor.clientWidth - paddingLeft - paddingRight - wrapSafetyGap);
-        };
-
         const wrapLineToEditor = (line, editor, indent) => {
           if (!line.trim()) return [""];
 
           const context = createMeasureContext(editor);
-          const writableWidth = getWritableWidth(editor);
           const wrapped = [];
           let current = "";
+          let segmentStart = "";
+
+          const getWritableForSegment = () => {
+            const innerWidth = getEditorInnerWidth(editor);
+            const segmentStartPx = context.measureText(segmentStart).width;
+            return Math.max(40, innerWidth - segmentStartPx - wrapRightGap);
+          };
 
           Array.from(line).forEach((char) => {
             const candidate = `${current}${char}`;
+            const writableWidth = getWritableForSegment();
 
             if (current && context.measureText(candidate).width > writableWidth) {
               wrapped.push(current.trimEnd());
               current = `${indent}${char}`;
+              segmentStart = indent;
               return;
             }
 
@@ -2395,8 +2783,9 @@
           const indent = computeContinuationIndent(editor);
           return value
             .split("\n")
-            .map((line) => normalizeLine(line, indent))
+            .map((line) => normalizeLine(line, indent, editor))
             .flatMap((line) => wrapLineToEditor(line, editor, indent))
+            .map((line) => enforceMarginBoundaries(line, editor))
             .join("\n");
         };
 
@@ -2408,15 +2797,127 @@
           editor.setSelectionRange(start + text.length, start + text.length);
         };
 
+        const applyEditorContentWithSpill = (editor, normalizedText, selectionStart, selectionEnd) => {
+          const pageIndex = Number(editor.dataset.pageEditor || 0);
+          const maxLines = getMaxLines(editor);
+          const lines = normalizedText.split("\n");
+
+          if (lines.length <= maxLines) {
+            editor.value = normalizedText;
+            return {
+              editor,
+              focusPageIndex: pageIndex,
+              selectionStart: Math.min(selectionStart, normalizedText.length),
+              selectionEnd: Math.min(selectionEnd, normalizedText.length),
+            };
+          }
+
+          const keepValue = lines.slice(0, maxLines).join("\n");
+          const overflowLines = stripLeadingEmptyLines(lines.slice(maxLines));
+          const overflowValue = overflowLines.join("\n");
+
+          editor.value = keepValue;
+
+          if (!overflowValue) {
+            return {
+              editor,
+              focusPageIndex: pageIndex,
+              selectionStart: Math.min(selectionStart, keepValue.length),
+              selectionEnd: Math.min(selectionEnd, keepValue.length),
+            };
+          }
+
+          const spillBoundary =
+            keepValue.length + (keepValue.length > 0 && overflowValue.length > 0 ? 1 : 0);
+          const cursorInSpill = selectionStart >= spillBoundary;
+          const clampedStart = Math.min(selectionStart, keepValue.length);
+          const clampedEnd = Math.min(selectionEnd, keepValue.length);
+
+          if (pageIndex >= maxPageCount - 1) {
+            if (overflowValue.length) showToast("ถึงจำนวนหน้าสูงสุดแล้ว — ส่วนที่เกินถูกตัด");
+            return {
+              editor,
+              focusPageIndex: pageIndex,
+              selectionStart: clampedStart,
+              selectionEnd: clampedEnd,
+            };
+          }
+
+          if (pageIndex >= examPages.length - 1) {
+            ensurePageCount(examPages.length + 1, false);
+          }
+
+          const nextEditor = editors[pageIndex + 1];
+          if (!nextEditor) {
+            return {
+              editor,
+              focusPageIndex: pageIndex,
+              selectionStart: clampedStart,
+              selectionEnd: clampedEnd,
+            };
+          }
+
+          const mergedNext =
+            overflowValue + (nextEditor.value.trim() ? `\n${nextEditor.value.trim()}` : "");
+          const normalizedNext = normalizeValue(mergedNext, nextEditor);
+
+          if (cursorInSpill) {
+            const nextSelStart = Math.max(0, selectionStart - spillBoundary);
+            const nextSelEnd = Math.max(0, selectionEnd - spillBoundary);
+            return applyEditorContentWithSpill(nextEditor, normalizedNext, nextSelStart, nextSelEnd);
+          }
+
+          applyEditorContentWithSpill(nextEditor, normalizedNext, 0, 0);
+          return {
+            editor,
+            focusPageIndex: pageIndex,
+            selectionStart: clampedStart,
+            selectionEnd: clampedEnd,
+          };
+        };
+
         editors.forEach(bindEditor);
 
-        const applyLineHeight = (lineHeight) => {
+        const applyLineHeightOnly = (lineHeight) => {
           const fontSize = Math.round(lineHeight * 0.54);
 
           document.documentElement.style.setProperty("--line-height", `${lineHeight}px`);
           document.documentElement.style.setProperty("--editor-font-size", `${fontSize}px`);
           if (lineHeightValue) lineHeightValue.value = `${lineHeight}px`;
+        };
+
+        const reflowAllPagesAfterLayoutChange = () => {
+          if (!editors.length) return;
+
+          computeContinuationIndent.reset();
+          const combined = editors
+            .map((editor) => editor.value.trimEnd())
+            .filter(Boolean)
+            .join("\n");
+
+          editors.forEach((editor) => {
+            editor.value = "";
+          });
+
+          if (!combined) {
+            balanceCurrentPageLines();
+            return;
+          }
+
+          isApplyingSpill = true;
+          try {
+            const normalized = normalizeValue(combined, editors[0]);
+            applyEditorContentWithSpill(editors[0], normalized, 0, 0);
+          } finally {
+            isApplyingSpill = false;
+          }
+
           balanceCurrentPageLines();
+        };
+
+        const applyLineHeight = (lineHeight) => {
+          applyLineHeightOnly(lineHeight);
+          reflowAllPagesAfterLayoutChange();
         };
 
         const getStudentDisplayName = () => [
@@ -2449,7 +2950,7 @@
           schema: "paligo.exam.answerBookDraft.v1",
           ownerId: localOwnerId,
           bookId: currentBookId,
-          lineHeight: lineHeightControls[0]?.value || "22",
+          lineHeight: lineHeightControls[0]?.value || "30",
           page: currentPageIndex,
           profile: studentProfile ? { ...studentProfile } : null,
           deliveryMethod: studentProfile?.deliveryMethod || "line",
@@ -2484,10 +2985,8 @@
             updatedAt: draft.savedAt,
             draft,
           };
-          const nextBooks = books.filter((book) => book.id !== currentBookId);
-          nextBooks.push(nextBook);
-          setStoredList(booksStorageKey, nextBooks);
-          localStorage.setItem(activeBookStorageKey, currentBookId);
+          setStoredList(booksStorageKey, upsertBookInList(books, nextBook));
+          writeRaw(activeBookStorageKey, currentBookId);
           return nextBook;
         };
 
@@ -2564,12 +3063,6 @@
         };
 
         const submitForReview = async () => {
-          if (!studentProfile) {
-            document.body.classList.add("needs-profile");
-            setSaveStatus("กรอกโปรไฟล์ก่อนส่งตรวจ");
-            return;
-          }
-
           const book = getCurrentBook();
           const status = normalizeBookStatus(book?.status);
           if (status === BOOK_STATUS.underReview) {
@@ -2581,34 +3074,30 @@
             return;
           }
 
-          const existingForBook = getStoredList(submissionsStorageKey).filter((item) => item.bookId === currentBookId);
-          if (
-            existingForBook.length &&
-            !window.confirm(
-              `สมุดนี้เคยส่งตรวจแล้ว ${toThaiNumber(existingForBook.length)} ครั้ง — ส่งอีกครั้งจะสร้าง submission ใหม่ ต้องการดำเนินการต่อหรือไม่?`
-            )
-          ) {
+          saveDraft({ silent: true });
+
+          let result = await PaligoExamSubmit.submitBookToInbox(currentBookId);
+          if (!result.ok && result.reason === "resubmit_confirm") {
+            if (
+              !window.confirm(`${result.message} — ต้องการดำเนินการต่อหรือไม่?`)
+            ) {
+              return;
+            }
+            result = await PaligoExamSubmit.submitBookToInbox(currentBookId, { skipResubmitConfirm: true });
+          }
+
+          if (!result.ok) {
+            if (result.reason === "no_profile") {
+              document.body.classList.add("needs-profile");
+            }
+            setSaveStatus(result.message || "ส่งตรวจไม่ได้");
             return;
           }
 
-          saveDraft({ silent: true });
-          const submission = await createSubmissionPackage();
-          const submissions = getStoredList(submissionsStorageKey);
-          submissions.push(submission);
-          setStoredList(submissionsStorageKey, submissions);
-          upsertBookRecord(currentBookId, {
-            status: BOOK_STATUS.underReview,
-            submittedAt: submission.submittedAt,
-          });
-          downloadJson(`${submission.id}.paligo-submission.json`, submission);
-          try {
-            sharedDownloadJson(`${currentBookId}.to-reviewer.paligo-transfer.json`, buildBookTransfer(currentBookId, "to-reviewer"));
-          } catch {
-            /* book may not be indexed yet on first submit */
-          }
           applyPermissions();
-          showSubmitModal(submission);
-          setSaveStatus("ส่งตรวจแล้ว — คำตอบถูกล็อกทั้งสองฝ่าย");
+          const submission = result.submission || getLatestSubmissionForBook(currentBookId);
+          if (submission) await showSubmitModal(submission, result);
+          setSaveStatus(result.message || "ส่งตรวจแล้ว — ส่งโทเค็นเข้า inbox ครู");
         };
 
         const saveProfileFromForm = () => {
@@ -2690,14 +3179,14 @@
           try {
             if (draft.bookId) {
               currentBookId = draft.bookId;
-              localStorage.setItem(activeBookStorageKey, currentBookId);
+              writeRaw(activeBookStorageKey, currentBookId);
             }
-            const lineHeight = Number(draft.lineHeight || 22);
+            const lineHeight = Number(draft.lineHeight || 30);
 
             lineHeightControls.forEach((control) => {
               control.value = String(lineHeight);
             });
-            applyLineHeight(lineHeight);
+            applyLineHeightOnly(lineHeight);
 
             ensurePageCount(draft.pages?.length || minPageCount);
 
@@ -2721,6 +3210,7 @@
             }
 
             syncPrefilledAnswerLine();
+            reflowAllPagesAfterLayoutChange();
 
             annotations = Array.isArray(draft.annotations) ? draft.annotations : [];
             renderAnnotations();
@@ -2752,7 +3242,7 @@
           );
         });
 
-        examPages.forEach((page, pageIndex) => {
+          examPages.forEach((page, pageIndex) => {
           const canvas = page.querySelector("[data-annotation-canvas]");
           if (canvas) bindAnnotationCanvas(canvas, pageIndex);
           const reviewCanvas = page.querySelector("[data-review-canvas]");
@@ -2767,12 +3257,20 @@
               scoreStamps = upsertScoreStamp(scoreStamps, { page, line, value });
               renderReviewOverlays();
             },
-            onErrorStamp: ({ page, line, kind }) => {
-              errorStamps = upsertErrorStamp(errorStamps, { page, line, kind });
-              renderReviewOverlays();
+          });
+          const editor = page.querySelector(".ruled-editor");
+          bindHighlightSelection({
+            editor,
+            pageIndex,
+            isActive: () => reviewMode && isHighlightMode,
+            onSelection: (selection) => {
+              pendingHighlightSelection = selection;
+              showHighlightPickerModal(selection);
             },
           });
         });
+
+        editors.forEach(bindEditor);
 
         pagePrevButton?.addEventListener("click", () => showPage(currentPageIndex - 1));
         pageNextButton?.addEventListener("click", () => showPage(currentPageIndex + 1));
@@ -2788,7 +3286,7 @@
           }
 
           currentBookId = activeSubmission.bookId;
-          localStorage.setItem(activeBookStorageKey, currentBookId);
+          writeRaw(activeBookStorageKey, currentBookId);
           const pageTexts = (activeSubmission.pages || []).map((page) => page.text || "");
           ensurePageCount(Math.max(pageTexts.length, minPageCount));
           pageTexts.forEach((text, index) => {
@@ -2801,8 +3299,10 @@
           if (saved) {
             scoreStamps = saved.scoreStamps ? saved.scoreStamps.slice() : [];
             errorStamps = saved.errorStamps ? saved.errorStamps.slice() : [];
+            textHighlights = saved.textHighlights ? saved.textHighlights.slice() : [];
             reviewSignature = saved.signature || null;
           }
+          savedReviewerSignature = getReviewerSignature();
           return true;
         };
 
@@ -2812,6 +3312,7 @@
           if (!review) return;
           scoreStamps = review.scoreStamps || [];
           errorStamps = review.errorStamps || [];
+          textHighlights = review.textHighlights || [];
           reviewSignature = review.signature || null;
         };
 
@@ -2819,7 +3320,7 @@
           if (!activeSubmission) return null;
           let reviewerProfile = null;
           try {
-            reviewerProfile = JSON.parse(localStorage.getItem("paligo-exam-reviewer-profile-v1") || "null");
+            reviewerProfile = JSON.parse(readRaw(KEYS.reviewerProfile) || "null");
           } catch {
             reviewerProfile = null;
           }
@@ -2839,6 +3340,7 @@
             reviewerRole: reviewerProfile?.role || "teacher-reviewer",
             scoreStamps: scoreStamps.slice(),
             errorStamps: errorStamps.slice(),
+            textHighlights: textHighlights.slice(),
             signature: reviewSignature,
             score,
             reviewedAt: new Date().toISOString(),
@@ -2856,13 +3358,105 @@
         const setActiveStampKind = (kind) => {
           activeStampKind = kind;
           isReviewStamping = Boolean(kind);
+          if (kind) {
+            isHighlightMode = false;
+          }
           applyPermissions();
+        };
+
+        const setHighlightMode = (enabled) => {
+          isHighlightMode = enabled;
+          if (enabled) {
+            activeStampKind = null;
+            isReviewStamping = false;
+          }
+          applyPermissions();
+          setSaveStatus(
+            enabled ? "โหมดไฮไลท์ — ลากเลือกคำศัพท์บนกระดาษ" : "ปิดโหมดไฮไลท์"
+          );
+        };
+
+        const closeHighlightPickerModal = () => {
+          if (!highlightPickerModal) return;
+          highlightPickerModal.hidden = true;
+          pendingHighlightSelection = null;
+        };
+
+        const showHighlightPickerModal = (selection) => {
+          if (!highlightPickerModal || !highlightPickerQuote) return;
+          highlightPickerQuote.textContent = `「${selection.text}」`;
+          highlightPickerModal.hidden = false;
+        };
+
+        const closeHighlightViewModal = () => {
+          if (!highlightViewModal) return;
+          highlightViewModal.hidden = true;
+          highlightViewModal.dataset.highlightId = "";
+        };
+
+        const showHighlightViewModal = (item, allowRemove = false) => {
+          if (!highlightViewModal || !highlightViewQuote || !highlightViewLabel) return;
+          highlightViewLabel.textContent = ERROR_LABELS[item.kind] || item.kind;
+          highlightViewQuote.textContent = `「${item.text || ""}」`;
+          if (highlightViewMeta) {
+            highlightViewMeta.textContent = `หน้า ${toThaiNumber(item.page)} · บรรทัด ${toThaiNumber(item.line)}`;
+          }
+          highlightViewModal.dataset.highlightId = item.id;
+          if (removeHighlightButton) {
+            removeHighlightButton.hidden = !allowRemove;
+          }
+          highlightViewModal.hidden = false;
+        };
+
+        const renderSignaturePreview = () => {
+          if (!signaturePreview) return;
+          const source = savedReviewerSignature;
+          if (!source?.dataUrl) {
+            signaturePreview.classList.add("is-empty");
+            signaturePreview.replaceChildren();
+            signaturePreview.textContent = "ยังไม่มีลายเซ็นที่บันทึก";
+            return;
+          }
+          signaturePreview.classList.remove("is-empty");
+          signaturePreview.replaceChildren();
+          const img = document.createElement("img");
+          img.src = source.dataUrl;
+          img.alt = source.label || "ลายเซ็นผู้ตรวจ";
+          signaturePreview.append(img);
+        };
+
+        const openSignatureModal = () => {
+          savedReviewerSignature = getReviewerSignature();
+          renderSignaturePreview();
+          if (signatureModal) signatureModal.hidden = false;
+        };
+
+        const closeSignatureModal = () => {
+          if (signatureModal) signatureModal.hidden = true;
+        };
+
+        const applySavedSignatureToPage = () => {
+          const source = savedReviewerSignature;
+          if (!source?.dataUrl) {
+            setSaveStatus("อัปโหลดลายเซ็นใน modal ก่อน");
+            return;
+          }
+          reviewSignature = {
+            dataUrl: source.dataUrl,
+            page: indexToDisplayPage(currentPageIndex),
+            line: currentPageIndex === 0 ? linesFirstPage : linesPerPage,
+            widthPx: source.widthPx || 120,
+            label: source.label || "ลายเซ็นผู้ตรวจ",
+          };
+          renderReviewOverlays();
+          setSaveStatus("ลงลายเซ็นบนหน้าปัจจุบันแล้ว");
+          closeSignatureModal();
         };
 
         document.querySelector("[data-review-stamp-mode]")?.addEventListener("click", () => {
           const nextKind = isReviewStamping ? null : "score-3";
           setActiveStampKind(nextKind);
-          setSaveStatus(nextKind ? "โหมด stamp เปิด — แตะบรรทัดบนกระดาษ" : "ปิดโหมด stamp");
+          setSaveStatus(nextKind ? "โหมด stamp คะแนน — แตะบรรทัดบนกระดาษ" : "ปิดโหมด stamp");
         });
 
         document.querySelectorAll("[data-score-stamp]").forEach((button) => {
@@ -2870,35 +3464,98 @@
             setActiveStampKind(`score-${button.dataset.scoreStamp}`);
           });
         });
-        document.querySelectorAll("[data-error-stamp]").forEach((button) => {
+
+        highlightModeButton?.addEventListener("click", () => {
+          setHighlightMode(!isHighlightMode);
+        });
+
+        document.querySelector("[data-clear-all-stamps]")?.addEventListener("click", () => {
+          if (
+            !window.confirm(
+              "ล้าง stamp คะแนนและไฮไลท์คำศัพท์ทั้งหมดในสมุดนี้หรือไม่?"
+            )
+          ) {
+            return;
+          }
+          scoreStamps = [];
+          errorStamps = [];
+          textHighlights = [];
+          renderReviewOverlays();
+          setSaveStatus("ล้าง stamp ทั้งหมดแล้ว");
+        });
+
+        document.querySelectorAll("[data-highlight-kind]").forEach((button) => {
           button.addEventListener("click", () => {
-            setActiveStampKind(button.dataset.errorStamp);
+            if (!pendingHighlightSelection) return;
+            textHighlights = upsertTextHighlight(textHighlights, {
+              ...pendingHighlightSelection,
+              id: createHighlightId(),
+              kind: button.dataset.highlightKind,
+            });
+            closeHighlightPickerModal();
+            renderReviewOverlays();
+            setSaveStatus(`ใส่ข้อคิดเห็น「${ERROR_LABELS[button.dataset.highlightKind]}」แล้ว`);
           });
+        });
+
+        document.querySelector("[data-close-highlight-picker]")?.addEventListener("click", closeHighlightPickerModal);
+        highlightPickerModal?.addEventListener("click", (event) => {
+          if (event.target === highlightPickerModal) closeHighlightPickerModal();
+        });
+
+        document.querySelector("[data-close-highlight-view]")?.addEventListener("click", closeHighlightViewModal);
+        highlightViewModal?.addEventListener("click", (event) => {
+          if (event.target === highlightViewModal) closeHighlightViewModal();
+        });
+
+        removeHighlightButton?.addEventListener("click", () => {
+          const highlightId = highlightViewModal?.dataset.highlightId;
+          if (!highlightId) return;
+          textHighlights = removeTextHighlight(textHighlights, highlightId);
+          closeHighlightViewModal();
+          renderReviewOverlays();
+          setSaveStatus("ลบไฮไลท์แล้ว");
+        });
+
+        document.querySelector("[data-open-signature-modal]")?.addEventListener("click", openSignatureModal);
+        document.querySelector("[data-close-signature-modal]")?.addEventListener("click", closeSignatureModal);
+        document.querySelector("[data-apply-signature]")?.addEventListener("click", applySavedSignatureToPage);
+        signatureModal?.addEventListener("click", (event) => {
+          if (event.target === signatureModal) closeSignatureModal();
+        });
+
+        document.querySelector("[data-clear-saved-signature]")?.addEventListener("click", () => {
+          savedReviewerSignature = saveReviewerSignature(null);
+          renderSignaturePreview();
+          setSaveStatus("ลบลายเซ็นที่บันทึกแล้ว");
         });
 
         signatureFileInput?.addEventListener("change", async () => {
           const file = signatureFileInput.files?.[0];
           if (!file) return;
-          const dataUrl = await new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(String(reader.result || ""));
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-          });
-          reviewSignature = {
-            dataUrl,
-            page: indexToDisplayPage(currentPageIndex),
-            line: linesPerPage,
-            widthPx: 120,
-            label: "ลายเซ็นผู้ตรวจ",
-          };
-          signatureFileInput.value = "";
-          renderReviewOverlays();
-          setSaveStatus("วางลายเซ็นบนหน้าปัจจุบันแล้ว");
+          try {
+            const dataUrl = await new Promise((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = () => resolve(String(reader.result || ""));
+              reader.onerror = reject;
+              reader.readAsDataURL(file);
+            });
+            savedReviewerSignature = saveReviewerSignature({
+              dataUrl,
+              widthPx: 120,
+              label: "ลายเซ็นผู้ตรวจ",
+            });
+            renderSignaturePreview();
+            setSaveStatus("บันทึกลายเซ็นแล้ว — กด「ใช้ลายเซ็นนี้ในหน้านี้」");
+          } catch {
+            setSaveStatus("อัปโหลดลายเซ็นไม่สำเร็จ");
+          } finally {
+            signatureFileInput.value = "";
+          }
         });
 
         document.querySelector("[data-save-review-paper]")?.addEventListener("click", saveReviewFromPaper);
-        document.querySelector("[data-return-review-paper]")?.addEventListener("click", () => {
+        document.querySelector("[data-return-review-paper]")?.addEventListener("click", async () => {
           const result = saveReviewFromPaper();
           if (!result) return;
           downloadJson(`${result.id}.paligo-review.json`, result);
@@ -2907,6 +3564,20 @@
             review: result,
             reviewReceivedAt: new Date().toISOString(),
           });
+
+          if (window.PaligoInboxClient?.isLoggedIn?.() && PaligoInboxClient.getInboxRole?.() === "reviewer") {
+            try {
+              const pushResult = await PaligoExamSubmit.pushReviewToStudent(result.bookId);
+              if (pushResult.ok) {
+                setSaveStatus(pushResult.message || "ส่งผลตรวจเข้า inbox นักเรียนแล้ว");
+                return;
+              }
+              setSaveStatus(`${pushResult.message || "ส่ง inbox ไม่สำเร็จ"} — ดาวน์โหลดไฟล์แทน`);
+            } catch (error) {
+              setSaveStatus(`${error.message || "ส่ง inbox ไม่สำเร็จ"} — ดาวน์โหลดไฟล์แทน`);
+            }
+          }
+
           try {
             sharedDownloadJson(
               `${result.bookId}.to-student.paligo-transfer.json`,
@@ -2915,7 +3586,7 @@
           } catch {
             /* transfer optional if book missing locally */
           }
-          setSaveStatus("ส่งคืนนักเรียนแล้ว — ให้นำเข้าที่ ผลตรวจของฉัน");
+          setSaveStatus("ส่งคืนนักเรียนแล้ว — ให้นำเข้าที่ ผลตรวจของฉัน หรือรับจาก inbox");
         });
 
         startNewRevisionButton?.addEventListener("click", () => {
@@ -2924,6 +3595,8 @@
           applyPermissions();
           setSaveStatus("เริ่ม revision ใหม่แล้ว");
         });
+
+        cancelSubmitButton?.addEventListener("click", handleCancelSubmit);
 
         exportTransferButton?.addEventListener("click", () => {
           if (!lastSubmissionPackage) return;
@@ -2937,11 +3610,14 @@
           }
         });
 
-        document.querySelector("[data-close-submit-modal]")?.addEventListener("click", () => {
-          if (submitModal) submitModal.hidden = true;
+        downloadSubmissionButton?.addEventListener("click", () => {
+          if (!lastSubmissionPackage) return;
+          sharedDownloadJson(`${lastSubmissionPackage.id}.paligo-submission.json`, lastSubmissionPackage);
         });
+
+        document.querySelector("[data-close-submit-modal]")?.addEventListener("click", closeSubmitModal);
         submitModal?.addEventListener("click", (event) => {
-          if (event.target === submitModal) submitModal.hidden = true;
+          if (event.target === submitModal) closeSubmitModal();
         });
 
         submitReviewButton?.addEventListener("click", () => {
@@ -2969,7 +3645,7 @@
         });
 
         lineHeightControls.forEach((control) => {
-          const responsiveDefault = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--line-height").trim()) || 26;
+          const responsiveDefault = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--line-height").trim()) || 30;
           control.value = String(responsiveDefault);
           control.addEventListener("input", () => {
             applyLineHeight(Number(control.value));

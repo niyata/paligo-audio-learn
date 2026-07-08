@@ -1,0 +1,220 @@
+/* Exam paper date pickers — shared with ruled-lines & exam-books filter */
+.exam-date-line {
+  align-items: center;
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  min-height: 1.35rem;
+  position: relative;
+  white-space: nowrap;
+}
+
+.exam-picker {
+  display: inline-flex;
+  position: relative;
+}
+
+.exam-picker-trigger {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  color: rgba(31, 45, 137, 0.76);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  line-height: 1.35;
+  min-height: 28px;
+  padding: 0 2px;
+  text-align: center;
+}
+
+.exam-picker-trigger:focus-visible {
+  outline: 1px solid rgba(31, 45, 137, 0.76);
+  outline-offset: 2px;
+}
+
+.picker-placeholder {
+  font-size: 0.64em;
+  letter-spacing: 0;
+  opacity: 0.72;
+}
+
+.exam-picker-trigger.has-value .picker-placeholder,
+.picker-value:empty {
+  display: none;
+}
+
+.exam-date-day {
+  min-width: 5ch;
+}
+
+.exam-date-month {
+  min-width: 11ch;
+}
+
+.exam-date-year {
+  min-width: 8ch;
+}
+
+.exam-picker-popover {
+  background: #fffaf0;
+  border: 1px solid rgba(31, 45, 137, 0.76);
+  border-radius: 6px;
+  box-shadow: 0 12px 28px rgba(31, 45, 137, 0.18);
+  left: 50%;
+  min-width: 180px;
+  padding: 8px;
+  pointer-events: auto;
+  position: absolute;
+  top: calc(100% + 4px);
+  transform: translateX(-50%);
+  z-index: 120;
+}
+
+.exam-picker-title {
+  color: rgba(31, 45, 137, 0.76);
+  font-size: 0.72rem;
+  line-height: 1.2;
+  margin-bottom: 6px;
+  text-align: center;
+}
+
+.exam-picker-grid {
+  display: grid;
+  gap: 4px;
+  grid-template-columns: repeat(7, minmax(24px, 1fr));
+}
+
+.exam-year-grid {
+  grid-template-columns: repeat(4, minmax(42px, 1fr));
+  max-height: 210px;
+  overflow: auto;
+}
+
+.exam-month-grid {
+  grid-template-columns: repeat(2, minmax(90px, 1fr));
+}
+
+.exam-picker-option.has-exam {
+  border-color: rgba(31, 45, 137, 0.42);
+  color: rgba(31, 45, 137, 0.96);
+  font-weight: 800;
+}
+
+.exam-picker-option.no-exam {
+  border-color: rgba(31, 45, 137, 0.08);
+  color: rgba(31, 45, 137, 0.32);
+  font-weight: 600;
+}
+
+.exam-picker-option.no-exam:hover,
+.exam-picker-option.no-exam.is-selected {
+  background: rgba(31, 45, 137, 0.05);
+  color: rgba(31, 45, 137, 0.48);
+}
+
+.exam-picker-option.has-exam:hover,
+.exam-picker-option.has-exam.is-selected {
+  background: rgba(31, 45, 137, 0.14);
+  color: rgba(31, 45, 137, 1);
+}
+
+.exam-picker-trigger.has-value.has-exam-date {
+  color: rgba(31, 45, 137, 0.96);
+  font-weight: 800;
+}
+
+.exam-picker-trigger.has-value.no-exam-date {
+  color: rgba(31, 45, 137, 0.38);
+  font-weight: 600;
+}
+
+.exam-picker-trigger.is-today-part {
+  text-decoration: underline;
+  text-decoration-color: rgba(31, 45, 137, 0.42);
+  text-underline-offset: 3px;
+}
+
+.filter-date-wrap .exam-picker-popover::before {
+  color: rgba(31, 45, 137, 0.62);
+  content: "ขอบวง = วันนี้ · ตัวเลขเข้ม = มีสมุดสอบ";
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-bottom: 6px;
+  text-align: center;
+}
+
+.filter-date-wrap .exam-picker-popover {
+  min-width: 196px;
+}
+
+.filter-date-wrap .exam-picker-title {
+  margin-bottom: 2px;
+}
+
+.exam-picker-option {
+  appearance: none;
+  background: transparent;
+  border: 1px solid rgba(31, 45, 137, 0.18);
+  border-radius: 4px;
+  color: rgba(31, 45, 137, 0.76);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.4;
+  min-height: 24px;
+  padding: 2px 4px;
+}
+
+.exam-picker-option:hover,
+.exam-picker-option.is-selected {
+  background: rgba(31, 45, 137, 0.1);
+}
+
+.exam-picker-option.is-current {
+  background: rgba(31, 45, 137, 0.06);
+  border-color: rgba(31, 45, 137, 0.76);
+  box-shadow: 0 0 0 2px rgba(31, 45, 137, 0.18);
+}
+
+.exam-picker-option.is-current.has-exam {
+  box-shadow: 0 0 0 2px rgba(31, 45, 137, 0.28);
+}
+
+.exam-picker-option.is-current.no-exam {
+  box-shadow: 0 0 0 2px rgba(31, 45, 137, 0.12);
+}
+
+.exam-picker-option.is-current.is-selected {
+  background: rgba(31, 45, 137, 0.16);
+  box-shadow: 0 0 0 2px rgba(31, 45, 137, 0.28);
+}
+
+.filter-date-wrap {
+  align-items: center;
+  background: #fffaf0;
+  border: 1px solid rgba(154, 106, 16, 0.42);
+  border-radius: 6px;
+  display: flex;
+  justify-content: center;
+  min-height: 38px;
+  padding: 4px 8px;
+  position: relative;
+}
+
+.filter-date-wrap:focus-within {
+  border-color: rgba(154, 106, 16, 0.72);
+  box-shadow: 0 0 0 2px rgba(154, 106, 16, 0.12);
+}
+
+.filter-date-wrap .exam-date-line {
+  width: 100%;
+}
+
+.filter-date-wrap .exam-picker-trigger {
+  font-size: 0.88rem;
+}

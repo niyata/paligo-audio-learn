@@ -1,0 +1,313 @@
+/**
+ * Paligo tape player — footer grid aligned with content shell (Apple HIG mini-player)
+ */
+@import url("paligo-design-tokens.css");
+
+.paligo-content.paligo-content--with-player {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - var(--topbar-height));
+  padding-bottom: 0;
+}
+
+.paligo-content.paligo-content--with-player .page-shell {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+}
+
+.tape-player {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: color-mix(in srgb, var(--paligo-paper-bg) 94%, transparent);
+  border-top: 1px solid var(--paligo-paper-border);
+  bottom: 0;
+  box-shadow: 0 -8px 28px var(--paligo-warm-shadow);
+  flex-shrink: 0;
+  margin-top: auto;
+  min-height: var(--paligo-player-height);
+  padding: 10px var(--paligo-content-padding-x) calc(10px + env(safe-area-inset-bottom, 0px));
+  position: sticky;
+  z-index: 100;
+}
+
+.tape-player__grid {
+  align-items: center;
+  display: grid;
+  gap: 6px 12px;
+  grid-template-areas:
+    "art transport tools"
+    "art meta tools";
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  margin: 0 auto;
+  max-width: var(--paligo-content-max-width);
+  width: 100%;
+}
+
+.tape-player__art {
+  align-items: center;
+  background: linear-gradient(135deg, var(--paligo-exam-blue) 0%, #4a6cf7 100%);
+  border-radius: 10px;
+  color: #fff;
+  display: flex;
+  flex-shrink: 0;
+  font-size: 18px;
+  font-weight: 700;
+  grid-area: art;
+  height: 44px;
+  justify-content: center;
+  width: 44px;
+}
+
+.tape-player__transport {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  grid-area: transport;
+  min-width: 0;
+}
+
+.tape-player__meta {
+  align-items: center;
+  color: var(--paligo-muted);
+  display: flex;
+  font-size: 12px;
+  gap: 8px;
+  grid-area: meta;
+  min-width: 0;
+}
+
+.tape-player__meta strong {
+  color: var(--paligo-ink);
+  font-size: 13px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tape-player__tools {
+  align-items: center;
+  display: flex;
+  flex-shrink: 0;
+  gap: 8px;
+  grid-area: tools;
+}
+
+.tape-player__play {
+  align-items: center;
+  background: var(--paligo-exam-blue);
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  flex-shrink: 0;
+  height: 40px;
+  justify-content: center;
+  min-height: 44px;
+  min-width: 44px;
+  width: 40px;
+}
+
+.tape-player__play:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+
+.tape-player__play:focus-visible {
+  outline: 2px solid var(--paligo-focus-ring);
+  outline-offset: 2px;
+}
+
+.tape-player__play svg {
+  display: block;
+  fill: currentColor;
+  height: 18px;
+  width: 18px;
+}
+
+.tape-player__progress-wrap {
+  align-items: center;
+  display: flex;
+  flex: 1;
+  gap: 10px;
+  min-width: 0;
+}
+
+.tape-player__range {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+  flex: 1;
+  height: 20px;
+  min-width: 60px;
+}
+
+.tape-player__range::-webkit-slider-runnable-track {
+  background: linear-gradient(
+    to right,
+    var(--paligo-exam-blue) 0%,
+    var(--paligo-exam-blue) var(--range-progress, 0%),
+    rgba(31, 45, 137, 0.18) var(--range-progress, 0%),
+    rgba(31, 45, 137, 0.18) 100%
+  );
+  border-radius: 999px;
+  height: 4px;
+}
+
+.tape-player__range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--paligo-exam-blue);
+  border: 0;
+  border-radius: 999px;
+  height: 12px;
+  margin-top: -4px;
+  width: 12px;
+}
+
+.tape-player__range::-moz-range-track {
+  background: rgba(31, 45, 137, 0.18);
+  border: 0;
+  border-radius: 999px;
+  height: 4px;
+}
+
+.tape-player__range::-moz-range-progress {
+  background: var(--paligo-exam-blue);
+  border-radius: 999px;
+  height: 4px;
+}
+
+.tape-player__range::-moz-range-thumb {
+  background: var(--paligo-exam-blue);
+  border: 0;
+  border-radius: 999px;
+  height: 12px;
+  width: 12px;
+}
+
+.tape-player__time {
+  color: var(--paligo-muted);
+  flex-shrink: 0;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  min-width: 42px;
+  text-align: right;
+}
+
+.tape-player__speed {
+  align-items: center;
+  background: var(--paligo-exam-blue-soft);
+  border: 1px solid var(--paligo-paper-border);
+  border-radius: 10px;
+  color: var(--paligo-ink);
+  display: inline-flex;
+  font: inherit;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  gap: 2px;
+  min-height: 44px;
+  padding: 0 8px;
+}
+
+.tape-player__speed-step {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  color: var(--paligo-muted);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 16px;
+  height: 28px;
+  justify-content: center;
+  line-height: 1;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0;
+  width: 24px;
+}
+
+.tape-player__speed-step:hover {
+  background: var(--sidebar-bg-hover);
+  color: var(--paligo-exam-blue);
+}
+
+.tape-player__volume-wrap {
+  align-items: center;
+  display: none;
+  gap: 6px;
+}
+
+.tape-player__volume-wrap svg {
+  color: var(--paligo-exam-blue-muted);
+  fill: currentColor;
+  flex-shrink: 0;
+  height: 18px;
+  width: 18px;
+}
+
+.tape-player__volume {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+  height: 20px;
+  width: 72px;
+}
+
+.tape-player__volume::-webkit-slider-runnable-track {
+  background: rgba(31, 45, 137, 0.18);
+  border-radius: 999px;
+  height: 4px;
+}
+
+.tape-player__volume::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--paligo-exam-blue);
+  border: 0;
+  border-radius: 999px;
+  height: 10px;
+  margin-top: -3px;
+  width: 10px;
+}
+
+@media (min-width: 720px) {
+  .tape-player__volume-wrap {
+    display: flex;
+  }
+}
+
+@media (max-width: 640px) {
+  .tape-player {
+    min-height: var(--paligo-player-height-mobile);
+  }
+
+  .tape-player__grid {
+    gap: 8px;
+    grid-template-areas:
+      "transport transport tools"
+      "meta meta meta";
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .tape-player__art {
+    display: none;
+  }
+
+  .tape-player__tools {
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 767px) {
+  .paligo-app.is-mobile-nav-open .tape-player {
+    padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+  }
+}

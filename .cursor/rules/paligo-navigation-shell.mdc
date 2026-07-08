@@ -1,28 +1,68 @@
 ---
-description: เมนูนำทาง Paligo — สีเล่มสมุด ชื่อเมนูไทย และโครงคอร์สเรียนบาลี
+description: หน้าผู้ใช้ Paligo ต้องมี sidebar + ลงทะเบียนเมนูเสมอ
 globs: "**/*.{html,js,css}"
-alwaysApply: false
+alwaysApply: true
 ---
 
-# Paligo Navigation & Shell
+# Paligo Navigation & Shell (บังคับ)
 
-อ่าน PRD เต็ม: `docs/navigation-and-shell-prd.md`
+อ่าน PRD: `docs/navigation-and-shell-prd.md`
 
-## สี
+## กฎหลัก — หน้าสำหรับผู้ใช้ (user-facing)
 
-- ใช้ `paligo-design-tokens.css` — โทนเล่มสมุด (`#f8f0e3`, `#fffaf0`, `#1f2d89`)
-- Sidebar: `--sidebar-bg` (#f0e8d6) — **ห้าม** dark sidebar หรือ accent แดงของ audio player
-- เนื้อเรียนต้อง contrast สูงกว่า sidebar
+**ทุกหน้า HTML ที่ผู้เรียน/ครูเปิดใช้งาน ต้องมี:**
 
-## เมนู
+1. **App shell** — sidebar + topbar + เนื้อหาใน `#paligoMainContent`
+2. **ลงทะเบียนเมนู** — ใน `paligo-nav-config.js` ทั้ง `menu` (ลิงก์ในหมวด) และ `pages` (title/section)
+3. **Smoke test sidebar** — หลังแก้ รัน `node scripts/audit-sidebar.mjs <url>` หรือ hard refresh แล้วตรวจ `#paligoSidebar`
 
-- แหล่งความจริงเดียว: `paligo-nav-config.js` — ห้าม hardcode รายการเมนูใน HTML
-- ลำดับหมวด: เรียนวันนี้ → ฝึกทำข้อสอบ → ครูและผู้ตรวจ → เตรียมเล่ม
-- ชื่อเมนูภาษาไทย 2–6 คำ ไม่ใช่ชื่อไฟล์
-- หน้าใหม่: เพิ่ม `PaligoNavConfig.pages` + ลิงก์ในหมวดที่เหมาะสม
+ห้ามส่งมอบหน้าใหม่ที่ไม่มีเมนูเข้าถึงหน้านั้น
 
-## Shell
+## โครง HTML มาตรฐาน
 
-- โหลด: `paligo-design-tokens.css` → `sidebar-nav.css` → `paligo-nav-config.js` → `sidebar-nav.js`
-- เรียก `PaligoSidebar.autoInit()` ท้าย body
-- Default sidebar **พับ** เพื่อไม่บังเนื้อเรียน
+```html
+<head>
+  <link rel="stylesheet" href="paligo-design-tokens.css" />
+  <link rel="stylesheet" href="sidebar-nav.css" />
+  <!-- CSS หน้านั้น -->
+  <script defer src="paligo-config.js"></script>
+  <script defer src="paligo-inbox-client.js"></script>
+  <script defer src="paligo-nav-config.js"></script>
+  <script defer src="sidebar-nav.js"></script>
+  <script defer src="paligo-shell-init.js"></script>
+</head>
+<body>
+  <!-- เนื้อหาหน้า (ไม่ wrap เอง — shell ห่อให้) -->
+  <!-- script เฉพาะหน้า ท้าย body -->
+</body>
+```
+
+- ใช้ `paligo-shell-init.js` แทนเรียก `PaligoSidebar.autoInit()` กระจายหลายแบบ
+- ห้าม hardcode รายการเมนูใน HTML
+
+## ลงทะเบียนหน้าใหม่ใน `paligo-nav-config.js`
+
+```javascript
+// 1) pages — title + section (+ focusMode: true เฉพาะหน้าเรียนเต็มจอ)
+"my-new-page.html": { title: "ชื่อไทย", section: "exam" },
+
+// 2) menu — ใส่ใน children ของหมวดที่เหมาะสม
+{ label: "ชื่อเมนู", href: "my-new-page.html", description: "..." }
+```
+
+ลำดับหมวด: เรียนวันนี้ → ฝึกทำข้อสอบ → ครูและผู้ตรวจ → เตรียมเล่ม
+
+## พฤติกรรม sidebar
+
+- **focusMode** (ฝึกเสียง / ทำข้อสอบ / อ่านเล่ม): default **พับ** — เน้นเนื้อเรียน
+- **หน้า hub** (index, exam-*, account, reviewer console): default **ขยาย** — เห็นเมนูหลัก (ถ้ายังไม่เคยบันทึก preference)
+- โลโก้ + โปรไฟล์ → `index.html` (`homeHref` ใน config)
+- สี: `paligo-design-tokens.css` — ห้าม dark sidebar / accent แดง audio player
+
+## Checklist ก่อนจบงาน (หน้าใหม่หรือแก้ HTML)
+
+- [ ] มี `paligo-design-tokens.css` + `sidebar-nav.css`
+- [ ] มี defer shell scripts ครบ (config → inbox → nav-config → sidebar-nav → shell-init)
+- [ ] เพิ่ม `PaligoNavConfig.pages` + รายการใน `menu`
+- [ ] `node scripts/audit-sidebar.mjs http://localhost:8765/<page>.html` ผ่าน
+- [ ] Modal/overlay อยู่ `body` ระดับ top (z-index สูงกว่า sidebar)

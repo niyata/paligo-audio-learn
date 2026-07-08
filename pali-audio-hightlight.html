@@ -9,12 +9,6 @@
             --pali-text-base: 24px;
             --pali-subtitle-base: 16px;
             --paligo-text-scale: 1;
-            --player-h: 72px;
-            --player-accent: #e53935;
-            --player-bg: rgba(255, 255, 255, 0.96);
-            --player-border: rgba(60, 60, 67, 0.14);
-            --player-muted: rgba(60, 60, 67, 0.62);
-            --player-ink: #1c1c1e;
             --page-bg: var(--paligo-page-bg, #f8f0e3);
         }
 
@@ -22,8 +16,8 @@
 
         body {
             background: var(--page-bg);
-            color: var(--player-ink);
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Sarabun, sans-serif;
+            color: var(--paligo-ink, #343434);
+            font-family: Sarabun, -apple-system, BlinkMacSystemFont, "SF Pro Text", ui-sans-serif, sans-serif;
             line-height: 1.47;
             margin: 0;
             min-height: 100vh;
@@ -32,19 +26,19 @@
         }
 
         .paligo-content {
-            padding: 20px 20px calc(var(--player-h) + 28px);
+            padding: 20px var(--paligo-content-padding-x, 20px) 0;
         }
 
         .page-shell {
             margin: 0 auto;
-            max-width: 900px;
+            max-width: var(--paligo-content-max-width, 900px);
         }
 
         .player-container {
-            background: #fff;
-            border: 1px solid var(--player-border);
+            background: var(--paligo-paper-bg, #fffaf0);
+            border: 1px solid var(--paligo-paper-border, rgba(74, 44, 10, 0.16));
             border-radius: 16px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+            box-shadow: 0 8px 24px var(--paligo-warm-shadow, rgba(74, 44, 10, 0.1));
             margin-bottom: 20px;
             padding: 18px 20px;
         }
@@ -58,7 +52,7 @@
         }
 
         .pack-toolbar select {
-            border: 1px solid var(--player-border);
+            border: 1px solid var(--paligo-paper-border);
             border-radius: 8px;
             flex: 1 1 260px;
             font: inherit;
@@ -74,10 +68,10 @@
             min-width: 180px;
         }
 
-        .font-size-field span { color: var(--player-muted); font-size: 13px; }
+        .font-size-field span { color: var(--paligo-muted); font-size: 13px; }
         .font-size-field input[type="range"] { width: 100%; }
 
-        .pack-meta { color: var(--player-muted); font-size: 13px; margin-bottom: 8px; }
+        .pack-meta { color: var(--paligo-muted); font-size: 13px; margin-bottom: 8px; }
         .pack-meta a { color: #8a6d1f; }
 
         .status-banner {
@@ -111,10 +105,10 @@
 
         .btn {
             appearance: none;
-            background: #fff;
-            border: 1px solid var(--player-border);
+            background: var(--paligo-paper-bg);
+            border: 1px solid var(--paligo-paper-border);
             border-radius: 8px;
-            color: var(--player-ink);
+            color: var(--paligo-ink);
             cursor: pointer;
             font: inherit;
             font-size: 14px;
@@ -132,7 +126,7 @@
         .btn:disabled { cursor: not-allowed; opacity: 0.45; }
 
         .subtitle-thai {
-            color: var(--player-muted);
+            color: var(--paligo-muted);
             font-size: calc(var(--pali-subtitle-base) * var(--paligo-text-scale));
             min-height: 24px;
         }
@@ -174,280 +168,10 @@
         #baliAudio {
             display: none;
         }
-
-        .tape-player {
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            background: var(--player-bg);
-            border-top: 1px solid var(--player-border);
-            bottom: 0;
-            box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.08);
-            left: 0;
-            min-height: var(--player-h);
-            padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
-            position: fixed;
-            right: 0;
-            z-index: 1000;
-        }
-
-        .tape-player__inner {
-            align-items: center;
-            display: flex;
-            gap: 12px;
-            margin: 0 auto;
-            max-width: 1100px;
-        }
-
-        .tape-player__art {
-            align-items: center;
-            background: linear-gradient(135deg, #1f2d89 0%, #4a6cf7 100%);
-            border-radius: 8px;
-            color: #fff;
-            display: flex;
-            flex-shrink: 0;
-            font-size: 18px;
-            font-weight: 700;
-            height: 44px;
-            justify-content: center;
-            width: 44px;
-        }
-
-        .tape-player__main {
-            display: grid;
-            flex: 1;
-            gap: 6px;
-            min-width: 0;
-        }
-
-        .tape-player__track-row {
-            align-items: center;
-            display: flex;
-            gap: 10px;
-            min-width: 0;
-        }
-
-        .tape-player__play {
-            align-items: center;
-            background: #111;
-            border: 0;
-            border-radius: 999px;
-            color: #fff;
-            cursor: pointer;
-            display: inline-flex;
-            flex-shrink: 0;
-            height: 40px;
-            justify-content: center;
-            width: 40px;
-        }
-
-        .tape-player__play:disabled {
-            cursor: not-allowed;
-            opacity: 0.35;
-        }
-
-        .tape-player__play svg {
-            display: block;
-            fill: currentColor;
-            height: 18px;
-            width: 18px;
-        }
-
-        .tape-player__progress-wrap {
-            align-items: center;
-            display: flex;
-            flex: 1;
-            gap: 10px;
-            min-width: 0;
-        }
-
-        .tape-player__range {
-            -webkit-appearance: none;
-            appearance: none;
-            background: transparent;
-            cursor: pointer;
-            flex: 1;
-            height: 20px;
-            min-width: 60px;
-        }
-
-        .tape-player__range::-webkit-slider-runnable-track {
-            background: linear-gradient(
-                to right,
-                var(--player-accent) 0%,
-                var(--player-accent) var(--range-progress, 0%),
-                rgba(118, 118, 128, 0.22) var(--range-progress, 0%),
-                rgba(118, 118, 128, 0.22) 100%
-            );
-            border-radius: 999px;
-            height: 4px;
-        }
-
-        .tape-player__range::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            background: var(--player-accent);
-            border: 0;
-            border-radius: 999px;
-            height: 12px;
-            margin-top: -4px;
-            width: 12px;
-        }
-
-        .tape-player__range::-moz-range-track {
-            background: rgba(118, 118, 128, 0.22);
-            border: 0;
-            border-radius: 999px;
-            height: 4px;
-        }
-
-        .tape-player__range::-moz-range-progress {
-            background: var(--player-accent);
-            border-radius: 999px;
-            height: 4px;
-        }
-
-        .tape-player__range::-moz-range-thumb {
-            background: var(--player-accent);
-            border: 0;
-            border-radius: 999px;
-            height: 12px;
-            width: 12px;
-        }
-
-        .tape-player__time {
-            color: var(--player-muted);
-            flex-shrink: 0;
-            font-size: 13px;
-            font-variant-numeric: tabular-nums;
-            min-width: 42px;
-            text-align: right;
-        }
-
-        .tape-player__meta-row {
-            align-items: center;
-            color: var(--player-muted);
-            display: flex;
-            font-size: 12px;
-            gap: 8px;
-            min-width: 0;
-        }
-
-        .tape-player__meta-row strong {
-            color: var(--player-ink);
-            font-size: 13px;
-            font-weight: 600;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .tape-player__controls {
-            align-items: center;
-            display: flex;
-            flex-shrink: 0;
-            gap: 8px;
-        }
-
-        .tape-player__speed {
-            align-items: center;
-            background: rgba(118, 118, 128, 0.1);
-            border: 0;
-            border-radius: 8px;
-            color: var(--player-ink);
-            cursor: pointer;
-            display: inline-flex;
-            font: inherit;
-            font-size: 13px;
-            font-variant-numeric: tabular-nums;
-            font-weight: 600;
-            gap: 2px;
-            min-height: 36px;
-            padding: 0 8px;
-        }
-
-        .tape-player__speed-step {
-            align-items: center;
-            background: transparent;
-            border: 0;
-            border-radius: 6px;
-            color: var(--player-muted);
-            cursor: pointer;
-            display: inline-flex;
-            font: inherit;
-            font-size: 16px;
-            height: 28px;
-            justify-content: center;
-            line-height: 1;
-            padding: 0;
-            width: 24px;
-        }
-
-        .tape-player__speed-step:hover {
-            background: rgba(0, 0, 0, 0.06);
-            color: var(--player-ink);
-        }
-
-        .tape-player__volume-wrap {
-            align-items: center;
-            display: none;
-            gap: 6px;
-        }
-
-        .tape-player__volume-wrap svg {
-            fill: currentColor;
-            flex-shrink: 0;
-            height: 18px;
-            width: 18px;
-        }
-
-        .tape-player__volume {
-            -webkit-appearance: none;
-            appearance: none;
-            background: transparent;
-            cursor: pointer;
-            height: 20px;
-            width: 72px;
-        }
-
-        .tape-player__volume::-webkit-slider-runnable-track {
-            background: rgba(118, 118, 128, 0.22);
-            border-radius: 999px;
-            height: 4px;
-        }
-
-        .tape-player__volume::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            background: var(--player-accent);
-            border: 0;
-            border-radius: 999px;
-            height: 10px;
-            margin-top: -3px;
-            width: 10px;
-        }
-
-        @media (min-width: 720px) {
-            .tape-player__volume-wrap { display: flex; }
-        }
-
-        @media (max-width: 640px) {
-            :root { --player-h: 108px; }
-
-            .tape-player__inner {
-                align-items: stretch;
-                flex-direction: column;
-            }
-
-            .tape-player__art { display: none; }
-
-            .tape-player__controls {
-                justify-content: space-between;
-                width: 100%;
-            }
-        }
     </style>
     <link rel="stylesheet" href="paligo-design-tokens.css" />
     <link rel="stylesheet" href="sidebar-nav.css" />
+    <link rel="stylesheet" href="paligo-tape-player.css" />
     <script src="book-fonts.js"></script>
 </head>
 <body>
@@ -480,35 +204,31 @@
 <audio id="baliAudio" preload="metadata"></audio>
 
 <footer class="tape-player" aria-label="แผงควบคุมเทปบาลี">
-    <div class="tape-player__inner">
+    <div class="tape-player__grid">
         <div class="tape-player__art" id="playerArt" aria-hidden="true">ฯ</div>
 
-        <div class="tape-player__main">
-            <div class="tape-player__track-row">
-                <button class="tape-player__play" id="btnPlayPause" type="button" aria-label="เล่น" disabled>
-                    <svg id="iconPlay" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
-                    <svg id="iconPause" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M6 5h4v14H6V5zm8 0h4v14h-4V5z"/></svg>
-                </button>
-
-                <div class="tape-player__progress-wrap">
-                    <input class="tape-player__range" id="progressRange" type="range" min="0" max="1000" value="0" step="1" aria-label="ตำแหน่งเทป" disabled />
-                    <span class="tape-player__time" id="timeDisplay">0:00</span>
-                </div>
-            </div>
-
-            <div class="tape-player__meta-row">
-                <strong id="footerTitle">—</strong>
-                <span id="footerMode">เล่นต่อเนื่อง</span>
+        <div class="tape-player__transport">
+            <button class="tape-player__play" id="btnPlayPause" type="button" aria-label="เล่น" disabled>
+                <svg id="iconPlay" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+                <svg id="iconPause" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M6 5h4v14H6V5zm8 0h4v14h-4V5z"/></svg>
+            </button>
+            <div class="tape-player__progress-wrap">
+                <input class="tape-player__range" id="progressRange" type="range" min="0" max="1000" value="0" step="1" aria-label="ตำแหน่งเทป" disabled />
+                <span class="tape-player__time" id="timeDisplay">0:00</span>
             </div>
         </div>
 
-        <div class="tape-player__controls">
+        <div class="tape-player__meta">
+            <strong id="footerTitle">—</strong>
+            <span id="footerMode">เล่นต่อเนื่อง</span>
+        </div>
+
+        <div class="tape-player__tools">
             <div class="tape-player__speed" aria-label="ความเร็วเทป">
                 <button class="tape-player__speed-step" id="btnSpeedDown" type="button" aria-label="ลดความเร็ว">‹</button>
                 <span id="speedLabel">1.0×</span>
                 <button class="tape-player__speed-step" id="btnSpeedUp" type="button" aria-label="เพิ่มความเร็ว">›</button>
             </div>
-
             <div class="tape-player__volume-wrap" aria-label="ระดับเสียง">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10v4h4l5 5V5L7 10H3zm13.5 2a4.5 4.5 0 0 0-2.5-4.03v8.06a4.5 4.5 0 0 0 2.5-4.03z"/></svg>
                 <input class="tape-player__volume" id="volumeRange" type="range" min="0" max="100" value="100" aria-label="ระดับเสียง" />
@@ -517,6 +237,14 @@
     </div>
 </footer>
 
+<script src="paligo-config.js"></script>
+<script src="paligo-inbox-client.js"></script>
+<script src="paligo-nav-config.js"></script>
+<script src="sidebar-nav.js"></script>
+<script>
+PaligoSidebar.autoInit();
+document.getElementById("paligoMainContent")?.classList.add("paligo-content--with-player");
+</script>
 <script>
 const SPEED_STEPS = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
 const SPEED_STORAGE_KEY = 'paligo-audio-playback-rate';
@@ -977,11 +705,6 @@ if (Number.isFinite(storedVolume)) {
 applyVolume();
 setPlayMode('normal');
 bootstrap();
-</script>
-<script src="paligo-nav-config.js"></script>
-<script src="sidebar-nav.js"></script>
-<script>
-PaligoSidebar.autoInit();
 </script>
 </body>
 </html>

@@ -25,6 +25,10 @@
     return options.brand || window.PaligoNavConfig?.brand || { title: "Paligo", subtitle: "เรียนบาลีออนไลน์" };
   }
 
+  function resolveHomeHref() {
+    return window.PaligoNavConfig?.homeHref || "index.html";
+  }
+
   function isMobile() {
     return window.matchMedia(MOBILE_QUERY).matches;
   }
@@ -45,14 +49,25 @@
     return name + window.location.search;
   }
 
-  function readCollapsed() {
+  function currentPageName() {
+    return window.location.pathname.split("/").pop()?.split("?")[0] || "";
+  }
+
+  function isFocusModePage(pageName) {
+    const name = pageName || currentPageName();
+    return Boolean(window.PaligoNavConfig?.pageMeta?.(name)?.focusMode);
+  }
+
+  function readCollapsed(pageName) {
+    const name = pageName || currentPageName();
     try {
       const value = localStorage.getItem(STORAGE_KEY);
-      if (value === null) return true;
-      return value === "1";
+      if (value !== null) return value === "1";
     } catch {
-      return true;
+      /* ignore */
     }
+    /* หน้าเรียน (focusMode) พับเมนู · หน้า hub ขยายให้เห็นเมนูหลัก */
+    return isFocusModePage(name);
   }
 
   function writeCollapsed(collapsed) {
@@ -75,6 +90,58 @@
         return `<li><a class="paligo-nav__sublink${active}" href="${item.href}">${item.label}</a></li>`;
       })
       .join("");
+  }
+
+  function profileInitial(name) {
+    const trimmed = String(name || "").trim();
+    if (!trimmed) return "?";
+    return trimmed.charAt(0).toUpperCase();
+  }
+
+  function buildProfileBlock() {
+    const session =
+      typeof window !== "undefined" ? window.PaligoInboxClient?.getSession?.() : null;
+    const user = session?.user;
+    const roleLabels = { student: "นักเรียน", reviewer: "ครู/ผู้ตรวจ" };
+
+    const homeHref = resolveHomeHref();
+
+    if (!user) {
+      return `
+        <a class="paligo-sidebar__profile paligo-sidebar__profile--guest" href="${homeHref}" data-tooltip="หน้าแรก" aria-label="กลับหน้าแรก">
+          <span class="paligo-sidebar__avatar" aria-hidden="true">?</span>
+          <span class="paligo-sidebar__profile-text">
+            <span class="paligo-sidebar__profile-name">เข้าสู่ระบบ</span>
+            <span class="paligo-sidebar__profile-role">บัญชี Inbox</span>
+          </span>
+        </a>`;
+    }
+
+    const name = user.displayName || "ไม่ระบุชื่อ";
+    const role = roleLabels[user.role] || user.role || "";
+    return `
+      <a class="paligo-sidebar__profile" href="${homeHref}" data-tooltip="หน้าแรก · ${name}" aria-label="กลับหน้าแรก">
+        <span class="paligo-sidebar__avatar" aria-hidden="true">${profileInitial(name)}</span>
+        <span class="paligo-sidebar__profile-text">
+          <span class="paligo-sidebar__profile-name">${name}</span>
+          <span class="paligo-sidebar__profile-role">${role}</span>
+        </span>
+      </a>`;
+  }
+
+  function buildBrandBlock(brand) {
+    const title = brand.title || "Paligo";
+    const subtitle = brand.subtitle || "";
+    const tooltip = subtitle ? `${title} · ${subtitle}` : title;
+    const homeHref = resolveHomeHref();
+    return `
+      <a class="paligo-sidebar__brand" href="${homeHref}" data-tooltip="หน้าแรก · ${tooltip}" aria-label="กลับหน้าแรก — ${title}">
+        <span class="paligo-sidebar__logo" aria-hidden="true">P</span>
+        <div class="paligo-sidebar__title-wrap">
+          <span class="paligo-sidebar__title">${title}</span>
+          <span class="paligo-sidebar__subtitle">${subtitle}</span>
+        </div>
+      </a>`;
   }
 
   function buildFlyoutLinks(section, activeRef) {
@@ -115,12 +182,9 @@
 
     return `
       <aside class="paligo-sidebar" id="paligoSidebar" aria-label="เมนูหลัก">
-        <div class="paligo-sidebar__brand">
-          <span class="paligo-sidebar__logo" aria-hidden="true">P</span>
-          <div class="paligo-sidebar__title-wrap">
-            <span class="paligo-sidebar__title">${brand.title}</span>
-            <span class="paligo-sidebar__subtitle">${brand.subtitle || ""}</span>
-          </div>
+        <div class="paligo-sidebar__header">
+          ${buildBrandBlock(brand)}
+          ${buildProfileBlock()}
         </div>
         <div class="paligo-sidebar__scroll">
           <nav aria-label="เมนูแอป">
@@ -168,7 +232,7 @@
     this.options = options;
     this.menu = resolveMenu(options);
     this.activeName = normalizeHref(options.activeHref) || currentPageRef();
-    this.collapsed = readCollapsed();
+    this.collapsed = readCollapsed(this.activeName.split("?")[0]);
     this.mobileOpen = false;
     this.flyoutSectionId = null;
 
@@ -287,14 +351,47 @@
     this.flyoutSectionId = section.id;
   };
 
+  PaligoSidebarController.prototype.openAccordion = function (trigger, { closeOthers = true } = {}) {
+    if (this.sidebar?.classList.contains("is-collapsed")) return;
+    const submenu = document.getElementById(trigger.getAttribute("aria-controls"));
+    if (!submenu) return;
+
+    if (closeOthers) {
+      this.sidebar.querySelectorAll(".paligo-nav__trigger").forEach((other) => {
+        if (other === trigger) return;
+        other.setAttribute("aria-expanded", "false");
+        const otherSubmenu = document.getElementById(other.getAttribute("aria-controls"));
+        otherSubmenu?.classList.remove("is-open");
+      });
+    }
+
+    trigger.setAttribute("aria-expanded", "true");
+    submenu.classList.add("is-open");
+  };
+
+  PaligoSidebarController.prototype.resetAccordionToActive = function () {
+    if (this.sidebar?.classList.contains("is-collapsed")) return;
+    this.sidebar.querySelectorAll(".paligo-nav__trigger").forEach((trigger) => {
+      const submenu = document.getElementById(trigger.getAttribute("aria-controls"));
+      const hasActive = Boolean(submenu?.querySelector(".paligo-nav__sublink.is-active"));
+      trigger.setAttribute("aria-expanded", hasActive ? "true" : "false");
+      submenu?.classList.toggle("is-open", hasActive);
+    });
+  };
+
   PaligoSidebarController.prototype.toggleAccordion = function (trigger) {
     if (this.sidebar?.classList.contains("is-collapsed")) return;
     const submenu = document.getElementById(trigger.getAttribute("aria-controls"));
     if (!submenu) return;
 
     const expanded = trigger.getAttribute("aria-expanded") === "true";
-    trigger.setAttribute("aria-expanded", expanded ? "false" : "true");
-    submenu.classList.toggle("is-open", !expanded);
+    if (expanded) {
+      trigger.setAttribute("aria-expanded", "false");
+      submenu.classList.remove("is-open");
+      return;
+    }
+
+    this.openAccordion(trigger);
   };
 
   PaligoSidebarController.prototype.bindEvents = function () {
@@ -346,15 +443,31 @@
     });
 
     this.sidebar?.addEventListener("mouseover", (event) => {
-      const trigger = event.target.closest(".paligo-nav__trigger");
+      if (self.sidebar.classList.contains("is-collapsed")) {
+        const anchor = event.target.closest("[data-tooltip]");
+        if (!anchor) return;
+        self.showTooltip(anchor.dataset.tooltip || "", anchor);
+        return;
+      }
+
+      const section = event.target.closest(".paligo-nav__section");
+      if (!section) return;
+      const trigger = section.querySelector(".paligo-nav__trigger");
       if (!trigger) return;
-      self.showTooltip(trigger.dataset.tooltip || "", trigger);
+      self.openAccordion(trigger);
     });
 
     this.sidebar?.addEventListener("mouseout", (event) => {
-      const trigger = event.target.closest(".paligo-nav__trigger");
-      if (!trigger) return;
-      self.hideTooltip();
+      if (self.sidebar.classList.contains("is-collapsed")) {
+        const anchor = event.target.closest("[data-tooltip]");
+        if (!anchor) return;
+        self.hideTooltip();
+      }
+    });
+
+    this.sidebar?.querySelector(".paligo-sidebar__scroll")?.addEventListener("mouseleave", () => {
+      if (self.sidebar.classList.contains("is-collapsed")) return;
+      self.resetAccordionToActive();
     });
 
     document.addEventListener("click", (event) => {
@@ -406,6 +519,7 @@
   }
 
   window.PaligoSidebar = {
+    getIcon: icon,
     init(options = {}) {
       wrapExistingContent(options);
       return new PaligoSidebarController(options);

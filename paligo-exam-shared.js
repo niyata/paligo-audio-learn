@@ -11,6 +11,7 @@
     owner: "paligo-exam-local-owner-id-v1",
     studentProfile: "paligo-exam-student-profile-v1",
     reviewerProfile: "paligo-exam-reviewer-profile-v1",
+    reviewerSignature: "paligo-exam-reviewer-signature-v1",
   };
 
   const BOOK_STATUS = {
@@ -18,6 +19,8 @@
     underReview: "under_review",
     reviewed: "reviewed",
   };
+
+  const CANCEL_SUBMIT_WINDOW_MS = 48 * 60 * 60 * 1000;
 
   const STATUS_LABELS = {
     draft: "ฉบับร่าง",
@@ -44,9 +47,98 @@
     return `${toThaiNumber(rounded)}%`;
   }
 
+  const INBOX_SESSION_KEY = "paligo-inbox-session-v1";
+  const LEGACY_SCOPE = "legacy";
+
+  function getInboxSession() {
+    if (typeof window !== "undefined" && window.PaligoInboxClient?.getSession) {
+      return window.PaligoInboxClient.getSession();
+    }
+    try {
+      const parsed = JSON.parse(localStorage.getItem(INBOX_SESSION_KEY) || "null");
+      if (!parsed?.sessionToken) return null;
+      if (parsed.expiresAt && new Date(parsed.expiresAt) <= new Date()) return null;
+      return parsed;
+    } catch {
+      return null;
+    }
+  }
+
+  function getInboxRole() {
+    return getInboxSession()?.user?.role || null;
+  }
+
+  function getInboxUserId() {
+    return getInboxSession()?.user?.id || null;
+  }
+
+  function resolveStorageScope() {
+    return getInboxUserId() || LEGACY_SCOPE;
+  }
+
+  function scopedStorageKey(key) {
+    return `${key}::${resolveStorageScope()}`;
+  }
+
+  /** ย้ายข้อมูลเก่า (ก่อนมีบัญชี) เข้า scope นักเรียนเท่านั้น */
+  function maybeMigrateLegacyKey(key) {
+    const scope = resolveStorageScope();
+    if (scope === LEGACY_SCOPE) return;
+    const target = scopedStorageKey(key);
+    if (localStorage.getItem(target) != null) return;
+    const legacy = localStorage.getItem(key);
+    if (!legacy) return;
+    if (getInboxRole() === "student") {
+      localStorage.setItem(target, legacy);
+    }
+  }
+
+  function readRaw(key) {
+    maybeMigrateLegacyKey(key);
+    const scoped = scopedStorageKey(key);
+    let value = localStorage.getItem(scoped);
+    if (value == null && resolveStorageScope() === LEGACY_SCOPE) {
+      value = localStorage.getItem(key);
+    }
+    return value;
+  }
+
+  function writeRaw(key, value) {
+    localStorage.setItem(scopedStorageKey(key), value);
+  }
+
+  /**
+   * แยกหน้าตามบทบาท Inbox — draft นักเรียนไม่ให้ครูเห็นบนเครื่องเดียวกัน
+   * @param {{ page: 'student'|'reviewer', reviewMode?: boolean }} options
+   */
+  function guardExamPageRole(options = {}) {
+    const role = getInboxRole();
+    if (!role) {
+      return { ok: true, role: null, legacy: true };
+    }
+
+    if (options.page === "student" && role === "reviewer" && !options.reviewMode) {
+      return {
+        ok: false,
+        redirect: "exam-reviewer-console.html",
+        message: "บัญชีครู/ผู้ตรวจ — ดูเฉพาะงานที่ส่งเข้ามา ไม่เห็นฉบับร่างของนักเรียน",
+      };
+    }
+
+    if (options.page === "reviewer" && role === "student") {
+      return {
+        ok: false,
+        redirect: "exam-books.html",
+        message: "บัญชีนักเรียน — ใช้หน้าสมุดข้อสอบของฉัน",
+      };
+    }
+
+    return { ok: true, role, legacy: false };
+  }
+
   function getList(key) {
     try {
-      const parsed = JSON.parse(localStorage.getItem(key) || "[]");
+      const parsed = JSON.parse(readRaw(key) || "[]");
       return Array.isArray(parsed) ? parsed : [];
     } catch {
       return [];
@@ -54,7 +146,7 @@
   }
 
   function setList(key, list) {
-    localStorage.setItem(key, JSON.stringify(list));
+    writeRaw(key, JSON.stringify(list));
   }
 
   function downloadJson(fileName, payload) {
@@ -94,6 +186,7 @@
       canSign: false,
       canSubmit: false,
       canStartNewRevision: false,
+      canCancelSubmit: false,
     };
 
     if (status === BOOK_STATUS.draft) {
@@ -105,11 +198,13 @@
     }
 
     if (status === BOOK_STATUS.underReview) {
+      const cancelState = role === "student" ? getCancelSubmitState(book, role) : { canCancel: false };
       return {
         ...base,
         canEditReview: role === "reviewer",
         canStamp: role === "reviewer",
         canSign: role === "reviewer",
+        canCancelSubmit: cancelState.canCancel,
       };
     }
 
@@ -159,8 +254,321 @@
 
   function getLatestSubmissionForBook(bookId) {
     return getList(KEYS.submissions)
-      .filter((item) => item.bookId === bookId)
+      .filter((item) => item.bookId === bookId && !item.cancelledAt)
       .sort((a, b) => new Date(b.submittedAt || 0) - new Date(a.submittedAt || 0))[0] || null;
+  }
+
+  function getStudentProfile() {
+    try {
+      return JSON.parse(readRaw(KEYS.studentProfile) || "null");
+    } catch {
+      return null;
+    }
+  }
+
+  function getReviewerProfile() {
+    try {
+      return JSON.parse(readRaw(KEYS.reviewerProfile) || "null");
+    } catch {
+      return null;
+    }
+  }
+
+  function saveReviewerProfile(profile) {
+    const payload = {
+      name: String(profile?.name || "").trim(),
+      role: profile?.role || "teacher-reviewer",
+      updatedAt: new Date().toISOString(),
+    };
+    writeRaw(KEYS.reviewerProfile, JSON.stringify(payload));
+    return payload;
+  }
+
+  /** โปรไฟล์ผู้ตรวจบนหน้า console — รวมชื่อจาก Inbox session */
+  function resolveReviewerProfileForConsole() {
+    const local = getReviewerProfile();
+    const inboxUser =
+      typeof window !== "undefined" ? window.PaligoInboxClient?.getSession?.()?.user : null;
+
+    if (inboxUser?.role === "reviewer") {
+      return {
+        name: local?.name?.trim() || inboxUser.displayName?.trim() || "",
+        role: local?.role || "teacher-reviewer",
+        inboxUserId: inboxUser.id,
+        displayName: inboxUser.displayName || "",
+        fromInbox: true,
+      };
+    }
+
+    if (local) {
+      return {
+        name: local.name || "",
+        role: local.role || "teacher-reviewer",
+        fromInbox: false,
+      };
+    }
+
+    return { name: "", role: "teacher-reviewer", fromInbox: false };
+  }
+
+  /** รวม submission จากสมุดที่อยู่ระหว่างตรวจเข้าคิวในเครื่อง */
+  function syncReviewQueueFromBooks() {
+    const books = getList(KEYS.books).filter(
+      (book) => normalizeBookStatus(book.status) === BOOK_STATUS.underReview
+    );
+    if (!books.length) return getList(KEYS.submissions);
+
+    let submissions = getList(KEYS.submissions);
+    let changed = false;
+
+    books.forEach((book) => {
+      const latest = getLatestSubmissionForBook(book.id);
+      if (!latest) return;
+      if (submissions.some((item) => item.id === latest.id)) return;
+      submissions.push(latest);
+      changed = true;
+    });
+
+    if (changed) setList(KEYS.submissions, submissions);
+    return submissions;
+  }
+
+  function listActiveSubmissions() {
+    syncReviewQueueFromBooks();
+    return getList(KEYS.submissions)
+      .filter((item) => !item.cancelledAt)
+      .sort((a, b) => new Date(b.submittedAt || 0) - new Date(a.submittedAt || 0));
+  }
+
+  function getReviewerSignature() {
+    try {
+      return JSON.parse(readRaw(KEYS.reviewerSignature) || "null");
+    } catch {
+      return null;
+    }
+  }
+
+  function saveReviewerSignature(signature) {
+    if (!signature?.dataUrl) {
+      writeRaw(KEYS.reviewerSignature, "");
+      return null;
+    }
+    const payload = {
+      dataUrl: signature.dataUrl,
+      widthPx: signature.widthPx || 120,
+      label: signature.label || "ลายเซ็นผู้ตรวจ",
+      updatedAt: new Date().toISOString(),
+    };
+    writeRaw(KEYS.reviewerSignature, JSON.stringify(payload));
+    return payload;
+  }
+
+  function resolveStudentProfileForSubmit() {
+    const local = getStudentProfile();
+    if (local?.studentName?.trim()) return local;
+
+    const inboxUser =
+      typeof window !== "undefined" ? window.PaligoInboxClient?.getSession?.()?.user : null;
+    if (inboxUser?.role === "student" && inboxUser.displayName?.trim()) {
+      return {
+        studentName: inboxUser.displayName.trim(),
+        grade: local?.grade || "4",
+        teacherRole: local?.teacherRole || "teacher-reviewer",
+        teacherName: local?.teacherName || "",
+        deliveryMethod: local?.deliveryMethod || "line",
+        inboxUserId: inboxUser.id,
+      };
+    }
+    return null;
+  }
+
+  function createSubmissionId() {
+    const random =
+      typeof crypto !== "undefined" && crypto.randomUUID?.()
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    return `submission-${random}`;
+  }
+
+  async function submitBookForReview(bookId, options = {}) {
+    const book = getBookById(bookId);
+    if (!book) throw new Error("ไม่พบสมุดข้อสอบ");
+
+    const status = normalizeBookStatus(book.status);
+    if (status === BOOK_STATUS.underReview && !options.forceUnderReview) {
+      return {
+        ok: false,
+        reason: "under_review",
+        message: "สมุดเล่มนี้อยู่ระหว่างส่งตรวจแล้ว — รอผู้ตรวจตรวจหรือยกเลิกส่งตรวจ (ภายใน ๔๘ ชั่วโมง)",
+      };
+    }
+    if (status === BOOK_STATUS.reviewed) {
+      return {
+        ok: false,
+        reason: "reviewed",
+        message: "สมุดนี้ได้รับผลตรวจแล้ว — เปิดสมุดแล้วกด「ทำรอบใหม่」หากต้องการส่ง revision ถัดไป",
+      };
+    }
+
+    const profile = resolveStudentProfileForSubmit();
+    if (!profile?.studentName?.trim()) {
+      return {
+        ok: false,
+        reason: "no_profile",
+        message: "เข้าสู่ระบบ Inbox (นักเรียน) หรือตั้งชื่อในโปรไฟล์ก่อนส่งตรวจ",
+        bookId,
+      };
+    }
+
+    const draft = book.draft || {};
+    const pages = pagesFromDraftOrSubmission(draft);
+    const hasAnswer = pages.some((text) => String(text || "").trim().length > 0);
+    if (!hasAnswer) {
+      return {
+        ok: false,
+        reason: "empty",
+        message: "ยังไม่มีคำตอบในสมุด — เปิดสมุดแล้วเขียนก่อนส่งตรวจ",
+        bookId,
+      };
+    }
+
+    const priorSubmissions = getList(KEYS.submissions).filter(
+      (item) => item.bookId === bookId && !item.cancelledAt
+    );
+    if (priorSubmissions.length && !options.skipResubmitConfirm) {
+      return {
+        ok: false,
+        reason: "resubmit_confirm",
+        message: `สมุดนี้เคยส่งตรวจแล้ว ${toThaiNumber(priorSubmissions.length)} ครั้ง — ส่งอีกครั้งจะสร้าง submission ใหม่`,
+        existingCount: priorSubmissions.length,
+        bookId,
+      };
+    }
+
+    const submittedAt = new Date().toISOString();
+    const pageObjects = pages.map((text, index) => ({ index, text }));
+    const answerHash = await computeAnswerHash(pageObjects);
+    const ownerId = readRaw(KEYS.owner) || book.ownerId || "";
+    const gradePicker = draft.pickers?.find((picker) => picker.type === "grade");
+
+    const submission = {
+      schema: "paligo.exam.submission.v1",
+      id: createSubmissionId(),
+      ownerId,
+      bookId,
+      bookRevision: book.revision || 1,
+      bookTitle: book.title,
+      submittedAt,
+      answerHash,
+      studentName: profile.studentName.trim(),
+      studentRole: "student",
+      teacherRole: profile.teacherRole || "teacher-reviewer",
+      teacherName: profile.teacherName || "",
+      deliveryMethod: profile.deliveryMethod || "line",
+      profile: { ...profile },
+      grade: book.grade || gradePicker?.value || profile.grade || "4",
+      pickers: draft.pickers || [],
+      pages: pageObjects,
+      annotations: Array.isArray(draft.annotations) ? draft.annotations.slice() : [],
+    };
+
+    const submissions = getList(KEYS.submissions);
+    submissions.push(submission);
+    setList(KEYS.submissions, submissions);
+
+    upsertBookRecord(bookId, {
+      status: BOOK_STATUS.underReview,
+      submittedAt,
+      updatedAt: submittedAt,
+      studentName: profile.studentName.trim(),
+    });
+
+    return { ok: true, submission, book: getBookById(bookId) };
+  }
+
+  async function ensureSubmissionForBook(bookId) {
+    const existing = getLatestSubmissionForBook(bookId);
+    if (existing) return existing;
+
+    const book = getBookById(bookId);
+    if (!book || normalizeBookStatus(book.status) !== BOOK_STATUS.underReview) return null;
+
+    const result = await submitBookForReview(bookId, {
+      skipResubmitConfirm: true,
+      forceUnderReview: true,
+    });
+    return result.ok ? result.submission : null;
+  }
+
+  function getBookSubmittedAt(book) {
+    if (!book) return null;
+    if (book.submittedAt) return book.submittedAt;
+    const submission = getLatestSubmissionForBook(book.id);
+    return submission?.submittedAt || null;
+  }
+
+  function getCancelSubmitState(book, role = "student") {
+    const status = normalizeBookStatus(book?.status);
+    if (role !== "student" || status !== BOOK_STATUS.underReview) {
+      return { showButton: false, canCancel: false, disabled: true, tooltip: "" };
+    }
+
+    const submittedAt = getBookSubmittedAt(book);
+    if (!submittedAt) {
+      return {
+        showButton: true,
+        canCancel: true,
+        disabled: false,
+        tooltip: "ยกเลิกส่งตรวจ — กลับไปแก้ไขฉบับร่างได้",
+      };
+    }
+
+    const elapsed = Date.now() - new Date(submittedAt).getTime();
+    if (elapsed >= CANCEL_SUBMIT_WINDOW_MS) {
+      return {
+        showButton: true,
+        canCancel: false,
+        disabled: true,
+        tooltip: "ยกเลิกส่งตรวจไม่ได้ — ส่งตรวจครบ ๔๘ ชั่วโมงแล้ว",
+      };
+    }
+
+    const remainingMs = CANCEL_SUBMIT_WINDOW_MS - elapsed;
+    const remainingHours = Math.ceil(remainingMs / (60 * 60 * 1000));
+    return {
+      showButton: true,
+      canCancel: true,
+      disabled: false,
+      tooltip: `ยกเลิกส่งตรวจ — เหลือเวลาอีกประมาณ ${toThaiNumber(remainingHours)} ชั่วโมง`,
+    };
+  }
+
+  function cancelBookSubmit(bookId) {
+    const book = getBookById(bookId);
+    if (!book) throw new Error("ไม่พบสมุดข้อสอบ");
+
+    const state = getCancelSubmitState(book, "student");
+    if (!state.canCancel) {
+      throw new Error(state.tooltip || "ยกเลิกส่งตรวจไม่ได้");
+    }
+
+    const now = new Date().toISOString();
+    const submissions = getList(KEYS.submissions);
+    const latest = submissions
+      .map((item, index) => ({ item, index }))
+      .filter(({ item }) => item.bookId === bookId && !item.cancelledAt)
+      .sort((a, b) => new Date(b.item.submittedAt || 0) - new Date(a.item.submittedAt || 0))[0];
+
+    if (latest) {
+      submissions[latest.index] = { ...submissions[latest.index], cancelledAt: now };
+      setList(KEYS.submissions, submissions);
+    }
+
+    return upsertBookRecord(bookId, {
+      status: BOOK_STATUS.draft,
+      submittedAt: null,
+      cancelSubmitAt: now,
+    });
   }
 
   function getReviewForBook(bookId) {
@@ -221,9 +629,11 @@
     }
 
     if (payload.book?.id) {
-      const books = getList(KEYS.books).filter((book) => book.id !== payload.book.id);
-      books.push(payload.book);
-      setList(KEYS.books, books);
+      const books = upsertBookInList(
+        getList(KEYS.books).filter((book) => book.id !== payload.book.id),
+        payload.book
+      );
+      setList(KEYS.books, sortBooksNewestFirst(books));
     }
 
     if (payload.submission) {
@@ -311,7 +721,7 @@
   /** หลักสูตรแม่กองบาลีสนามหลวง — วิชาที่เลือกได้ต่อชั้น ป.ธ. */
   const SUBJECTS_BY_GRADE = {
     "1-2": ["grammar", "pali-to-thai"],
-    "3": ["grammar", "pali-to-thai", "burapapak"],
+    "3": ["grammar", "pali-to-thai", "sambandha-thai", "burapapak"],
     "4": ["thai-to-pali", "pali-to-thai"],
     "5": ["thai-to-pali", "pali-to-thai"],
     "6": ["thai-to-pali", "pali-to-thai"],
@@ -418,6 +828,34 @@
     return changed ? next : book;
   }
 
+  function getBookCreatedAtMs(book) {
+    const value = book?.createdAt || book?.draft?.savedAt || book?.updatedAt || 0;
+    const time = Date.parse(value);
+    return Number.isFinite(time) ? time : 0;
+  }
+
+  function compareBooksByNewest(a, b) {
+    const diff = getBookCreatedAtMs(b) - getBookCreatedAtMs(a);
+    if (diff !== 0) return diff;
+    return String(b?.id || "").localeCompare(String(a?.id || ""));
+  }
+
+  function sortBooksNewestFirst(books) {
+    if (!Array.isArray(books)) return [];
+    return [...books].sort(compareBooksByNewest);
+  }
+
+  function upsertBookInList(books, book) {
+    const list = Array.isArray(books) ? [...books] : [];
+    const index = list.findIndex((item) => item.id === book.id);
+    if (index >= 0) {
+      list[index] = { ...list[index], ...book };
+      return list;
+    }
+    list.unshift(book);
+    return list;
+  }
+
   function migrateExamBooksList() {
     const books = getList(KEYS.books);
     if (!books.length) return books;
@@ -429,13 +867,25 @@
       return next;
     });
 
-    if (changed) setList(KEYS.books, migrated);
-    return migrated;
+    const sorted = sortBooksNewestFirst(migrated);
+    const orderChanged = sorted.some((book, index) => book.id !== migrated[index]?.id);
+    if (changed || orderChanged) setList(KEYS.books, sorted);
+    return sorted;
   }
 
   window.PaligoExamShared = {
     KEYS,
+    INBOX_SESSION_KEY,
     BOOK_STATUS,
+    CANCEL_SUBMIT_WINDOW_MS,
+    getInboxSession,
+    getInboxRole,
+    getInboxUserId,
+    resolveStorageScope,
+    scopedStorageKey,
+    readRaw,
+    writeRaw,
+    guardExamPageRole,
     getList,
     setList,
     downloadJson,
@@ -445,6 +895,20 @@
     normalizeBookStatus,
     getStatusLabel,
     getBookPermissions,
+    getBookSubmittedAt,
+    getCancelSubmitState,
+    cancelBookSubmit,
+    getStudentProfile,
+    getReviewerProfile,
+    saveReviewerProfile,
+    resolveReviewerProfileForConsole,
+    syncReviewQueueFromBooks,
+    listActiveSubmissions,
+    getReviewerSignature,
+    saveReviewerSignature,
+    resolveStudentProfileForSubmit,
+    submitBookForReview,
+    ensureSubmissionForBook,
     pagesFromDraftOrSubmission,
     computeAnswerHash,
     computeScore,
@@ -460,6 +924,10 @@
     formatThaiDateTime,
     formatBookDateTime,
     normalizeExamBookRecord,
+    getBookCreatedAtMs,
+    compareBooksByNewest,
+    sortBooksNewestFirst,
+    upsertBookInList,
     migrateExamBooksList,
     SUBJECT_OPTIONS,
     SUBJECTS_BY_GRADE,

@@ -1,11 +1,17 @@
 /**
- * Shared ruled-paper review layer — stamp + signature overlays
+ * Shared ruled-paper review layer — stamp, highlight, signature overlays
  */
 (function () {
   const ERROR_LABELS = {
     "wrong-word": "ผิดศัพท์",
     "wrong-relation": "ผิดสัมพันธ์",
     "wrong-pa": "ผิด ป.",
+  };
+
+  const HIGHLIGHT_COLORS = {
+    "wrong-word": "rgba(255, 214, 0, 0.42)",
+    "wrong-relation": "rgba(255, 159, 64, 0.42)",
+    "wrong-pa": "rgba(255, 107, 107, 0.38)",
   };
 
   function displayPageToIndex(page) {
@@ -19,7 +25,7 @@
   function getLineHeight() {
     return (
       Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--line-height").trim()) ||
-      26
+      30
     );
   }
 
@@ -36,7 +42,26 @@
     return lineN;
   }
 
-  function renderReviewLayerForPage(container, pageIndex, { scoreStamps, errorStamps, signature }) {
+  function lineFromSelectionStart(editor) {
+    const start = editor.selectionStart ?? 0;
+    const textBefore = editor.value.substring(0, start);
+    return Math.max(1, textBefore.split("\n").length);
+  }
+
+  function createHighlightId() {
+    const random =
+      typeof crypto !== "undefined" && crypto.randomUUID?.()
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    return `hl-${random}`;
+  }
+
+  function renderReviewLayerForPage(
+    container,
+    pageIndex,
+    { scoreStamps, errorStamps, textHighlights, signature },
+    { onHighlightClick } = {}
+  ) {
     if (!container) return;
     container.innerHTML = "";
 
@@ -60,6 +85,27 @@
         container.append(el);
       });
 
+    (textHighlights || [])
+      .filter((item) => displayPageToIndex(item.page) === pageIndex)
+      .forEach((item) => {
+        const el = document.createElement("button");
+        el.type = "button";
+        el.className = `review-highlight-mark is-${item.kind}`;
+        el.style.setProperty("--line-n", String(item.line));
+        el.style.setProperty("--hl-bg", HIGHLIGHT_COLORS[item.kind] || HIGHLIGHT_COLORS["wrong-word"]);
+        el.dataset.highlightId = item.id;
+        el.title = `${ERROR_LABELS[item.kind] || item.kind}: ${item.text || ""}`;
+        el.innerHTML = `<span class="review-highlight-mark__bar" aria-hidden="true"></span><span class="review-highlight-mark__label">${ERROR_LABELS[item.kind] || item.kind}</span><span class="review-highlight-mark__text">${item.text || ""}</span>`;
+        if (typeof onHighlightClick === "function") {
+          el.addEventListener("click", (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            onHighlightClick(item);
+          });
+        }
+        container.append(el);
+      });
+
     if (signature?.dataUrl && displayPageToIndex(signature.page) === pageIndex) {
       const img = document.createElement("img");
       img.className = "review-signature-overlay";
@@ -71,10 +117,10 @@
     }
   }
 
-  function renderAllReviewLayers(examPages, reviewState) {
+  function renderAllReviewLayers(examPages, reviewState, options = {}) {
     examPages.forEach((page, pageIndex) => {
       const container = page.querySelector("[data-review-layer]");
-      renderReviewLayerForPage(container, pageIndex, reviewState);
+      renderReviewLayerForPage(container, pageIndex, reviewState, options);
     });
   }
 
@@ -110,9 +156,32 @@
       const page = indexToDisplayPage(pageIndex);
       if (kind === "score-1" || kind === "score-2" || kind === "score-3") {
         onScoreStamp({ page, line, value: Number(kind.split("-")[1]) });
-      } else {
+      } else if (typeof onErrorStamp === "function") {
         onErrorStamp({ page, line, kind });
       }
+    });
+  }
+
+  function bindHighlightSelection({ editor, pageIndex, isActive, onSelection }) {
+    if (!editor || editor.dataset.highlightBound === "true") return;
+    editor.dataset.highlightBound = "true";
+
+    editor.addEventListener("mouseup", () => {
+      if (!isActive()) return;
+      const start = editor.selectionStart ?? 0;
+      const end = editor.selectionEnd ?? 0;
+      if (start === end) return;
+
+      const text = editor.value.substring(Math.min(start, end), Math.max(start, end)).trim();
+      if (!text) return;
+
+      onSelection({
+        page: indexToDisplayPage(pageIndex),
+        line: lineFromSelectionStart(editor),
+        start: Math.min(start, end),
+        end: Math.max(start, end),
+        text,
+      });
     });
   }
 
@@ -150,14 +219,42 @@
     return list;
   }
 
+  function upsertTextHighlight(highlights, nextHighlight) {
+    const list = highlights.slice();
+    const index = list.findIndex((item) => item.id === nextHighlight.id);
+    const payload = {
+      id: nextHighlight.id || createHighlightId(),
+      page: nextHighlight.page,
+      line: nextHighlight.line,
+      start: nextHighlight.start,
+      end: nextHighlight.end,
+      text: nextHighlight.text,
+      kind: nextHighlight.kind,
+      createdAt: nextHighlight.createdAt || new Date().toISOString(),
+    };
+    if (index >= 0) list[index] = payload;
+    else list.push(payload);
+    return list;
+  }
+
+  function removeTextHighlight(highlights, highlightId) {
+    return highlights.filter((item) => item.id !== highlightId);
+  }
+
   window.PaligoExamPaper = {
     ERROR_LABELS,
+    HIGHLIGHT_COLORS,
     displayPageToIndex,
     indexToDisplayPage,
     lineFromPointer,
+    lineFromSelectionStart,
+    createHighlightId,
     renderAllReviewLayers,
     bindReviewCanvas,
+    bindHighlightSelection,
     upsertScoreStamp,
     upsertErrorStamp,
+    upsertTextHighlight,
+    removeTextHighlight,
   };
 })();

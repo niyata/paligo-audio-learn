@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "description": "Paligo Exam Inbox API — Cloudflare Workers",
   "scripts": {
-    "dev": "wrangler dev",
+    "dev": "wrangler dev --port 8788 --ip 127.0.0.1",
     "deploy": "wrangler deploy",
     "check": "wrangler deploy --dry-run",
     "tail": "wrangler tail",

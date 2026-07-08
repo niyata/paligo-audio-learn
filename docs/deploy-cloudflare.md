@@ -4,15 +4,15 @@ Domain plan สำหรับเปิดตัวและ Inbox MVP
 
 | Domain | บริการ | เนื้อหา |
 |--------|--------|---------|
-| `paligo.com` | Cloudflare Pages (หรือ landing แยก) | Marketing · เปิดตัว |
-| `app.paligo.com` | **Cloudflare Pages** | Exam app — repo static HTML |
-| `api.paligo.com` | **Cloudflare Workers** | Inbox API (`workers/`) |
+| `paligo.jp` | Cloudflare Pages (หรือ landing แยก) | Marketing · เปิดตัว |
+| `app.paligo.jp` | **Cloudflare Pages** | Exam app — repo static HTML |
+| `api.paligo.jp` | **Cloudflare Workers** | Inbox API (`workers/`) |
 
 ภายหลัง scale: **Pages คงที่** · **API + Postgres ย้าย DO** · DNS `api.*` ชี้ใหม่
 
 ---
 
-## 1. Cloudflare Pages — `app.paligo.com`
+## 1. Cloudflare Pages — `app.paligo.jp`
 
 1. Dashboard → Workers & Pages → Create → Connect Git → `niyata/paligo-audio-learn`
 2. Branch: `new-dev` (หรือ `main` ตามที่ ship)
@@ -20,7 +20,7 @@ Domain plan สำหรับเปิดตัวและ Inbox MVP
    - **Framework preset:** None
    - **Build command:** (ว่าง)
    - **Build output directory:** `/` (root — ไฟล์ `.html` อยู่ root)
-4. Custom domain → `app.paligo.com`
+4. Custom domain → `app.paligo.jp`
 5. (Optional) `_headers` สำหรับ cache static assets
 
 Local preview ก่อน deploy:
@@ -32,7 +32,7 @@ python3 -m http.server 8765
 
 ---
 
-## 2. Cloudflare Workers — `api.paligo.com`
+## 2. Cloudflare Workers — `api.paligo.jp`
 
 ดู [`workers/README.md`](../workers/README.md)
 
@@ -43,12 +43,12 @@ cd workers && npm install && npm run deploy
 `wrangler.jsonc` — เปิด routes หลัง zone พร้อม:
 
 ```jsonc
-"routes": [{ "pattern": "api.paligo.com/*", "zone_name": "paligo.com" }]
+"routes": [{ "pattern": "api.paligo.jp/*", "zone_name": "paligo.jp" }]
 ```
 
 ---
 
-## 3. DNS (Cloudflare zone `paligo.com`)
+## 3. DNS (Cloudflare zone `paligo.jp`)
 
 | Record | Type | Target |
 |--------|------|--------|
@@ -66,27 +66,27 @@ SSL: **Full (strict)**
 
 | Environment | `apiBase` |
 |-------------|-----------|
-| localhost:8765 | `http://localhost:8787/v1` |
-| app.paligo.com | `https://api.paligo.com/v1` |
+| localhost:8765 | `http://localhost:8788/v1` |
+| app.paligo.jp | `https://api.paligo.jp/v1` |
 
-CORS อนุญาต: `https://app.paligo.com`, `localhost:8765`, `*.pages.dev`
+CORS อนุญาต: `https://app.paligo.jp`, `localhost:8765`, `*.pages.dev`
 
 ---
 
-## 5. Landing `paligo.com`
+## 5. Landing `paligo.jp`
 
 แยก epic ได้ — ตัวเลือก:
 
 - Pages project ที่สอง (โฟลเดอร์ `landing/` ภายหลัง)
-- CyberPanel / DO ชั่วคราว redirect → `app.paligo.com`
-- Cloudflare redirect rule: `paligo.com` → marketing page
+- CyberPanel / DO ชั่วคราว redirect → `app.paligo.jp`
+- Cloudflare redirect rule: `paligo.jp` → marketing page
 
 ---
 
 ## 6. Checklist เปิดตัว
 
-- [ ] Pages deploy · `app.paligo.com` เปิด exam-books
-- [ ] Workers deploy · `curl https://api.paligo.com/v1/health`
+- [ ] Pages deploy · `app.paligo.jp` เปิด exam-books
+- [ ] Workers deploy · `curl https://api.paligo.jp/v1/health`
 - [ ] `PaligoInboxClient.healthCheck()` จาก production app
 - [ ] Scrum: Phase 0 DoD ใน `docs/agile/inbox-sprint-backlog.md`
 

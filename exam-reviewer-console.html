@@ -7,6 +7,11 @@
     <link rel="stylesheet" href="paligo-design-tokens.css" />
     <link rel="stylesheet" href="sidebar-nav.css" />
     <link rel="stylesheet" href="paligo-exam-ui.css" />
+    <script defer src="paligo-config.js"></script>
+    <script defer src="paligo-inbox-client.js"></script>
+    <script defer src="paligo-nav-config.js"></script>
+    <script defer src="sidebar-nav.js"></script>
+    <script defer src="paligo-shell-init.js"></script>
     <style>
       :root {
         --page-bg: #f8f0e3;
@@ -158,6 +163,35 @@
         font-weight: 700;
       }
 
+      .reviewer-session {
+        background: rgba(36, 113, 91, 0.1);
+        border: 1px solid rgba(36, 113, 91, 0.22);
+        border-radius: 8px;
+        margin-bottom: 12px;
+        padding: 10px 12px;
+      }
+
+      .reviewer-session strong {
+        color: var(--green);
+        display: block;
+        font-size: 0.92rem;
+      }
+
+      .reviewer-gate {
+        margin: 0 auto;
+        max-width: 520px;
+        padding: 24px 16px;
+      }
+
+      .reviewer-gate .panel {
+        text-align: center;
+      }
+
+      .reviewer-gate .button-row {
+        justify-content: center;
+        margin-top: 16px;
+      }
+
       .answer-page {
         background: var(--paper-bg);
         border: 1px solid rgba(31, 45, 137, 0.18);
@@ -221,9 +255,24 @@
     </style>
   </head>
   <body>
-    <main class="review-shell">
+    <section class="reviewer-gate" data-reviewer-gate hidden>
+      <div class="panel">
+        <h1 class="panel-title">เข้าสู่ระบบผู้ตรวจ</h1>
+        <p class="status-note" data-gate-message>กำลังตรวจสอบบัญชี…</p>
+        <div class="button-row">
+          <a class="button is-primary" href="exam-account.html">เข้าสู่ระบบ / จับคู่</a>
+          <a class="button" href="index.html">หน้าแรก</a>
+        </div>
+      </div>
+    </section>
+
+    <main class="review-shell" data-reviewer-shell hidden>
       <aside class="panel">
         <h1 class="panel-title">ผู้ตรวจข้อสอบ</h1>
+        <div class="reviewer-session" data-reviewer-session hidden>
+          <strong data-reviewer-session-name>—</strong>
+          <span class="status-note" data-reviewer-session-meta>บัญชี Inbox · ผู้ตรวจ</span>
+        </div>
         <label class="field">
           <span>ชื่ออาจารย์ / ผู้ตรวจ</span>
           <input class="input" data-reviewer-name />
@@ -248,7 +297,13 @@
           <button class="button is-primary" type="button" data-import-json>นำเข้า</button>
           <button class="button" type="button" data-refresh-list>รีเฟรชรายการ</button>
         </div>
-        <p class="status-note" data-status-note>นำเข้าข้อสอบที่นักเรียนส่งมา แล้วเลือกเพื่อตรวจ</p>
+        <p class="status-note" data-status-note>เฉพาะงานที่นักเรียน<strong>ส่งตรวจแล้ว</strong> — รับจาก Inbox หรือนำเข้าไฟล์</p>
+        <h2 class="panel-title" style="font-size:1rem;margin-top:12px">Inbox</h2>
+        <div class="button-row">
+          <button class="button is-primary" type="button" data-refresh-inbox>โหลด inbox</button>
+        </div>
+        <div class="submission-list" data-inbox-list></div>
+        <h2 class="panel-title" style="font-size:1rem;margin-top:12px">คิวในเครื่อง</h2>
         <div class="submission-list" data-submission-list></div>
       </aside>
 
@@ -309,18 +364,44 @@
       </section>
     </main>
 
-    <script src="paligo-config.js"></script>
-    <script src="paligo-inbox-client.js"></script>
     <script src="paligo-exam-shared.js"></script>
-    <script src="paligo-nav-config.js"></script>
-    <script src="sidebar-nav.js"></script>
+    <script src="paligo-exam-submit.js"></script>
     <script>
-      (() => {
-        const { KEYS, getList, setList, downloadJson, toThaiNumber, toThaiPercent, getSavedReviewForSubmission, formatThaiDateTime, computeScore, saveReviewResult, buildBookTransfer, importBookTransfer, upsertBookRecord, BOOK_STATUS } =
-          window.PaligoExamShared;
-        const submissionsStorageKey = KEYS.submissions;
-        const resultsStorageKey = KEYS.results;
-        const reviewerStorageKey = KEYS.reviewerProfile;
+      (async () => {
+        const {
+          KEYS,
+          getList,
+          setList,
+          guardExamPageRole,
+          downloadJson,
+          toThaiNumber,
+          toThaiPercent,
+          getSavedReviewForSubmission,
+          formatThaiDateTime,
+          computeScore,
+          saveReviewResult,
+          buildBookTransfer,
+          importBookTransfer,
+          upsertBookRecord,
+          BOOK_STATUS,
+          resolveReviewerProfileForConsole,
+          saveReviewerProfile,
+          listActiveSubmissions,
+        } = window.PaligoExamShared;
+
+        const gate = document.querySelector("[data-reviewer-gate]");
+        const shell = document.querySelector("[data-reviewer-shell]");
+        const gateMessage = document.querySelector("[data-gate-message]");
+        const sessionCard = document.querySelector("[data-reviewer-session]");
+        const sessionName = document.querySelector("[data-reviewer-session-name]");
+        const sessionMeta = document.querySelector("[data-reviewer-session-meta]");
+
+        const roleGuard = guardExamPageRole({ page: "reviewer" });
+        if (!roleGuard.ok) {
+          window.location.replace(roleGuard.redirect);
+          return;
+        }
+
         const list = document.querySelector("[data-submission-list]");
         const answerView = document.querySelector("[data-answer-view]");
         const stampBody = document.querySelector("[data-stamp-body]");
@@ -336,6 +417,7 @@
         const reviewerName = document.querySelector("[data-reviewer-name]");
         const reviewerRole = document.querySelector("[data-reviewer-role]");
         const importFile = document.querySelector("[data-import-file]");
+        const inboxList = document.querySelector("[data-inbox-list]");
         const importText = document.querySelector("[data-import-text]");
         const pageInput = document.querySelector("[data-stamp-page]");
         const lineInput = document.querySelector("[data-stamp-line]");
@@ -345,24 +427,157 @@
         let scoreStamps = [];
         let errorStamps = [];
         let reviewSignature = null;
+        let inboxSession = null;
 
-        const getReviewerProfile = () => {
-          try {
-            return JSON.parse(localStorage.getItem(reviewerStorageKey) || "null");
-          } catch {
-            return null;
+        const showGate = (message) => {
+          if (gateMessage) gateMessage.textContent = message;
+          if (gate) gate.hidden = false;
+          if (shell) shell.hidden = true;
+        };
+
+        const showShell = () => {
+          if (gate) gate.hidden = true;
+          if (shell) shell.hidden = false;
+        };
+
+        const applyReviewerProfile = (profile) => {
+          if (!profile) return;
+          if (reviewerName && !reviewerName.dataset.userEdited) {
+            reviewerName.value = profile.name || "";
           }
+          if (reviewerRole) reviewerRole.value = profile.role || "teacher-reviewer";
         };
-        const saveReviewerProfile = () => {
-          localStorage.setItem(reviewerStorageKey, JSON.stringify({
-            name: reviewerName.value.trim(),
-            role: reviewerRole.value,
-            updatedAt: new Date().toISOString(),
-          }));
+
+        const paintSessionCard = (session) => {
+          if (!session?.user || session.user.role !== "reviewer") {
+            sessionCard.hidden = true;
+            return;
+          }
+          sessionCard.hidden = false;
+          sessionName.textContent = session.user.displayName || "ผู้ตรวจ";
+          sessionMeta.textContent = `บัญชี Inbox · ${session.user.email || session.user.id || "ผู้ตรวจ"}`;
         };
+
+        const bootstrapAuth = async () => {
+          if (!window.PaligoInboxClient?.isInboxFeatureEnabled?.()) {
+            showShell();
+            applyReviewerProfile(resolveReviewerProfileForConsole());
+            setStatus("Inbox ปิดใน config — ใช้นำเข้า JSON หรือคิวในเครื่อง");
+            return { ok: true, legacy: true };
+          }
+
+          try {
+            await PaligoInboxClient.ensureApiReady?.();
+          } catch (error) {
+            showShell();
+            applyReviewerProfile(resolveReviewerProfileForConsole());
+            setStatus(error.message || "ไม่พบ Inbox API");
+            return { ok: true, apiDown: true };
+          }
+
+          inboxSession = await PaligoInboxClient.ensureAuthenticatedSession();
+
+          if (inboxSession?.user?.role === "student") {
+            showGate("บัญชีนี้เป็นบทบาทนักเรียน — ใช้หน้า สมุดข้อสอบของฉัน หรือสลับบัญชีผู้ตรวจ");
+            return { ok: false };
+          }
+
+          showShell();
+          if (inboxSession?.user?.role === "reviewer") {
+            paintSessionCard(inboxSession);
+            applyReviewerProfile(resolveReviewerProfileForConsole());
+            return { ok: true, session: inboxSession };
+          }
+
+          applyReviewerProfile(resolveReviewerProfileForConsole());
+          setStatus("ยังไม่ได้เข้าสู่ระบบ — นำเข้า JSON ได้ หรือเข้าสู่ระบบผู้ตรวจเพื่อรับจาก Inbox");
+          return { ok: true, legacy: true };
+        };
+
         const setStatus = (message) => {
           statusNote.textContent = message;
         };
+
+        const renderInbox = async () => {
+          if (!inboxList) return;
+
+          if (!window.PaligoInboxClient?.isInboxFeatureEnabled?.()) {
+            inboxList.innerHTML = "<p class='status-note'>Inbox ยังไม่เปิดใช้งานใน config</p>";
+            return;
+          }
+
+          inboxList.innerHTML = "<p class='status-note'>กำลังตรวจสอบบัญชี…</p>";
+
+          try {
+            await PaligoInboxClient.ensureApiReady?.();
+          } catch (error) {
+            inboxList.innerHTML = `<p class='status-note'>${error.message || "ไม่พบ Inbox API"}</p>`;
+            return;
+          }
+
+          const session = inboxSession || (await PaligoInboxClient.ensureAuthenticatedSession());
+
+          if (!session?.sessionToken) {
+            inboxList.innerHTML =
+              "<p class='status-note'>ยังไม่ได้เข้าสู่ระบบ — <a href='exam-account.html'>เข้าสู่ระบบที่บัญชี Inbox</a></p>";
+            return;
+          }
+
+          if (session.user?.role !== "reviewer") {
+            inboxList.innerHTML =
+              "<p class='status-note'>บัญชีนี้เป็นบทบาทนักเรียน — inbox ครูใช้บัญชีผู้ตรวจ · <a href='exam-account.html'>สลับบัญชี</a></p>";
+            return;
+          }
+
+          inboxList.innerHTML = `<p class='status-note'>Inbox ของ ${session.user.displayName || "ครู"} — กำลังโหลด…</p>`;
+          try {
+            const data = await PaligoInboxClient.listInbox();
+            const items = data.items || [];
+            if (!items.length) {
+              inboxList.innerHTML = `<p class='status-note'>Inbox ของ ${session.user.displayName || "ครู"} — ไม่มีรายการรอรับ (ให้นักเรียนส่งตรวจจากสมุดหรือกล่องข้อความ)</p>`;
+              return;
+            }
+            inboxList.innerHTML = "";
+            items.forEach((item) => {
+              const row = document.createElement("div");
+              row.className = "submission-item";
+              const title = document.createElement("strong");
+              title.textContent = item.bookTitle || "สมุดข้อสอบ";
+              const meta = document.createElement("div");
+              meta.className = "status-note";
+              meta.textContent = `จาก ${item.fromDisplayName || "นักเรียน"} · ป.ธ. ${toThaiNumber(item.grade || "—")} · ${formatThaiDateTime(item.createdAt)}`;
+              const claimBtn = document.createElement("button");
+              claimBtn.className = "button is-primary";
+              claimBtn.type = "button";
+              claimBtn.textContent = "รับเข้าคลัง";
+              claimBtn.addEventListener("click", async () => {
+                try {
+                  const result = await PaligoInboxClient.claimInboxItem(item.id);
+                  importBookTransfer(result.bookTransfer);
+                  renderSubmissions();
+                  await renderInbox();
+                  setStatus(`รับเข้าคลังแล้ว — ${item.bookTitle || "สมุด"}`);
+                  if (result.bookTransfer?.submission?.id) {
+                    selectSubmission(result.bookTransfer.submission.id);
+                  }
+                } catch (error) {
+                  window.alert(error.message || "รับเข้าคลังไม่สำเร็จ");
+                }
+              });
+              row.append(title, meta, claimBtn);
+              inboxList.append(row);
+            });
+            setStatus(`Inbox: ${toThaiNumber(items.length)} รายการรอรับ`);
+          } catch (error) {
+            if (error.status === 401) {
+              inboxList.innerHTML =
+                "<p class='status-note'>เซสชันหมดอายุ — <a href='exam-account.html'>เข้าสู่ระบบใหม่</a></p>";
+              return;
+            }
+            inboxList.innerHTML = `<p class='status-note'>${error.message || "โหลด inbox ไม่สำเร็จ"}</p>`;
+          }
+        };
+
         const calculateScore = () => computeScore(scoreStamps);
         const renderScore = () => {
           const score = calculateScore();
@@ -383,8 +598,15 @@
           preflightSubmitted.textContent = formatThaiDateTime(currentSubmission.submittedAt);
         };
         const renderSubmissions = () => {
-          submissions = getList(submissionsStorageKey);
+          submissions = listActiveSubmissions();
           list.innerHTML = "";
+          if (!submissions.length) {
+            const empty = document.createElement("p");
+            empty.className = "status-note";
+            empty.textContent = "ยังไม่มีคิวในเครื่อง — กด «โหลด inbox» แล้วรับงาน หรือนำเข้า JSON";
+            list.append(empty);
+            return;
+          }
           submissions.forEach((submission) => {
             const button = document.createElement("button");
             const title = document.createElement("strong");
@@ -509,7 +731,10 @@
             setStatus("เลือกข้อสอบก่อนบันทึก");
             return null;
           }
-          saveReviewerProfile();
+          saveReviewerProfile({
+            name: reviewerName.value.trim(),
+            role: reviewerRole.value,
+          });
           const result = buildReviewResult();
           saveReviewResult(result);
           setStatus("บันทึกผลตรวจแล้ว — เปิดตรวจบนกระดาษเพื่อ stamp/ลายเซ็นบนกระดาษ");
@@ -518,7 +743,7 @@
         const importSubmission = (payload) => {
           if (payload?.schema === "paligo.exam.bookTransfer.v1") {
             importBookTransfer(payload);
-            submissions = getList(submissionsStorageKey);
+            submissions = listActiveSubmissions();
             if (payload.submission) selectSubmission(payload.submission.id);
             renderSubmissions();
             setStatus("นำเข้าแพ็กเกจโอนสมุดแล้ว");
@@ -528,9 +753,9 @@
             setStatus("ไฟล์ไม่ใช่ submission package");
             return;
           }
-          const next = getList(submissionsStorageKey).filter((item) => item.id !== payload.id);
+          const next = listActiveSubmissions().filter((item) => item.id !== payload.id);
           next.push(payload);
-          setList(submissionsStorageKey, next);
+          setList(KEYS.submissions, next);
           submissions = next;
           selectSubmission(payload.id);
           renderSubmissions();
@@ -554,6 +779,7 @@
           }
         });
         document.querySelector("[data-refresh-list]")?.addEventListener("click", renderSubmissions);
+        document.querySelector("[data-refresh-inbox]")?.addEventListener("click", renderInbox);
         document.querySelectorAll("[data-score-stamp]").forEach((button) => {
           button.addEventListener("click", () => addStamp("score", Number(button.dataset.scoreStamp)));
         });
@@ -561,7 +787,7 @@
           button.addEventListener("click", () => addStamp(button.dataset.errorStamp, ""));
         });
         document.querySelector("[data-save-review]")?.addEventListener("click", saveReview);
-        document.querySelector("[data-return-package]")?.addEventListener("click", () => {
+        document.querySelector("[data-return-package]")?.addEventListener("click", async () => {
           const result = saveReview();
           if (!result) return;
           downloadJson(`${result.id}.paligo-review.json`, result);
@@ -570,6 +796,20 @@
             review: result,
             reviewReceivedAt: new Date().toISOString(),
           });
+
+          if (window.PaligoInboxClient?.isLoggedIn?.() && PaligoInboxClient.getInboxRole?.() === "reviewer") {
+            try {
+              const pushResult = await PaligoExamSubmit.pushReviewToStudent(result.bookId);
+              if (pushResult.ok) {
+                setStatus(pushResult.message || "ส่งผลตรวจเข้า inbox นักเรียนแล้ว");
+                return;
+              }
+              setStatus(`${pushResult.message || "ส่ง inbox ไม่สำเร็จ"} — ดาวน์โหลดไฟล์แทน`);
+            } catch (error) {
+              setStatus(`${error.message || "ส่ง inbox ไม่สำเร็จ"} — ดาวน์โหลดไฟล์แทน`);
+            }
+          }
+
           try {
             downloadJson(`${result.bookId}.to-student.paligo-transfer.json`, buildBookTransfer(result.bookId, "to-student"));
           } catch {
@@ -578,18 +818,34 @@
           setStatus("ดาวน์โหลดไฟล์ผลตรวจแล้ว — ส่งให้นักเรียนนำเข้าที่ ผลตรวจของฉัน หรือแพ็กเกจโอน");
         });
 
-        const reviewer = getReviewerProfile();
-        if (reviewer) {
-          reviewerName.value = reviewer.name || "";
-          reviewerRole.value = reviewer.role || "teacher-reviewer";
-        }
+        reviewerName?.addEventListener("input", () => {
+          reviewerName.dataset.userEdited = "1";
+        });
+        reviewerName?.addEventListener("change", () => {
+          saveReviewerProfile({
+            name: reviewerName.value.trim(),
+            role: reviewerRole.value,
+          });
+        });
+        reviewerRole?.addEventListener("change", () => {
+          saveReviewerProfile({
+            name: reviewerName.value.trim(),
+            role: reviewerRole.value,
+          });
+        });
+
+        const auth = await bootstrapAuth();
+        if (!auth.ok) return;
+
+        showShell();
 
         const querySubmissionId = new URLSearchParams(window.location.search).get("submissionId");
         renderSubmissions();
+        await renderInbox();
         renderScore();
         if (querySubmissionId) selectSubmission(querySubmissionId);
+        else if (submissions.length === 1) selectSubmission(submissions[0].id);
       })();
-      PaligoSidebar.autoInit();
     </script>
   </body>
 </html>

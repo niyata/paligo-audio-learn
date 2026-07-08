@@ -3,7 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ruled Lines Template</title>
+    <title>Ruled Lines Template · Paligo</title>
+    <link rel="stylesheet" href="paligo-design-tokens.css" />
+    <link rel="stylesheet" href="sidebar-nav.css" />
     <style>
       :root {
         --page-bg: #f8f0e3;
@@ -299,15 +301,21 @@
 
       /* ── Annotation (ruler / emphasis-line) tool ─────────────────── */
       :root {
-        --annotation-line-width: calc(var(--line-width) + 0.4px);
+        --annotation-line-width: calc(var(--line-width) + 0.4px + 0.5 * var(--emphasis-line-width));
+        --annotation-line-shift: 0;
+        --annotation-line-nudge: -1px;
       }
 
       .exam-page.is-first .ruled-editor-frame {
+        --annotation-page-offset: 0px;
+      }
+
+      .exam-page.is-first.has-prefilled-line .ruled-editor-frame {
         --annotation-page-offset: var(--line-height);
       }
 
       .exam-page.is-continuation .ruled-editor-frame {
-        --annotation-page-offset: var(--text-y-offset);
+        --annotation-page-offset: 0px;
       }
 
       .annotation-lines {
@@ -329,8 +337,10 @@
         right: 0;
         top: calc(
           var(--annotation-page-offset, 0px) +
-          var(--line-n, 1) * var(--line-height) -
-          var(--annotation-line-width)
+          (var(--line-n, 1) + var(--annotation-line-shift, 0)) * var(--line-height) -
+          var(--line-width) -
+          var(--text-y-offset) +
+          var(--annotation-line-nudge, 0px)
         );
         z-index: 3;
       }
@@ -1033,7 +1043,7 @@
 
       <section class="answer-card" aria-label="การ์ดพื้นที่เขียนคำตอบ">
         <div class="exam-page-stack">
-          <article class="exam-page is-first" aria-label="กระดาษคำตอบหน้าแรก">
+          <article class="exam-page is-first has-prefilled-line" aria-label="กระดาษคำตอบหน้าแรก">
             <div class="exam-header-lines" aria-label="หัวกระดาษหน้าแรก">
               <div class="exam-header-line" aria-hidden="true"></div>
               <div class="exam-header-line exam-grade-line">
@@ -1881,6 +1891,49 @@
           });
         };
 
+        const getAnnotationLineShift = () =>
+          Number.parseFloat(
+            getComputedStyle(document.documentElement).getPropertyValue("--annotation-line-shift").trim()
+          ) || 0;
+
+        const getAnnotationLineWidth = () =>
+          Number.parseFloat(
+            getComputedStyle(document.documentElement).getPropertyValue("--line-width").trim()
+          ) || 0.75;
+
+        const getTextYOffset = () =>
+          Number.parseFloat(
+            getComputedStyle(document.documentElement).getPropertyValue("--text-y-offset").trim()
+          ) || 0;
+
+        const getAnnotationLineNudge = () =>
+          Number.parseFloat(
+            getComputedStyle(document.documentElement).getPropertyValue("--annotation-line-nudge").trim()
+          ) || 0;
+
+        const getAnnotationLineFromPointer = (event, frame) => {
+          const lineHeight =
+            Number.parseFloat(
+              getComputedStyle(document.documentElement).getPropertyValue("--line-height").trim()
+            ) || 26;
+          const frameRect = frame.getBoundingClientRect();
+          const offset =
+            Number.parseFloat(
+              getComputedStyle(frame).getPropertyValue("--annotation-page-offset").trim()
+            ) || 0;
+          const relativeY = event.clientY - frameRect.top;
+          return (
+            Math.round(
+              (relativeY -
+                offset +
+                getAnnotationLineWidth() +
+                getTextYOffset() -
+                getAnnotationLineNudge()) /
+                lineHeight
+            ) - getAnnotationLineShift()
+          );
+        };
+
         const bindAnnotationCanvas = (canvas, pageIndex) => {
           if (canvas.dataset.annotationBound === "true") return;
           canvas.dataset.annotationBound = "true";
@@ -1889,16 +1942,9 @@
             if (!isAnnotating) return;
 
             const frame = canvas.closest(".ruled-editor-frame");
-            const editor = frame?.querySelector(".ruled-editor");
-            if (!frame || !editor) return;
+            if (!frame) return;
 
-            const lineHeight =
-              Number.parseFloat(
-                getComputedStyle(document.documentElement).getPropertyValue("--line-height").trim()
-              ) || 26;
-            const editorRect = editor.getBoundingClientRect();
-            const relativeY = e.clientY - editorRect.top;
-            const lineN = Math.ceil(relativeY / lineHeight);
+            const lineN = getAnnotationLineFromPointer(e, frame);
             const maxLines = pageIndex === 0 ? linesFirstPage : linesPerPage;
 
             if (lineN < 1 || lineN > maxLines) return;
@@ -1940,5 +1986,8 @@
         });
       })();
     </script>
+    <script src="paligo-nav-config.js"></script>
+    <script src="sidebar-nav.js"></script>
+    <script>PaligoSidebar.autoInit();</script>
   </body>
 </html>

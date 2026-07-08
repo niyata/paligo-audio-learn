@@ -26,6 +26,7 @@
 - **ไม่ commit** จน user ขอ
 - **Shell ทุกหน้า user-facing** — ใช้ `PaligoSidebar.autoInit()`
 - **Exam handoff** — ใช้ `paligo-exam-shared.js` + book transfer schemas
+- **ตีเส้นบรรทัด** — ห้าม regression ตำแหน่ง/ลบเส้น (ดู `.cursor/rules/paligo-annotation-lines.mdc`)
 - **Handoff ข้าม agent** — ใช้ template ใน `docs/agile/AGENT-HANDOFF.md`
 
 ## Local dev
@@ -36,11 +37,11 @@ python3 -m http.server 8765
 
 # Inbox API (Phase 0+)
 cd workers && npm install && npm run dev
-# API: http://localhost:8787/v1/health
+# API: http://localhost:8788/v1/health
 # Browser: PaligoInboxClient.healthCheck()
 ```
 
-Domains: `paligo.com` (landing) · `app.paligo.com` (Pages) · `api.paligo.com` (Workers) — ดู `docs/deploy-cloudflare.md`
+Domains: `paligo.jp` (landing) · `app.paligo.jp` (Pages) · `api.paligo.jp` (Workers) — ดู `docs/deploy-cloudflare.md`
 
 ## เมื่อจบงาน
 

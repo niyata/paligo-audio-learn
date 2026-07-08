@@ -50,9 +50,9 @@ else
 ส่งเล่มผ่าน web inbox แทนไฟล์โอน (flow หลัก) · import/export เป็นเมนูเพิ่มเติม
 
 ## Domain
-- `paligo.com` — landing
-- `app.paligo.com` — Cloudflare Pages
-- `api.paligo.com` — Workers → DO ภายหลัง
+- `paligo.jp` — landing
+- `app.paligo.jp` — Cloudflare Pages
+- `api.paligo.jp` — Workers → DO ภายหลัง
 
 ## Phases
 See `docs/agile/inbox-sprint-backlog.md`
@@ -72,7 +72,7 @@ seed "[Inbox P0.1] Workers API skeleton + /v1/health" "$(cat <<'EOF'
 ## Acceptance Criteria
 - [ ] `workers/` + `wrangler.jsonc` + `npm run dev`
 - [ ] `GET /v1/health` → `{ ok, service, version }`
-- [ ] CORS สำหรับ `localhost:8765` และ `https://app.paligo.com`
+- [ ] CORS สำหรับ `localhost:8765` และ `https://app.paligo.jp`
 - [ ] Stub routes: `/v1/me`, `/v1/inbox`, `POST /v1/packages` (501)
 
 ## Verify
@@ -103,12 +103,12 @@ seed "[Inbox P0.2] PALIGO_CONFIG.apiBase + PaligoInboxClient" "$(cat <<'EOF'
 EOF
 )" "type:story,area:inbox,priority:P0,agent:cursor-ai,phase:inbox-0,status:ready-for-dev"
 
-seed "[Inbox P0.3] Deploy guide + api.paligo.com routes" "$(cat <<'EOF'
+seed "[Inbox P0.3] Deploy guide + api.paligo.jp routes" "$(cat <<'EOF'
 **Phase 0** · **Agent:** cursor-ai
 
 ## Acceptance Criteria
 - [ ] `workers/README.md` ครบ: dev, deploy, secrets
-- [ ] `wrangler.jsonc` routes comment/document สำหรับ `api.paligo.com`
+- [ ] `wrangler.jsonc` routes comment/document สำหรับ `api.paligo.jp`
 - [ ] `wrangler deploy` สำเร็จ (หลัง DNS)
 
 ## Blocked by
@@ -116,26 +116,26 @@ P0.5 DNS
 EOF
 )" "type:task,area:inbox,priority:P1,agent:cursor-ai,phase:inbox-0"
 
-seed "[Inbox P0.4] Cloudflare Pages — app.paligo.com" "$(cat <<'EOF'
+seed "[Inbox P0.4] Cloudflare Pages — app.paligo.jp" "$(cat <<'EOF'
 **Phase 0** · **Agent:** human
 
 ## Acceptance Criteria
 - [ ] Pages project จาก repo branch `new-dev` (หรือ main)
 - [ ] Build: none (static) · output = repo root
-- [ ] `app.paligo.com` custom domain
+- [ ] `app.paligo.jp` custom domain
 
 ## Ref
 `docs/deploy-cloudflare.md`
 EOF
 )" "type:task,area:inbox,priority:P1,agent:human,phase:inbox-0"
 
-seed "[Inbox P0.5] DNS: paligo.com / app / api" "$(cat <<'EOF'
+seed "[Inbox P0.5] DNS: paligo.jp / app / api" "$(cat <<'EOF'
 **Phase 0** · **Agent:** human
 
 ## Acceptance Criteria
-- [ ] `paligo.com` → landing (Pages หรือ DO ชั่วคราว)
-- [ ] `app.paligo.com` → Pages
-- [ ] `api.paligo.com` → Workers route
+- [ ] `paligo.jp` → landing (Pages หรือ DO ชั่วคราว)
+- [ ] `app.paligo.jp` → Pages
+- [ ] `api.paligo.jp` → Workers route
 - [ ] SSL Full (strict) บน Cloudflare
 
 ## Domain plan

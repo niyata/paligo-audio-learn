@@ -28,8 +28,8 @@ Use case: static HTML frontend + REST API + SQL metadata + object storage สำ
 
 ```text
 CyberPanel (OpenLiteSpeed)
-  ├── paligo.example     → static files (repo HTML)
-  └── api.paligo.example → reverse proxy → Docker: Node/FastAPI + PostgreSQL
+  ├── paligo.jp          → static files (repo HTML)
+  └── api.paligo.jp      → reverse proxy → Docker: Node/FastAPI + PostgreSQL
 Object storage (optional): DO Spaces สำหรับ payload ใหญ่
 ```
 
