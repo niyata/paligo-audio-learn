@@ -188,6 +188,21 @@ Phase 6  Scale prep    → backup D1 · แผนย้าย Postgres บน DO
 
 ---
 
+## Phase 8.5 — หาครูตรวจ · Invite LINE · Onboarding ครู (Backlog)
+
+> **Pain point PO:** นักเรียนอยากเรียนบาลีแต่ยังไม่มีครูตรวจ · สเปค vision: [`docs/teacher-invite-onboarding-vision.md`](../teacher-invite-onboarding-vision.md)
+
+| # | งาน | Priority |
+|---|-----|----------|
+| 8.5.1 | Invite URL หลายครูรับพร้อมกัน (ขยาย pairing) | P1 |
+| 8.5.2 | LINE Flex + shareTargetPicker แชร์คำเชิญ | P1 |
+| 8.5.3 | Invite wizard นำทางครูใหม่ | P1 |
+| 8.5.4 | Inbox แจ้งนักเรียน (1 ท่าน / หลายท่าน รับศิษย์) | P1 |
+| 8.5.5 | เลือกผู้ตรวจตอนส่งข้อสอบ (แบ่งภาระ) | P2 |
+| 8.5.6 | Seed ครูล่วงหน้า (super admin / ops) | P2 |
+
+---
+
 ## Phase 9–10 — กัลยาณมิตร · ศิษย์ · Feed (Backlog)
 
 > **อย่าเริ่มจน Phase 4 Done** · สเปค: [`docs/phase-social-relations-feed.md`](../phase-social-relations-feed.md) · Backlog ทีม: [`docs/agile/phase-social-sprint-backlog.md`](phase-social-sprint-backlog.md)
@@ -226,6 +241,7 @@ Phase 6  Scale prep    → backup D1 · แผนย้าย Postgres บน DO
 - `docs/exam-review-queue-backlog.md` — Phase 7 คิวตรวจ
 - `docs/phase-line-reply-webhook.md` — Phase 8 LINE reply webhook
 - `docs/phase-social-relations-feed.md` — Phase 9–10 มิตร/ศิษย์/feed
+- `docs/teacher-invite-onboarding-vision.md` — pain point หาครูตรวจ · LINE invite · wizard ครู
 - `docs/pali-ai/CLOUD-CODE-ALIGNMENT.md` — Paligo web vs Cloud Code PALI-AI (handoff ไม่แทน sprint นี้)
 - `docs/agile/SCRUM-WORKFLOW.md`
 - `workers/README.md`
