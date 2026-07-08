@@ -190,7 +190,7 @@ Phase 6  Scale prep    → backup D1 · แผนย้าย Postgres บน DO
 
 ## Phase 8.5 — หาครูตรวจ · Invite LINE · Onboarding ครู (Backlog)
 
-> **Pain point PO:** นักเรียนอยากเรียนบาลีแต่ยังไม่มีครูตรวจ · สเปค vision: [`docs/teacher-invite-onboarding-vision.md`](../teacher-invite-onboarding-vision.md)
+> **Pain point PO:** นักเรียนอยากเรียนบาลีแต่ยังไม่มีครูตรวจ · **PRD:** [`docs/prd-teacher-matching-onboarding.md`](../prd-teacher-matching-onboarding.md) · สรุป: [`teacher-invite-onboarding-vision.md`](../teacher-invite-onboarding-vision.md)
 
 | # | งาน | Priority |
 |---|-----|----------|
@@ -241,7 +241,8 @@ Phase 6  Scale prep    → backup D1 · แผนย้าย Postgres บน DO
 - `docs/exam-review-queue-backlog.md` — Phase 7 คิวตรวจ
 - `docs/phase-line-reply-webhook.md` — Phase 8 LINE reply webhook
 - `docs/phase-social-relations-feed.md` — Phase 9–10 มิตร/ศิษย์/feed
-- `docs/teacher-invite-onboarding-vision.md` — pain point หาครูตรวจ · LINE invite · wizard ครู
+- `docs/prd-teacher-matching-onboarding.md` — PRD จับคู่ครูตรวจ · LINE invite · wizard ครู
+- `docs/teacher-invite-onboarding-vision.md` — สรุป vision สั้น
 - `docs/pali-ai/CLOUD-CODE-ALIGNMENT.md` — Paligo web vs Cloud Code PALI-AI (handoff ไม่แทน sprint นี้)
 - `docs/agile/SCRUM-WORKFLOW.md`
 - `workers/README.md`

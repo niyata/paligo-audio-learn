@@ -18,6 +18,7 @@
 | Navigation shell | `sidebar-nav.*`, `paligo-nav-config.js` | `docs/navigation-and-shell-prd.md` |
 | Agile | `.github/`, `docs/agile/` | `docs/agile/SCRUM-WORKFLOW.md` |
 | Inbox API | `workers/`, `paligo-config.js`, `paligo-inbox-client.js` | `docs/agile/inbox-sprint-backlog.md` |
+| Teacher matching | `exam-account.html`, `exam-inbox.html` (planned) | `docs/prd-teacher-matching-onboarding.md` |
 
 ## กฎสำคัญ
 
