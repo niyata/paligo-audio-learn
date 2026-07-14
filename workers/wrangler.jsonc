@@ -14,7 +14,7 @@
     {
       "binding": "DB",
       "database_name": "paligo-inbox",
-      "database_id": "00000000-0000-4000-8000-000000000001",
+      "database_id": "b7e3ba10-9602-4640-b20a-61496dc14a6e",
       "migrations_dir": "migrations"
     }
   ]
