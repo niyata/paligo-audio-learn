@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS platform_settings (
 INSERT OR IGNORE INTO platform_settings (key, value_json)
 VALUES (
   'platform_flags',
-  '{"importExportEnabled":false,"inboxEnabled":true,"lineWebhookEnabled":false,"lineMessagingEnabled":false,"lineNotifyQueueEnabled":false,"notificationsEnabled":true,"maintenanceMode":false,"debugApiLogs":false}'
+  '{"importExportEnabled":false,"inboxEnabled":true,"lineWebhookEnabled":false,"lineMessagingEnabled":false,"lineNotifyQueueEnabled":false,"notificationsEnabled":true,"crawlerIndexingAllowed":false,"maintenanceMode":false,"debugApiLogs":false}'
 );
 
 UPDATE users SET is_super_admin = 1

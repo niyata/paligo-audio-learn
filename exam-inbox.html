@@ -58,6 +58,9 @@
               <button class="paligo-btn inbox-contact-rail__create" type="button" data-open-group-sheet aria-label="สร้างกลุ่ม">
                 สร้างกลุ่ม
               </button>
+              <button class="paligo-btn inbox-contact-rail__create" type="button" data-open-invite-sheet aria-label="เชิญผู้ใช้">
+                เชิญ
+              </button>
             </div>
           </div>
           <div class="inbox-contact-list" data-contact-list></div>
@@ -71,6 +74,7 @@
           </div>
           <div class="inbox-chat-composer__tools">
             <button class="paligo-btn is-ghost" type="button" data-open-group-sheet>สร้างกลุ่ม</button>
+            <button class="paligo-btn is-ghost" type="button" data-open-invite-sheet>เชิญผู้ใช้</button>
             <button class="paligo-btn" type="button" data-refresh-chat>โหลดใหม่</button>
             <a class="paligo-btn is-ghost" href="exam-account.html">บัญชี</a>
           </div>
@@ -223,6 +227,36 @@
       </div>
     </div>
 
+    <div class="inbox-group-sheet" data-invite-sheet data-paligo-overlay hidden aria-hidden="true">
+      <div class="inbox-group-sheet__panel" role="dialog" aria-labelledby="invite-sheet-title">
+        <h2 class="inbox-book-sheet__title" id="invite-sheet-title">เชิญผู้ใช้</h2>
+        <p class="paligo-local-note">ทดสอบ invite จากรายชื่อผู้ใช้จำลอง เลือกได้ทั้งห้องส่วนตัวและเชิญเข้ากลุ่ม</p>
+        <div class="inbox-group-form">
+          <label class="inbox-book-sheet__filter">
+            <span class="inbox-book-sheet__filter-label">รูปแบบ</span>
+            <select class="inbox-book-sheet__filter-select" data-invite-mode>
+              <option value="personal">ห้องส่วนตัว</option>
+              <option value="group">เชิญเข้ากลุ่ม</option>
+            </select>
+          </label>
+          <label class="inbox-book-sheet__filter" data-invite-group-field>
+            <span class="inbox-book-sheet__filter-label">กลุ่มเป้าหมาย</span>
+            <select class="inbox-book-sheet__filter-select" data-invite-group-target></select>
+          </label>
+          <label class="inbox-book-sheet__filter inbox-group-form__wide">
+            <span class="inbox-book-sheet__filter-label">ค้นหา contact</span>
+            <input class="inbox-book-sheet__search-input" type="search" placeholder="ชื่อ อีเมล role หรือโดเมน" data-invite-search autocomplete="off" />
+          </label>
+        </div>
+        <div class="inbox-invite-list" data-invite-list></div>
+        <div class="inbox-book-sheet__footer">
+          <p class="inbox-invite-summary" data-invite-summary>ยังไม่ได้เลือกผู้ใช้</p>
+          <button class="paligo-btn is-primary" type="button" data-confirm-invite>เชิญ</button>
+          <button class="paligo-btn is-ghost inbox-book-sheet__close" type="button" data-close-invite-sheet>ปิด</button>
+        </div>
+      </div>
+    </div>
+
     <div class="inbox-chat-context-menu" data-chat-context-menu data-paligo-overlay hidden role="menu" aria-label="เมนูข้อความ"></div>
 
     <script src="paligo-config.js"></script>
@@ -296,6 +330,13 @@
         const groupPreviewAvatar = document.querySelector("[data-group-preview-avatar]");
         const groupPreviewTitle = document.querySelector("[data-group-preview-title]");
         const groupPreviewMeta = document.querySelector("[data-group-preview-meta]");
+        const inviteSheet = document.querySelector("[data-invite-sheet]");
+        const inviteModeSelect = document.querySelector("[data-invite-mode]");
+        const inviteGroupField = document.querySelector("[data-invite-group-field]");
+        const inviteGroupTarget = document.querySelector("[data-invite-group-target]");
+        const inviteSearchInput = document.querySelector("[data-invite-search]");
+        const inviteList = document.querySelector("[data-invite-list]");
+        const inviteSummary = document.querySelector("[data-invite-summary]");
 
         const subjectOptions = () => SUBJECT_OPTIONS || [];
 
@@ -319,6 +360,7 @@
           const menu = document.querySelector("[data-chat-context-menu]");
           if (sheet && sheet.parentElement !== document.body) document.body.append(sheet);
           if (groupSheet && groupSheet.parentElement !== document.body) document.body.append(groupSheet);
+          if (inviteSheet && inviteSheet.parentElement !== document.body) document.body.append(inviteSheet);
           if (menu && menu.parentElement !== document.body) document.body.append(menu);
         };
 
@@ -329,6 +371,7 @@
 
         const PAIRING_CACHE_KEY = "paligo-inbox-pairing-cache-v1";
         const GROUPS_STORAGE_KEY = "paligo-inbox-groups-v1";
+        const INVITES_STORAGE_KEY = "paligo-inbox-invites-v1";
         const cachePairingContext = (userId, ctx) => {
           if (!userId || !ctx) return;
           try {
@@ -360,6 +403,44 @@
             localStorage.setItem(GROUPS_STORAGE_KEY, JSON.stringify(parsed));
           } catch {}
         };
+        const readStoredInvites = () => {
+          try {
+            const parsed = JSON.parse(localStorage.getItem(INVITES_STORAGE_KEY) || "{}") || {};
+            const record = parsed[getGroupOwnerScope()] || {};
+            return {
+              personal: Array.isArray(record.personal) ? record.personal : [],
+              groupMembers:
+                record.groupMembers && typeof record.groupMembers === "object" ? record.groupMembers : {},
+            };
+          } catch {
+            return { personal: [], groupMembers: {} };
+          }
+        };
+        const writeStoredInvites = (record) => {
+          try {
+            const parsed = JSON.parse(localStorage.getItem(INVITES_STORAGE_KEY) || "{}") || {};
+            parsed[getGroupOwnerScope()] = {
+              personal: Array.isArray(record.personal) ? record.personal : [],
+              groupMembers:
+                record.groupMembers && typeof record.groupMembers === "object" ? record.groupMembers : {},
+            };
+            localStorage.setItem(INVITES_STORAGE_KEY, JSON.stringify(parsed));
+          } catch {}
+        };
+        const mockInviteContacts = [
+          { id: "pete.std@paligo.jp", name: "สามเณร Pete", email: "pete.std@paligo.jp", role: "student", meta: "นักเรียน · ป.ธ. ๔" },
+          { id: "precha.tc@paligo.in.th", name: "ครูปรีชา", email: "precha.tc@paligo.in.th", role: "reviewer", meta: "ครูผู้ตรวจ · ไทย" },
+          { id: "prateep.std@paligo.jp", name: "ประทีป", email: "prateep.std@paligo.jp", role: "student", meta: "นักเรียน · ญี่ปุ่น" },
+          { id: "saman.std@paligo.jp", name: "สามัญ", email: "saman.std@paligo.jp", role: "student", meta: "นักเรียน · ป.ธ. ๓" },
+          { id: "kittipong.tc@paligo.in.th", name: "ครูกิตติพงษ์", email: "kittipong.tc@paligo.in.th", role: "reviewer", meta: "ครูผู้ตรวจ · แปลไทย" },
+          { id: "boonmee.std@paligo.jp", name: "บุญมี", email: "boonmee.std@paligo.jp", role: "student", meta: "นักเรียน · ฝึกแปล" },
+          { id: "ananda.std@paligo.jp", name: "อนันทะ", email: "ananda.std@paligo.jp", role: "student", meta: "นักเรียน · inbox beta" },
+          { id: "sujin.tc@paligo.in.th", name: "ครูสุจินต์", email: "sujin.tc@paligo.in.th", role: "reviewer", meta: "ครูผู้ตรวจ · ไวยากรณ์" },
+          { id: "dhamma.std@paligo.jp", name: "ธรรมะ", email: "dhamma.std@paligo.jp", role: "student", meta: "นักเรียน · อ่านบาลี" },
+          { id: "metta.std@paligo.jp", name: "เมตตา", email: "metta.std@paligo.jp", role: "student", meta: "นักเรียน · ทดสอบกลุ่ม" },
+        ];
+        const inviteSelection = new Set();
+        let inviteSearchQuery = "";
         const groupThemes = {
           "blue-gold": {
             cover: "linear-gradient(135deg, #1f2d89 0%, #4654b8 58%, #f4b400 100%)",
@@ -391,10 +472,32 @@
           type: "group",
           threadId: group.threadId,
           name: group.name,
-          meta: group.description || "กลุ่ม · invite สมาชิกได้",
+          meta: [
+            Array.isArray(group.members) && group.members.length ? `${group.members.length} สมาชิก` : "",
+            group.description || "กลุ่ม · invite สมาชิกได้",
+          ]
+            .filter(Boolean)
+            .join(" · "),
           avatarUrl: group.avatarUrl || makeGroupAvatarUrl(group),
           pendingCount: 0,
           updatedAt: group.updatedAt || group.createdAt,
+        });
+        const makeInviteAvatarUrl = (contact) => {
+          const color = contact.role === "reviewer" ? "#24715b" : "#1f2d89";
+          const initials = contactInitials(contact.name || contact.email);
+          const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96"><rect width="96" height="96" rx="48" fill="${color}"/><text x="48" y="57" text-anchor="middle" font-family="Sarabun, sans-serif" font-size="26" font-weight="900" fill="#fff">${escapeSvgText(initials)}</text></svg>`;
+          return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+        };
+        const buildInviteContact = (contact) => ({
+          id: `invite:${contact.id}`,
+          type: contact.role === "reviewer" ? "reviewer" : "student",
+          peerUserId: contact.id,
+          threadId: resolvePeerThreadId(contact.id),
+          name: contact.name,
+          meta: `${contact.email} · ${contact.role === "reviewer" ? "ครู/ผู้ตรวจ" : "นักเรียน"}`,
+          avatarUrl: contact.avatarUrl || makeInviteAvatarUrl(contact),
+          pendingCount: 0,
+          updatedAt: contact.invitedAt || new Date().toISOString(),
         });
         let sheetBooks = [];
         let sheetSearchQuery = "";
@@ -612,6 +715,9 @@
               });
             });
           }
+          readStoredInvites().personal.forEach((contact) => {
+            upsertContact(buildInviteContact(contact));
+          });
           readStoredGroups().forEach((group) => {
             upsertContact(buildGroupContact(group));
           });
@@ -899,6 +1005,7 @@
             kind,
             themeKey,
             description,
+            members: [],
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
           };
@@ -910,6 +1017,177 @@
           closeGroupSheet();
           setActiveContact(group.id);
           appendSystem(`${ownerLabel}สร้าง${kindLabel}: ${name}`);
+        };
+
+        const findActiveGroup = () =>
+          Array.from(inboxContacts.values()).find((contact) => contact.type === "group" && contact.threadId === threadId) ||
+          Array.from(inboxContacts.values()).find((contact) => contact.type === "group");
+
+        const updateInviteGroupOptions = () => {
+          if (!inviteGroupTarget) return;
+          const groups = readStoredGroups();
+          inviteGroupTarget.replaceChildren();
+          groups.forEach((group) => {
+            const option = document.createElement("option");
+            option.value = group.id;
+            option.textContent = group.name || "กลุ่ม";
+            inviteGroupTarget.append(option);
+          });
+          const activeGroup = findActiveGroup();
+          if (activeGroup && groups.some((group) => group.id === activeGroup.id)) {
+            inviteGroupTarget.value = activeGroup.id;
+          }
+          const groupMode = inviteModeSelect?.value === "group";
+          if (inviteGroupField) inviteGroupField.hidden = !groupMode;
+        };
+
+        const updateInviteSummary = () => {
+          if (!inviteSummary) return;
+          const selected = mockInviteContacts.filter((contact) => inviteSelection.has(contact.id));
+          inviteSummary.textContent = selected.length
+            ? `เลือกแล้ว ${selected.length} คน · ${selected.map((contact) => contact.name).join(", ")}`
+            : "ยังไม่ได้เลือกผู้ใช้";
+        };
+
+        const renderInviteList = () => {
+          if (!inviteList) return;
+          const q = normalizeSheetSearch(inviteSearchQuery);
+          const filtered = mockInviteContacts.filter((contact) => {
+            if (!q) return true;
+            return normalizeSheetSearch([contact.name, contact.email, contact.role, contact.meta].join(" ")).includes(q);
+          });
+          inviteList.replaceChildren();
+          if (!filtered.length) {
+            const empty = document.createElement("p");
+            empty.className = "paligo-local-note";
+            empty.textContent = "ไม่พบ contact ตามคำค้นหา";
+            inviteList.append(empty);
+            updateInviteSummary();
+            return;
+          }
+          filtered.forEach((contact) => {
+            const row = document.createElement("button");
+            row.type = "button";
+            row.className = "inbox-invite-contact";
+            row.dataset.inviteContactId = contact.id;
+            row.setAttribute("aria-pressed", String(inviteSelection.has(contact.id)));
+
+            const avatar = document.createElement("span");
+            avatar.className = "inbox-contact-card__avatar";
+            const img = document.createElement("img");
+            img.src = contact.avatarUrl || makeInviteAvatarUrl(contact);
+            img.alt = "";
+            avatar.append(img);
+
+            const main = document.createElement("span");
+            main.className = "inbox-contact-card__main";
+            const name = document.createElement("span");
+            name.className = "inbox-contact-card__name";
+            name.textContent = contact.name;
+            const meta = document.createElement("span");
+            meta.className = "inbox-contact-card__meta";
+            meta.textContent = `${contact.email} · ${contact.role === "reviewer" ? "ครู/ผู้ตรวจ" : "นักเรียน"}`;
+            main.append(name, meta);
+
+            const check = document.createElement("span");
+            check.className = "inbox-invite-contact__check";
+            check.textContent = inviteSelection.has(contact.id) ? "เลือกแล้ว" : "เลือก";
+            row.append(avatar, main, check);
+            inviteList.append(row);
+          });
+          updateInviteSummary();
+        };
+
+        const openInviteSheet = ({ mode = "personal" } = {}) => {
+          ensureOverlayPortals();
+          if (!inviteSheet) return;
+          inviteSelection.clear();
+          inviteSearchQuery = "";
+          if (inviteSearchInput) inviteSearchInput.value = "";
+          if (inviteModeSelect) {
+            inviteModeSelect.value = mode === "group" || findActiveGroup() ? mode : "personal";
+            if (findActiveGroup()) inviteModeSelect.value = mode;
+          }
+          updateInviteGroupOptions();
+          renderInviteList();
+          inviteSheet.hidden = false;
+          inviteSheet.removeAttribute("hidden");
+          inviteSheet.classList.add("is-open");
+          inviteSheet.setAttribute("aria-hidden", "false");
+          window.requestAnimationFrame(() => inviteSearchInput?.focus());
+        };
+
+        const closeInviteSheet = () => {
+          if (!inviteSheet) return;
+          inviteSheet.hidden = true;
+          inviteSheet.setAttribute("hidden", "");
+          inviteSheet.classList.remove("is-open");
+          inviteSheet.setAttribute("aria-hidden", "true");
+        };
+
+        const persistPersonalInvites = (contacts) => {
+          const stored = readStoredInvites();
+          const byId = new Map(stored.personal.map((contact) => [contact.id, contact]));
+          contacts.forEach((contact) => byId.set(contact.id, { ...contact, invitedAt: new Date().toISOString() }));
+          stored.personal = Array.from(byId.values());
+          writeStoredInvites(stored);
+          stored.personal.forEach((contact) => upsertContact(buildInviteContact(contact)));
+        };
+
+        const persistGroupInvites = (groupId, contacts) => {
+          const groups = readStoredGroups();
+          const groupIndex = groups.findIndex((group) => group.id === groupId);
+          if (groupIndex < 0) return null;
+          const group = { ...groups[groupIndex] };
+          const memberMap = new Map((group.members || []).map((member) => [member.id, member]));
+          contacts.forEach((contact) => memberMap.set(contact.id, { ...contact, invitedAt: new Date().toISOString() }));
+          group.members = Array.from(memberMap.values());
+          group.updatedAt = new Date().toISOString();
+          groups[groupIndex] = group;
+          writeStoredGroups(groups);
+
+          const stored = readStoredInvites();
+          stored.groupMembers[group.id] = group.members;
+          writeStoredInvites(stored);
+          upsertContact(buildGroupContact(group));
+          return group;
+        };
+
+        const confirmInviteSelection = () => {
+          const selected = mockInviteContacts.filter((contact) => inviteSelection.has(contact.id));
+          if (!selected.length) {
+            window.alert("เลือกผู้ใช้ที่จะเชิญก่อน");
+            return;
+          }
+          const mode = inviteModeSelect?.value || "personal";
+          if (mode === "group") {
+            const groupId = inviteGroupTarget?.value || findActiveGroup()?.id;
+            if (!groupId) {
+              window.alert("ยังไม่มีกลุ่ม — สร้างกลุ่มก่อนเชิญสมาชิก");
+              return;
+            }
+            const group = persistGroupInvites(groupId, selected);
+            if (!group) {
+              window.alert("ไม่พบกลุ่มเป้าหมาย");
+              return;
+            }
+            closeInviteSheet();
+            setActiveContact(group.id);
+            appendSystem(`เชิญ ${selected.map((contact) => contact.name).join(", ")} เข้ากลุ่มแล้ว`);
+            return;
+          }
+
+          persistPersonalInvites(selected);
+          closeInviteSheet();
+          const first = buildInviteContact(selected[0]);
+          setActiveContact(first.id);
+          chat.appendMessage(first.threadId, {
+            id: chat.createId("msg"),
+            type: "system",
+            text: `เริ่มห้องส่วนตัวกับ ${selected[0].name}`,
+            at: new Date().toISOString(),
+          });
+          paintThread();
         };
 
         const showGate = (message) => {
@@ -1609,6 +1887,30 @@
                 openGroupSheet();
                 return;
               }
+              if (event.target.closest("[data-open-invite-sheet]")) {
+                event.preventDefault();
+                openInviteSheet({ mode: findActiveGroup() ? "group" : "personal" });
+                return;
+              }
+              if (event.target.closest("[data-close-invite-sheet]")) {
+                event.preventDefault();
+                closeInviteSheet();
+                return;
+              }
+              if (event.target.closest("[data-confirm-invite]")) {
+                event.preventDefault();
+                confirmInviteSelection();
+                return;
+              }
+              const inviteContactButton = event.target.closest("[data-invite-contact-id]");
+              if (inviteContactButton) {
+                event.preventDefault();
+                const id = inviteContactButton.dataset.inviteContactId;
+                if (inviteSelection.has(id)) inviteSelection.delete(id);
+                else inviteSelection.add(id);
+                renderInviteList();
+                return;
+              }
               if (event.target.closest("[data-close-group-sheet]")) {
                 event.preventDefault();
                 closeGroupSheet();
@@ -1652,6 +1954,9 @@
               if (groupSheet?.classList.contains("is-open") && event.target === groupSheet) {
                 closeGroupSheet();
               }
+              if (inviteSheet?.classList.contains("is-open") && event.target === inviteSheet) {
+                closeInviteSheet();
+              }
             });
 
             document.body.addEventListener("input", (event) => {
@@ -1666,6 +1971,10 @@
                 event.target.matches("[data-group-description]")
               ) {
                 updateGroupPreview();
+              }
+              if (event.target.matches("[data-invite-search]")) {
+                inviteSearchQuery = event.target.value;
+                renderInviteList();
               }
             });
 
@@ -1685,6 +1994,10 @@
               ) {
                 updateGroupPreview();
               }
+              if (event.target.matches("[data-invite-mode]")) {
+                updateInviteGroupOptions();
+                renderInviteList();
+              }
             });
 
             document.body.addEventListener("keydown", (event) => {
@@ -1695,6 +2008,10 @@
               if (event.key === "Escape" && groupSheet?.classList.contains("is-open")) {
                 event.preventDefault();
                 closeGroupSheet();
+              }
+              if (event.key === "Escape" && inviteSheet?.classList.contains("is-open")) {
+                event.preventDefault();
+                closeInviteSheet();
               }
             });
           }
@@ -1735,7 +2052,14 @@
         });
         window.addEventListener("scroll", hideChatContextMenu, true);
 
-        window.PaligoExamInboxUI = { openBookSheet, closeBookSheet, openGroupSheet, closeGroupSheet };
+        window.PaligoExamInboxUI = {
+          openBookSheet,
+          closeBookSheet,
+          openGroupSheet,
+          closeGroupSheet,
+          openInviteSheet,
+          closeInviteSheet,
+        };
 
         hideChatContextMenu();
         PaligoSidebar.autoInit();

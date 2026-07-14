@@ -62,6 +62,7 @@ async function main() {
       })
     );
     localStorage.removeItem("paligo-inbox-groups-v1");
+    localStorage.removeItem("paligo-inbox-invites-v1");
   }, { userSession: session(), userId: USER_ID });
 
   await page.goto(URL, { waitUntil: "domcontentloaded", timeout: 30000 });
@@ -75,23 +76,50 @@ async function main() {
   await page.click("[data-create-group-submit]");
   await page.waitForTimeout(400);
 
+  await page.locator("[data-open-invite-sheet]").first().click();
+  await page.waitForSelector("[data-invite-sheet].is-open", { timeout: 5000 });
+  await page.selectOption("[data-invite-mode]", "personal");
+  await page.fill("[data-invite-search]", "pete.std");
+  await page.click("[data-invite-contact-id='pete.std@paligo.jp']");
+  await page.click("[data-confirm-invite]");
+  await page.waitForTimeout(300);
+
+  await page.evaluate(() => window.PaligoExamInboxUI.openInviteSheet({ mode: "group" }));
+  await page.waitForSelector("[data-invite-sheet].is-open", { timeout: 5000 });
+  await page.selectOption("[data-invite-mode]", "group");
+  await page.fill("[data-invite-search]", "precha.tc");
+  await page.click("[data-invite-contact-id='precha.tc@paligo.in.th']");
+  await page.click("[data-confirm-invite]");
+  await page.waitForTimeout(300);
+
   const result = await page.evaluate((expectedName) => {
     const groupSheet = document.querySelector("[data-group-sheet]");
     const list = document.querySelector(".inbox-contact-list");
     const cards = Array.from(document.querySelectorAll(".inbox-contact-card"));
     const groupsRaw = localStorage.getItem("paligo-inbox-groups-v1") || "{}";
+    const invitesRaw = localStorage.getItem("paligo-inbox-invites-v1") || "{}";
     let groups = {};
+    let invites = {};
     try {
       groups = JSON.parse(groupsRaw);
     } catch {}
+    try {
+      invites = JSON.parse(invitesRaw);
+    } catch {}
+    const storedGroups = Array.isArray(groups["audit-inbox-group-user"]) ? groups["audit-inbox-group-user"] : [];
+    const inviteRecord = invites["audit-inbox-group-user"] || {};
     return {
       sheetHidden: Boolean(groupSheet?.hidden),
+      inviteSheetHidden: Boolean(document.querySelector("[data-invite-sheet]")?.hidden),
       activeTitle: document.querySelector("[data-chat-peer-name]")?.textContent?.trim() || "",
       hasGroupContact: cards.some((card) => card.textContent.includes(expectedName)),
+      hasPersonalInviteContact: cards.some((card) => card.textContent.includes("สามเณร Pete")),
       contactCardHeights: cards.map((card) => Math.round(card.getBoundingClientRect().height)),
       listAlignContent: list ? getComputedStyle(list).alignContent : "",
       listGridAutoRows: list ? getComputedStyle(list).gridAutoRows : "",
-      storedGroupCount: Array.isArray(groups["audit-inbox-group-user"]) ? groups["audit-inbox-group-user"].length : 0,
+      storedGroupCount: storedGroups.length,
+      storedPersonalInviteCount: Array.isArray(inviteRecord.personal) ? inviteRecord.personal.length : 0,
+      storedGroupMemberCount: Array.isArray(storedGroups[0]?.members) ? storedGroups[0].members.length : 0,
       systemText: document.querySelector("[data-chat-thread]")?.textContent || "",
     };
   }, GROUP_NAME);
@@ -102,10 +130,14 @@ async function main() {
   const pass =
     errors.length === 0 &&
     result.sheetHidden &&
+    result.inviteSheetHidden &&
     result.activeTitle === GROUP_NAME &&
     result.hasGroupContact &&
+    result.hasPersonalInviteContact &&
     result.storedGroupCount === 1 &&
-    result.systemText.includes("สร้างกลุ่ม") &&
+    result.storedPersonalInviteCount === 1 &&
+    result.storedGroupMemberCount === 1 &&
+    result.systemText.includes("เชิญ") &&
     result.listAlignContent === "start" &&
     result.listGridAutoRows === "max-content" &&
     result.contactCardHeights.length >= 2 &&

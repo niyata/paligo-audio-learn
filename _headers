@@ -3,6 +3,9 @@
 # (สั้น + ให้ revalidate) เพื่อกัน user ค้าง asset เก่าหลัง deploy ใหม่
 # อ้างอิง: docs/deploy-cloudflare.md §1
 
+/*
+  X-Robots-Tag: noindex, nofollow, noarchive, nosnippet, noimageindex
+
 /*.html
   Cache-Control: public, max-age=0, must-revalidate
 

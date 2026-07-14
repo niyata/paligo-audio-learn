@@ -38,10 +38,13 @@
   "lineMessagingEnabled": false,
   "lineNotifyQueueEnabled": false,
   "notificationsEnabled": true,
+  "crawlerIndexingAllowed": false,
   "maintenanceMode": false,
   "debugApiLogs": false
 }
 ```
+
+`crawlerIndexingAllowed=false` คือค่าเริ่มต้นช่วงทดสอบ production: `robots.txt` และ `X-Robots-Tag` ต้องยังเป็น `noindex`. เมื่อ Super Admin เปิดสวิตช์นี้ก่อน launch จริง ให้ Integrator deploy `robots.txt`/headers ชุดที่อนุญาต Google อีกครั้ง เพื่อให้ crawler อ่านได้จริงในระดับ HTTP ไม่ใช่แค่ runtime flag
 
 ### 2.3 ซ่อน Import/Export
 

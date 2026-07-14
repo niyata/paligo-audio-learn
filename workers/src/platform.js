@@ -14,6 +14,7 @@ export const DEFAULT_PLATFORM_FLAGS = {
   lineMessagingEnabled: false,
   lineNotifyQueueEnabled: false,
   notificationsEnabled: true,
+  crawlerIndexingAllowed: false,
   maintenanceMode: false,
   debugApiLogs: false,
 };

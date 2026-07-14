@@ -15,6 +15,7 @@
     lineMessagingEnabled: false,
     lineNotifyQueueEnabled: false,
     notificationsEnabled: true,
+    crawlerIndexingAllowed: false,
     maintenanceMode: false,
     debugApiLogs: false,
   };
@@ -130,6 +131,23 @@
     doc.body.classList.add("paligo-maintenance-active");
   }
 
+  function applyCrawlerPolicy(flags) {
+    const doc = global.document;
+    if (!doc?.head) return false;
+    const allowed = Boolean(flags?.crawlerIndexingAllowed);
+    let meta = doc.querySelector('meta[name="robots"][data-paligo-crawler-policy]');
+    if (!meta) {
+      meta = doc.createElement("meta");
+      meta.name = "robots";
+      meta.dataset.paligoCrawlerPolicy = "true";
+      doc.head.append(meta);
+    }
+    meta.content = allowed ? "index,follow" : "noindex,nofollow,noarchive,nosnippet,noimageindex";
+    doc.body?.classList.toggle("paligo-crawler-indexing-allowed", allowed);
+    doc.body?.classList.toggle("paligo-crawler-indexing-blocked", !allowed);
+    return allowed;
+  }
+
   async function boot(options = {}) {
     const user = options.user ?? global.PaligoInboxClient?.getSession?.()?.user ?? null;
     const offlineFallback = Boolean(options.offline);
@@ -137,12 +155,14 @@
     const importExportAllowed = applyImportExportGate(flags, user, { offlineFallback });
     applyInboxGate(flags, user);
     applyMaintenanceBanner(flags);
+    const crawlerIndexingAllowed = applyCrawlerPolicy(flags);
     return {
       flags,
       user,
       offline: offlineFallback,
       importExportAllowed,
       inboxAllowed: canUseInbox(user, flags),
+      crawlerIndexingAllowed,
     };
   }
 
@@ -168,6 +188,7 @@
     applyImportExportGate,
     applyInboxGate,
     applyMaintenanceBanner,
+    applyCrawlerPolicy,
     boot,
     ensureSuperAdminPage,
   };

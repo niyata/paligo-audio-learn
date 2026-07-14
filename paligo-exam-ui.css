@@ -1634,6 +1634,59 @@
   margin-top: 2px;
 }
 
+.inbox-invite-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+  max-height: min(42vh, 360px);
+  overflow-y: auto;
+}
+
+.inbox-invite-contact {
+  align-items: center;
+  appearance: none;
+  background: #fff;
+  border: 1px solid rgba(31, 45, 137, 0.12);
+  border-radius: 8px;
+  color: inherit;
+  cursor: pointer;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  min-height: 62px;
+  padding: 10px;
+  text-align: left;
+}
+
+.inbox-invite-contact[aria-pressed="true"] {
+  background: rgba(31, 45, 137, 0.06);
+  border-color: rgba(31, 45, 137, 0.62);
+}
+
+.inbox-invite-contact__check {
+  align-self: center;
+  background: rgba(31, 45, 137, 0.08);
+  border-radius: 999px;
+  color: var(--paligo-exam-blue, #1f2d89);
+  font-size: 0.72rem;
+  font-weight: 900;
+  padding: 4px 8px;
+  white-space: nowrap;
+}
+
+.inbox-invite-contact[aria-pressed="true"] .inbox-invite-contact__check {
+  background: var(--paligo-exam-blue, #1f2d89);
+  color: #fff;
+}
+
+.inbox-invite-summary {
+  color: var(--paligo-muted, rgba(52, 52, 52, 0.62));
+  flex: 1 1 220px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  margin: 0;
+}
+
 @media (min-width: 768px) {
   .inbox-book-sheet {
     align-items: center;

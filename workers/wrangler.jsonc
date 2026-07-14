@@ -4,8 +4,7 @@
   "main": "src/index.js",
   "compatibility_date": "2026-07-01",
   "workers_dev": true,
-  // Production: uncomment after paligo.jp zone is on Cloudflare
-  // "routes": [{ "pattern": "api.paligo.jp/*", "zone_name": "paligo.jp" }],
+  "routes": [{ "pattern": "api.paligo.jp/*", "zone_name": "paligo.jp" }],
   "vars": {
     "PALIGO_API_VERSION": "v1",
     "PALIGO_ENV": "production"

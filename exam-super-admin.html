@@ -295,6 +295,12 @@
             live: true,
           },
           {
+            key: "crawlerIndexingAllowed",
+            label: "อนุญาต Google อ่านเว็บ",
+            desc: "ค่าเริ่มต้นปิด crawler/AI ระหว่างทดสอบ production · เปิดเมื่อพร้อม launch จริง",
+            live: true,
+          },
+          {
             key: "lineWebhookEnabled",
             label: "LINE Webhook",
             desc: "รับ event จาก LINE OA (Phase 8)",
@@ -366,6 +372,9 @@
           if (platform.IMPORT_EXPORT_UI_TEMPORARILY_HIDDEN) {
             draftFlags.importExportEnabled = false;
           }
+          if (!draftFlags.crawlerIndexingAllowed) {
+            showStatus("โหมดทดสอบ production: ปิด Google/AI indexing อยู่", "");
+          }
           const user = payload.user;
           document.querySelector("[data-admin-user-meta]").textContent =
             `${user.displayName || "—"} · ${user.email || "ไม่มีอีเมล"} · ${user.role}`;
@@ -390,7 +399,12 @@
             await client.patchAdminSettings(draftFlags);
             await platform.boot({ force: true });
             await refreshPanel();
-            showStatus("บันทึกการตั้งค่าแล้ว", "success");
+            showStatus(
+              draftFlags.crawlerIndexingAllowed
+                ? "บันทึกแล้ว: อนุญาต indexing ใน platform flag แล้ว — ถ้าใช้ static Pages shield ให้ deploy robots/header แบบเปิดอีกครั้งก่อน launch"
+                : "บันทึกแล้ว: ปิด Google/AI indexing",
+              "success"
+            );
           } catch (error) {
             showStatus(error.message || "บันทึกไม่สำเร็จ", "error");
           }

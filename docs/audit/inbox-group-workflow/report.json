@@ -1,18 +1,23 @@
 {
-  "auditedAt": "2026-07-12T11:41:52.948Z",
+  "auditedAt": "2026-07-14T05:33:34.455Z",
   "url": "http://127.0.0.1:8765/exam-inbox.html?apiPort=9999",
   "result": {
     "sheetHidden": true,
+    "inviteSheetHidden": true,
     "activeTitle": "กลุ่มประโยค ป.ธ. ๔ Audit",
     "hasGroupContact": true,
+    "hasPersonalInviteContact": true,
     "contactCardHeights": [
+      64,
       64,
       64
     ],
     "listAlignContent": "start",
     "listGridAutoRows": "max-content",
     "storedGroupCount": 1,
-    "systemText": "นักเรียนสร้างกลุ่มเรียน: กลุ่มประโยค ป.ธ. ๔ Audit"
+    "storedPersonalInviteCount": 1,
+    "storedGroupMemberCount": 1,
+    "systemText": "นักเรียนสร้างกลุ่มเรียน: กลุ่มประโยค ป.ธ. ๔ Auditเชิญ ครูปรีชา เข้ากลุ่มแล้ว"
   },
   "errors": [],
   "pass": true

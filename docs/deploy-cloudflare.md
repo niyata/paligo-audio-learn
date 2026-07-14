@@ -88,6 +88,7 @@ CORS อนุญาต: `https://app.paligo.jp`, `localhost:8765`, `*.pages.dev
 - [ ] Pages deploy · `app.paligo.jp` เปิด exam-books
 - [ ] Workers deploy · `curl https://api.paligo.jp/v1/health`
 - [ ] `PaligoInboxClient.healthCheck()` จาก production app
+- [ ] Privacy gate: ช่วงทดสอบ production ใช้ `robots.txt` + `X-Robots-Tag: noindex`; ก่อนเปิดตัวจริงให้ Super Admin เปิด `crawlerIndexingAllowed` และ deploy robots/header แบบอนุญาต Google
 - [ ] Scrum: Phase 0 DoD ใน `docs/agile/inbox-sprint-backlog.md`
 
 ---
