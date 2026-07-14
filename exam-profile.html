@@ -26,10 +26,10 @@
       }
 
       .profile-card {
-        background: rgba(255, 255, 255, 0.84);
+        background: rgba(255, 255, 255, 0.9);
         border: 1px solid var(--paligo-paper-border, rgba(74, 44, 10, 0.16));
-        border-radius: 12px;
-        box-shadow: 0 18px 46px rgba(74, 44, 10, 0.08);
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(74, 44, 10, 0.06);
         padding: 18px;
       }
 
@@ -149,20 +149,119 @@
         margin: 0 0 10px;
       }
 
+      /* Profile panel reads as an Apple HIG inset-grouped list of cards */
+      .profile-panel[data-profile-panel="profile"] {
+        display: grid;
+        gap: 14px;
+      }
+
+      .profile-section {
+        background: #fffdf7;
+        border: 1px solid var(--paligo-paper-border, rgba(74, 44, 10, 0.16));
+        border-radius: 14px;
+        display: grid;
+        gap: 14px;
+        padding: 16px;
+      }
+
+      /* group header (title) + footnote (lead) — Primer form-group rhythm */
+      .profile-section__head {
+        display: grid;
+        gap: 2px;
+      }
+
+      .profile-section__title {
+        color: var(--paligo-ink, #343434);
+        font-size: 0.95rem;
+        font-weight: 800;
+        margin: 0;
+      }
+
+      .profile-section__lead {
+        color: var(--paligo-muted, rgba(52, 52, 52, 0.62));
+        font-size: 0.8rem;
+        font-weight: 600;
+        line-height: 1.45;
+        margin: 0;
+      }
+
       .profile-field-grid {
+        align-items: start;
         display: grid;
         gap: 12px;
       }
 
+      /* mobile = 1 column; desktop = strict 2 columns (related pairs only) */
       .profile-field-grid.is-2col {
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        grid-template-columns: 1fr;
       }
 
+      @media (min-width: 520px) {
+        .profile-field-grid.is-2col {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      /* Primer rhythm: label → control → caption (hint slot reserved in pairs) */
+      .profile-field {
+        display: grid;
+        gap: 6px;
+        grid-template-rows: auto auto minmax(1.35em, auto);
+        min-width: 0;
+      }
+
+      .profile-field--stack {
+        grid-template-rows: auto auto;
+      }
+
+      .profile-field--full {
+        grid-column: 1 / -1;
+      }
+
+      .profile-field__label {
+        color: rgba(52, 52, 52, 0.82);
+        font-size: 0.82rem;
+        font-weight: 700;
+        line-height: 1.35;
+      }
+
+      .profile-field__control {
+        min-width: 0;
+        width: 100%;
+      }
+
+      .profile-field__hint {
+        color: var(--paligo-muted, rgba(52, 52, 52, 0.62));
+        font-size: 0.76rem;
+        font-weight: 600;
+        line-height: 1.35;
+        min-height: 1.35em;
+      }
+
+      .profile-field__hint:empty,
+      .profile-field__hint.is-empty {
+        visibility: hidden;
+      }
+
+      /* legacy alias — prefer profile-field */
       .profile-label {
         display: grid;
-        font-size: 0.86rem;
-        font-weight: 700;
-        gap: 4px;
+        gap: 6px;
+        grid-template-rows: auto auto minmax(1.35em, auto);
+        min-width: 0;
+      }
+
+      .profile-label--full,
+      .profile-field--full {
+        grid-column: 1 / -1;
+      }
+
+      .profile-field-hint {
+        color: var(--paligo-muted, rgba(52, 52, 52, 0.62));
+        font-size: 0.76rem;
+        font-weight: 600;
+        line-height: 1.35;
+        min-height: 1.35em;
       }
 
       .profile-input,
@@ -170,9 +269,26 @@
         background: var(--paligo-paper-bg, #fffaf0);
         border: 1px solid rgba(31, 45, 137, 0.24);
         border-radius: 8px;
+        box-sizing: border-box;
+        color: var(--paligo-ink, #343434);
         font: inherit;
-        min-height: 40px;
-        padding: 8px 10px;
+        font-size: 0.92rem;
+        height: 44px;
+        line-height: 1.3;
+        min-height: 44px;
+        max-height: 44px;
+        padding: 0 12px;
+      }
+
+      .profile-input:focus,
+      .profile-select:focus {
+        border-color: var(--paligo-exam-blue, #1f2d89);
+        box-shadow: 0 0 0 3px rgba(31, 45, 137, 0.12);
+        outline: none;
+      }
+
+      .profile-select {
+        padding-right: 28px;
       }
 
       .teacher-combobox {
@@ -330,6 +446,59 @@
         accent-color: var(--paligo-exam-blue, #1f2d89);
       }
 
+      .profile-option-grid {
+        display: grid;
+        gap: 8px;
+        margin-top: 2px;
+      }
+
+      .profile-option-grid--compact {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      }
+
+      .wizard-option {
+        align-items: center;
+        appearance: none;
+        background: var(--paligo-paper-bg, #fffaf0);
+        border: 1px solid rgba(31, 45, 137, 0.22);
+        border-radius: 8px;
+        color: var(--paligo-ink, #343434);
+        cursor: pointer;
+        display: flex;
+        font: inherit;
+        justify-content: flex-start;
+        min-height: 44px;
+        padding: 8px 10px;
+        text-align: left;
+        width: 100%;
+      }
+
+      .profile-option-grid--compact .wizard-option {
+        min-height: 44px;
+        padding: 8px 10px;
+      }
+
+      .wizard-option.is-selected {
+        background: rgba(31, 45, 137, 0.08);
+        border-color: rgba(31, 45, 137, 0.45);
+        box-shadow: inset 0 0 0 1px rgba(31, 45, 137, 0.12);
+        color: var(--paligo-exam-blue, #1f2d89);
+      }
+
+      .wizard-option__title {
+        font-size: 0.86rem;
+        font-weight: 800;
+        line-height: 1.3;
+      }
+
+      .wizard-option__helper {
+        color: var(--paligo-muted, rgba(52, 52, 52, 0.62));
+        font-size: 0.72rem;
+        font-weight: 600;
+        line-height: 1.25;
+        margin-top: 2px;
+      }
+
       .profile-note {
         color: var(--paligo-muted, rgba(52, 52, 52, 0.62));
         font-size: 0.84rem;
@@ -337,9 +506,96 @@
         margin: 0 0 12px;
       }
 
+      .profile-check-row {
+        display: grid;
+        gap: 8px;
+        grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+        margin-top: 2px;
+      }
+
+      .profile-check {
+        align-items: center;
+        background: var(--paligo-paper-bg, #fffaf0);
+        border: 1px solid rgba(31, 45, 137, 0.2);
+        border-radius: 8px;
+        cursor: pointer;
+        display: inline-flex;
+        font-size: 0.84rem;
+        font-weight: 700;
+        gap: 8px;
+        min-height: 44px;
+        padding: 8px 10px;
+      }
+
+      .profile-check:has(input:checked) {
+        background: rgba(31, 45, 137, 0.1);
+        border-color: rgba(31, 45, 137, 0.42);
+        color: var(--paligo-exam-blue, #1f2d89);
+      }
+
+      /* live preview row — eyebrow + Atlassian-style status lozenge */
+      .profile-availability-preview {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px 10px;
+        margin: 0;
+      }
+
+      .profile-availability-preview__eyebrow {
+        color: var(--paligo-muted, rgba(52, 52, 52, 0.62));
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+      }
+
+      .profile-availability-badge {
+        align-items: center;
+        background: rgba(52, 52, 52, 0.08);
+        border-radius: 999px;
+        color: rgba(52, 52, 52, 0.72);
+        display: inline-flex;
+        font-size: 0.82rem;
+        font-weight: 800;
+        line-height: 1.3;
+        padding: 4px 12px;
+      }
+
+      .profile-availability-preview[data-status="open"] .profile-availability-badge {
+        background: rgba(31, 157, 85, 0.14);
+        color: #1a7a43;
+      }
+
+      .profile-availability-preview[data-status="limited"] .profile-availability-badge {
+        background: rgba(201, 138, 0, 0.16);
+        color: #8a5e0e;
+      }
+
+      .profile-availability-preview[data-status="full"] .profile-availability-badge {
+        background: rgba(192, 57, 43, 0.12);
+        color: #a5342a;
+      }
+
+      .profile-availability-preview[data-status="closed"] .profile-availability-badge {
+        background: rgba(52, 52, 52, 0.08);
+        color: rgba(52, 52, 52, 0.72);
+      }
+
+      .profile-availability-preview[data-status="error"] .profile-availability-badge {
+        background: rgba(192, 57, 43, 0.12);
+        color: #a5342a;
+      }
+
+      .profile-input:disabled {
+        opacity: 0.55;
+      }
+
+      /* inline status = Atlassian SectionMessage (tinted fill + left accent) */
       .profile-status {
         background: rgba(31, 45, 137, 0.06);
-        border-radius: 8px;
+        border-radius: 10px;
+        border-left: 3px solid var(--paligo-exam-blue, #1f2d89);
+        color: var(--paligo-ink, #343434);
         font-size: 0.84rem;
         font-weight: 700;
         margin-top: 12px;
@@ -348,16 +604,19 @@
 
       .profile-status.is-error {
         background: rgba(180, 35, 47, 0.1);
+        border-left-color: #b4232f;
         color: #8f1d28;
       }
 
       .profile-status.is-success {
         background: rgba(36, 113, 91, 0.12);
+        border-left-color: #24715b;
         color: #1f553f;
       }
 
       .profile-status.is-warning {
         background: rgba(154, 106, 16, 0.14);
+        border-left-color: #9a6a10;
         color: #8a5e0e;
       }
 
@@ -367,6 +626,36 @@
         flex-wrap: wrap;
         gap: 8px;
         margin-top: 14px;
+      }
+
+      .profile-actions--footer {
+        display: grid;
+        gap: 10px;
+        margin-top: 2px;
+      }
+
+      .profile-actions--footer .paligo-btn.is-primary {
+        justify-content: center;
+        min-height: 44px;
+        width: 100%;
+      }
+
+      .profile-actions__secondary {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+      }
+
+      @media (min-width: 520px) {
+        .profile-actions--footer .paligo-btn.is-primary {
+          width: auto;
+          min-width: 200px;
+        }
+
+        .profile-actions__secondary {
+          justify-content: flex-start;
+        }
       }
 
       .profile-actions.is-tight {
@@ -418,11 +707,25 @@
       }
 
       body.is-role-student [data-profile-student-only] {
-        display: revert;
+        display: contents;
       }
 
       body.is-role-reviewer [data-profile-reviewer-only] {
-        display: revert;
+        display: contents;
+      }
+
+      @media (max-width: 519px) {
+        .profile-card {
+          padding: 14px;
+        }
+
+        .profile-section {
+          padding: 14px;
+        }
+
+        .profile-shell {
+          padding: 4px 0 24px;
+        }
       }
     </style>
   </head>
@@ -449,121 +752,239 @@
         </div>
 
         <div class="profile-panel" data-profile-panel="profile">
-          <p class="profile-note">ข้อมูลบนปกสมุดและกล่องข้อความ — บันทึกในเครื่อง</p>
+          <section class="profile-section">
+            <div class="profile-section__head">
+              <h2 class="profile-section__title">รูปโปรไฟล์</h2>
+              <p class="profile-section__lead">แสดงบนปกสมุดและกล่องข้อความ</p>
+            </div>
+            <input type="file" accept="image/*" data-field-avatar-file hidden />
+            <div class="profile-actions is-tight">
+              <button class="paligo-btn" type="button" data-pick-avatar>เลือกรูป</button>
+              <button class="paligo-btn is-ghost" type="button" data-remove-avatar hidden>ลบรูป</button>
+            </div>
+          </section>
 
-          <h2 class="profile-section-title">รูปโปรไฟล์บนปกสมุด (แชท)</h2>
-          <div class="profile-field-grid">
-            <div class="profile-label">
-              <span>รูปเมื่อส่งสมุดผ่านกล่องข้อความ — เลือกแล้วครอปก่อนบันทึก</span>
-              <input type="file" accept="image/*" data-field-avatar-file hidden />
-              <div class="profile-actions is-tight">
-                <button class="paligo-btn" type="button" data-pick-avatar>เลือกรูป</button>
-                <button class="paligo-btn is-ghost" type="button" data-remove-avatar hidden>ลบรูป</button>
+          <section class="profile-section">
+            <div class="profile-section__head">
+              <h2 class="profile-section__title">ชื่อที่แสดง</h2>
+              <p class="profile-section__lead">ชื่อที่ครูและผู้ตรวจเห็นในกล่องข้อความ</p>
+            </div>
+            <div class="profile-field-grid is-2col">
+              <div class="profile-field">
+                <label class="profile-field__label" for="displayNameInput">ชื่อในกล่องข้อความ</label>
+                <input
+                  class="profile-input profile-field__control"
+                  id="displayNameInput"
+                  name="displayName"
+                  data-field-display-name
+                  required
+                  minlength="2"
+                />
+                <span class="profile-field__hint is-empty" aria-hidden="true"></span>
+              </div>
+              <div class="profile-field">
+                <label class="profile-field__label" for="displayAliasInput">ชื่อสาธารณะ</label>
+                <input
+                  class="profile-input profile-field__control"
+                  id="displayAliasInput"
+                  name="displayAlias"
+                  data-field-display-alias
+                  placeholder="เว้นว่าง = ใช้ชื่อแสดง"
+                />
+                <span class="profile-field__hint">ใช้เมื่อแสดงบนฟีดหรือกระดานคะแนน</span>
               </div>
             </div>
-          </div>
-
-          <h2 class="profile-section-title" style="margin-top: 18px">ชื่อในกล่องข้อความ</h2>
-          <div class="profile-field-grid">
-            <label class="profile-label">
-              ชื่อแสดง (ส่งให้ครูเห็น)
-              <input class="profile-input" name="displayName" data-field-display-name required minlength="2" />
-            </label>
-            <label class="profile-label">
-              ชื่อสาธารณะ (feed/leaderboard — ไม่บังคับ)
-              <input class="profile-input" name="displayAlias" data-field-display-alias placeholder="เว้นว่าง = ใช้ชื่อแสดง" />
-            </label>
-          </div>
+          </section>
 
           <div data-profile-student-only>
-            <h2 class="profile-section-title" style="margin-top: 18px">ข้อมูลนักเรียน</h2>
-            <div class="profile-field-grid">
-              <div>
-                <span class="profile-section-title" style="font-size: 0.84rem">คำนำหน้า</span>
-                <div class="profile-prefix-row" data-prefix-group="student"></div>
+            <section class="profile-section">
+              <div class="profile-section__head">
+                <h2 class="profile-section__title">ข้อมูลนักเรียน</h2>
+                <p class="profile-section__lead">ใช้บนหน้าปกสมุดและโปรไฟล์</p>
               </div>
-            </div>
-            <div class="profile-field-grid is-2col" style="margin-top: 12px">
-              <label class="profile-label">
-                ชื่อ
-                <input class="profile-input" name="firstName" data-field-first-name required />
-              </label>
-              <label class="profile-label">
-                นามสกุล
-                <input class="profile-input" name="lastName" data-field-last-name />
-              </label>
-              <label class="profile-label">
-                ฉายา
-                <input class="profile-input" name="monasticName" data-field-monastic-name />
-              </label>
-              <label class="profile-label">
-                ชั้น ป.ธ.
-                <select class="profile-select" name="grade" data-field-grade></select>
-              </label>
-              <div class="profile-label">
-                <label id="teacherNameLabel" for="teacherNameInput">อาจารย์ผู้สอน (อ้างอิง)</label>
-                <div class="teacher-combobox" data-teacher-combobox>
-                  <input
-                    class="profile-input"
-                    id="teacherNameInput"
-                    name="teacherName"
-                    data-field-teacher-name
-                    type="text"
-                    role="combobox"
-                    autocomplete="off"
-                    aria-autocomplete="list"
-                    aria-expanded="false"
-                    aria-controls="teacherNameListbox"
-                    aria-describedby="teacherNameHint"
-                    placeholder="ค้นหาหรือกรอกชื่อครู"
-                  />
-                  <ul
-                    class="teacher-combobox__list"
-                    id="teacherNameListbox"
-                    role="listbox"
-                    aria-labelledby="teacherNameLabel"
-                    data-teacher-listbox
-                    hidden
-                  ></ul>
-                  <p class="teacher-combobox__hint" id="teacherNameHint" data-teacher-hint hidden></p>
+              <div class="profile-field-grid">
+                <div class="profile-field profile-field--stack">
+                  <span class="profile-field__label">คำนำหน้า</span>
+                  <div class="profile-prefix-row profile-field__control" data-prefix-group="student"></div>
                 </div>
               </div>
-              <label class="profile-label">
-                ช่องทางส่งตรวจ
-                <select class="profile-select" name="deliveryMethod" data-field-delivery></select>
-              </label>
-            </div>
+              <div class="profile-field-grid is-2col">
+                <div class="profile-field">
+                  <label class="profile-field__label" for="firstNameInput">ชื่อ</label>
+                  <input class="profile-input profile-field__control" id="firstNameInput" name="firstName" data-field-first-name required />
+                  <span class="profile-field__hint is-empty" aria-hidden="true"></span>
+                </div>
+                <div class="profile-field">
+                  <label class="profile-field__label" for="lastNameInput">นามสกุล</label>
+                  <input class="profile-input profile-field__control" id="lastNameInput" name="lastName" data-field-last-name />
+                  <span class="profile-field__hint is-empty" aria-hidden="true"></span>
+                </div>
+                <div class="profile-field">
+                  <label class="profile-field__label" for="monasticNameInput">ฉายา</label>
+                  <input class="profile-input profile-field__control" id="monasticNameInput" name="monasticName" data-field-monastic-name />
+                  <span class="profile-field__hint is-empty" aria-hidden="true"></span>
+                </div>
+                <div class="profile-field">
+                  <label class="profile-field__label" for="gradeSelect">ชั้น ป.ธ.</label>
+                  <select class="profile-select profile-field__control" id="gradeSelect" name="grade" data-field-grade></select>
+                  <span class="profile-field__hint is-empty" aria-hidden="true"></span>
+                </div>
+                <div class="profile-field profile-field--full">
+                  <label class="profile-field__label" id="teacherNameLabel" for="teacherNameInput">อาจารย์ผู้สอน</label>
+                  <div class="teacher-combobox profile-field__control" data-teacher-combobox>
+                    <input
+                      class="profile-input"
+                      id="teacherNameInput"
+                      name="teacherName"
+                      data-field-teacher-name
+                      type="text"
+                      role="combobox"
+                      autocomplete="off"
+                      aria-autocomplete="list"
+                      aria-expanded="false"
+                      aria-controls="teacherNameListbox"
+                      aria-describedby="teacherNameHint"
+                      placeholder="ค้นหาหรือกรอกชื่อครู"
+                    />
+                    <ul
+                      class="teacher-combobox__list"
+                      id="teacherNameListbox"
+                      role="listbox"
+                      aria-labelledby="teacherNameLabel"
+                      data-teacher-listbox
+                      hidden
+                    ></ul>
+                    <p class="teacher-combobox__hint" id="teacherNameHint" data-teacher-hint hidden></p>
+                  </div>
+                  <span class="profile-field__hint">ค้นหาจากรายชื่อครูในระบบ หรือพิมพ์เอง</span>
+                </div>
+                <div class="profile-field profile-field--full">
+                  <label class="profile-field__label" for="deliverySelect">ช่องทางส่งตรวจ</label>
+                  <select class="profile-select profile-field__control" id="deliverySelect" name="deliveryMethod" data-field-delivery></select>
+                  <span class="profile-field__hint is-empty" aria-hidden="true"></span>
+                </div>
+              </div>
+            </section>
           </div>
 
           <div data-profile-reviewer-only>
-            <h2 class="profile-section-title" style="margin-top: 18px">ข้อมูลครู/ผู้ตรวจ</h2>
-            <div class="profile-field-grid">
-              <div>
-                <span class="profile-section-title" style="font-size: 0.84rem">คำนำหน้า</span>
-                <div class="profile-prefix-row" data-prefix-group="reviewer"></div>
+            <section class="profile-section">
+              <div class="profile-section__head">
+                <h2 class="profile-section__title">ข้อมูลครู/ผู้ตรวจ</h2>
+                <p class="profile-section__lead">ชื่อและสังกัดที่แสดงบนโปรไฟล์สาธารณะ</p>
               </div>
-            </div>
-            <div class="profile-field-grid is-2col" style="margin-top: 12px">
-              <label class="profile-label">
-                ชื่อ
-                <input class="profile-input" name="reviewerName" data-field-reviewer-name required />
-              </label>
-              <label class="profile-label">
-                สำนัก / วัด (ไม่บังคับ)
-                <input class="profile-input" name="institution" data-field-institution />
-              </label>
-              <label class="profile-label">
-                บทบาทปลายทาง
-                <select class="profile-select" name="reviewerRole" data-field-reviewer-role></select>
-              </label>
-            </div>
+              <div class="profile-field-grid">
+                <div class="profile-field profile-field--stack">
+                  <span class="profile-field__label">คำนำหน้า</span>
+                  <div class="profile-prefix-row profile-field__control" data-prefix-group="reviewer"></div>
+                </div>
+              </div>
+              <div class="profile-field-grid is-2col">
+                <div class="profile-field">
+                  <label class="profile-field__label" for="reviewerNameInput">ชื่อ</label>
+                  <input class="profile-input profile-field__control" id="reviewerNameInput" name="reviewerName" data-field-reviewer-name required />
+                  <span class="profile-field__hint is-empty" aria-hidden="true"></span>
+                </div>
+                <div class="profile-field">
+                  <label class="profile-field__label" for="institutionInput">สำนัก / วัด</label>
+                  <input class="profile-input profile-field__control" id="institutionInput" name="institution" data-field-institution placeholder="ไม่บังคับ" />
+                  <span class="profile-field__hint is-empty" aria-hidden="true"></span>
+                </div>
+              </div>
+            </section>
+
+            <section class="profile-section">
+              <div class="profile-section__head">
+                <h2 class="profile-section__title">สถานะโปรไฟล์</h2>
+                <p class="profile-section__lead">เลือกสถานะที่ตรงกับท่าน</p>
+              </div>
+              <input type="hidden" name="profileStatus" data-field-profile-status />
+              <div class="profile-option-grid profile-option-grid--compact" data-field-profile-status-tiles></div>
+            </section>
+
+            <section class="profile-section">
+              <div class="profile-section__head">
+                <h2 class="profile-section__title">หน้าที่</h2>
+                <p class="profile-section__lead">เลือกสอน ตรวจสมุด หรือทั้งสอง</p>
+              </div>
+              <input type="hidden" name="capability" data-field-capability />
+              <div class="profile-option-grid profile-option-grid--compact" data-field-capability-tiles></div>
+            </section>
+
+            <section class="profile-section">
+              <div class="profile-section__head">
+                <h2 class="profile-section__title">ความพร้อมรับตรวจ</h2>
+                <p class="profile-section__lead">ตั้งค่าที่ผู้เรียนเห็นเมื่อค้นหาครู</p>
+              </div>
+              <div class="profile-field-grid is-2col" data-review-availability-fields>
+                <div class="profile-field profile-field--full profile-field--stack">
+                  <span class="profile-field__label">สถานะรับงาน</span>
+                  <div class="profile-field__control">
+                    <input type="hidden" name="availabilityStatus" data-field-availability-status value="closed" />
+                    <div class="profile-option-grid profile-option-grid--compact" data-field-availability-status-tiles></div>
+                  </div>
+                </div>
+                <div class="profile-field">
+                  <label class="profile-field__label" for="dailyLimitInput">รับตรวจได้ต่อวัน</label>
+                  <input
+                    class="profile-input profile-field__control"
+                    id="dailyLimitInput"
+                    type="number"
+                    name="dailyLimit"
+                    data-field-daily-limit
+                    min="0"
+                    max="60"
+                    step="1"
+                    inputmode="numeric"
+                    value="0"
+                  />
+                  <span class="profile-field__hint" data-availability-limit-hint>ระบบกำหนดเพดานไว้ที่ 60 รายการต่อวัน</span>
+                </div>
+                <div class="profile-field">
+                  <label class="profile-field__label" for="queueSlotsInput">คิวว่างตอนนี้</label>
+                  <input
+                    class="profile-input profile-field__control"
+                    id="queueSlotsInput"
+                    type="number"
+                    name="queueSlots"
+                    data-field-queue-slots
+                    min="0"
+                    step="1"
+                    inputmode="numeric"
+                    value="0"
+                  />
+                  <span class="profile-field__hint">แสดงในรายชื่อครูเมื่อค้นหา</span>
+                </div>
+                <div class="profile-field profile-field--full profile-field--stack">
+                  <span class="profile-field__label">ประเภทงานที่รับ</span>
+                  <div class="profile-check-row profile-field__control">
+                    <label class="profile-check">
+                      <input type="checkbox" name="acceptsHomework" data-field-accepts-homework checked />
+                      รับสมุดการบ้าน
+                    </label>
+                    <label class="profile-check">
+                      <input type="checkbox" name="acceptsExam" data-field-accepts-exam checked />
+                      รับสมุดข้อสอบ
+                    </label>
+                  </div>
+                </div>
+                <div class="profile-availability-preview profile-field--full" data-availability-preview-box data-status="closed">
+                  <span class="profile-availability-preview__eyebrow">ตัวอย่างที่ผู้เรียนเห็น</span>
+                  <span class="profile-availability-badge">
+                    <span data-availability-preview aria-live="polite"></span>
+                  </span>
+                </div>
+              </div>
+            </section>
           </div>
 
-          <div class="profile-actions">
+          <footer class="profile-actions profile-actions--footer">
             <button class="paligo-btn is-primary" type="button" data-save-profile>บันทึกโปรไฟล์</button>
-            <a class="paligo-btn is-ghost" href="exam-inbox.html">เปิดกล่องข้อความ</a>
-            <a class="paligo-btn is-ghost" href="exam-super-admin.html" data-profile-admin-link hidden>ตั้งค่าระบบ</a>
-          </div>
+            <div class="profile-actions__secondary">
+              <a class="paligo-btn is-ghost" href="exam-inbox.html">เปิดกล่องข้อความ</a>
+              <a class="paligo-btn is-ghost" href="exam-super-admin.html" data-profile-admin-link hidden>ตั้งค่าระบบ</a>
+            </div>
+          </footer>
           <p class="profile-status" data-profile-status hidden></p>
         </div>
 
@@ -580,10 +1001,17 @@
             </div>
             <h2 class="profile-section-title" style="margin-top: 16px">เข้าร่วมด้วยรหัส</h2>
             <form class="profile-field-grid" data-join-form>
-              <label class="profile-label">
-                กรอกรหัส รับตัวเป็นศิษย์ ที่ได้จากครู หรือผู้ตรวจ ของท่าน
-                <input class="profile-input" name="inviteCode" required placeholder="เช่น AB12CD34" style="text-transform: uppercase" />
-              </label>
+              <div class="profile-field profile-field--stack">
+                <label class="profile-field__label" for="inviteCodeInput">รหัสจับคู่จากครู</label>
+                <input
+                  class="profile-input profile-field__control"
+                  id="inviteCodeInput"
+                  name="inviteCode"
+                  required
+                  placeholder="เช่น AB12CD34"
+                  style="text-transform: uppercase"
+                />
+              </div>
               <button class="paligo-btn is-primary" type="submit">จับคู่ครู</button>
             </form>
           </div>
@@ -609,10 +1037,10 @@
         <div class="profile-panel" data-profile-panel="account" hidden>
           <p class="profile-note">จัดการอีเมล PIN และการเข้าสู่ระบบ</p>
           <div class="profile-field-grid">
-            <label class="profile-label">
-              อีเมล (ไม่บังคับ)
-              <input class="profile-input" name="email" type="email" data-field-email placeholder="name@example.com" />
-            </label>
+            <div class="profile-field profile-field--stack">
+              <label class="profile-field__label" for="emailInput">อีเมล (ไม่บังคับ)</label>
+              <input class="profile-input profile-field__control" id="emailInput" name="email" type="email" data-field-email placeholder="name@example.com" />
+            </div>
           </div>
           <div class="profile-actions">
             <button class="paligo-btn" type="button" data-save-email>บันทึกอีเมล</button>
@@ -620,14 +1048,14 @@
 
           <h2 class="profile-section-title" style="margin-top: 18px">เปลี่ยน PIN</h2>
           <form class="profile-field-grid" data-change-pin-form>
-            <label class="profile-label">
-              PIN ปัจจุบัน
-              <input class="profile-input" name="currentPin" inputmode="numeric" autocomplete="current-password" required minlength="6" />
-            </label>
-            <label class="profile-label">
-              PIN ใหม่
-              <input class="profile-input" name="newPin" inputmode="numeric" autocomplete="new-password" required minlength="6" pattern="[0-9]{6,}" />
-            </label>
+            <div class="profile-field profile-field--stack">
+              <label class="profile-field__label" for="currentPinInput">PIN ปัจจุบัน</label>
+              <input class="profile-input profile-field__control" id="currentPinInput" name="currentPin" inputmode="numeric" autocomplete="current-password" required minlength="6" />
+            </div>
+            <div class="profile-field profile-field--stack">
+              <label class="profile-field__label" for="newPinInput">PIN ใหม่</label>
+              <input class="profile-input profile-field__control" id="newPinInput" name="newPin" inputmode="numeric" autocomplete="new-password" required minlength="6" pattern="[0-9]{6,}" />
+            </div>
             <button class="paligo-btn is-primary" type="submit">เปลี่ยน PIN</button>
           </form>
 
@@ -712,19 +1140,59 @@
           if (host.dataset.prefixBound === fieldName) return;
           host.dataset.prefixBound = fieldName;
 
+          let checkedBeforePointer = null;
+          let pointerTargetTag = "";
+
+          host.addEventListener("mousedown", (event) => {
+            const label = event.target.closest(".profile-prefix");
+            if (!label || !host.contains(label)) return;
+            checkedBeforePointer =
+              host.querySelector(`input[name="${fieldName}"]:checked`)?.value || "";
+            pointerTargetTag = event.target.tagName;
+          });
+
           host.addEventListener("click", (event) => {
             const label = event.target.closest(".profile-prefix");
             if (!label || !host.contains(label)) return;
+            if (event.target.tagName === "INPUT" && pointerTargetTag === "LABEL") return;
             const input = label.querySelector('input[type="radio"]');
             if (!input) return;
 
-            if (host.classList.contains("is-collapsed")) {
+            const checkedBefore =
+              checkedBeforePointer !== null
+                ? checkedBeforePointer
+                : host.querySelector(`input[name="${fieldName}"]:checked`)?.value || "";
+            checkedBeforePointer = null;
+
+            const collapsed = host.classList.contains("is-collapsed");
+            const sameAsBefore = input.value === checkedBefore;
+
+            if (collapsed) {
+              if (sameAsBefore && input.checked) {
+                event.preventDefault();
+                setCollapsed(false);
+              }
+              return;
+            }
+
+            if (sameAsBefore && input.checked) {
+              event.preventDefault();
+              setCollapsed(true);
+            }
+          });
+
+          host.addEventListener("keydown", (event) => {
+            if (event.key !== "Enter" && event.key !== " ") return;
+            const input = event.target;
+            if (input?.type !== "radio" || input.name !== fieldName) return;
+
+            const collapsed = host.classList.contains("is-collapsed");
+            if (collapsed && input.checked) {
               event.preventDefault();
               setCollapsed(false);
               return;
             }
-
-            if (input.checked) {
+            if (!collapsed && input.checked) {
               event.preventDefault();
               setCollapsed(true);
             }
@@ -759,6 +1227,93 @@
           });
           select.value = value;
         };
+
+        const availabilityRoot = document.querySelector("[data-review-availability-fields]");
+        const dailyLimitInput = document.querySelector("[data-field-daily-limit]");
+        const queueSlotsInput = document.querySelector("[data-field-queue-slots]");
+        const availabilityStatusInput = document.querySelector("[data-field-availability-status]");
+        const availabilityPreview = document.querySelector("[data-availability-preview]");
+        const availabilityLimitHint = document.querySelector("[data-availability-limit-hint]");
+
+        const syncAvailabilityFieldState = () => {
+          if (!availabilityRoot) return;
+          const max = profile.getReviewerDailyLimitMax();
+          const status = availabilityStatusInput?.value || "closed";
+          const dailyLimit = Number(dailyLimitInput?.value || 0);
+
+          if (dailyLimitInput) {
+            dailyLimitInput.max = String(max);
+            dailyLimitInput.disabled = status === "closed" || status === "full";
+          }
+          if (queueSlotsInput) {
+            queueSlotsInput.max = String(Math.max(0, dailyLimit));
+            const queueDisabled = status === "closed" || status === "full";
+            queueSlotsInput.disabled = queueDisabled;
+            if (queueDisabled) queueSlotsInput.value = "0";
+          }
+          if (availabilityLimitHint) {
+            availabilityLimitHint.textContent = `ระบบกำหนดเพดานไว้ที่ ${max} รายการต่อวัน`;
+          }
+        };
+
+        const availabilityPreviewBox = document.querySelector("[data-availability-preview-box]");
+        const updateAvailabilityPreview = () => {
+          if (!availabilityPreview) return;
+          const draft = profile.collectReviewAvailabilityFromForm(availabilityRoot);
+          const result = profile.validateReviewAvailabilityInput(draft);
+          if (!result.ok) {
+            availabilityPreview.textContent = result.message;
+            if (availabilityPreviewBox) availabilityPreviewBox.dataset.status = "error";
+            return;
+          }
+          availabilityPreview.textContent = profile.formatReviewAvailabilityLabel(result.value);
+          if (availabilityPreviewBox) availabilityPreviewBox.dataset.status = result.value.status || "closed";
+        };
+
+        const paintReviewAvailability = (reviewAvailability) => {
+          if (!availabilityRoot) return;
+          const normalized = profile.normalizeReviewAvailability(reviewAvailability);
+          const max = profile.getReviewerDailyLimitMax();
+
+          if (availabilityStatusInput) availabilityStatusInput.value = normalized.status;
+          if (dailyLimitInput) {
+            dailyLimitInput.value = String(normalized.dailyLimit);
+            dailyLimitInput.max = String(max);
+          }
+          if (queueSlotsInput) queueSlotsInput.value = String(normalized.queueSlots);
+          document.querySelector("[data-field-accepts-homework]").checked = normalized.accepts.homework;
+          document.querySelector("[data-field-accepts-exam]").checked = normalized.accepts.exam;
+
+          profile.mountOptionTiles({
+            container: document.querySelector("[data-field-availability-status-tiles]"),
+            options: profile.REVIEW_AVAILABILITY_STATUS_OPTIONS,
+            value: normalized.status,
+            onChange: (value) => {
+              if (availabilityStatusInput) availabilityStatusInput.value = value;
+              if ((value === "closed" || value === "full") && queueSlotsInput) {
+                queueSlotsInput.value = "0";
+              }
+              syncAvailabilityFieldState();
+              updateAvailabilityPreview();
+            },
+            groupLabel: "สถานะความพร้อมรับตรวจ",
+          });
+
+          syncAvailabilityFieldState();
+          updateAvailabilityPreview();
+        };
+
+        if (availabilityRoot && !availabilityRoot.dataset.bound) {
+          availabilityRoot.dataset.bound = "true";
+          availabilityRoot.addEventListener("input", () => {
+            syncAvailabilityFieldState();
+            updateAvailabilityPreview();
+          });
+          availabilityRoot.addEventListener("change", () => {
+            syncAvailabilityFieldState();
+            updateAvailabilityPreview();
+          });
+        }
 
         const readPrefix = (fieldName) => {
           const checked = document.querySelector(`input[name="${fieldName}"]:checked`);
@@ -824,11 +1379,32 @@
             renderPrefixRadios("reviewer", localProfile.prefix || "พระ", "reviewerPrefix");
             document.querySelector("[data-field-reviewer-name]").value = localProfile.name || "";
             document.querySelector("[data-field-institution]").value = localProfile.institution || "";
-            fillSelect(
-              document.querySelector("[data-field-reviewer-role]"),
-              profile.REVIEWER_KIND_OPTIONS,
-              localProfile.role || "teacher-reviewer"
-            );
+            const normalized = profile.normalizeReviewerProfile(localProfile);
+            const statusInput = document.querySelector("[data-field-profile-status]");
+            const capabilityInput = document.querySelector("[data-field-capability]");
+            statusInput.value = normalized.profileStatus;
+            capabilityInput.value = normalized.capability;
+            profile.mountOptionTiles({
+              container: document.querySelector("[data-field-profile-status-tiles]"),
+              options: profile.REVIEWER_PROFILE_STATUS_OPTIONS,
+              value: normalized.profileStatus,
+              onChange: (value) => {
+                statusInput.value = value;
+                const inferredPrefix = profile.inferPrefixFromProfileStatus(value);
+                if (inferredPrefix) renderPrefixRadios("reviewer", inferredPrefix, "reviewerPrefix");
+              },
+              groupLabel: "สถานะโปรไฟล์",
+            });
+            profile.mountOptionTiles({
+              container: document.querySelector("[data-field-capability-tiles]"),
+              options: profile.REVIEWER_CAPABILITY_WIZARD_OPTIONS,
+              value: normalized.capability,
+              onChange: (value) => {
+                capabilityInput.value = value;
+              },
+              groupLabel: "หน้าที่ในระบบ",
+            });
+            paintReviewAvailability(normalized.reviewAvailability);
           }
 
           paintAvatar(user.displayName || "ไม่ระบุชื่อ", localProfile.avatarUrl);
@@ -854,14 +1430,16 @@
               avatarUrl,
             };
           }
-          return {
+          return profile.normalizeReviewerProfile({
             prefix: readPrefix("reviewerPrefix"),
             name: document.querySelector("[data-field-reviewer-name]").value.trim(),
             institution: document.querySelector("[data-field-institution]").value.trim(),
-            role: document.querySelector("[data-field-reviewer-role]").value,
+            profileStatus: document.querySelector("[data-field-profile-status]").value,
+            capability: document.querySelector("[data-field-capability]").value,
+            reviewAvailability: profile.collectReviewAvailabilityFromForm(availabilityRoot),
             displayAlias: document.querySelector("[data-field-display-alias]").value.trim(),
             avatarUrl,
-          };
+          });
         };
 
         const paintConnections = (context) => {
@@ -870,7 +1448,16 @@
             const box = document.querySelector("[data-student-pairing-text]");
             const link = document.querySelector("[data-student-inbox-link]");
             if (context.pairing) {
-              box.textContent = `${context.pairing.reviewerDisplayName || "ครู"} · ตั้งแต่ ${profile.formatThaiDate(context.pairing.createdAt)}`;
+              const peerProfile = {
+                profileStatus: context.pairing.reviewerProfileStatus,
+                capability: context.pairing.reviewerCapability,
+              };
+              const label = profile.formatReviewerPeerLabel(
+                context.pairing.reviewerDisplayName,
+                peerProfile,
+                { short: true }
+              );
+              box.textContent = `${label} · ตั้งแต่ ${profile.formatThaiDate(context.pairing.createdAt)}`;
               link.hidden = false;
             } else {
               box.textContent = "ยังไม่ได้จับคู่ครู — กรอกรหัสด้านล่าง";
@@ -973,6 +1560,21 @@
             showStatus(statusEl, "กรุณากรอกชื่อครู/ผู้ตรวจ", "error");
             return;
           }
+          let clampMessage = "";
+          if (user.role === "reviewer") {
+            const availCheck = profile.validateReviewAvailabilityInput(local.reviewAvailability);
+            if (!availCheck.ok) {
+              showStatus(statusEl, availCheck.message, "error");
+              return;
+            }
+            local.reviewAvailability = availCheck.value;
+            if (availCheck.clamped) {
+              clampMessage = `จำนวนรับตรวจต่อวันถูกปรับเป็น ${availCheck.value.dailyLimit} (เพดานสูงสุด ${availCheck.value.dailyLimitMax} รายการ/วัน)`;
+              if (dailyLimitInput) dailyLimitInput.value = String(availCheck.value.dailyLimit);
+              if (queueSlotsInput) queueSlotsInput.value = String(availCheck.value.queueSlots);
+              updateAvailabilityPreview();
+            }
+          }
 
           // บันทึกในเครื่องก่อนเสมอเมื่อ validation ผ่าน — ไม่ต้องพึ่ง Workers API
           try {
@@ -989,7 +1591,11 @@
               profileJson: local,
             });
             await refreshMe();
-            showStatus(statusEl, "บันทึกโปรไฟล์แล้ว", "success");
+            showStatus(
+              statusEl,
+              clampMessage ? `${clampMessage} · บันทึกโปรไฟล์แล้ว` : "บันทึกโปรไฟล์แล้ว",
+              clampMessage ? "warning" : "success"
+            );
           } catch (error) {
             // local สำเร็จแล้ว — รูป/ข้อมูลยังอยู่ แม้ sync server ไม่ได้
             showStatus(
@@ -1100,6 +1706,9 @@
               localProfile.teacherUserId = reviewer.id || "";
               localProfile.teacherDisplayName = reviewer.displayName || "";
               localProfile.teacherInstitution = reviewer.institution || "";
+              localProfile.teacherProfileStatus = reviewer.profileStatus || "";
+              localProfile.teacherCapability = reviewer.capability || "";
+              localProfile.teacherRoleLabel = reviewer.roleLabel || "";
             }
             closeList();
             setHint("");
@@ -1140,6 +1749,13 @@
                 text.append(name);
 
                 const metaParts = [];
+                if (reviewer.reviewAvailability?.label) metaParts.push(reviewer.reviewAvailability.label);
+                else if (reviewer.roleLabel) metaParts.push(reviewer.roleLabel);
+                else if (reviewer.profileStatus && reviewer.capability) {
+                  metaParts.push(
+                    profile.formatReviewerProfileLabel(reviewer, { short: true })
+                  );
+                }
                 if (reviewer.institution) metaParts.push(reviewer.institution);
                 if (reviewer.isPaired) metaParts.push("จับคู่แล้ว");
                 if (metaParts.length) {

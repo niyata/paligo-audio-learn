@@ -5,6 +5,7 @@
 import { handleChangePin, handleLogin, handleLogout, handleMe, handlePatchMe, handleRegister, requireUser } from "./auth.js";
 import { handleGetAdminPanel, handleGetPlatformFlags, handlePatchAdminSettings } from "./platform.js";
 import { handleClaimInbox, handleGetInbox } from "./inbox.js";
+import { handleLineIssueWebhook } from "./line-issue-bot.js";
 import { handlePostPackage } from "./packages.js";
 import { handlePairingInvite, handlePairingJoin } from "./pairing.js";
 import { handleSearchReviewers } from "./reviewers.js";
@@ -27,6 +28,8 @@ export async function handleV1(request, env) {
       phase: 4,
     });
   }
+
+  if (path === "/v1/line/issues/webhook" && method === "POST") return handleLineIssueWebhook(request, env);
 
   if (path === "/v1/auth/register" && method === "POST") return handleRegister(request, env);
   if (path === "/v1/auth/login" && method === "POST") return handleLogin(request, env);

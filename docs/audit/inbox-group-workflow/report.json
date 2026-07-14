@@ -1,0 +1,19 @@
+{
+  "auditedAt": "2026-07-12T11:41:52.948Z",
+  "url": "http://127.0.0.1:8765/exam-inbox.html?apiPort=9999",
+  "result": {
+    "sheetHidden": true,
+    "activeTitle": "กลุ่มประโยค ป.ธ. ๔ Audit",
+    "hasGroupContact": true,
+    "contactCardHeights": [
+      64,
+      64
+    ],
+    "listAlignContent": "start",
+    "listGridAutoRows": "max-content",
+    "storedGroupCount": 1,
+    "systemText": "นักเรียนสร้างกลุ่มเรียน: กลุ่มประโยค ป.ธ. ๔ Audit"
+  },
+  "errors": [],
+  "pass": true
+}

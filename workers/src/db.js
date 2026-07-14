@@ -3,6 +3,7 @@
  */
 
 import { createId } from "./crypto.js";
+import { publicReviewerProfileFields } from "./reviewer-profile.js";
 
 const SESSION_DAYS = 30;
 
@@ -164,7 +165,8 @@ export async function getPairingContext(db, user) {
   const pairing = await db
     .prepare(
       `SELECT p.id, p.reviewer_user_id, p.status, p.created_at,
-              u.display_name AS reviewer_display_name
+              u.display_name AS reviewer_display_name,
+              u.profile_json AS reviewer_profile_json
        FROM pairings p
        JOIN users u ON u.id = p.reviewer_user_id
        WHERE p.student_user_id = ?1 AND p.status = 'active'
@@ -174,12 +176,26 @@ export async function getPairingContext(db, user) {
     .bind(user.id)
     .first();
 
+  let reviewerProfile = null;
+  if (pairing?.reviewer_profile_json) {
+    try {
+      reviewerProfile = JSON.parse(pairing.reviewer_profile_json);
+    } catch {
+      reviewerProfile = null;
+    }
+  }
+  const publicProfile = publicReviewerProfileFields(reviewerProfile);
+
   return {
     pairing: pairing
       ? {
           pairingId: pairing.id,
           reviewerUserId: pairing.reviewer_user_id,
           reviewerDisplayName: pairing.reviewer_display_name,
+          reviewerProfileStatus: publicProfile.profileStatus,
+          reviewerCapability: publicProfile.capability,
+          reviewerRoleLabel: publicProfile.roleLabel,
+          reviewerAvatarUrl: publicProfile.avatarUrl,
           status: pairing.status,
           createdAt: pairing.created_at,
         }

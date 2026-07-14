@@ -14,6 +14,7 @@
 | บทบาท | ใคร | หน้าที่ |
 |--------|-----|--------|
 | **Product Owner** | คุณ (iworn) | จัดลำดับ backlog, อนุมัติ Done, กำหนด P0 |
+| **Paligo Integrator** | ผู้ที่ PO มอบหมาย (human หรือ agent) | เคลม/จัดระเบียบงานค้างข้าม agent, แยก diff, ทำ compatibility migration, เตรียม release-safe PR |
 | **Dev / AI Agent** | Cursor, Codex, AI อื่น | รับ issue → PR → handoff notes |
 | **Reviewer** | คุณ หรือ AI อีกตัว | Review column, QA |
 
@@ -64,11 +65,42 @@ Backlog → Ready → In Progress → Review → QA → Ready to Release → Don
 | Label | ใครรับ |
 |-------|--------|
 | `agent:human` | คุณ — ตัดสินใจ UX, approve |
+| `agent:integrator` | Paligo Integrator — เคลมงานค้าง/dirty tree/cross-agent migration |
 | `agent:cursor-ai` | Cursor Agent (repo นี้) |
 | `agent:codex-ai` | Codex / CLI agent |
 | `agent:other-ai` | AI อื่น |
 
 เมื่อส่งมอบข้าม agent: comment `## Handoff` บน issue (ดู `AGENT-HANDOFF.md`)
+
+## Paligo Integrator Workflow
+
+คู่มือปฏิบัติ: [`PALIGO-INTEGRATOR.md`](./PALIGO-INTEGRATOR.md)
+
+ใช้เมื่องานกระทบหลาย agent, working tree dirty, refactor เปลี่ยนชื่อไฟล์/URL,
+compatibility route, release prep, หรือมีไฟล์ค้างที่ไม่รู้เจ้าของ
+
+**อำนาจ**
+
+- เคลมไฟล์งานค้างหลังอ่าน diff และระบุเจ้าของ/ที่มาเท่าที่หาได้
+- แยกงานเป็น migration slices และกำหนด compatibility path
+- เปิด/อัปเดต issue สำหรับ cleanup, rename, release, หรือ cross-agent handoff
+- ตัดสินใจว่าไฟล์ใดควร preserve, migrate, split, หรือขอ PO อนุมัติก่อน discard
+
+**ข้อจำกัด**
+
+- ห้ามลบ/revert งานของ user หรือ agent อื่นโดยไม่มี PO approval
+- ห้าม commit/push ถ้า PO ยังไม่ขอ
+- ห้าม broad rename ใน dirty tree โดยไม่มี migration plan และ validation checklist
+- ห้าม merge เอง unless PO สั่งชัด
+
+**ขั้นตอนเคลมไฟล์ค้าง**
+
+1. รัน `git status --short --branch`
+2. อ่าน diff ของไฟล์ที่จะเคลม
+3. บันทึกใน issue หรือ worklog ว่าไฟล์นั้นถูกเคลมเพื่ออะไร
+4. แยกเป็นหนึ่งในสถานะ: `preserve`, `migrate`, `split`, `needs-owner`, `needs-PO-decision`
+5. ตรวจอย่างน้อย `git diff --check` และ syntax/test ที่เกี่ยวข้อง
+6. ส่ง handoff สั้นๆ พร้อมไฟล์ที่แตะและสิ่งที่ยังไม่ทดสอบ
 
 ---
 

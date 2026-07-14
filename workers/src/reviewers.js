@@ -4,6 +4,8 @@
 
 import { getUserBySession } from "./db.js";
 import { errorResponse, jsonResponse, readBearerToken } from "./http.js";
+import { publicReviewerProfileFields } from "./reviewer-profile.js";
+import { publicReviewAvailabilityFields } from "./review-capacity.js";
 
 const MAX_LIMIT = 20;
 const DEFAULT_LIMIT = 10;
@@ -22,11 +24,16 @@ function safeParseProfile(raw) {
 function toPublicReviewer(row, pairedReviewerIds) {
   const profile = safeParseProfile(row.profile_json);
   const avatar = String(profile?.avatarUrl || "");
+  const publicProfile = publicReviewerProfileFields(profile);
+  const reviewAvailability = publicReviewAvailabilityFields(profile);
   return {
     id: row.id,
     displayName: row.display_name,
     institution: String(profile?.institution || "").trim() || null,
-    reviewerRole: String(profile?.role || profile?.reviewerRole || "").trim() || null,
+    profileStatus: publicProfile.profileStatus,
+    capability: publicProfile.capability,
+    roleLabel: publicProfile.roleLabel,
+    reviewAvailability,
     avatarUrl: avatar.startsWith("data:image/") ? avatar : null,
     isPaired: pairedReviewerIds.has(row.id),
   };

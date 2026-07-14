@@ -190,7 +190,7 @@ CREATE TABLE feed_recipients (
 | `exam-account.html` | แท็บ **กัลยาณมิตร** · **ครู/ศิษย์** · รายการคำขอรอ |
 | `exam-inbox.html` | คำขอมิตร/ศิษย์เป็นการ์ด · ปุ่ม รับเป็นมิตร / รับตัวเป็นศิษย์ |
 | `exam-feed.html` | **ใหม่** — timeline กิจกรรม |
-| `ruled-lines-card-only-template.html` | เลือกครูผู้รับเมื่อส่งตรวจ (ถ้ามี >1 discipleship) |
+| `workbook.html` | เลือกครูผู้รับเมื่อส่งตรวจ (ถ้ามี >1 discipleship) |
 | `exam-leaderboard.html` | ปุ่ม «ประกาศขึ้น feed» (ครู · opt-in) |
 | `paligo-nav-config.js` | เมนู Feed · กัลยาณมิตร |
 

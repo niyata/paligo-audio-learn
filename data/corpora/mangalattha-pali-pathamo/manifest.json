@@ -1,0 +1,8 @@
+{
+  "schema": "paligo.corpus-manifest.v1",
+  "title": "มังคลัตถทีปนีบาลี (ปฐโม ภาโค)",
+  "grade": "ป.ธ. ๔",
+  "corpus": "corpus.json",
+  "defaultDisplayMode": "kho",
+  "audioAlignment": ""
+}

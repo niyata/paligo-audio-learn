@@ -47,7 +47,7 @@ Reviewer profile:
 Flow ปัจจุบัน:
 
 1. นักเรียนตั้งค่า profile และเลือกอาจารย์/บทบาทปลายทาง
-2. นักเรียนกด `ส่งตรวจ` ใน `ruled-lines-card-only-template.html`
+2. นักเรียนกด `ส่งตรวจ` ใน `workbook.html`
 3. ระบบสร้าง `paligo.exam.submission.v1` เก็บใน `paligo-exam-submissions-v1` และดาวน์โหลดไฟล์ `.paligo-submission.json`
 4. อาจารย์/ผู้ตรวจเปิด `exam-reviewer-console.html`
 5. ผู้ตรวจนำเข้า submission, stamp คะแนน/ข้อผิด, แล้วกดบันทึกการตรวจ

@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ฝึกแปลจากตำรา · Paligo</title>
+  <link rel="stylesheet" href="paligo-design-tokens.css" />
+  <link rel="stylesheet" href="sidebar-nav.css" />
+  <script src="book-fonts.js"></script>
+  <style>
+    :root {
+      --paligo-reader-scale: 1;
+      --reader-text-base: 31px;
+      --reader-muted: var(--paligo-muted, rgba(58, 58, 58, 0.68));
+      --pali-reader-font: "TH Sarabun Pali", "TH Sarabun Bali", Sarabun, sans-serif;
+    }
+
+    @font-face {
+      font-family: "TH Sarabun Pali";
+      font-style: normal;
+      font-weight: 400;
+      src: url("fonts/THSarabunPali.ttf") format("truetype");
+    }
+
+    @font-face {
+      font-family: "TH Sarabun Pali";
+      font-style: normal;
+      font-weight: 700;
+      src: url("fonts/THSarabunPali.ttf") format("truetype");
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      background: var(--paligo-page-bg, #f8f0e3);
+      color: var(--paligo-ink, #343434);
+      font-family: Sarabun, -apple-system, BlinkMacSystemFont, "SF Pro Text", ui-sans-serif, sans-serif;
+      line-height: 1.5;
+      margin: 0;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .paligo-content {
+      padding: 20px var(--paligo-content-padding-x, 20px) 32px;
+    }
+
+    .reader-shell {
+      margin: 0 auto;
+      max-width: var(--paligo-content-max-width, 940px);
+    }
+
+    .reader-panel,
+    .reader-page {
+      background: var(--paligo-paper-bg, #fffaf0);
+      border: 1px solid var(--paligo-paper-border, rgba(74, 44, 10, 0.16));
+      border-radius: 16px;
+      box-shadow: 0 8px 24px var(--paligo-warm-shadow, rgba(74, 44, 10, 0.1));
+    }
+
+    .reader-panel {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 18px;
+      padding: 18px 20px;
+    }
+
+    .reader-title {
+      color: #1f2d89;
+      font-size: clamp(1.25rem, 2.4vw, 1.7rem);
+      font-weight: 900;
+      line-height: 1.25;
+      margin: 0;
+    }
+
+    .reader-meta,
+    .reader-status {
+      color: var(--reader-muted);
+      font-size: 0.92rem;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .reader-toolbar,
+    .reader-mode-row {
+      align-items: center;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .reader-font-field {
+      display: grid;
+      flex: 1 1 220px;
+      gap: 4px;
+      min-width: 190px;
+    }
+
+    .reader-font-field span {
+      color: var(--reader-muted);
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .reader-nav-row {
+      align-items: center;
+      display: grid;
+      gap: 8px;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+    }
+
+    .reader-select {
+      background: #fffdf7;
+      border: 1px solid var(--paligo-paper-border, rgba(74, 44, 10, 0.18));
+      border-radius: 8px;
+      color: var(--paligo-ink, #343434);
+      font: inherit;
+      min-height: 42px;
+      padding: 8px 10px;
+      width: 100%;
+    }
+
+    .reader-btn {
+      appearance: none;
+      background: var(--paligo-paper-bg, #fffaf0);
+      border: 1px solid var(--paligo-paper-border, rgba(74, 44, 10, 0.18));
+      border-radius: 8px;
+      color: #1f2d89;
+      cursor: pointer;
+      font: inherit;
+      font-size: 0.92rem;
+      font-weight: 800;
+      min-height: 42px;
+      padding: 8px 14px;
+      white-space: nowrap;
+    }
+
+    .reader-btn.is-active {
+      background: #fff3d6;
+      border-color: #f2a600;
+      color: #6b4f00;
+    }
+
+    .reader-btn:disabled {
+      cursor: default;
+      opacity: 0.45;
+    }
+
+    .reader-page {
+      background: #fff;
+      font-family: var(--pali-reader-font);
+      font-size: calc(var(--reader-text-base) * var(--paligo-reader-scale));
+      line-height: 2;
+      min-height: 48vh;
+      padding: clamp(22px, 4vw, 42px);
+    }
+
+    .reader-unit {
+      border-bottom: 1px solid rgba(74, 44, 10, 0.1);
+      margin-bottom: 22px;
+      padding-bottom: 18px;
+    }
+
+    .reader-unit:last-child {
+      border-bottom: 0;
+      margin-bottom: 0;
+    }
+
+    .reader-unit__meta {
+      color: var(--reader-muted);
+      font-size: calc(0.72rem * var(--paligo-reader-scale));
+      font-weight: 800;
+      line-height: 1.45;
+      margin-bottom: 8px;
+    }
+
+    .reader-unit__title {
+      color: #1f2d89;
+      font-family: var(--pali-reader-font);
+      font-size: calc(1.05rem * var(--paligo-reader-scale));
+      font-weight: 900;
+      line-height: 1.45;
+      margin-bottom: 10px;
+    }
+
+    .reader-line {
+      border-radius: 8px;
+      display: block;
+      line-height: 1.9;
+      margin: 4px 0;
+      padding: 2px 6px;
+      white-space: pre-wrap;
+    }
+
+    .reader-line.is-active {
+      background: #fff3d6;
+    }
+
+    @media (max-width: 640px) {
+      .reader-nav-row {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .reader-select {
+        grid-column: 1 / -1;
+        grid-row: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="reader-shell" aria-label="ฝึกแปลจากตำรา">
+    <section class="reader-panel">
+      <div>
+        <h1 class="reader-title" data-reader-title>ฝึกแปลจากตำรา</h1>
+        <p class="reader-meta" data-reader-meta>ชุดแปล 3 เล่ม · ไม่มีเสียงเทป · ไม่ผูกกับสมุดข้อสอบ</p>
+      </div>
+
+      <div class="reader-toolbar">
+        <label class="reader-font-field">
+          <span>ขนาดฟอนต์ <span data-font-scale-value>100%</span></span>
+          <input data-font-scale-input type="range" min="100" max="240" step="5" value="125" aria-label="ปรับขนาดฟอนต์" />
+        </label>
+        <button class="reader-btn" type="button" data-reader-reload>โหลดใหม่</button>
+      </div>
+
+      <div class="reader-mode-row" aria-label="โหมดแสดงตำรา">
+        <button class="reader-btn is-active" type="button" data-reader-mode="page" aria-pressed="true">ทีละหน้า</button>
+        <button class="reader-btn" type="button" data-reader-mode="sentence" aria-pressed="false">ทีละบรรทัด</button>
+        <button class="reader-btn" type="button" data-reader-mode="chapter" aria-pressed="false">ทีละเรื่อง</button>
+      </div>
+
+      <div class="reader-nav-row" aria-label="นำทางตำรา">
+        <button class="reader-btn" type="button" data-reader-prev disabled>‹ หน้าที่แล้ว</button>
+        <select class="reader-select" data-reader-select aria-label="เลือกหน่วยเรียน"></select>
+        <button class="reader-btn" type="button" data-reader-next disabled>หน้าถัดไป ›</button>
+      </div>
+
+      <p class="reader-status" data-reader-status>กำลังโหลดตำรา…</p>
+    </section>
+
+    <section class="reader-page" data-reader-page aria-live="polite"></section>
+  </main>
+
+  <script src="paligo-config.js"></script>
+  <script src="paligo-inbox-client.js"></script>
+  <script src="paligo-nav-config.js"></script>
+  <script src="sidebar-nav.js"></script>
+  <script>
+    PaligoSidebar.autoInit();
+  </script>
+  <script>
+    const DEFAULT_CORPUS = 'data/corpora/mangalattha-pt4-part1/manifest.json';
+
+    let currentCorpus = null;
+    let corpusBaseUrl = '';
+    let readerMode = 'page';
+    let selectedItemId = '';
+
+    const readerTitle = document.querySelector('[data-reader-title]');
+    const readerMeta = document.querySelector('[data-reader-meta]');
+    const readerStatus = document.querySelector('[data-reader-status]');
+    const readerPage = document.querySelector('[data-reader-page]');
+    const readerSelect = document.querySelector('[data-reader-select]');
+    const readerPrev = document.querySelector('[data-reader-prev]');
+    const readerNext = document.querySelector('[data-reader-next]');
+    const NAV_LABELS = {
+    sentence: {
+        prev: '‹ บรรทัดที่แล้ว',
+        next: 'บรรทัดถัดไป ›',
+      },
+      kho: {
+        prev: '‹ ข้อที่แล้ว',
+        next: 'ข้อถัดไป ›',
+      },
+      page: {
+        prev: '‹ หน้าที่แล้ว',
+        next: 'หน้าถัดไป ›',
+      },
+      chapter: {
+        prev: '‹ เรื่องที่แล้ว',
+        next: 'เรื่องถัดไป ›',
+      },
+    };
+
+    function resolveQueryParam(name) {
+      const params = new URLSearchParams(window.location.search);
+      const value = params.get(name);
+      if (!value) return '';
+      try {
+        return decodeURIComponent(value);
+      } catch (_error) {
+        return value;
+      }
+    }
+
+    function dirname(path) {
+      const normalized = path.replace(/\\/g, '/');
+      const idx = normalized.lastIndexOf('/');
+      return idx >= 0 ? normalized.slice(0, idx) : '';
+    }
+
+    function joinUrl(base, relative) {
+      if (!relative) return '';
+      if (/^https?:\/\//.test(relative)) return relative;
+      const cleanBase = base.endsWith('/') ? base.slice(0, -1) : base;
+      const cleanRelative = relative.startsWith('/') ? relative.slice(1) : relative;
+      return `${cleanBase}/${cleanRelative}`;
+    }
+
+    async function fetchJson(url) {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`โหลด ${url} ไม่สำเร็จ (${response.status})`);
+      return response.json();
+    }
+
+    function getPages() {
+      return (currentCorpus?.items || []).filter((item) => item.itemType === 'page');
+    }
+
+    function getSentences() {
+      return getPages().flatMap((page) => page.children || []);
+    }
+
+    function getChapters() {
+      return currentCorpus?.chapters || [];
+    }
+
+    function getCurrentList() {
+      if (!currentCorpus) return [];
+      if (readerMode === 'sentence') return getSentences();
+      if (readerMode === 'chapter') return getChapters();
+      return getPages();
+    }
+
+    function optionLabel(item) {
+      if (!item) return '-';
+      if (item.itemType === 'chapter') return item.title || item.chapterId;
+      if (item.itemType === 'sentence') return `หน้า ${item.sourcePageLabel || item.sourcePage} · บรรทัด ${item.itemNo}`;
+      return `หน้า ${item.sourcePageLabel || item.sourcePage || item.itemNo} · ${item.title || item.itemId}`;
+    }
+
+    function updateNavButtons(list = getCurrentList()) {
+      const index = list.findIndex((item) => item.itemId === selectedItemId);
+      const hasSelection = index >= 0;
+      const labels = NAV_LABELS[readerMode] || NAV_LABELS.page;
+      readerPrev.textContent = labels.prev;
+      readerNext.textContent = labels.next;
+      readerPrev.disabled = !hasSelection || index <= 0;
+      readerNext.disabled = !hasSelection || index >= list.length - 1;
+    }
+
+    function populateSelect() {
+      const list = getCurrentList();
+      readerSelect.innerHTML = '';
+      list.forEach((item) => {
+        const option = document.createElement('option');
+        option.value = item.itemId;
+        option.textContent = optionLabel(item);
+        readerSelect.append(option);
+      });
+      if (!selectedItemId || !list.some((item) => item.itemId === selectedItemId)) {
+        selectedItemId = list[0]?.itemId || '';
+      }
+      readerSelect.value = selectedItemId;
+      updateNavButtons(list);
+    }
+
+    function makeLine(text, isActive = false) {
+      const line = document.createElement('span');
+      line.className = `reader-line${isActive ? ' is-active' : ''}`;
+      line.textContent = text || '-';
+      return line;
+    }
+
+    function renderUnit({ title, meta, lines, activeItemId }) {
+      const section = document.createElement('section');
+      section.className = 'reader-unit';
+      if (meta) {
+        const metaEl = document.createElement('div');
+        metaEl.className = 'reader-unit__meta';
+        metaEl.textContent = meta;
+        section.append(metaEl);
+      }
+      if (title) {
+        const titleEl = document.createElement('div');
+        titleEl.className = 'reader-unit__title';
+        titleEl.textContent = title;
+        section.append(titleEl);
+      }
+      lines.forEach((line) => section.append(makeLine(line.text, line.itemId === activeItemId)));
+      return section;
+    }
+
+    function pageLines(page) {
+      const children = page.children || [];
+      if (children.length) {
+        return children.map((sentence) => ({
+          itemId: sentence.itemId,
+          text: sentence.pali,
+        }));
+      }
+      return String(page.text || '')
+        .split(/\n+/)
+        .filter(Boolean)
+        .map((text, index) => ({
+          itemId: `${page.itemId}-text-${index + 1}`,
+          text,
+        }));
+    }
+
+    function renderReader() {
+      readerPage.innerHTML = '';
+      if (!currentCorpus) return;
+
+      if (readerMode === 'sentence') {
+        const item = getSentences().find((sentence) => sentence.itemId === selectedItemId);
+        if (!item) return;
+        readerPage.append(
+          renderUnit({
+            title: item.pali,
+            meta: `หน้า ${item.sourcePageLabel || item.sourcePage}`,
+            lines: [{ itemId: item.itemId, text: item.pali }],
+            activeItemId: item.itemId,
+          })
+        );
+        readerStatus.textContent = `บรรทัด ${item.itemNo} · หน้า ${item.sourcePageLabel || item.sourcePage}`;
+        return;
+      }
+
+      if (readerMode === 'chapter') {
+        const chapter = getChapters().find((item) => item.itemId === selectedItemId);
+        if (!chapter) return;
+        const pages = getPages().filter((page) => page.chapterId === chapter.chapterId);
+        pages.forEach((page) => {
+          readerPage.append(
+            renderUnit({
+              title: page.title,
+                    meta: `หน้า ${page.sourcePageLabel || page.sourcePage}`,
+              lines: pageLines(page),
+            })
+          );
+        });
+        readerStatus.textContent = `${chapter.title} · ${pages.length} หน้า`;
+        return;
+      }
+
+      const page = getPages().find((item) => item.itemId === selectedItemId);
+      if (!page) return;
+      readerPage.append(
+        renderUnit({
+          title: page.title,
+          meta: `หน้า ${page.sourcePageLabel || page.sourcePage}`,
+          lines: pageLines(page),
+        })
+      );
+      readerStatus.textContent = `หน้า ${page.sourcePageLabel || page.sourcePage} · ${pageLines(page).length} บรรทัด`;
+    }
+
+    function setReaderMode(mode) {
+      readerMode = mode;
+      document.querySelectorAll('[data-reader-mode]').forEach((button) => {
+        const active = button.dataset.readerMode === mode;
+        button.classList.toggle('is-active', active);
+        button.setAttribute('aria-pressed', String(active));
+      });
+      populateSelect();
+      renderReader();
+    }
+
+    function navigateSelection(direction) {
+      const list = getCurrentList();
+      if (!list.length) return;
+      const currentIndex = list.findIndex((item) => item.itemId === selectedItemId);
+      const fallbackIndex = direction > 0 ? -1 : list.length;
+      const nextIndex = Math.min(list.length - 1, Math.max(0, (currentIndex >= 0 ? currentIndex : fallbackIndex) + direction));
+      selectedItemId = list[nextIndex].itemId;
+      readerSelect.value = selectedItemId;
+      updateNavButtons(list);
+      renderReader();
+    }
+
+    async function loadCorpus(manifestPath) {
+      const manifest = await fetchJson(manifestPath);
+      corpusBaseUrl = dirname(manifestPath);
+      currentCorpus = await fetchJson(joinUrl(corpusBaseUrl, manifest.corpus || 'corpus.json'));
+      readerMode = manifest.defaultTranslationDisplayMode || manifest.defaultDisplayMode || 'page';
+      selectedItemId = '';
+      readerTitle.textContent = manifest.title || currentCorpus.title || 'ฝึกแปลจากตำรา';
+      readerMeta.textContent = `${currentCorpus.grade || ''} · ${getPages().length} หน้า · ไม่ใช้เสียงเทป`;
+      setReaderMode(readerMode);
+    }
+
+    async function bootstrap() {
+      const manifestPath = resolveQueryParam('corpus') || DEFAULT_CORPUS;
+      try {
+        await loadCorpus(manifestPath);
+      } catch (error) {
+        readerStatus.textContent = error.message;
+      }
+    }
+
+    document.querySelectorAll('[data-reader-mode]').forEach((button) => {
+      button.addEventListener('click', () => setReaderMode(button.dataset.readerMode));
+    });
+
+    readerSelect.addEventListener('change', () => {
+      selectedItemId = readerSelect.value;
+      updateNavButtons();
+      renderReader();
+    });
+
+    readerPrev.addEventListener('click', () => navigateSelection(-1));
+    readerNext.addEventListener('click', () => navigateSelection(1));
+    document.querySelector('[data-reader-reload]').addEventListener('click', bootstrap);
+
+    function applyTextScale(scale) {
+      document.documentElement.style.setProperty('--paligo-reader-scale', String(scale / 100));
+    }
+
+    function bindReaderScale(input, valueEl) {
+      const storageKey = 'paligo-pali-reader-scale-v1';
+      const min = 100;
+      const max = 240;
+      const defaultScale = 125;
+      const clamp = (value) => {
+        const scale = Number(value);
+        if (!Number.isFinite(scale)) return defaultScale;
+        return Math.min(max, Math.max(min, Math.round(scale)));
+      };
+      const stored = clamp(localStorage.getItem(storageKey) || defaultScale);
+
+      input.min = String(min);
+      input.max = String(max);
+      input.step = '5';
+      input.value = String(stored);
+
+      const apply = (value) => {
+        const next = clamp(value);
+        input.value = String(next);
+        if (valueEl) valueEl.textContent = `${next}%`;
+        localStorage.setItem(storageKey, String(next));
+        applyTextScale(next);
+      };
+
+      input.addEventListener('input', () => apply(input.value));
+      apply(stored);
+    }
+
+    bindReaderScale(
+      document.querySelector('[data-font-scale-input]'),
+      document.querySelector('[data-font-scale-value]')
+    );
+
+    bootstrap();
+  </script>
+</body>
+</html>

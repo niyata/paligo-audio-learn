@@ -92,6 +92,26 @@ CORS อนุญาต: `https://app.paligo.jp`, `localhost:8765`, `*.pages.dev
 
 ---
 
+## 7. Code readiness (ตรวจแล้ว 2026-07-10 — Claude)
+
+สิ่งที่ **พร้อมแล้วฝั่ง code** รอแค่ขั้นตอน Dashboard/DNS (ต้องคนที่มี access Cloudflare ทำ):
+
+| รายการ | สถานะ |
+|--------|-------|
+| `_headers` cache rules (root) | ✅ เพิ่มแล้ว — conservative TTL เพราะไฟล์ยังไม่มี fingerprint ใน filename |
+| CORS ฝั่ง Workers (`workers/src/http.js`) | ✅ อนุญาต `app.paligo.jp`, `localhost:8765`, `*.pages.dev` อยู่แล้ว ตรงกับแผน §4 |
+| `paligo-config.js` apiBase/appOrigin resolver | ✅ แยก local/production ถูกต้องแล้ว ไม่ต้องแก้ |
+| `wrangler.jsonc` routes (`api.paligo.jp/*`) | ⛔ ยัง **comment ไว้ตามเดิม** — ต้อง uncomment เองหลัง zone `paligo.jp` ขึ้น Cloudflare จริงเท่านั้น (ห้ามเปิดก่อน มิฉะนั้น deploy fail) |
+
+**ยังบล็อกอยู่ (ต้อง PO/คนมี Cloudflare Dashboard access ทำ ไม่ใช่งาน code):**
+
+1. สร้าง Cloudflare Pages project + connect repo (§1)
+2. ผูก custom domain `app.paligo.jp` + DNS record `app` → Pages (§3)
+3. Deploy Workers + ผูก zone แล้วค่อย uncomment routes ใน `wrangler.jsonc`
+4. ยังไม่มี cloudflared tunnel ใดๆ ในโปรเจ็คนี้ — แผนใช้ Cloudflare Pages ปกติ ไม่ใช่ tunnel
+
+---
+
 ## อ้างอิง
 
 - [`docs/exam-inbox-hosting-recommendation.md`](./exam-inbox-hosting-recommendation.md)

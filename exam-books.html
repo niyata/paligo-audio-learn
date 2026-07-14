@@ -731,6 +731,7 @@
     <script src="paligo-config.js"></script>
     <script src="paligo-inbox-client.js"></script>
     <script src="paligo-exam-shared.js"></script>
+    <script src="paligo-exam-book-cover.js"></script>
     <script src="paligo-exam-submit.js"></script>
     <script src="paligo-exam-date-picker.js"></script>
     <script src="paligo-nav-config.js"></script>
@@ -1047,7 +1048,7 @@
                     : result.bookId && result.reason === "empty"
                       ? {
                           label: "เปิดสมุด",
-                          href: `ruled-lines-card-only-template.html?bookId=${encodeURIComponent(book.id)}`,
+                          href: `workbook.html?bookId=${encodeURIComponent(book.id)}`,
                         }
                       : null,
               });
@@ -1362,7 +1363,45 @@
           return "—";
         };
 
+        const normalizeAvatarUrl = (value) => {
+          const url = String(value || "").trim();
+          return url.startsWith("data:image/") ? url : "";
+        };
+
+        const resolveBookAvatarUrl = (book) => {
+          const currentProfile =
+            typeof buildStudentProfileSnapshot === "function" ? buildStudentProfileSnapshot() : null;
+          return [
+            book?.avatarUrl,
+            book?.profile?.avatarUrl,
+            book?.studentProfile?.avatarUrl,
+            book?.draft?.profile?.avatarUrl,
+            currentProfile?.avatarUrl,
+          ]
+            .map(normalizeAvatarUrl)
+            .find(Boolean) || "";
+        };
+
+        const resolveBookAvatarName = (book) => {
+          const currentProfile =
+            typeof buildStudentProfileSnapshot === "function" ? buildStudentProfileSnapshot() : null;
+          return (
+            book?.studentName ||
+            book?.studentProfile?.studentName ||
+            book?.draft?.profile?.studentName ||
+            currentProfile?.studentName ||
+            ""
+          );
+        };
+
         const buildBookCover = (book) => {
+          if (window.PaligoExamBookCover?.buildBookCoverElement) {
+            return PaligoExamBookCover.buildBookCoverElement(book, {
+              avatarUrl: resolveBookAvatarUrl(book),
+              avatarName: resolveBookAvatarName(book),
+            });
+          }
+
           const cover = document.createElement("div");
           const grade = document.createElement("div");
           const subject = document.createElement("div");
@@ -1569,7 +1608,7 @@
               reviewNote.className = "book-meta";
               actions.className = "button-row";
               open.className = "button is-primary";
-              open.href = `ruled-lines-card-only-template.html?bookId=${encodeURIComponent(book.id)}`;
+              open.href = `workbook.html?bookId=${encodeURIComponent(book.id)}`;
               open.textContent = "เปิดสมุด";
               open.addEventListener("click", () => {
                 writeRaw(KEYS.activeBook, book.id);
@@ -1682,7 +1721,7 @@
           event.preventDefault();
           const bookId = createBookWithCover(new FormData(coverForm));
           closeCoverModal();
-          window.location.href = `ruled-lines-card-only-template.html?bookId=${encodeURIComponent(bookId)}`;
+          window.location.href = `workbook.html?bookId=${encodeURIComponent(bookId)}`;
         });
 
         try {

@@ -183,7 +183,7 @@ export async function assertInboxOperational(request, env, user) {
     return errorResponse(
       request,
       "inbox_disabled",
-      "Inbox API ปิดอยู่ — ใช้โอนไฟล์ (ขั้นสูง) หรือติดต่อผู้ดูแล",
+      "Inbox API ปิดอยู่ — ติดต่อผู้ดูแลระบบ",
       503
     );
   }

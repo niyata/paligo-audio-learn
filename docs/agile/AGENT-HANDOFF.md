@@ -25,6 +25,7 @@
 ### Files / branches
 - Branch: `…`
 - Key files: `…`
+- Claimed files: `preserve | migrate | split | needs-owner | needs-PO-decision`
 
 ### Risks / open questions
 - …
@@ -56,4 +57,33 @@
 
 - **Source of truth:** GitHub issue + board column
 - **Code:** branch บน repo — rebase ก่อน PR
+- **Dirty tree / ไฟล์ไม่รู้เจ้าของ:** ส่งให้ **Paligo Integrator** เคลมก่อน ห้าม agent ลบ/revert/stage แทนกันเอง
 - **ข้อขัดแย้ง:** PO (human) ตัดสินใน issue comment `Decision:`
+
+---
+
+## Paligo Integrator Handoff
+
+ใช้เมื่อส่งงานให้ผู้ถือสิทธิ์เคลมไฟล์ค้างข้าม agent
+
+```markdown
+## Integrator Handoff
+
+**Reason:** dirty tree | rename migration | release prep | conflict | abandoned work
+**Requested owner:** Paligo Integrator
+**Status:** needs-triage | ready-to-split | needs-PO-decision
+
+### Files to claim
+- `path` — preserve | migrate | split | needs-owner | needs-PO-decision
+
+### Context
+- …
+
+### Validation already run
+- …
+
+### Do not touch
+- …
+```
+
+**กฎ:** Integrator เป็นคนจัดคิวและเคลม แต่ PO ยังเป็น final authority สำหรับการทิ้ง/revert/merge งาน

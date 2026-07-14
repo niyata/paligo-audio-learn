@@ -1,0 +1,15 @@
+{
+  "auditedAt": "2026-07-13T11:45:47.147Z",
+  "url": "http://127.0.0.1:8765/exam-books.html?apiPort=9999",
+  "result": {
+    "cardCount": 1,
+    "hasSharedCover": true,
+    "hasAvatarClass": true,
+    "hasAvatarImage": true,
+    "avatarSrcIsDataImage": true,
+    "openHref": "workbook.html?bookId=book-audit-cover-avatar",
+    "selectorOverlapsAvatar": false
+  },
+  "errors": [],
+  "pass": true
+}

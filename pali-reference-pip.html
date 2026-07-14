@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>มังคลัตถทีปนีบาลี (ปฐโม ภาโค) · PiP</title>
+  <link rel="stylesheet" href="paligo-design-tokens.css" />
+  <style>
+    :root {
+      --reader-scale: 1;
+      --reader-text-base: 30px;
+      --reader-font: "TH Sarabun Pali", "TH Sarabun Bali", Sarabun, sans-serif;
+      --reader-muted: var(--paligo-muted, rgba(58, 58, 58, 0.68));
+    }
+
+    @font-face {
+      font-family: "TH Sarabun Pali";
+      font-style: normal;
+      font-weight: 400;
+      src: url("fonts/THSarabunPali.ttf") format("truetype");
+    }
+
+    @font-face {
+      font-family: "TH Sarabun Pali";
+      font-style: normal;
+      font-weight: 700;
+      src: url("fonts/THSarabunPali.ttf") format("truetype");
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      background: var(--paligo-page-bg, #f8f0e3);
+      color: var(--paligo-ink, #343434);
+      font-family: Sarabun, -apple-system, BlinkMacSystemFont, "SF Pro Text", ui-sans-serif, sans-serif;
+      line-height: 1.45;
+      margin: 0;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .pip-shell {
+      display: grid;
+      gap: 10px;
+      padding: 12px;
+    }
+
+    .pip-toolbar,
+    .pip-reader {
+      background: var(--paligo-paper-bg, #fffaf0);
+      border: 1px solid var(--paligo-paper-border, rgba(74, 44, 10, 0.16));
+      border-radius: 14px;
+      box-shadow: 0 6px 20px var(--paligo-warm-shadow, rgba(74, 44, 10, 0.08));
+    }
+
+    .pip-toolbar {
+      display: grid;
+      gap: 9px;
+      padding: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+
+    .pip-toolbar.is-collapsed {
+      gap: 0;
+      padding: 8px;
+    }
+
+    .pip-toolbar.is-collapsed .pip-toolbar-full {
+      display: none;
+    }
+
+    .pip-toolbar:not(.is-collapsed) .pip-focus-row {
+      display: none;
+    }
+
+    .pip-toolbar-full {
+      display: grid;
+      gap: 9px;
+    }
+
+    .pip-toolbar-head {
+      align-items: start;
+      display: grid;
+      gap: 3px;
+    }
+
+    .pip-control-grid {
+      display: grid;
+      gap: 9px;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+
+    .pip-tool-section {
+      background: rgba(255, 255, 255, 0.46);
+      border: 1px solid rgba(74, 44, 10, 0.12);
+      border-radius: 12px;
+      display: grid;
+      gap: 8px;
+      min-width: 0;
+      padding: 9px;
+    }
+
+    .pip-tool-section__title {
+      color: var(--reader-muted);
+      font-size: 0.76rem;
+      font-weight: 900;
+      line-height: 1.2;
+    }
+
+    .pip-tool-row {
+      align-items: center;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      min-width: 0;
+    }
+
+    .pip-title {
+      color: #1f2d89;
+      font-size: 1.18rem;
+      font-weight: 900;
+      line-height: 1.25;
+      margin: 0;
+    }
+
+    .pip-status {
+      color: var(--reader-muted);
+      font-size: 0.84rem;
+      font-weight: 800;
+      margin: 0;
+    }
+
+    .pip-nav-row,
+    .pip-focus-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .pip-nav-row {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+    }
+
+    .pip-focus-row {
+      align-items: center;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto auto;
+    }
+
+    .pip-focus-label {
+      color: var(--reader-muted);
+      font-size: 0.82rem;
+      font-weight: 850;
+      min-width: 0;
+      overflow: hidden;
+      padding: 0 2px;
+      text-align: center;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .pip-btn,
+    .pip-select {
+      border: 1px solid var(--paligo-paper-border, rgba(74, 44, 10, 0.18));
+      border-radius: 8px;
+      color: #1f2d89;
+      font: inherit;
+      font-size: 0.9rem;
+      font-weight: 850;
+      min-height: 38px;
+      padding: 7px 10px;
+    }
+
+    .pip-btn {
+      appearance: none;
+      align-items: center;
+      background: var(--paligo-paper-bg, #fffaf0);
+      cursor: pointer;
+      display: inline-flex;
+      gap: 6px;
+      justify-content: center;
+      white-space: nowrap;
+    }
+
+    .pip-icon {
+      flex: 0 0 auto;
+      fill: none;
+      height: 1em;
+      stroke: currentColor;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 2.2;
+      width: 1em;
+    }
+
+    .pip-icon-sprite {
+      display: none;
+    }
+
+    .pip-btn.is-active {
+      background: #fff3d6;
+      border-color: #f2a600;
+      color: #6b4f00;
+    }
+
+    .pip-btn:disabled {
+      cursor: default;
+      opacity: 0.45;
+    }
+
+    .pip-review-btn {
+      margin-left: auto;
+      position: relative;
+    }
+
+    .pip-tool-row .pip-review-btn {
+      margin-left: 0;
+    }
+
+    .pip-review-btn.has-review::after {
+      background: #d83b3b;
+      border: 2px solid var(--paligo-paper-bg, #fffaf0);
+      border-radius: 999px;
+      content: "";
+      height: 8px;
+      position: absolute;
+      right: 6px;
+      top: 6px;
+      width: 8px;
+    }
+
+    .pip-select {
+      background: #fffdf7;
+      min-width: 0;
+      width: 100%;
+    }
+
+    .pip-font {
+      align-items: center;
+      color: var(--reader-muted);
+      display: grid;
+      font-size: 0.82rem;
+      font-weight: 800;
+      gap: 4px;
+      grid-template-columns: auto minmax(120px, 1fr);
+      min-width: min(100%, 260px);
+    }
+
+    .pip-font__label {
+      align-items: center;
+      display: inline-flex;
+      gap: 5px;
+      white-space: nowrap;
+    }
+
+    .pip-font input { width: 100%; }
+
+    .pip-notice {
+      align-items: start;
+      background: #fff8e6;
+      border: 1px solid #f2d48a;
+      border-radius: 10px;
+      color: #6b4f00;
+      display: flex;
+      font-size: 0.82rem;
+      font-weight: 800;
+      gap: 10px;
+      justify-content: space-between;
+      line-height: 1.45;
+      padding: 8px 10px;
+    }
+
+    .pip-notice[hidden] {
+      display: none;
+    }
+
+    .pip-notice__close {
+      appearance: none;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.62);
+      border: 1px solid rgba(107, 79, 0, 0.28);
+      border-radius: 999px;
+      color: #6b4f00;
+      cursor: pointer;
+      display: inline-flex;
+      flex: 0 0 auto;
+      font: inherit;
+      font-size: 0.78rem;
+      font-weight: 900;
+      gap: 4px;
+      justify-content: center;
+      line-height: 1;
+      min-height: 26px;
+      padding: 5px 9px;
+    }
+
+    .pip-review-panel {
+      background: #fffdf7;
+      border: 1px solid rgba(31, 45, 137, 0.18);
+      border-radius: 12px;
+      box-shadow: 0 10px 26px rgba(74, 44, 10, 0.12);
+      display: grid;
+      gap: 9px;
+      padding: 12px;
+    }
+
+    .pip-review-panel[hidden] {
+      display: none;
+    }
+
+    .pip-review-panel__head {
+      align-items: start;
+      display: flex;
+      gap: 10px;
+      justify-content: space-between;
+    }
+
+    .pip-review-panel__title {
+      color: #1f2d89;
+      font-size: 0.95rem;
+      font-weight: 900;
+      line-height: 1.25;
+    }
+
+    .pip-review-panel__target {
+      color: var(--reader-muted);
+      font-size: 0.78rem;
+      font-weight: 800;
+      margin-top: 2px;
+    }
+
+    .pip-review-panel label {
+      color: var(--reader-muted);
+      display: grid;
+      font-size: 0.8rem;
+      font-weight: 850;
+      gap: 4px;
+    }
+
+    .pip-review-panel select,
+    .pip-review-panel textarea {
+      background: #fffaf0;
+      border: 1px solid rgba(31, 45, 137, 0.22);
+      border-radius: 9px;
+      color: #343434;
+      font: inherit;
+      font-size: 0.9rem;
+      padding: 8px 10px;
+      width: 100%;
+    }
+
+    .pip-review-panel textarea {
+      min-height: 74px;
+      resize: vertical;
+    }
+
+    .pip-review-panel__actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      justify-content: flex-end;
+    }
+
+    .pip-reader {
+      background: #fff;
+      font-family: var(--reader-font);
+      font-size: calc(var(--reader-text-base) * var(--reader-scale));
+      line-height: 1.9;
+      min-height: 45vh;
+      padding: 18px;
+    }
+
+    body.foolscap-layout .pip-reader {
+      aspect-ratio: 22 / 34.5;
+      margin: 0 auto;
+      min-height: auto;
+      overflow: auto;
+      padding: clamp(18px, 5vw, 44px);
+      width: 100%;
+    }
+
+    body.foolscap-layout .pip-toolbar {
+      background: rgba(255, 250, 240, 0.96);
+    }
+
+    body.foolscap-layout .pip-line:not(.pip-page-marker) {
+      display: inline;
+      line-height: 1.9;
+      margin: 0;
+      padding: 0;
+      white-space: normal;
+    }
+
+    body.foolscap-layout .pip-line:not(.pip-page-marker)::after {
+      content: " ";
+    }
+
+    body.foolscap-layout .pip-line.is-active {
+      background: transparent;
+    }
+
+    .pip-unit {
+      border-bottom: 1px solid rgba(74, 44, 10, 0.1);
+      margin-bottom: 18px;
+      padding-bottom: 14px;
+    }
+
+    .pip-unit:last-child {
+      border-bottom: 0;
+      margin-bottom: 0;
+    }
+
+    .pip-unit__meta {
+      color: var(--reader-muted);
+      font-family: Sarabun, -apple-system, BlinkMacSystemFont, "SF Pro Text", ui-sans-serif, sans-serif;
+      font-size: calc(0.76rem * var(--reader-scale));
+      font-weight: 800;
+      line-height: 1.4;
+      margin-bottom: 6px;
+    }
+
+    .pip-unit__title {
+      color: #1f2d89;
+      font-weight: 900;
+      line-height: 1.45;
+      margin-bottom: 8px;
+    }
+
+    .pip-line {
+      border-radius: 8px;
+      display: block;
+      line-height: 1.9;
+      margin: 3px 0;
+      padding: 1px 4px;
+      white-space: pre-wrap;
+    }
+
+    .pip-line.is-active { background: #fff3d6; }
+
+    .pip-page-marker {
+      align-items: center;
+      color: var(--reader-muted);
+      display: flex;
+      font-family: Sarabun, -apple-system, BlinkMacSystemFont, "SF Pro Text", ui-sans-serif, sans-serif;
+      font-size: calc(0.78rem * var(--reader-scale));
+      font-weight: 800;
+      gap: 8px;
+      line-height: 1.35;
+      margin: 14px 0 6px;
+      padding: 0;
+    }
+
+    .pip-page-marker::before,
+    .pip-page-marker::after {
+      border-top: 1px dashed rgba(74, 44, 10, 0.24);
+      content: "";
+      flex: 1 1 auto;
+    }
+
+    @media (max-width: 520px) {
+      .pip-control-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .pip-nav-row {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .pip-focus-row {
+        grid-template-columns: 1fr 1fr auto;
+      }
+
+      .pip-focus-label {
+        grid-column: 1 / -1;
+        grid-row: 1;
+      }
+
+      .pip-select {
+        grid-column: 1 / -1;
+        grid-row: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <svg class="pip-icon-sprite" aria-hidden="true" focusable="false">
+    <!-- Lucide-compatible inline outline icons. Source style: https://github.com/lucide-icons/lucide -->
+    <symbol id="pip-icon-align-left" viewBox="0 0 24 24">
+      <path d="M4 6h16" /><path d="M4 12h12" /><path d="M4 18h18" />
+    </symbol>
+    <symbol id="pip-icon-book-open" viewBox="0 0 24 24">
+      <path d="M12 7v14" /><path d="M3 18a2 2 0 0 0 2 2h7V6H5a2 2 0 0 0-2 2z" /><path d="M21 18a2 2 0 0 1-2 2h-7V6h7a2 2 0 0 1 2 2z" />
+    </symbol>
+    <symbol id="pip-icon-chevron-left" viewBox="0 0 24 24">
+      <path d="m15 18-6-6 6-6" />
+    </symbol>
+    <symbol id="pip-icon-chevron-right" viewBox="0 0 24 24">
+      <path d="m9 18 6-6-6-6" />
+    </symbol>
+    <symbol id="pip-icon-file-text" viewBox="0 0 24 24">
+      <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z" /><path d="M14 2v6h6" /><path d="M8 13h8" /><path d="M8 17h6" />
+    </symbol>
+    <symbol id="pip-icon-layers" viewBox="0 0 24 24">
+      <path d="m12 2 9 5-9 5-9-5z" /><path d="m3 12 9 5 9-5" /><path d="m3 17 9 5 9-5" />
+    </symbol>
+    <symbol id="pip-icon-list-checks" viewBox="0 0 24 24">
+      <path d="m3 7 2 2 4-4" /><path d="m3 17 2 2 4-4" /><path d="M13 6h8" /><path d="M13 12h8" /><path d="M13 18h8" />
+    </symbol>
+    <symbol id="pip-icon-maximize" viewBox="0 0 24 24">
+      <path d="M8 3H5a2 2 0 0 0-2 2v3" /><path d="M16 3h3a2 2 0 0 1 2 2v3" /><path d="M8 21H5a2 2 0 0 1-2-2v-3" /><path d="M16 21h3a2 2 0 0 0 2-2v-3" />
+    </symbol>
+    <symbol id="pip-icon-message-warning" viewBox="0 0 24 24">
+      <path d="M21 15a4 4 0 0 1-4 4H7l-4 4V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z" /><path d="M12 7v5" /><path d="M12 16h.01" />
+    </symbol>
+    <symbol id="pip-icon-minimize" viewBox="0 0 24 24">
+      <path d="M8 3v3a2 2 0 0 1-2 2H3" /><path d="M16 3v3a2 2 0 0 0 2 2h3" /><path d="M8 21v-3a2 2 0 0 0-2-2H3" /><path d="M16 21v-3a2 2 0 0 1 2-2h3" />
+    </symbol>
+    <symbol id="pip-icon-panel-top" viewBox="0 0 24 24">
+      <rect x="3" y="4" width="18" height="16" rx="2" /><path d="M3 10h18" />
+    </symbol>
+    <symbol id="pip-icon-type" viewBox="0 0 24 24">
+      <path d="M4 7V4h16v3" /><path d="M9 20h6" /><path d="M12 4v16" />
+    </symbol>
+    <symbol id="pip-icon-x" viewBox="0 0 24 24">
+      <path d="M18 6 6 18" /><path d="m6 6 12 12" />
+    </symbol>
+  </svg>
+
+  <main class="pip-shell">
+    <section class="pip-toolbar" data-toolbar>
+      <div class="pip-focus-row" aria-label="นำทางแบบโฟกัส">
+        <button class="pip-btn" type="button" data-focus-prev data-icon="chevron-left" disabled><svg class="pip-icon" aria-hidden="true"><use href="#pip-icon-chevron-left"></use></svg><span>ข้อที่แล้ว</span></button>
+        <div class="pip-focus-label" data-focus-label>กำลังโหลดตำรา...</div>
+        <button class="pip-btn" type="button" data-focus-next data-icon="chevron-right" disabled><svg class="pip-icon" aria-hidden="true"><use href="#pip-icon-chevron-right"></use></svg><span>ข้อถัดไป</span></button>
+        <button class="pip-btn" type="button" data-focus-toggle data-icon="maximize" aria-pressed="true"><svg class="pip-icon" aria-hidden="true"><use href="#pip-icon-maximize"></use></svg><span>ขยาย</span></button>
+      </div>
+
+      <div class="pip-toolbar-full">
+        <div class="pip-toolbar-head">
+          <h1 class="pip-title" data-title>มังคลัตถทีปนีบาลี (ปฐโม ภาโค)</h1>
+          <p class="pip-status" data-status>กำลังโหลดตำรา...</p>
+        </div>
+
+        <div class="pip-control-grid">
+          <section class="pip-tool-section" aria-label="เครื่องมือคุมมุมมอง">
+            <div class="pip-tool-section__title">มุมมอง</div>
+            <label class="pip-font">
+              <span class="pip-font__label"><svg class="pip-icon" aria-hidden="true"><use href="#pip-icon-type"></use></svg>ฟอนต์ <span data-scale-label>120%</span></span>
+              <input data-scale-input type="range" min="90" max="220" step="5" value="120" aria-label="ปรับขนาดฟอนต์" />
+            </label>
+            <div class="pip-tool-row">
+              <button class="pip-btn" type="button" data-layout-toggle data-icon="book-open" aria-pressed="false"><svg class="pip-icon" aria-hidden="true"><use href="#pip-icon-book-open"></use></svg><span>หน้ากระดาษ: ดั้งเดิม</span></button>
+              <button class="pip-btn" type="button" data-collapse-toggle data-icon="minimize" aria-pressed="false"><svg class="pip-icon" aria-hidden="true"><use href="#pip-icon-minimize"></use></svg><span>ย่อแผง</span></button>
+              <button class="pip-btn pip-review-btn" type="button" data-review-open aria-pressed="false"><svg class="pip-icon" aria-hidden="true"><use href="#pip-icon-message-warning"></use></svg><span>รายงาน</span></button>
+            </div>
+          </section>
+
+          <section class="pip-tool-section" aria-label="เครื่องมือตัวกรองและนำทาง">
+            <div class="pip-tool-section__title">เนื้อหา</div>
+            <div class="pip-tool-row" aria-label="โหมดแสดงตำรา">
+              <button class="pip-btn" type="button" data-mode="kho" aria-pressed="true"><svg class="pip-icon" aria-hidden="true"><use href="#pip-icon-list-checks"></use></svg><span>ทีละข้อ</span></button>
+              <button class="pip-btn" type="button" data-mode="page" aria-pressed="false"><svg class="pip-icon" aria-hidden="true"><use href="#pip-icon-file-text"></use></svg><span>ทีละหน้า</span></button>
+              <button class="pip-btn" type="button" data-mode="sentence" aria-pressed="false"><svg class="pip-icon" aria-hidden="true"><use href="#pip-icon-align-left"></use></svg><span>ทีละบรรทัด</span></button>
+              <button class="pip-btn" type="button" data-mode="chapter" aria-pressed="false"><svg class="pip-icon" aria-hidden="true"><use href="#pip-icon-layers"></use></svg><span>ทีละเรื่อง</span></button>
+            </div>
+          </section>
+        </div>
+
+        <div class="pip-nav-row" aria-label="นำทางตำรา">
+          <button class="pip-btn" type="button" data-prev data-icon="chevron-left" disabled><svg class="pip-icon" aria-hidden="true"><use href="#pip-icon-chevron-left"></use></svg><span>ข้อที่แล้ว</span></button>
+          <select class="pip-select" data-select aria-label="เลือกหน่วยเรียน"></select>
+          <button class="pip-btn" type="button" data-next data-icon="chevron-right" disabled><svg class="pip-icon" aria-hidden="true"><use href="#pip-icon-chevron-right"></use></svg><span>ข้อถัดไป</span></button>
+        </div>
+
+        <div class="pip-notice" data-layout-notice hidden role="status" aria-live="polite">
+          <span>โหมดฟุลสแก๊ปเป็นการจำลองหน้ากระดาษสนามหลวง ข้อความจะไหลเต็มความกว้างของหน้า จึงปิดโหมดทีละบรรทัดไว้ชั่วคราว การแบ่งข้อและหน้ายังยึดตามข้อมูลตำราเดิม</span>
+          <button class="pip-notice__close" type="button" data-layout-notice-close aria-label="ปิดข้อความแจ้งเตือน"><svg class="pip-icon" aria-hidden="true"><use href="#pip-icon-x"></use></svg><span>ปิด</span></button>
+        </div>
+
+        <form class="pip-review-panel" data-review-panel hidden>
+          <div class="pip-review-panel__head">
+            <div>
+              <div class="pip-review-panel__title">รายงานข้อสังเกตตำแหน่งนี้</div>
+              <div class="pip-review-panel__target" data-review-target>ยังไม่ได้เลือกตำแหน่ง</div>
+            </div>
+            <button class="pip-btn" type="button" data-review-close><svg class="pip-icon" aria-hidden="true"><use href="#pip-icon-x"></use></svg><span>ปิด</span></button>
+          </div>
+          <label>
+            หมวด
+            <select data-review-category>
+              <option value="segmentation">การแบ่งข้อ/บรรทัด</option>
+              <option value="footnote">เชิงอรรถ/เลขยกลอย</option>
+              <option value="hyphen">การตัดคำ/ขีดกลาง</option>
+              <option value="ocr">ตัวอักษร/OCR</option>
+              <option value="layout">การจัดหน้า</option>
+              <option value="other">อื่นๆ</option>
+            </select>
+          </label>
+          <label>
+            ความเห็น
+            <textarea data-review-comment placeholder="บอกจุดที่ผิดหรือสิ่งที่ควรตรวจซ้ำ" required></textarea>
+          </label>
+          <label>
+            ข้อเสนอ
+            <textarea data-review-suggestion placeholder="ถ้ามีข้อความที่ควรแก้ หรือแนวทางแก้ ให้เขียนไว้ตรงนี้"></textarea>
+          </label>
+          <div class="pip-review-panel__actions">
+            <button class="pip-btn" type="button" data-review-delete hidden>ลบความเห็น</button>
+            <button class="pip-btn is-active" type="submit">บันทึก</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section class="pip-reader" data-reader aria-live="polite"></section>
+  </main>
+
+  <script>
+    const DEFAULT_CORPUS = 'data/corpora/mangalattha-pali-pathamo/manifest.json';
+    const SCALE_KEY = 'paligo-reference-pip-scale-v1';
+    const LAYOUT_KEY = 'paligo-reference-pip-layout-v1';
+    const COLLAPSED_KEY = 'paligo-reference-pip-toolbar-collapsed-v1';
+    const REVIEW_STORAGE_KEY = 'paligo-corpus-review-notes-v1';
+    const NAV_LABELS = {
+      sentence: { prev: 'บรรทัดที่แล้ว', next: 'บรรทัดถัดไป' },
+      kho: { prev: 'ข้อที่แล้ว', next: 'ข้อถัดไป' },
+      page: { prev: 'หน้าที่แล้ว', next: 'หน้าถัดไป' },
+      chapter: { prev: 'เรื่องที่แล้ว', next: 'เรื่องถัดไป' },
+    };
+
+    let currentCorpus = null;
+    let corpusBaseUrl = '';
+    let mode = 'kho';
+    let selectedId = '';
+    let reviewNotes = [];
+    let activeReviewTarget = null;
+
+    const titleEl = document.querySelector('[data-title]');
+    const statusEl = document.querySelector('[data-status]');
+    const toolbarEl = document.querySelector('[data-toolbar]');
+    const readerEl = document.querySelector('[data-reader]');
+    const selectEl = document.querySelector('[data-select]');
+    const prevEl = document.querySelector('[data-prev]');
+    const nextEl = document.querySelector('[data-next]');
+    const scaleInput = document.querySelector('[data-scale-input]');
+    const scaleLabel = document.querySelector('[data-scale-label]');
+    const layoutToggle = document.querySelector('[data-layout-toggle]');
+    const sentenceModeButton = document.querySelector('[data-mode="sentence"]');
+    const layoutNotice = document.querySelector('[data-layout-notice]');
+    const layoutNoticeClose = document.querySelector('[data-layout-notice-close]');
+    const collapseToggle = document.querySelector('[data-collapse-toggle]');
+    const focusToggle = document.querySelector('[data-focus-toggle]');
+    const focusLabel = document.querySelector('[data-focus-label]');
+    const focusPrev = document.querySelector('[data-focus-prev]');
+    const focusNext = document.querySelector('[data-focus-next]');
+    const reviewOpen = document.querySelector('[data-review-open]');
+    const reviewPanel = document.querySelector('[data-review-panel]');
+    const reviewTarget = document.querySelector('[data-review-target]');
+    const reviewClose = document.querySelector('[data-review-close]');
+    const reviewCategory = document.querySelector('[data-review-category]');
+    const reviewComment = document.querySelector('[data-review-comment]');
+    const reviewSuggestion = document.querySelector('[data-review-suggestion]');
+    const reviewDelete = document.querySelector('[data-review-delete]');
+
+    function queryParam(name) {
+      const value = new URLSearchParams(window.location.search).get(name);
+      if (!value) return '';
+      try { return decodeURIComponent(value); } catch (_error) { return value; }
+    }
+
+    function dirname(path) {
+      const normalized = path.replace(/\\/g, '/');
+      const idx = normalized.lastIndexOf('/');
+      return idx >= 0 ? normalized.slice(0, idx) : '';
+    }
+
+    function joinUrl(base, relative) {
+      if (!relative) return '';
+      if (/^https?:\/\//.test(relative)) return relative;
+      return `${base.replace(/\/$/, '')}/${relative.replace(/^\//, '')}`;
+    }
+
+    async function fetchJson(url) {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`โหลด ${url} ไม่สำเร็จ (${response.status})`);
+      return response.json();
+    }
+
+    function pages() {
+      return (currentCorpus?.items || []).filter((item) => item.itemType === 'page');
+    }
+
+    function khos() {
+      return (currentCorpus?.items || []).filter((item) => item.itemType === 'kho');
+    }
+
+    function lines() {
+      return pages().flatMap((page) => page.children || []);
+    }
+
+    function chapters() {
+      return currentCorpus?.chapters || [];
+    }
+
+    function list() {
+      if (!currentCorpus) return [];
+      if (mode === 'kho') return khos();
+      if (mode === 'sentence') return lines();
+      if (mode === 'chapter') return chapters();
+      return pages();
+    }
+
+    function optionLabel(item) {
+      if (!item) return '-';
+      if (item.itemType === 'kho') return `${item.khoLabel || `ข้อ ${item.itemNo}`} · หน้า ${item.sourcePageLabel || item.sourcePage}`;
+      if (item.itemType === 'page') return `หน้า ${item.sourcePageLabel || item.sourcePage}`;
+      if (item.itemType === 'sentence') return `หน้า ${item.sourcePageLabel || item.sourcePage} · บรรทัด ${item.itemNo}`;
+      if (item.itemType === 'chapter') return item.title || item.chapterId;
+      return item.title || item.itemId;
+    }
+
+    function setButtonLabel(button, text, iconName = button?.dataset.icon || '') {
+      if (!button) return;
+      button.replaceChildren();
+      if (iconName) {
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.classList.add('pip-icon');
+        svg.setAttribute('aria-hidden', 'true');
+        const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+        use.setAttribute('href', `#pip-icon-${iconName}`);
+        svg.append(use);
+        button.append(svg);
+      }
+      const label = document.createElement('span');
+      label.textContent = text;
+      button.append(label);
+    }
+
+    function loadReviewNotes() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(REVIEW_STORAGE_KEY) || '[]');
+        reviewNotes = Array.isArray(parsed) ? parsed : [];
+      } catch (_error) {
+        reviewNotes = [];
+      }
+    }
+
+    function saveReviewNotes() {
+      localStorage.setItem(REVIEW_STORAGE_KEY, JSON.stringify(reviewNotes));
+    }
+
+    function reviewKey(target) {
+      return [
+        target.corpusId || '',
+        target.itemId || '',
+        target.sourcePage || '',
+        target.khoNo || '',
+      ].join('::');
+    }
+
+    function findReviewNote(target) {
+      if (!target) return null;
+      const key = reviewKey(target);
+      return reviewNotes.find((note) => note.key === key) || null;
+    }
+
+    function currentItem() {
+      return list().find((item) => item.itemId === selectedId) || null;
+    }
+
+    function itemTextPreview(item) {
+      if (!item) return '';
+      if (item.itemType === 'kho') return (item.lines || []).map((line) => line.text).join(' ');
+      if (item.itemType === 'page') return (item.children || []).map((line) => line.pali).join(' ');
+      if (item.itemType === 'sentence') return item.pali || '';
+      if (item.itemType === 'chapter') return item.title || '';
+      return item.title || '';
+    }
+
+    function makeReviewTarget(item = currentItem()) {
+      if (!item) return null;
+      return {
+        corpusId: currentCorpus?.corpusId || currentCorpus?.id || '',
+        itemId: item.itemId || '',
+        parentItemId: item.parentItemId || '',
+        chapterId: item.chapterId || '',
+        sourcePage: item.sourcePage || '',
+        sourcePageLabel: item.sourcePageLabel || '',
+        khoNo: item.khoNo || '',
+        khoLabel: item.khoLabel || '',
+        selectedText: itemTextPreview(item).slice(0, 500),
+        displayMode: mode,
+      };
+    }
+
+    function formatReviewTarget(target) {
+      const parts = [];
+      if (target?.khoLabel) parts.push(target.khoLabel);
+      if (target?.sourcePageLabel || target?.sourcePage) parts.push(`หน้า ${target.sourcePageLabel || target.sourcePage}`);
+      if (target?.itemId) parts.push(target.itemId);
+      return parts.join(' · ') || 'ตำแหน่งที่กำลังเปิด';
+    }
+
+    function currentPositionLabel() {
+      const item = currentItem();
+      if (!item) return statusEl.textContent || 'กำลังโหลดตำรา...';
+      return optionLabel(item);
+    }
+
+    function updateReviewButton() {
+      const target = makeReviewTarget();
+      const existing = findReviewNote(target);
+      reviewOpen.classList.toggle('has-review', Boolean(existing));
+      reviewOpen.setAttribute('aria-pressed', String(!reviewPanel.hidden));
+      reviewOpen.title = existing ? 'มีความเห็นรีวิวในตำแหน่งนี้แล้ว' : 'รายงานข้อสังเกตของตำแหน่งนี้';
+    }
+
+    function openReviewPanel() {
+      const target = makeReviewTarget();
+      if (!target) return;
+      activeReviewTarget = target;
+      const existing = findReviewNote(target);
+      reviewTarget.textContent = formatReviewTarget(target);
+      reviewCategory.value = existing?.category || 'ocr';
+      reviewComment.value = existing?.comment || '';
+      reviewSuggestion.value = existing?.suggestion || '';
+      reviewDelete.hidden = !existing;
+      reviewPanel.hidden = false;
+      updateReviewButton();
+      reviewComment.focus();
+    }
+
+    function closeReviewPanel() {
+      reviewPanel.hidden = true;
+      activeReviewTarget = null;
+      updateReviewButton();
+    }
+
+    function updateNav(items = list()) {
+      const index = items.findIndex((item) => item.itemId === selectedId);
+      const labels = NAV_LABELS[mode] || NAV_LABELS.kho;
+      setButtonLabel(prevEl, labels.prev);
+      setButtonLabel(nextEl, labels.next);
+      prevEl.disabled = index <= 0;
+      nextEl.disabled = index < 0 || index >= items.length - 1;
+      setButtonLabel(focusPrev, labels.prev);
+      setButtonLabel(focusNext, labels.next);
+      focusPrev.disabled = prevEl.disabled;
+      focusNext.disabled = nextEl.disabled;
+      focusLabel.textContent = currentPositionLabel();
+    }
+
+    function populateSelect() {
+      const items = list();
+      selectEl.innerHTML = '';
+      items.forEach((item) => {
+        const option = document.createElement('option');
+        option.value = item.itemId;
+        option.textContent = optionLabel(item);
+        selectEl.append(option);
+      });
+      if (!selectedId || !items.some((item) => item.itemId === selectedId)) {
+        selectedId = items[0]?.itemId || '';
+      }
+      selectEl.value = selectedId;
+      updateNav(items);
+      updateReviewButton();
+    }
+
+    function makeLine(text, className = '') {
+      const line = document.createElement('span');
+      line.className = `pip-line${className ? ` ${className}` : ''}`;
+      line.textContent = text || '-';
+      return line;
+    }
+
+    function renderUnit({ title, meta, unitLines, activeItemId }) {
+      const section = document.createElement('section');
+      section.className = 'pip-unit';
+      if (meta) {
+        const metaEl = document.createElement('div');
+        metaEl.className = 'pip-unit__meta';
+        metaEl.textContent = meta;
+        section.append(metaEl);
+      }
+      if (title) {
+        const titleEl = document.createElement('div');
+        titleEl.className = 'pip-unit__title';
+        titleEl.textContent = title;
+        section.append(titleEl);
+      }
+      unitLines.forEach((line) => {
+        section.append(makeLine(line.text, `${line.className || ''}${line.itemId === activeItemId ? ' is-active' : ''}`.trim()));
+      });
+      return section;
+    }
+
+    function khoLines(item) {
+      const result = [];
+      let lastPage = item.sourcePage;
+      (item.lines || []).forEach((line, index) => {
+        if (line.sourcePage && line.sourcePage !== lastPage) {
+          result.push({
+            itemId: `${item.itemId}-page-${line.sourcePage}`,
+            text: `${item.khoLabel || item.title || 'ข้อ'} ต่อหน้า ${line.sourcePageLabel || line.sourcePage}`,
+            className: 'pip-page-marker',
+          });
+          lastPage = line.sourcePage;
+        }
+        result.push({ itemId: `${item.itemId}-line-${index + 1}`, text: line.text });
+      });
+      return result;
+    }
+
+    function pageLines(page) {
+      return (page.children || []).map((line) => ({ itemId: line.itemId, text: line.pali }));
+    }
+
+    function render() {
+      readerEl.innerHTML = '';
+      if (!currentCorpus) return;
+
+      if (mode === 'kho') {
+        const item = khos().find((entry) => entry.itemId === selectedId);
+        if (!item) return;
+        readerEl.append(renderUnit({
+          title: item.title,
+          meta: `เริ่มหน้า ${item.sourcePageLabel || item.sourcePage}`,
+          unitLines: khoLines(item),
+        }));
+        statusEl.textContent = `${item.khoLabel || item.title} · ${item.lines?.length || 0} บรรทัด`;
+        updateReviewButton();
+        return;
+      }
+
+      if (mode === 'sentence') {
+        const item = lines().find((entry) => entry.itemId === selectedId);
+        if (!item) return;
+        readerEl.append(renderUnit({
+          title: '',
+          meta: `หน้า ${item.sourcePageLabel || item.sourcePage}`,
+          unitLines: [{ itemId: item.itemId, text: item.pali }],
+          activeItemId: item.itemId,
+        }));
+        statusEl.textContent = `บรรทัด ${item.itemNo} · หน้า ${item.sourcePageLabel || item.sourcePage}`;
+        updateReviewButton();
+        return;
+      }
+
+      if (mode === 'chapter') {
+        const chapter = chapters().find((entry) => entry.itemId === selectedId);
+        if (!chapter) return;
+        pages().filter((page) => page.chapterId === chapter.chapterId).forEach((page) => {
+          readerEl.append(renderUnit({
+            title: page.title,
+            meta: `หน้า ${page.sourcePageLabel || page.sourcePage}`,
+            unitLines: pageLines(page),
+          }));
+        });
+        statusEl.textContent = `${chapter.title} · ${pages().length} หน้า`;
+        updateReviewButton();
+        return;
+      }
+
+      const page = pages().find((entry) => entry.itemId === selectedId);
+      if (!page) return;
+      readerEl.append(renderUnit({
+        title: page.title,
+        meta: `หน้า ${page.sourcePageLabel || page.sourcePage}`,
+        unitLines: pageLines(page),
+      }));
+      statusEl.textContent = `หน้า ${page.sourcePageLabel || page.sourcePage} · ${page.children?.length || 0} บรรทัด`;
+      updateReviewButton();
+    }
+
+    function setMode(nextMode) {
+      mode = nextMode;
+      if (!reviewPanel.hidden) closeReviewPanel();
+      document.querySelectorAll('[data-mode]').forEach((button) => {
+        const active = button.dataset.mode === mode;
+        button.classList.toggle('is-active', active);
+        button.setAttribute('aria-pressed', String(active));
+      });
+      populateSelect();
+      render();
+    }
+
+    function move(direction) {
+      const items = list();
+      const index = items.findIndex((item) => item.itemId === selectedId);
+      const nextIndex = Math.min(items.length - 1, Math.max(0, index + direction));
+      selectedId = items[nextIndex]?.itemId || '';
+      selectEl.value = selectedId;
+      if (!reviewPanel.hidden) closeReviewPanel();
+      updateNav(items);
+      render();
+    }
+
+    async function loadCorpus(manifestPath) {
+      const manifest = await fetchJson(manifestPath);
+      corpusBaseUrl = dirname(manifestPath);
+      currentCorpus = await fetchJson(joinUrl(corpusBaseUrl, manifest.corpus || 'corpus.json'));
+      titleEl.textContent = manifest.title || currentCorpus.title || 'ตำรา';
+      mode = manifest.defaultDisplayMode || 'kho';
+      selectedId = '';
+      setMode(mode);
+    }
+
+    function bindScale() {
+      const clamp = (value) => Math.min(220, Math.max(90, Number(value) || 120));
+      const stored = clamp(localStorage.getItem(SCALE_KEY) || 120);
+      const apply = (value) => {
+        const next = clamp(value);
+        scaleInput.value = String(next);
+        scaleLabel.textContent = `${next}%`;
+        document.documentElement.style.setProperty('--reader-scale', String(next / 100));
+        localStorage.setItem(SCALE_KEY, String(next));
+      };
+      scaleInput.addEventListener('input', () => apply(scaleInput.value));
+      apply(stored);
+    }
+
+    function setFoolscapLayout(enabled) {
+      document.body.classList.toggle('foolscap-layout', enabled);
+      layoutToggle.classList.toggle('is-active', enabled);
+      layoutToggle.setAttribute('aria-pressed', String(enabled));
+      setButtonLabel(layoutToggle, enabled ? 'หน้ากระดาษ: ฟุลสแก๊ป' : 'หน้ากระดาษ: ดั้งเดิม');
+      if (sentenceModeButton) {
+        sentenceModeButton.disabled = enabled;
+        sentenceModeButton.title = enabled ? 'โหมดฟุลสแก๊ปจัดข้อความให้ไหลเต็มหน้ากระดาษ จึงไม่ใช้ตัวกรองทีละบรรทัด' : '';
+      }
+      localStorage.setItem(LAYOUT_KEY, enabled ? 'foolscap' : 'default');
+      if (enabled && mode === 'sentence') {
+        setMode('kho');
+      } else {
+        render();
+      }
+      if (enabled) {
+        layoutNotice.hidden = false;
+      } else {
+        layoutNotice.hidden = true;
+      }
+    }
+
+    function setToolbarCollapsed(enabled) {
+      toolbarEl.classList.toggle('is-collapsed', enabled);
+      collapseToggle.setAttribute('aria-pressed', String(enabled));
+      focusToggle.setAttribute('aria-pressed', String(enabled));
+      setButtonLabel(collapseToggle, enabled ? 'ขยายแผง' : 'ย่อแผง', enabled ? 'maximize' : 'minimize');
+      setButtonLabel(focusToggle, 'ขยาย', 'maximize');
+      localStorage.setItem(COLLAPSED_KEY, enabled ? '1' : '0');
+      if (enabled && !reviewPanel.hidden) closeReviewPanel();
+      updateNav();
+    }
+
+    document.querySelectorAll('[data-mode]').forEach((button) => {
+      button.addEventListener('click', () => setMode(button.dataset.mode));
+    });
+    selectEl.addEventListener('change', () => {
+      selectedId = selectEl.value;
+      if (!reviewPanel.hidden) closeReviewPanel();
+      updateNav();
+      render();
+    });
+    prevEl.addEventListener('click', () => move(-1));
+    nextEl.addEventListener('click', () => move(1));
+    focusPrev.addEventListener('click', () => move(-1));
+    focusNext.addEventListener('click', () => move(1));
+    collapseToggle.addEventListener('click', () => {
+      setToolbarCollapsed(!toolbarEl.classList.contains('is-collapsed'));
+    });
+    focusToggle.addEventListener('click', () => {
+      setToolbarCollapsed(false);
+    });
+    layoutToggle.addEventListener('click', () => {
+      setFoolscapLayout(!document.body.classList.contains('foolscap-layout'));
+    });
+    layoutNoticeClose.addEventListener('click', () => {
+      layoutNotice.hidden = true;
+    });
+    reviewOpen.addEventListener('click', () => {
+      if (reviewPanel.hidden) openReviewPanel();
+      else closeReviewPanel();
+    });
+    reviewClose.addEventListener('click', closeReviewPanel);
+    reviewDelete.addEventListener('click', () => {
+      if (!activeReviewTarget) return;
+      const key = reviewKey(activeReviewTarget);
+      reviewNotes = reviewNotes.filter((note) => note.key !== key);
+      saveReviewNotes();
+      closeReviewPanel();
+      render();
+    });
+    reviewPanel.addEventListener('submit', (event) => {
+      event.preventDefault();
+      if (!activeReviewTarget) return;
+      const key = reviewKey(activeReviewTarget);
+      const nextNote = {
+        ...activeReviewTarget,
+        key,
+        category: reviewCategory.value,
+        comment: reviewComment.value.trim(),
+        suggestion: reviewSuggestion.value.trim(),
+        updatedAt: new Date().toISOString(),
+      };
+      const existingIndex = reviewNotes.findIndex((note) => note.key === key);
+      if (existingIndex >= 0) {
+        reviewNotes[existingIndex] = {
+          ...reviewNotes[existingIndex],
+          ...nextNote,
+          createdAt: reviewNotes[existingIndex].createdAt || nextNote.updatedAt,
+        };
+      } else {
+        reviewNotes.push({ ...nextNote, createdAt: nextNote.updatedAt });
+      }
+      saveReviewNotes();
+      closeReviewPanel();
+      render();
+    });
+
+    loadReviewNotes();
+    bindScale();
+    setFoolscapLayout(localStorage.getItem(LAYOUT_KEY) === 'foolscap');
+    setToolbarCollapsed(localStorage.getItem(COLLAPSED_KEY) === '1');
+    loadCorpus(queryParam('corpus') || DEFAULT_CORPUS).catch((error) => {
+      statusEl.textContent = error.message;
+      focusLabel.textContent = error.message;
+    });
+  </script>
+</body>
+</html>

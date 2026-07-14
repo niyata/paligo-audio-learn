@@ -138,7 +138,7 @@
 
 .filter-date-wrap .exam-picker-popover::before {
   color: rgba(31, 45, 137, 0.62);
-  content: "ขอบวง = วันนี้ · ตัวเลขเข้ม = มีสมุดสอบ";
+  content: "เน้นสีเฉพาะวันที่มีสมุดข้อสอบ";
   display: block;
   font-size: 0.68rem;
   font-weight: 700;

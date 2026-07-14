@@ -16,6 +16,11 @@
           description: "ฟังและไฮไลท์คำบาลีตามเสียง",
         },
         {
+          label: "ฝึกแปลจากตำรา",
+          href: "pali-translation-practice.html",
+          description: "อ่านชุดแปล 3 เล่มโดยไม่ใช้เสียงเทป",
+        },
+        {
           label: "อ่านหน้าเล่ม",
           href: "book-page-viewer.html",
           description: "เปิดหน้าเล่มจาก manifest",
@@ -30,7 +35,7 @@
       children: [
         {
           label: "เริ่มทำข้อสอบ",
-          href: "ruled-lines-card-only-template.html?newBook=1",
+          href: "workbook.html?newBook=1",
           description: "สร้างสมุดข้อสอบใหม่",
         },
         {
@@ -40,12 +45,12 @@
         },
         {
           label: "ทำต่อเล่มล่าสุด",
-          href: "ruled-lines-card-only-template.html?resume=1",
+          href: "workbook.html?resume=1",
           description: "เปิดสมุดที่ค้างไว้",
         },
         {
           label: "กล่องข้อความ",
-          href: "exam-inbox.html",
+          href: "inbox.html",
           description: "ส่งสมุดให้ครูในแชท",
           requiresInbox: true,
         },
@@ -74,7 +79,7 @@
       children: [
         {
           label: "Inbox แชท",
-          href: "exam-inbox.html",
+          href: "inbox.html",
           description: "รับสมุดจากนักเรียนในรูปแบบแชท",
           requiresInbox: true,
         },
@@ -127,9 +132,19 @@
       section: "study",
       focusMode: true,
     },
+    "pali-translation-practice.html": {
+      title: "ฝึกแปลจากตำรา",
+      section: "study",
+      focusMode: true,
+    },
     "book-page-viewer.html": {
       title: "อ่านหน้าเล่ม",
       section: "study",
+      focusMode: true,
+    },
+    "workbook.html": {
+      title: "ทำข้อสอบ",
+      section: "exam",
       focusMode: true,
     },
     "ruled-lines-card-only-template.html": {
@@ -147,6 +162,10 @@
       section: "exam",
     },
     "exam-inbox.html": {
+      title: "กล่องข้อความ",
+      section: "exam",
+    },
+    "inbox.html": {
       title: "กล่องข้อความ",
       section: "exam",
     },
@@ -196,7 +215,7 @@
     guest: [
       {
         label: "กล่องข้อความ",
-        href: "exam-inbox.html",
+        href: "inbox.html",
         description: "ส่งสมุดให้ครู · แชท Inbox",
         requiresInbox: true,
       },
@@ -214,7 +233,7 @@
     student: [
       {
         label: "กล่องข้อความ",
-        href: "exam-inbox.html",
+        href: "inbox.html",
         description: "แชทส่งสมุดให้ครู",
         requiresInbox: true,
       },
@@ -247,7 +266,7 @@
       },
       {
         label: "Inbox แชท",
-        href: "exam-inbox.html",
+        href: "inbox.html",
         description: "รับสมุดจากนักเรียน",
         requiresInbox: true,
       },

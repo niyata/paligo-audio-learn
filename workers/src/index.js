@@ -18,7 +18,11 @@ export default {
       return new Response(null, { status: 204, headers: corsHeaders(request) });
     }
 
-    if (!env.DB) {
+    const url = new URL(request.url);
+    const path = url.pathname.replace(/\/+$/, "") || "/";
+    const dbOptionalPaths = new Set(["/v1/line/issues/webhook"]);
+
+    if (!env.DB && !dbOptionalPaths.has(path)) {
       return errorResponse(
         request,
         "db_unavailable",
@@ -26,8 +30,6 @@ export default {
         503
       );
     }
-
-    const url = new URL(request.url);
 
     if (url.pathname === "/" || url.pathname === "") {
       return jsonResponse(request, {

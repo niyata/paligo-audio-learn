@@ -146,6 +146,27 @@
         border-color: rgba(180, 40, 40, 0.24);
       }
 
+      .api-status {
+        display: grid;
+        gap: 8px;
+      }
+
+      .api-status__title {
+        font-weight: 900;
+      }
+
+      .api-status__meta {
+        color: var(--muted);
+        font-size: 0.82rem;
+        overflow-wrap: anywhere;
+      }
+
+      .api-status__actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
       .invite-code {
         font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
         font-size: 1.35rem;
@@ -234,6 +255,261 @@
         opacity: 0;
         position: absolute;
       }
+
+      .register-wizard {
+        display: grid;
+        gap: 16px;
+      }
+
+      .register-wizard__progress {
+        color: var(--exam-blue);
+        font-size: 0.88rem;
+        font-weight: 900;
+        margin: 0;
+      }
+
+      .register-wizard__step[hidden] {
+        display: none !important;
+      }
+
+      .register-wizard__heading {
+        font-size: 1.05rem;
+        font-weight: 900;
+        margin: 0 0 4px;
+      }
+
+      .register-wizard__lead {
+        color: var(--muted);
+        font-size: 0.86rem;
+        font-weight: 700;
+        margin: 0 0 12px;
+      }
+
+      .wizard-option-grid {
+        display: grid;
+        gap: 10px;
+      }
+
+      @media (min-width: 480px) {
+        .wizard-option-grid--two {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      .wizard-option {
+        align-items: flex-start;
+        appearance: none;
+        background: var(--paper-bg);
+        border: 1px solid rgba(31, 45, 137, 0.24);
+        border-radius: 8px;
+        color: var(--ink);
+        cursor: pointer;
+        display: grid;
+        font: inherit;
+        gap: 4px;
+        min-height: 44px;
+        padding: 12px 14px;
+        text-align: left;
+        width: 100%;
+      }
+
+      .wizard-option.is-selected {
+        background: rgba(31, 45, 137, 0.1);
+        border-color: rgba(31, 45, 137, 0.5);
+        box-shadow: inset 0 0 0 1px rgba(31, 45, 137, 0.18);
+        color: var(--exam-blue);
+      }
+
+      .wizard-option__title {
+        font-size: 0.95rem;
+        font-weight: 900;
+      }
+
+      .wizard-option__helper {
+        color: var(--muted);
+        font-size: 0.8rem;
+        font-weight: 700;
+      }
+
+      .register-wizard__nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: space-between;
+      }
+
+      .register-wizard__error {
+        color: #a32828;
+        font-size: 0.84rem;
+        font-weight: 700;
+        margin: 0;
+      }
+
+      .register-wizard__summary {
+        background: rgba(31, 45, 137, 0.06);
+        border: 1px solid rgba(31, 45, 137, 0.16);
+        border-radius: 8px;
+        display: grid;
+        font-size: 0.9rem;
+        gap: 6px;
+        padding: 12px 14px;
+      }
+
+      .register-wizard__summary dt {
+        color: var(--muted);
+        font-size: 0.78rem;
+        font-weight: 900;
+        margin: 0;
+      }
+
+      .register-wizard__summary dd {
+        font-weight: 700;
+        margin: 0 0 6px;
+      }
+
+      .register-wizard__summary dd:last-child {
+        margin-bottom: 0;
+      }
+
+      .sr-only {
+        border: 0;
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        white-space: nowrap;
+        width: 1px;
+      }
+
+      /* --- Onboarding focus mode (issue #74) --- */
+      .onboarding {
+        display: grid;
+        gap: 18px;
+      }
+
+      .onboarding__mascot {
+        align-items: center;
+        aspect-ratio: 1 / 1;
+        background:
+          radial-gradient(circle at 50% 38%, rgba(31, 45, 137, 0.16), rgba(31, 45, 137, 0.04) 70%);
+        border-radius: 24px;
+        display: flex;
+        justify-content: center;
+        margin: 0 auto;
+        overflow: hidden;
+        width: min(148px, 42vw);
+      }
+
+      .onboarding__mascot-fallback {
+        color: rgba(31, 45, 137, 0.5);
+        font-size: clamp(2.4rem, 12vw, 3.4rem);
+        font-weight: 900;
+        letter-spacing: 0.04em;
+        line-height: 1;
+      }
+
+      .onboarding__mascot img {
+        height: 100%;
+        object-fit: contain;
+        width: 100%;
+      }
+
+      .onboarding__intro {
+        text-align: center;
+      }
+
+      .onboarding__title {
+        color: var(--exam-blue);
+        font-size: clamp(1.3rem, 5vw, 1.7rem);
+        margin: 0 0 4px;
+      }
+
+      .onboarding__lead {
+        color: var(--muted);
+        font-size: 0.92rem;
+        font-weight: 700;
+        margin: 0;
+      }
+
+      .stepper {
+        display: flex;
+        gap: 6px;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      .stepper__seg {
+        background: rgba(31, 45, 137, 0.14);
+        border-radius: 999px;
+        flex: 1 1 0;
+        height: 6px;
+        transition: background 0.2s ease;
+      }
+
+      .stepper__seg.is-done {
+        background: rgba(31, 45, 137, 0.4);
+      }
+
+      .stepper__seg.is-current {
+        background: var(--exam-blue);
+      }
+
+      .onboarding__secondary {
+        color: var(--muted);
+        font-size: 0.9rem;
+        font-weight: 700;
+        margin: 0;
+        text-align: center;
+      }
+
+      .linklike {
+        appearance: none;
+        background: none;
+        border: 0;
+        color: var(--exam-blue);
+        cursor: pointer;
+        font: inherit;
+        font-weight: 900;
+        padding: 4px 2px;
+        text-decoration: underline;
+      }
+
+      .onboarding__note {
+        text-align: center;
+      }
+
+      .login-secondary {
+        color: var(--muted);
+        font-size: 0.9rem;
+        font-weight: 700;
+        margin: 8px 0 0;
+        text-align: center;
+      }
+
+      /* When onboarding is active, remove shell chrome + page chrome distractions */
+      body.is-onboarding .paligo-sidebar,
+      body.is-onboarding .paligo-topbar {
+        display: none !important;
+      }
+
+      body.is-onboarding .paligo-main {
+        margin-inline-start: 0 !important;
+      }
+
+      body.is-onboarding .tab-row,
+      body.is-onboarding [data-api-status],
+      body.is-onboarding .account-banner,
+      body.is-onboarding .account-title,
+      body.is-onboarding .account-subtitle {
+        display: none !important;
+      }
+
+      body.is-onboarding .account-shell {
+        max-width: 520px;
+      }
     </style>
   </head>
   <body>
@@ -241,7 +517,7 @@
       <section class="account-card">
         <h1 class="account-title">บัญชี Inbox</h1>
         <p class="account-subtitle">สมัคร · เข้าสู่ระบบ · จับคู่ครู–นักเรียน</p>
-        <p class="hint" data-api-status>กำลังตรวจสอบ…</p>
+        <p class="hint" data-api-status hidden>กำลังตรวจสอบ…</p>
 
         <div class="account-banner" data-account-banner hidden>
           <p class="account-banner__title" data-account-banner-title>เข้าสู่ระบบแล้ว</p>
@@ -279,40 +555,111 @@
             <button class="button is-primary" type="submit">เข้าสู่ระบบ</button>
           </form>
           <p class="hint">ช่วงทดสอบ: ระบบจำอีเมลและ PIN ในเบราว์เซอร์นี้</p>
+          <p class="login-secondary">ยังไม่มีบัญชี? <button type="button" class="linklike" data-goto-register>สมัครใช้งาน</button></p>
         </div>
 
         <div class="panel" data-panel="register" hidden>
-          <form class="field-grid" data-register-form>
-            <label>
-              บทบาท
-              <select name="role" required>
-                <option value="student">นักเรียน</option>
-                <option value="reviewer">ครู/ผู้ตรวจ</option>
-              </select>
-            </label>
-            <label>
-              ชื่อแสดง
-              <input name="displayName" required minlength="2" placeholder="ชื่อที่แสดงในแอป" />
-            </label>
-            <label>
-              อีเมล (ไม่บังคับ)
-              <input name="email" type="email" placeholder="ใช้แทนรหัสผู้ใช้ได้" />
-            </label>
-            <label>
-              PIN (ตัวเลข 6 หลักขึ้นไป)
-              <input
-                name="pin"
-                inputmode="numeric"
-                autocomplete="new-password"
-                required
-                minlength="6"
-                pattern="[0-9]{6,}"
-                title="ใส่ตัวเลข 6 หลักขึ้นไป"
-              />
-            </label>
-            <button class="button is-primary" type="submit">สมัครบัญชี</button>
-          </form>
-          <p class="hint">หลังสมัคร ระบบจะแสดง User ID — เก็บไว้ถ้าไม่ได้ใส่อีเมล</p>
+          <div class="onboarding" data-onboarding>
+            <div class="onboarding__mascot" data-onboarding-mascot aria-hidden="true">
+              <span class="onboarding__mascot-fallback">ปา</span>
+            </div>
+            <div class="onboarding__intro">
+              <h1 class="onboarding__title">สมัครใช้งาน Paligo</h1>
+              <p class="onboarding__lead">ตอบไม่กี่ข้อ แล้วเริ่มใช้งานได้เลย</p>
+            </div>
+            <ol class="stepper" data-wizard-stepper aria-label="ความคืบหน้าการสมัคร"></ol>
+          <div class="register-wizard" data-register-wizard>
+            <p class="register-wizard__progress sr-only" data-wizard-progress aria-live="polite">ขั้นตอน 1 จาก 4</p>
+            <p class="register-wizard__error" data-wizard-error hidden></p>
+
+            <section class="register-wizard__step" data-wizard-step="role">
+              <h2 class="register-wizard__heading" tabindex="-1" data-wizard-focus>เลือกบทบาท</h2>
+              <p class="register-wizard__lead">คุณจะใช้ Paligo ในฐานะใด</p>
+              <div class="wizard-option-grid wizard-option-grid--two" data-wizard-role-tiles></div>
+            </section>
+
+            <section class="register-wizard__step" data-wizard-step="student" hidden>
+              <h2 class="register-wizard__heading" tabindex="-1" data-wizard-focus>ข้อมูลนักเรียน</h2>
+              <p class="register-wizard__lead">ใช้แสดงบนหน้าปกสมุดและโปรไฟล์</p>
+              <div class="field-grid">
+                <div>
+                  <span class="hint" style="display: block; margin-bottom: 6px">คำนำหน้า</span>
+                  <div class="wizard-option-grid" data-wizard-prefix-tiles></div>
+                </div>
+                <label>
+                  ชื่อ
+                  <input name="firstName" data-wizard-first-name autocomplete="given-name" />
+                </label>
+                <label>
+                  นามสกุล (ไม่บังคับ)
+                  <input name="lastName" data-wizard-last-name autocomplete="family-name" />
+                </label>
+                <label>
+                  ฉายา (ไม่บังคับ)
+                  <input name="monasticName" data-wizard-monastic-name />
+                </label>
+                <label>
+                  ชั้น ป.ธ.
+                  <select name="grade" data-wizard-grade></select>
+                </label>
+              </div>
+            </section>
+
+            <section class="register-wizard__step" data-wizard-step="reviewer-status" hidden>
+              <h2 class="register-wizard__heading" tabindex="-1" data-wizard-focus>สถานะโปรไฟล์</h2>
+              <p class="register-wizard__lead">เลือกสถานะที่ตรงกับท่าน</p>
+              <div class="wizard-option-grid" data-wizard-status-tiles></div>
+            </section>
+
+            <section class="register-wizard__step" data-wizard-step="reviewer-capability" hidden>
+              <h2 class="register-wizard__heading" tabindex="-1" data-wizard-focus>หน้าที่ในระบบ</h2>
+              <p class="register-wizard__lead">ท่านจะใช้ Paligo เพื่ออะไร</p>
+              <div class="wizard-option-grid" data-wizard-capability-tiles></div>
+            </section>
+
+            <section class="register-wizard__step" data-wizard-step="account" hidden>
+              <h2 class="register-wizard__heading" tabindex="-1" data-wizard-focus>บัญชีเข้าใช้งาน</h2>
+              <p class="register-wizard__lead">ตั้งชื่อแสดง อีเมล (ถ้ามี) และ PIN</p>
+              <div class="field-grid">
+                <label>
+                  ชื่อแสดง
+                  <input name="displayName" data-wizard-display-name required minlength="2" placeholder="ชื่อที่แสดงในแอป" />
+                </label>
+                <label>
+                  อีเมล (ไม่บังคับ)
+                  <input name="email" type="email" data-wizard-email placeholder="ใช้แทนรหัสผู้ใช้ได้" />
+                </label>
+                <label>
+                  PIN (ตัวเลข 6 หลักขึ้นไป)
+                  <input
+                    name="pin"
+                    data-wizard-pin
+                    inputmode="numeric"
+                    autocomplete="new-password"
+                    required
+                    minlength="6"
+                    pattern="[0-9]{6,}"
+                    title="ใส่ตัวเลข 6 หลักขึ้นไป"
+                  />
+                </label>
+              </div>
+            </section>
+
+            <section class="register-wizard__step" data-wizard-step="review" hidden>
+              <h2 class="register-wizard__heading" tabindex="-1" data-wizard-focus>ตรวจสอบก่อนสมัคร</h2>
+              <p class="register-wizard__lead">ยืนยันข้อมูลด้านล่างก่อนกดสมัคร</p>
+              <dl class="register-wizard__summary" data-wizard-summary></dl>
+            </section>
+
+            <div class="register-wizard__nav">
+              <button class="button" type="button" data-wizard-back hidden>ย้อนกลับ</button>
+              <button class="button is-primary" type="button" data-wizard-next>ต่อไป</button>
+              <button class="button is-primary" type="button" data-wizard-submit hidden>สมัครบัญชี</button>
+            </div>
+          </div>
+            <p class="hint onboarding__note">หลังสมัคร ระบบจะแสดง User ID — เก็บไว้ถ้าไม่ได้ใส่อีเมล</p>
+            <p class="onboarding__secondary">มีบัญชีแล้ว? <button type="button" class="linklike" data-goto-login>เข้าสู่ระบบ</button></p>
+          </div>
         </div>
 
         <div class="panel" data-panel="pairing" hidden>
@@ -361,6 +708,7 @@
     <script src="paligo-inbox-client.js"></script>
     <script src="paligo-platform.js"></script>
     <script src="paligo-exam-shared.js"></script>
+    <script src="paligo-profile.js"></script>
     <script src="paligo-nav-config.js"></script>
     <script src="sidebar-nav.js"></script>
     <script>
@@ -391,7 +739,8 @@
       const accountPrimaryLink = document.querySelector("[data-account-primary-link]");
       const accountProfileLink = document.querySelector("[data-account-profile-link]");
 
-      const returnPath = new URLSearchParams(window.location.search).get("return");
+      const searchParams = new URLSearchParams(window.location.search);
+      const returnPath = searchParams.get("return");
 
       const roleLabels = {
         student: "นักเรียน",
@@ -400,7 +749,329 @@
 
       const TEST_CREDS_KEY = "paligo-inbox-test-credentials-v1";
       const loginForm = document.querySelector("[data-login-form]");
-      const registerForm = document.querySelector("[data-register-form]");
+      const registerWizard = document.querySelector("[data-register-wizard]");
+
+      const wizardEls = {
+        progress: registerWizard?.querySelector("[data-wizard-progress]"),
+        stepper: document.querySelector("[data-wizard-stepper]"),
+        error: registerWizard?.querySelector("[data-wizard-error]"),
+        back: registerWizard?.querySelector("[data-wizard-back]"),
+        next: registerWizard?.querySelector("[data-wizard-next]"),
+        submit: registerWizard?.querySelector("[data-wizard-submit]"),
+        summary: registerWizard?.querySelector("[data-wizard-summary]"),
+        roleTiles: registerWizard?.querySelector("[data-wizard-role-tiles]"),
+        prefixTiles: registerWizard?.querySelector("[data-wizard-prefix-tiles]"),
+        statusTiles: registerWizard?.querySelector("[data-wizard-status-tiles]"),
+        capabilityTiles: registerWizard?.querySelector("[data-wizard-capability-tiles]"),
+        firstName: registerWizard?.querySelector("[data-wizard-first-name]"),
+        lastName: registerWizard?.querySelector("[data-wizard-last-name]"),
+        monasticName: registerWizard?.querySelector("[data-wizard-monastic-name]"),
+        grade: registerWizard?.querySelector("[data-wizard-grade]"),
+        displayName: registerWizard?.querySelector("[data-wizard-display-name]"),
+        email: registerWizard?.querySelector("[data-wizard-email]"),
+        pin: registerWizard?.querySelector("[data-wizard-pin]"),
+        steps: registerWizard ? [...registerWizard.querySelectorAll("[data-wizard-step]")] : [],
+      };
+
+      const wizardState = {
+        role: "",
+        prefix: "",
+        firstName: "",
+        lastName: "",
+        monasticName: "",
+        grade: "4",
+        profileStatus: "",
+        capability: "",
+        displayName: "",
+        email: "",
+        pin: "",
+      };
+
+      let wizardStepIndex = 0;
+
+      const syncWizardStateFromInputs = () => {
+        if (!registerWizard) return;
+        wizardState.firstName = wizardEls.firstName?.value || "";
+        wizardState.lastName = wizardEls.lastName?.value || "";
+        wizardState.monasticName = wizardEls.monasticName?.value || "";
+        wizardState.grade = wizardEls.grade?.value || wizardState.grade;
+        wizardState.displayName = wizardEls.displayName?.value || "";
+        wizardState.email = wizardEls.email?.value || "";
+        wizardState.pin = wizardEls.pin?.value || "";
+      };
+
+      const suggestWizardDisplayName = () => {
+        if (wizardState.role === "student") {
+          const parts = [wizardState.prefix, wizardState.firstName].filter(Boolean);
+          return parts.join(" ").trim();
+        }
+        return wizardState.displayName;
+      };
+
+      const maybeAutofillDisplayName = () => {
+        if (!wizardEls.displayName) return;
+        const current = wizardEls.displayName.value.trim();
+        const suggested = suggestWizardDisplayName();
+        if (!current && suggested) {
+          wizardEls.displayName.value = suggested;
+          wizardState.displayName = suggested;
+        }
+      };
+
+      const getWizardStepIds = () => PaligoProfile.getRegisterWizardSteps(wizardState.role || "student");
+
+      const getCurrentWizardStepId = () => getWizardStepIds()[wizardStepIndex] || "role";
+
+      const showWizardError = (message) => {
+        if (!wizardEls.error) return;
+        if (!message) {
+          wizardEls.error.hidden = true;
+          wizardEls.error.textContent = "";
+          return;
+        }
+        wizardEls.error.hidden = false;
+        wizardEls.error.textContent = message;
+      };
+
+      const renderWizardSummary = () => {
+        if (!wizardEls.summary) return;
+        wizardEls.summary.replaceChildren();
+        const rows = [];
+        rows.push(["บทบาท", roleLabels[wizardState.role] || wizardState.role]);
+        if (wizardState.role === "student") {
+          const gradeLabel =
+            PaligoProfile.GRADE_OPTIONS.find((item) => item.value === wizardState.grade)?.label ||
+            wizardState.grade;
+          rows.push(["ชื่อ", [wizardState.prefix, wizardState.firstName, wizardState.lastName].filter(Boolean).join(" ")]);
+          if (wizardState.monasticName) rows.push(["ฉายา", wizardState.monasticName]);
+          rows.push(["ชั้น ป.ธ.", gradeLabel]);
+        } else {
+          rows.push(["โปรไฟล์", PaligoProfile.formatRegisterWizardSummary(wizardState)]);
+        }
+        rows.push(["ชื่อแสดง", wizardState.displayName]);
+        rows.push(["อีเมล", wizardState.email || "—"]);
+        rows.push(["PIN", wizardState.pin ? "•".repeat(Math.min(wizardState.pin.length, 8)) : "—"]);
+        rows.forEach(([label, value]) => {
+          const dt = document.createElement("dt");
+          dt.textContent = label;
+          const dd = document.createElement("dd");
+          dd.textContent = value;
+          wizardEls.summary.append(dt, dd);
+        });
+      };
+
+      const renderWizardStepper = (total, currentIndex) => {
+        if (!wizardEls.stepper) return;
+        wizardEls.stepper.replaceChildren();
+        for (let i = 0; i < total; i += 1) {
+          const seg = document.createElement("li");
+          seg.className = "stepper__seg";
+          if (i < currentIndex) seg.classList.add("is-done");
+          if (i === currentIndex) seg.classList.add("is-current");
+          const label = document.createElement("span");
+          label.className = "sr-only";
+          label.textContent = `ขั้นตอน ${i + 1} จาก ${total}`;
+          seg.append(label);
+          wizardEls.stepper.append(seg);
+        }
+      };
+
+      const paintWizardStep = () => {
+        if (!registerWizard) return;
+        syncWizardStateFromInputs();
+        const stepIds = getWizardStepIds();
+        const stepId = stepIds[wizardStepIndex] || "role";
+        const total = stepIds.length;
+        if (wizardEls.progress) {
+          if (!wizardState.role && stepId === "role") {
+            wizardEls.progress.textContent = "ขั้นตอน 1 — เลือกบทบาท";
+          } else {
+            wizardEls.progress.textContent = `ขั้นตอน ${wizardStepIndex + 1} จาก ${total}`;
+          }
+        }
+        renderWizardStepper(total, wizardStepIndex);
+        wizardEls.steps.forEach((section) => {
+          section.hidden = section.dataset.wizardStep !== stepId;
+        });
+        const active = registerWizard.querySelector(`[data-wizard-step="${stepId}"]`);
+        active?.querySelector("[data-wizard-focus]")?.focus({ preventScroll: true });
+
+        if (wizardEls.back) wizardEls.back.hidden = wizardStepIndex === 0;
+        if (wizardEls.next) wizardEls.next.hidden = stepId === "review";
+        if (wizardEls.submit) wizardEls.submit.hidden = stepId !== "review";
+
+        if (stepId === "account") maybeAutofillDisplayName();
+        if (stepId === "review") renderWizardSummary();
+        showWizardError("");
+      };
+
+      const initRegisterWizard = () => {
+        if (!registerWizard) return;
+
+        PaligoProfile.GRADE_OPTIONS.forEach((item) => {
+          const option = document.createElement("option");
+          option.value = item.value;
+          option.textContent = item.label;
+          wizardEls.grade?.append(option);
+        });
+        wizardEls.grade.value = wizardState.grade;
+
+        PaligoProfile.mountOptionTiles({
+          container: wizardEls.roleTiles,
+          options: PaligoProfile.REGISTER_ROLE_OPTIONS,
+          value: wizardState.role,
+          onChange: (value) => {
+            const prevRole = wizardState.role;
+            wizardState.role = value;
+            if (value === "student" && !wizardState.prefix) {
+              wizardState.prefix = "พระ";
+            }
+            if (value === "reviewer") {
+              if (!wizardState.profileStatus) wizardState.profileStatus = "monk_teacher";
+              if (!wizardState.capability) wizardState.capability = "teach_review";
+            }
+            if (prevRole && prevRole !== value) {
+              wizardStepIndex = 0;
+            }
+            PaligoProfile.mountPrefixTiles({
+              container: wizardEls.prefixTiles,
+              value: wizardState.prefix,
+              onChange: (prefixValue) => {
+                wizardState.prefix = prefixValue;
+                const inferred = PaligoProfile.inferProfileStatusFromPrefix(prefixValue);
+                if (inferred) wizardState.profileStatus = inferred;
+              },
+            });
+            PaligoProfile.mountOptionTiles({
+              container: wizardEls.statusTiles,
+              options: PaligoProfile.REVIEWER_PROFILE_STATUS_OPTIONS,
+              value: wizardState.profileStatus,
+              onChange: (statusValue) => {
+                wizardState.profileStatus = statusValue;
+                wizardState.prefix =
+                  PaligoProfile.inferPrefixFromProfileStatus(statusValue) || wizardState.prefix;
+              },
+              groupLabel: "สถานะโปรไฟล์",
+            });
+            PaligoProfile.mountOptionTiles({
+              container: wizardEls.capabilityTiles,
+              options: PaligoProfile.REVIEWER_CAPABILITY_WIZARD_OPTIONS,
+              value: wizardState.capability,
+              onChange: (capValue) => {
+                wizardState.capability = capValue;
+              },
+              groupLabel: "หน้าที่ในระบบ",
+            });
+            paintWizardStep();
+          },
+          groupLabel: "บทบาท",
+        });
+
+        PaligoProfile.mountPrefixTiles({
+          container: wizardEls.prefixTiles,
+          value: wizardState.prefix,
+          onChange: (value) => {
+            wizardState.prefix = value;
+            const inferred = PaligoProfile.inferProfileStatusFromPrefix(value);
+            if (inferred) wizardState.profileStatus = inferred;
+          },
+        });
+
+        PaligoProfile.mountOptionTiles({
+          container: wizardEls.statusTiles,
+          options: PaligoProfile.REVIEWER_PROFILE_STATUS_OPTIONS,
+          value: wizardState.profileStatus,
+          onChange: (value) => {
+            wizardState.profileStatus = value;
+            wizardState.prefix = PaligoProfile.inferPrefixFromProfileStatus(value) || wizardState.prefix;
+          },
+          groupLabel: "สถานะโปรไฟล์",
+        });
+
+        PaligoProfile.mountOptionTiles({
+          container: wizardEls.capabilityTiles,
+          options: PaligoProfile.REVIEWER_CAPABILITY_WIZARD_OPTIONS,
+          value: wizardState.capability,
+          onChange: (value) => {
+            wizardState.capability = value;
+          },
+          groupLabel: "หน้าที่ในระบบ",
+        });
+
+        registerWizard.querySelectorAll("input, select").forEach((input) => {
+          input.addEventListener("input", syncWizardStateFromInputs);
+          input.addEventListener("change", syncWizardStateFromInputs);
+        });
+
+        wizardEls.back?.addEventListener("click", () => {
+          if (wizardStepIndex > 0) {
+            wizardStepIndex -= 1;
+            paintWizardStep();
+          }
+        });
+
+        wizardEls.next?.addEventListener("click", () => {
+          syncWizardStateFromInputs();
+          const stepId = getCurrentWizardStepId();
+          const error = PaligoProfile.validateRegisterWizardStep(stepId, wizardState);
+          if (error) {
+            showWizardError(error);
+            return;
+          }
+          const stepIds = getWizardStepIds();
+          if (wizardStepIndex < stepIds.length - 1) {
+            wizardStepIndex += 1;
+            paintWizardStep();
+          }
+        });
+
+        wizardEls.submit?.addEventListener("click", async () => {
+          syncWizardStateFromInputs();
+          const error = PaligoProfile.validateRegisterWizardStep("account", wizardState);
+          if (error) {
+            showWizardError(error);
+            return;
+          }
+          try {
+            const role = wizardState.role;
+            const profileJson = PaligoProfile.buildProfileJsonFromRegisterWizard(wizardState);
+            if (role === "student") {
+              PaligoProfile.saveLocalProfile("student", profileJson);
+            } else if (role === "reviewer") {
+              PaligoProfile.saveLocalProfile("reviewer", profileJson);
+            }
+            saveTestCredentials({
+              role,
+              displayName: wizardState.displayName,
+              email: wizardState.email,
+              pin: wizardState.pin,
+            });
+            const payload = await PaligoInboxClient.register({
+              role,
+              displayName: wizardState.displayName.trim(),
+              email: wizardState.email.trim() || null,
+              pin: wizardState.pin,
+              profileJson,
+            });
+            await refreshAccountSession();
+            if (redirectAfterAuth()) return;
+            activateTab("me");
+            showStatus(
+              `สมัครสำเร็จ\nชื่อ: ${payload.user.displayName}\nUser ID: ${payload.user.id}\nบทบาท: ${roleLabels[payload.user.role] || payload.user.role}\n\nเก็บ User ID ไว้ถ้าไม่ได้ใส่อีเมล`
+            );
+          } catch (registerError) {
+            showStatus(registerError.message || "สมัครไม่สำเร็จ", true);
+          }
+        });
+
+        const saved = loadTestCredentials();
+        if (saved.displayName) wizardEls.displayName.value = saved.displayName;
+        if (saved.email) wizardEls.email.value = saved.email;
+        if (saved.pin) wizardEls.pin.value = saved.pin;
+        if (saved.role) wizardState.role = saved.role;
+        syncWizardStateFromInputs();
+        paintWizardStep();
+      };
 
       function loadTestCredentials() {
         try {
@@ -434,12 +1105,6 @@
           if (saved.email) loginForm.elements.email.value = saved.email;
           if (saved.pin) loginForm.elements.pin.value = saved.pin;
         }
-        if (registerForm) {
-          if (saved.role) registerForm.elements.role.value = saved.role;
-          if (saved.displayName) registerForm.elements.displayName.value = saved.displayName;
-          if (saved.email) registerForm.elements.email.value = saved.email;
-          if (saved.pin) registerForm.elements.pin.value = saved.pin;
-        }
       }
 
       function persistTestCredentialsFromForm(form) {
@@ -454,7 +1119,7 @@
 
       applyTestCredentialsToForms();
       wireTestCredentialPersistence(loginForm);
-      wireTestCredentialPersistence(registerForm);
+      initRegisterWizard();
 
       const advBookList = document.querySelector("[data-adv-book-list]");
       const getBooks = () => getList(KEYS.books);
@@ -610,12 +1275,99 @@
         panels.forEach((panel) => {
           panel.hidden = panel.dataset.panel !== name;
         });
+        setOnboardingMode(name === "register");
+      }
+
+      function setOnboardingMode(active) {
+        // Shell stays mounted (nav rule) but its chrome is hidden via CSS so it never
+        // distracts the wizard. We avoid touching the persisted collapse preference.
+        document.body.classList.toggle("is-onboarding", active);
+        if (active) {
+          window.scrollTo({ top: 0 });
+          loadOnboardingMascot();
+        }
+      }
+
+      let mascotRequested = false;
+      function loadOnboardingMascot() {
+        if (mascotRequested) return;
+        mascotRequested = true;
+        const slot = document.querySelector("[data-onboarding-mascot]");
+        if (!slot) return;
+        // Prepare 512px mascot slot for the future without ever showing a broken image:
+        // probe the asset off-DOM and only swap in once it decodes successfully.
+        const probe = new Image();
+        probe.decoding = "async";
+        probe.onload = () => {
+          const img = document.createElement("img");
+          img.src = probe.src;
+          img.width = 512;
+          img.height = 512;
+          img.alt = "";
+          slot.replaceChildren(img);
+        };
+        probe.onerror = () => {
+          /* no asset yet — keep the tasteful placeholder, no broken image */
+        };
+        probe.src = "assets/paligo-mascot-512.png";
       }
 
       function showStatus(message, isError = false) {
         statusEl.hidden = false;
         statusEl.textContent = message;
         statusEl.classList.toggle("is-error", isError);
+      }
+
+      function renderApiStatusBox({ title, message, tone = "info", action = true } = {}) {
+        const apiStatus = document.querySelector("[data-api-status]");
+        if (!apiStatus) return;
+        const diag = getAccountApiDiagnostics();
+        const apiBase = diag.apiBase;
+        apiStatus.hidden = false;
+        apiStatus.classList.toggle("is-error", tone === "error");
+        apiStatus.innerHTML = "";
+
+        const box = document.createElement("div");
+        box.className = "api-status";
+        const titleEl = document.createElement("div");
+        titleEl.className = "api-status__title";
+        titleEl.textContent = title || "สถานะ API";
+        const messageEl = document.createElement("div");
+        messageEl.textContent = message || "";
+        const metaEl = document.createElement("div");
+        metaEl.className = "api-status__meta";
+        metaEl.textContent = `API endpoint: ${apiBase}`;
+        box.append(titleEl, messageEl, metaEl);
+
+        if (action) {
+          const actions = document.createElement("div");
+          actions.className = "api-status__actions";
+          const retry = document.createElement("button");
+          retry.className = "button";
+          retry.type = "button";
+          retry.textContent = "ลองเชื่อมต่ออีกครั้ง";
+          retry.addEventListener("click", bootApiStatus);
+          actions.append(retry);
+          box.append(actions);
+        }
+
+        apiStatus.append(box);
+      }
+
+      function getAccountApiDiagnostics() {
+        const host = window.location.hostname || "";
+        const isLocal = host === "localhost" || host === "127.0.0.1";
+        const isPages = host === "app.paligo.jp" || /\.pages\.dev$/i.test(host);
+        const fromClient = PaligoInboxClient.getApiDiagnostics?.() || {};
+        const fallbackBase = isLocal ? "http://localhost:8788/v1" : "https://api.paligo.jp/v1";
+        return {
+          ...fromClient,
+          host: fromClient.host || host,
+          isLocal: Boolean(fromClient.isLocal ?? isLocal),
+          isPages: Boolean(fromClient.isPages ?? isPages),
+          apiBase: fromClient.apiBase || PaligoInboxClient.getApiBase?.() || window.PALIGO_CONFIG?.apiBase || fallbackBase,
+          localCommand: fromClient.localCommand || "cd workers && npm run dev",
+        };
       }
 
       function renderLoggedInBanner(session) {
@@ -680,6 +1432,15 @@
         });
       });
 
+      document.querySelector("[data-goto-login]")?.addEventListener("click", () => {
+        activateTab("login");
+        loginForm?.querySelector("input")?.focus({ preventScroll: true });
+      });
+
+      document.querySelector("[data-goto-register]")?.addEventListener("click", () => {
+        activateTab("register");
+      });
+
       function redirectAfterAuth() {
         if (!returnPath || returnPath.includes("://")) return false;
         const safe = returnPath.split("?")[0];
@@ -705,29 +1466,6 @@
           showStatus(`เข้าสู่ระบบแล้ว: ${payload.user.displayName} (${roleLabels[payload.user.role] || payload.user.role})`);
         } catch (error) {
           showStatus(error.message || "เข้าสู่ระบบไม่สำเร็จ", true);
-        }
-      });
-
-      document.querySelector("[data-register-form]").addEventListener("submit", async (event) => {
-        event.preventDefault();
-        const form = event.currentTarget;
-        const data = new FormData(form);
-        persistTestCredentialsFromForm(form);
-        try {
-          const payload = await PaligoInboxClient.register({
-            role: String(data.get("role")),
-            displayName: String(data.get("displayName") || "").trim(),
-            email: String(data.get("email") || "").trim() || null,
-            pin: String(data.get("pin") || ""),
-          });
-          await refreshAccountSession();
-          if (redirectAfterAuth()) return;
-          activateTab("me");
-          showStatus(
-            `สมัครสำเร็จ\nชื่อ: ${payload.user.displayName}\nUser ID: ${payload.user.id}\nบทบาท: ${roleLabels[payload.user.role] || payload.user.role}\n\nเก็บ User ID ไว้ถ้าไม่ได้ใส่อีเมล`
-          );
-        } catch (error) {
-          showStatus(error.message || "สมัครไม่สำเร็จ", true);
         }
       });
 
@@ -776,11 +1514,31 @@
 
       PaligoSidebar.autoInit();
 
-      const apiStatus = document.querySelector("[data-api-status]");
-      if (apiStatus) {
+      // Deep-link straight into focused onboarding (?mode=register)
+      const wantsRegister = searchParams.get("mode") === "register" || searchParams.has("register");
+      if (wantsRegister && !PaligoInboxClient.getSession?.()?.user) {
+        activateTab("register");
+      }
+
+      async function bootApiStatus() {
+        const apiStatus = document.querySelector("[data-api-status]");
+        if (!apiStatus) return;
+        renderApiStatusBox({
+          title: "กำลังเชื่อมต่อ Inbox API",
+          message: "กำลังตรวจสอบ endpoint สำหรับ local หรือ Cloudflare Pages",
+          action: false,
+        });
         PaligoInboxClient.ensureApiReady()
           .then(async (base) => {
-            apiStatus.textContent = `API พร้อม: ${base}`;
+            renderApiStatusBox({
+              title: "เชื่อมต่อ Inbox API แล้ว",
+              message: "บัญชีและการจับคู่พร้อมใช้งาน",
+              tone: "info",
+              action: false,
+            });
+            window.setTimeout(() => {
+              apiStatus.hidden = true;
+            }, 1400);
             const session = await refreshAccountSession();
             if (session?.user) {
               activateTab("me");
@@ -788,24 +1546,26 @@
             await PaligoPlatform?.boot?.({ user: session?.user });
           })
           .catch(async (error) => {
-            apiStatus.textContent = `ออฟไลน์ — เครื่องมือโอนไฟล์ในเครื่องยังใช้ได้`;
-            apiStatus.style.color = "#9a3412";
-            // ออฟไลน์: เปิดทางเข้าเครื่องมือ import/export ในเครื่องเป็นทางสำรอง
+            const diag = getAccountApiDiagnostics();
+            const message = diag.isLocal
+              ? `ออฟไลน์ — เปิด local static ได้ แต่ login/register ต้องรัน API ก่อน: ${diag.localCommand}`
+              : `ออฟไลน์ — หน้าเว็บโหลดได้ แต่ login/register ต้องเชื่อมต่อ Workers API ที่ ${diag.apiBase}`;
+            renderApiStatusBox({
+              title: "ยังเชื่อมต่อ Inbox API ไม่ได้",
+              message,
+              tone: "error",
+            });
             const cachedUser = PaligoInboxClient.getSession?.()?.user || null;
             if (cachedUser) renderLoggedInBanner({ user: cachedUser });
             try {
               await PaligoPlatform?.boot?.({ user: cachedUser, offline: true });
             } catch {
-              // fallback สุดท้าย — เผยแท็บโอนไฟล์แม้ platform boot ล้มเหลว
-              document
-                .querySelectorAll("[data-paligo-import-export], [data-paligo-import-export-tab]")
-                .forEach((node) => {
-                  node.hidden = false;
-                  node.setAttribute("aria-hidden", "false");
-                });
+              /* ไม่เผยแท็บโอนไฟล์ขั้นสูงแม้ platform boot ล้ม (#78) */
             }
           });
       }
+
+      bootApiStatus();
     </script>
   </body>
 </html>

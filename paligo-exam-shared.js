@@ -12,6 +12,21 @@
     studentProfile: "paligo-exam-student-profile-v1",
     reviewerProfile: "paligo-exam-reviewer-profile-v1",
     reviewerSignature: "paligo-exam-reviewer-signature-v1",
+    reviewWorkflow: "paligo-exam-review-workflow-v1",
+  };
+
+  const REVIEW_WORKFLOW_PHASE = {
+    waitingReview: "waiting_review",
+    inReview: "in_review",
+    reviewedReady: "reviewed_ready",
+    returned: "returned",
+  };
+
+  const REVIEW_WORKFLOW_LABELS = {
+    waiting_review: "รอตรวจ",
+    in_review: "กำลังตรวจ",
+    reviewed_ready: "รอส่งคืน",
+    returned: "ส่งคืนแล้ว",
   };
 
   const BOOK_STATUS = {
@@ -302,13 +317,20 @@
   }
 
   function saveReviewerProfile(profile) {
+    const normalized =
+      typeof window !== "undefined" && window.PaligoProfile?.normalizeReviewerProfile
+        ? window.PaligoProfile.normalizeReviewerProfile(profile)
+        : profile;
     const payload = {
-      prefix: String(profile?.prefix || "").trim(),
-      name: String(profile?.name || "").trim(),
-      institution: String(profile?.institution || "").trim(),
-      role: profile?.role || "teacher-reviewer",
-      displayAlias: String(profile?.displayAlias || "").trim(),
-      avatarUrl: normalizeAvatarUrl(profile?.avatarUrl),
+      prefix: String(normalized?.prefix || "").trim(),
+      name: String(normalized?.name || "").trim(),
+      institution: String(normalized?.institution || "").trim(),
+      profileStatus: normalized?.profileStatus || "monk_teacher",
+      capability: normalized?.capability || "teach_review",
+      role: normalized?.role || "teacher-reviewer",
+      reviewAvailability: normalized?.reviewAvailability || null,
+      displayAlias: String(normalized?.displayAlias || "").trim(),
+      avatarUrl: normalizeAvatarUrl(normalized?.avatarUrl),
       updatedAt: new Date().toISOString(),
     };
     writeRaw(KEYS.reviewerProfile, JSON.stringify(payload));
@@ -362,13 +384,6 @@
 
     if (changed) setList(KEYS.submissions, submissions);
     return submissions;
-  }
-
-  function listActiveSubmissions() {
-    syncReviewQueueFromBooks();
-    return getList(KEYS.submissions)
-      .filter((item) => !item.cancelledAt)
-      .sort((a, b) => new Date(b.submittedAt || 0) - new Date(a.submittedAt || 0));
   }
 
   function getReviewerSignature() {
@@ -549,6 +564,9 @@
       submittedAt,
       updatedAt: submittedAt,
       studentName: profile.studentName.trim(),
+      avatarUrl: normalizeAvatarUrl(profile.avatarUrl),
+      profile: { avatarUrl: normalizeAvatarUrl(profile.avatarUrl) },
+      studentProfile: { ...profile },
     });
 
     return { ok: true, submission, book: getBookById(bookId) };
@@ -652,10 +670,152 @@
     return getList(KEYS.results).find((item) => item.submissionId === submissionId) || null;
   }
 
+  function readReviewWorkflowStore() {
+    try {
+      const parsed = JSON.parse(readRaw(KEYS.reviewWorkflow) || "{}");
+      return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+    } catch {
+      return {};
+    }
+  }
+
+  function writeReviewWorkflowStore(store) {
+    writeRaw(KEYS.reviewWorkflow, JSON.stringify(store || {}));
+  }
+
+  function getReviewWorkflow(submissionId) {
+    if (!submissionId) return null;
+    return readReviewWorkflowStore()[submissionId] || null;
+  }
+
+  function upsertReviewWorkflow(submissionId, patch = {}) {
+    if (!submissionId) return null;
+    const store = readReviewWorkflowStore();
+    const prior = store[submissionId] || {};
+    const now = new Date().toISOString();
+    const next = {
+      schema: "paligo.exam.review-workflow.v1",
+      submissionId,
+      bookId: patch.bookId || prior.bookId || "",
+      phase: patch.phase || prior.phase || REVIEW_WORKFLOW_PHASE.waitingReview,
+      inboxItemId: patch.inboxItemId ?? prior.inboxItemId ?? "",
+      claimedAt: patch.claimedAt ?? prior.claimedAt ?? "",
+      startedAt: patch.startedAt ?? prior.startedAt ?? "",
+      reviewedAt: patch.reviewedAt ?? prior.reviewedAt ?? "",
+      returnedAt: patch.returnedAt ?? prior.returnedAt ?? "",
+      updatedAt: now,
+      ...patch,
+      submissionId,
+      schema: "paligo.exam.review-workflow.v1",
+      updatedAt: now,
+    };
+    store[submissionId] = next;
+    writeReviewWorkflowStore(store);
+    return next;
+  }
+
+  function inferWorkflowPhase(submissionId) {
+    const saved = getReviewWorkflow(submissionId);
+    if (saved?.phase) return saved.phase;
+
+    const submission = getList(KEYS.submissions).find((item) => item.id === submissionId);
+    if (!submission) return null;
+
+    const book = submission.bookId ? getBookById(submission.bookId) : null;
+    const bookStatus = normalizeBookStatus(book?.status);
+    const hasSavedReview = Boolean(getSavedReviewForSubmission(submissionId));
+
+    if (bookStatus === BOOK_STATUS.reviewed || book?.review) {
+      return REVIEW_WORKFLOW_PHASE.returned;
+    }
+    if (hasSavedReview) {
+      return REVIEW_WORKFLOW_PHASE.reviewedReady;
+    }
+    if (bookStatus === BOOK_STATUS.underReview) {
+      return REVIEW_WORKFLOW_PHASE.waitingReview;
+    }
+    return REVIEW_WORKFLOW_PHASE.waitingReview;
+  }
+
+  function resolveReviewWorkflow(submissionId, submission = null) {
+    const stored = getReviewWorkflow(submissionId);
+    if (stored) return stored;
+    const sub =
+      submission || getList(KEYS.submissions).find((item) => item.id === submissionId) || null;
+    const phase = inferWorkflowPhase(submissionId);
+    if (!phase || !sub) return null;
+    return upsertReviewWorkflow(submissionId, {
+      bookId: sub.bookId || "",
+      phase,
+      claimedAt: sub.submittedAt || "",
+    });
+  }
+
+  function markWorkflowClaimed(submissionId, meta = {}) {
+    const now = new Date().toISOString();
+    return upsertReviewWorkflow(submissionId, {
+      bookId: meta.bookId || "",
+      inboxItemId: meta.inboxItemId || "",
+      phase: REVIEW_WORKFLOW_PHASE.inReview,
+      claimedAt: now,
+      startedAt: now,
+    });
+  }
+
+  function markWorkflowInReview(submissionId, meta = {}) {
+    const prior = getReviewWorkflow(submissionId);
+    const now = new Date().toISOString();
+    return upsertReviewWorkflow(submissionId, {
+      bookId: meta.bookId || prior?.bookId || "",
+      phase: REVIEW_WORKFLOW_PHASE.inReview,
+      startedAt: prior?.startedAt || now,
+    });
+  }
+
+  function markWorkflowReviewedReady(submissionId, meta = {}) {
+    const prior = getReviewWorkflow(submissionId);
+    const now = new Date().toISOString();
+    return upsertReviewWorkflow(submissionId, {
+      bookId: meta.bookId || prior?.bookId || "",
+      phase: REVIEW_WORKFLOW_PHASE.reviewedReady,
+      reviewedAt: now,
+    });
+  }
+
+  function markWorkflowReturned(submissionId, meta = {}) {
+    const prior = getReviewWorkflow(submissionId);
+    const now = new Date().toISOString();
+    return upsertReviewWorkflow(submissionId, {
+      bookId: meta.bookId || prior?.bookId || "",
+      phase: REVIEW_WORKFLOW_PHASE.returned,
+      returnedAt: now,
+    });
+  }
+
+  function listReviewerSubmissionsByPhase(phase) {
+    syncReviewQueueFromBooks();
+    const submissions = getList(KEYS.submissions).filter((item) => !item.cancelledAt);
+    return submissions
+      .filter((submission) => resolveReviewWorkflow(submission.id, submission)?.phase === phase)
+      .sort((a, b) => new Date(b.submittedAt || 0) - new Date(a.submittedAt || 0));
+  }
+
+  function listActiveSubmissions() {
+    syncReviewQueueFromBooks();
+    return getList(KEYS.submissions)
+      .filter((item) => {
+        if (item.cancelledAt) return false;
+        const phase = resolveReviewWorkflow(item.id, item)?.phase;
+        return phase !== REVIEW_WORKFLOW_PHASE.returned;
+      })
+      .sort((a, b) => new Date(b.submittedAt || 0) - new Date(a.submittedAt || 0));
+  }
+
   function saveReviewResult(result) {
     const results = getList(KEYS.results).filter((item) => item.submissionId !== result.submissionId);
     results.push(result);
     setList(KEYS.results, results);
+    markWorkflowReviewedReady(result.submissionId, { bookId: result.bookId || "" });
     return result;
   }
 
@@ -708,6 +868,12 @@
       const submissions = getList(KEYS.submissions).filter((item) => item.id !== payload.submission.id);
       submissions.push(payload.submission);
       setList(KEYS.submissions, submissions);
+      if (payload.direction === "to-reviewer") {
+        markWorkflowClaimed(payload.submission.id, {
+          bookId: payload.submission.bookId || payload.book?.id || "",
+          inboxItemId: payload.inboxItemId || "",
+        });
+      }
     }
 
     if (payload.review) {
@@ -974,6 +1140,17 @@
     buildStudentProfileSnapshot,
     resolveReviewerProfileForConsole,
     syncReviewQueueFromBooks,
+    REVIEW_WORKFLOW_PHASE,
+    REVIEW_WORKFLOW_LABELS,
+    getReviewWorkflow,
+    upsertReviewWorkflow,
+    inferWorkflowPhase,
+    resolveReviewWorkflow,
+    markWorkflowClaimed,
+    markWorkflowInReview,
+    markWorkflowReviewedReady,
+    markWorkflowReturned,
+    listReviewerSubmissionsByPhase,
     listActiveSubmissions,
     getReviewerSignature,
     saveReviewerSignature,

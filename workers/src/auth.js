@@ -15,6 +15,13 @@ import {
 import { createSession, deleteSession, getPairingContext, getUserByEmail, getUserByIdWithSecret, getUserBySession, mapUser, updateUserPin, updateUserProfile } from "./db.js";
 import { ensureSuperAdminFlag, SUPER_ADMIN_EMAILS } from "./platform.js";
 import { errorResponse, jsonResponse, parseJsonBody, readBearerToken } from "./http.js";
+import { mergeReviewAvailabilityIntoProfile } from "./review-capacity.js";
+
+function sanitizeProfileJson(role, profileJson) {
+  if (!profileJson || typeof profileJson !== "object") return profileJson;
+  if (role !== "reviewer") return profileJson;
+  return mergeReviewAvailabilityIntoProfile(profileJson);
+}
 
 export async function handleRegister(request, env) {
   const body = await parseJsonBody(request);
@@ -26,6 +33,14 @@ export async function handleRegister(request, env) {
   const displayName = normalizeDisplayName(body.displayName);
   const email = normalizeEmail(body.email);
   const pin = String(body.pin || "");
+
+  let profileJson = null;
+  if (body.profileJson !== undefined && body.profileJson !== null) {
+    if (typeof body.profileJson !== "object") {
+      return errorResponse(request, "invalid_profile", "profileJson ต้องเป็น object", 400);
+    }
+    profileJson = body.profileJson;
+  }
 
   if (!isValidRole(role)) {
     return errorResponse(request, "invalid_role", "role ต้องเป็น student หรือ reviewer", 400);
@@ -48,12 +63,13 @@ export async function handleRegister(request, env) {
   const salt = createSaltHex();
   const passwordHash = await hashPin(pin, salt);
   const isSuperAdmin = email && SUPER_ADMIN_EMAILS.has(email) ? 1 : 0;
+  const storedProfile = profileJson ? sanitizeProfileJson(role, profileJson) : null;
 
   await env.DB.prepare(
-    `INSERT INTO users (id, role, display_name, email, password_hash, password_salt, is_super_admin)
-     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)`
+    `INSERT INTO users (id, role, display_name, email, password_hash, password_salt, is_super_admin, profile_json)
+     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)`
   )
-    .bind(userId, role, displayName, email, passwordHash, salt, isSuperAdmin)
+    .bind(userId, role, displayName, email, passwordHash, salt, isSuperAdmin, storedProfile ? JSON.stringify(storedProfile) : null)
     .run();
 
   await ensureSuperAdminFlag(env.DB, userId, email);
@@ -173,7 +189,7 @@ export async function handlePatchMe(request, env) {
     if (body.profileJson !== null && typeof body.profileJson !== "object") {
       return errorResponse(request, "invalid_profile", "profileJson ต้องเป็น object", 400);
     }
-    patch.profileJson = body.profileJson;
+    patch.profileJson = sanitizeProfileJson(user.role, body.profileJson);
   }
 
   if (!Object.keys(patch).length) {

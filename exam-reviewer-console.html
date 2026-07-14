@@ -50,6 +50,11 @@
         max-width: 1240px;
       }
 
+      [data-paligo-import-export][hidden],
+      [data-paligo-import-export][aria-hidden="true"] {
+        display: none !important;
+      }
+
       .panel {
         background: var(--card-bg);
         border: 1px solid var(--card-border);
@@ -162,6 +167,131 @@
         color: var(--muted);
         font-size: 0.82rem;
         font-weight: 700;
+      }
+
+      .workflow-lifecycle {
+        display: grid;
+        gap: 10px;
+        margin-top: 12px;
+      }
+
+      .workflow-tabs {
+        display: none;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .workflow-tab {
+        align-items: center;
+        appearance: none;
+        background: var(--paper-bg);
+        border: 1px solid rgba(31, 45, 137, 0.2);
+        border-radius: 999px;
+        color: var(--exam-blue);
+        cursor: pointer;
+        display: inline-flex;
+        font: inherit;
+        font-size: 0.78rem;
+        font-weight: 800;
+        gap: 6px;
+        min-height: 36px;
+        padding: 6px 10px;
+      }
+
+      .workflow-tab.is-active {
+        background: rgba(31, 45, 137, 0.1);
+        border-color: var(--exam-blue);
+        box-shadow: 0 0 0 2px rgba(31, 45, 137, 0.12);
+      }
+
+      .workflow-segment {
+        background: var(--paper-bg);
+        border: 1px solid rgba(31, 45, 137, 0.24);
+        border-radius: 8px;
+        color: var(--exam-blue);
+        font: inherit;
+        font-size: 0.9rem;
+        font-weight: 800;
+        min-height: 44px;
+        padding: 8px 10px;
+        width: 100%;
+      }
+
+      .wf-badge {
+        background: rgba(31, 45, 137, 0.12);
+        border-radius: 999px;
+        color: var(--exam-blue);
+        font-size: 0.72rem;
+        font-weight: 900;
+        line-height: 1;
+        min-width: 1.4rem;
+        padding: 3px 6px;
+        text-align: center;
+      }
+
+      .workflow-tab.is-active .wf-badge {
+        background: var(--exam-blue);
+        color: var(--paper-bg);
+      }
+
+      .workflow-panel-title {
+        color: var(--exam-blue);
+        font-size: 0.92rem;
+        font-weight: 900;
+        margin: 0 0 8px;
+      }
+
+      .workflow-empty {
+        background: rgba(31, 45, 137, 0.04);
+        border: 1px dashed rgba(31, 45, 137, 0.18);
+        border-radius: 8px;
+        color: var(--muted);
+        font-size: 0.84rem;
+        font-weight: 700;
+        padding: 12px;
+      }
+
+      .submission-item .wf-phase-badge {
+        background: rgba(36, 113, 91, 0.12);
+        border-radius: 999px;
+        color: var(--green);
+        display: inline-block;
+        font-size: 0.72rem;
+        font-weight: 900;
+        margin-top: 4px;
+        padding: 2px 8px;
+      }
+
+      .submission-item.is-readonly {
+        cursor: default;
+        opacity: 0.82;
+      }
+
+      .review-readonly-banner {
+        background: rgba(154, 106, 16, 0.1);
+        border: 1px solid rgba(154, 106, 16, 0.24);
+        border-radius: 8px;
+        color: var(--yellow);
+        font-size: 0.84rem;
+        font-weight: 800;
+        margin: 0 0 10px;
+        padding: 8px 10px;
+      }
+
+      .review-actions.is-disabled .button,
+      .review-actions.is-disabled .input {
+        opacity: 0.45;
+        pointer-events: none;
+      }
+
+      @media (min-width: 821px) {
+        .workflow-tabs {
+          display: flex;
+        }
+
+        .workflow-segment {
+          display: none;
+        }
       }
 
       .reviewer-session {
@@ -299,16 +429,63 @@
           <button class="button is-primary" type="button" data-import-json>นำเข้า</button>
           <button class="button" type="button" data-refresh-list>รีเฟรชรายการ</button>
         </div>
-        <p class="status-note" data-status-note>เฉพาะงานที่นักเรียน<strong>ส่งตรวจแล้ว</strong> — รับจาก Inbox หรือนำเข้าไฟล์</p>
         </div>
-        <p class="status-note" data-inbox-status-note>รับงานจากกล่องข้อความ — ไม่ต้องนำเข้าไฟล์</p>
-        <h2 class="panel-title" style="font-size:1rem;margin-top:12px">Inbox</h2>
-        <div class="button-row">
-          <button class="button is-primary" type="button" data-refresh-inbox>โหลดงานใหม่</button>
+        <p class="status-note" data-status-note>เฉพาะงานที่นักเรียน<strong>ส่งตรวจแล้ว</strong> — รับจาก Inbox หรือคิวในเครื่อง</p>
+        <p class="status-note" data-inbox-status-note>รับงานจากกล่องข้อความของระบบ</p>
+        <div class="workflow-lifecycle" data-workflow-lifecycle>
+          <div class="workflow-tabs" role="tablist" aria-label="ขั้นตอนการตรวจ" data-workflow-tabs>
+            <button class="workflow-tab is-active" type="button" role="tab" aria-selected="true" data-workflow-tab="inbox">
+              รอรับงาน <span class="wf-badge" data-wf-count="inbox">0</span>
+            </button>
+            <button class="workflow-tab" type="button" role="tab" aria-selected="false" data-workflow-tab="waiting_review">
+              รอตรวจ <span class="wf-badge" data-wf-count="waiting_review">0</span>
+            </button>
+            <button class="workflow-tab" type="button" role="tab" aria-selected="false" data-workflow-tab="in_review">
+              กำลังตรวจ <span class="wf-badge" data-wf-count="in_review">0</span>
+            </button>
+            <button class="workflow-tab" type="button" role="tab" aria-selected="false" data-workflow-tab="reviewed_ready">
+              รอส่งคืน <span class="wf-badge" data-wf-count="reviewed_ready">0</span>
+            </button>
+            <button class="workflow-tab" type="button" role="tab" aria-selected="false" data-workflow-tab="returned">
+              ส่งคืนแล้ว <span class="wf-badge" data-wf-count="returned">0</span>
+            </button>
+          </div>
+          <label class="field" style="margin:0">
+            <span>ขั้นตอนงานตรวจ</span>
+            <select class="workflow-segment" data-workflow-segment aria-label="ขั้นตอนงานตรวจ">
+              <option value="inbox">รอรับงาน</option>
+              <option value="waiting_review">รอตรวจ</option>
+              <option value="in_review">กำลังตรวจ</option>
+              <option value="reviewed_ready">รอส่งคืน</option>
+              <option value="returned">ส่งคืนแล้ว</option>
+            </select>
+          </label>
+          <div data-workflow-panels>
+            <section data-workflow-panel="inbox">
+              <h2 class="workflow-panel-title">รอรับงานจาก Inbox</h2>
+              <div class="button-row">
+                <button class="button is-primary" type="button" data-refresh-inbox>โหลดงานใหม่</button>
+              </div>
+              <div class="submission-list" data-inbox-list></div>
+            </section>
+            <section data-workflow-panel="waiting_review" hidden>
+              <h2 class="workflow-panel-title">รอตรวจ</h2>
+              <div class="submission-list" data-queue-waiting></div>
+            </section>
+            <section data-workflow-panel="in_review" hidden>
+              <h2 class="workflow-panel-title">กำลังตรวจ</h2>
+              <div class="submission-list" data-queue-in-review></div>
+            </section>
+            <section data-workflow-panel="reviewed_ready" hidden>
+              <h2 class="workflow-panel-title">ตรวจแล้วรอส่งคืน</h2>
+              <div class="submission-list" data-queue-ready></div>
+            </section>
+            <section data-workflow-panel="returned" hidden>
+              <h2 class="workflow-panel-title">ส่งคืนแล้ว</h2>
+              <div class="submission-list" data-queue-returned></div>
+            </section>
+          </div>
         </div>
-        <div class="submission-list" data-inbox-list></div>
-        <h2 class="panel-title" style="font-size:1rem;margin-top:12px">คิวในเครื่อง</h2>
-        <div class="submission-list" data-submission-list></div>
       </aside>
 
       <section class="panel">
@@ -327,6 +504,8 @@
           <span class="score-pill" data-score-percent>๐%</span>
           <span class="status-note" data-score-detail>ยังไม่มีคะแนน</span>
         </div>
+        <p class="review-readonly-banner" data-review-readonly-banner hidden>ส่งคืนแล้ว — ดูผลตรวจอย่างเดียว ไม่สามารถแก้ไขหรือส่งซ้ำ</p>
+        <div class="review-actions" data-review-actions>
         <div class="button-row">
           <label class="field">
             <span>หน้า</span>
@@ -351,6 +530,7 @@
           <button class="button" type="button" data-return-package>ส่งคืนนักเรียน</button>
           <a class="button" href="exam-leaderboard.html">เปิดตารางคะแนน</a>
         </div>
+        </div>
         <p class="status-note">แนะนำ: stamp และลายเซ็นบนกระดาษจริง — ใช้ปุ่ม «เปิดตรวจบนกระดาษ» (คำตอบถูกล็อกทั้งสองฝ่าย)</p>
         <div data-answer-view></div>
         <table class="stamp-table">
@@ -370,6 +550,7 @@
 
     <script src="paligo-exam-shared.js"></script>
     <script src="paligo-exam-submit.js"></script>
+    <script src="paligo-inbox-chat.js"></script>
     <script>
       (async () => {
         const {
@@ -377,20 +558,27 @@
           getList,
           setList,
           guardExamPageRole,
-          downloadJson,
           toThaiNumber,
           toThaiPercent,
           getSavedReviewForSubmission,
           formatThaiDateTime,
           computeScore,
           saveReviewResult,
-          buildBookTransfer,
           importBookTransfer,
           upsertBookRecord,
           BOOK_STATUS,
           resolveReviewerProfileForConsole,
           saveReviewerProfile,
           listActiveSubmissions,
+          listReviewerSubmissionsByPhase,
+          REVIEW_WORKFLOW_PHASE,
+          REVIEW_WORKFLOW_LABELS,
+          resolveReviewWorkflow,
+          markWorkflowClaimed,
+          markWorkflowInReview,
+          markWorkflowReturned,
+          buildBookTransfer,
+          downloadJson,
         } = window.PaligoExamShared;
 
         const gate = document.querySelector("[data-reviewer-gate]");
@@ -406,7 +594,6 @@
           return;
         }
 
-        const list = document.querySelector("[data-submission-list]");
         const answerView = document.querySelector("[data-answer-view]");
         const stampBody = document.querySelector("[data-stamp-body]");
         const statusNote = document.querySelector("[data-status-note]");
@@ -426,8 +613,21 @@
         const pageInput = document.querySelector("[data-stamp-page]");
         const lineInput = document.querySelector("[data-stamp-line]");
         const openPaperReview = document.querySelector("[data-open-paper-review]");
+        const workflowTabs = document.querySelectorAll("[data-workflow-tab]");
+        const workflowSegment = document.querySelector("[data-workflow-segment]");
+        const workflowPanels = document.querySelectorAll("[data-workflow-panel]");
+        const queueHosts = {
+          [REVIEW_WORKFLOW_PHASE.waitingReview]: document.querySelector("[data-queue-waiting]"),
+          [REVIEW_WORKFLOW_PHASE.inReview]: document.querySelector("[data-queue-in-review]"),
+          [REVIEW_WORKFLOW_PHASE.reviewedReady]: document.querySelector("[data-queue-ready]"),
+          [REVIEW_WORKFLOW_PHASE.returned]: document.querySelector("[data-queue-returned]"),
+        };
+        const reviewReadonlyBanner = document.querySelector("[data-review-readonly-banner]");
+        const reviewActions = document.querySelector("[data-review-actions]");
         let submissions = [];
         let currentSubmission = null;
+        let activeWorkflowTab = "inbox";
+        let inboxCount = 0;
         let scoreStamps = [];
         let errorStamps = [];
         let reviewSignature = null;
@@ -466,7 +666,7 @@
           if (!window.PaligoInboxClient?.isInboxFeatureEnabled?.()) {
             showShell();
             applyReviewerProfile(resolveReviewerProfileForConsole());
-            setStatus("Inbox ปิดใน config — ใช้นำเข้า JSON หรือคิวในเครื่อง");
+            setStatus("Inbox ปิดใน config — ใช้คิวในเครื่องชั่วคราว");
             return { ok: true, legacy: true };
           }
 
@@ -494,12 +694,133 @@
           }
 
           applyReviewerProfile(resolveReviewerProfileForConsole());
-          setStatus("ยังไม่ได้เข้าสู่ระบบ — นำเข้า JSON ได้ หรือเข้าสู่ระบบผู้ตรวจเพื่อรับจาก Inbox");
+          setStatus("ยังไม่ได้เข้าสู่ระบบ — เข้าสู่ระบบผู้ตรวจเพื่อรับงานจาก Inbox");
           return { ok: true, legacy: true };
         };
 
         const setStatus = (message) => {
           statusNote.textContent = message;
+        };
+
+        const getSubmissionPhase = (submissionId) =>
+          resolveReviewWorkflow(submissionId)?.phase || REVIEW_WORKFLOW_PHASE.waitingReview;
+
+        const isReturnedSubmission = (submissionId) =>
+          getSubmissionPhase(submissionId) === REVIEW_WORKFLOW_PHASE.returned;
+
+        const applyReviewPanelMode = () => {
+          const readonly = currentSubmission ? isReturnedSubmission(currentSubmission.id) : false;
+          if (reviewReadonlyBanner) reviewReadonlyBanner.hidden = !readonly;
+          if (reviewActions) reviewActions.classList.toggle("is-disabled", readonly);
+          if (openPaperReview) {
+            if (readonly) {
+              openPaperReview.setAttribute("aria-disabled", "true");
+              openPaperReview.classList.add("is-disabled");
+              openPaperReview.tabIndex = -1;
+            } else {
+              openPaperReview.removeAttribute("aria-disabled");
+              openPaperReview.classList.remove("is-disabled");
+              openPaperReview.tabIndex = 0;
+            }
+          }
+        };
+
+        const setActiveWorkflowTab = (tabName) => {
+          activeWorkflowTab = tabName;
+          workflowTabs.forEach((tab) => {
+            const active = tab.dataset.workflowTab === tabName;
+            tab.classList.toggle("is-active", active);
+            tab.setAttribute("aria-selected", active ? "true" : "false");
+          });
+          if (workflowSegment) workflowSegment.value = tabName;
+          workflowPanels.forEach((panel) => {
+            panel.hidden = panel.dataset.workflowPanel !== tabName;
+          });
+        };
+
+        const updateWorkflowCounts = () => {
+          document.querySelectorAll("[data-wf-count]").forEach((badge) => {
+            const key = badge.dataset.wfCount;
+            if (key === "inbox") {
+              badge.textContent = toThaiNumber(inboxCount);
+              return;
+            }
+            const count = listReviewerSubmissionsByPhase(key).length;
+            badge.textContent = toThaiNumber(count);
+          });
+          if (workflowSegment) {
+            workflowSegment.querySelectorAll("option").forEach((option) => {
+              const key = option.value;
+              if (key === "inbox") {
+                option.textContent = `รอรับงาน (${toThaiNumber(inboxCount)})`;
+                return;
+              }
+              const count = listReviewerSubmissionsByPhase(key).length;
+              const labels = {
+                waiting_review: "รอตรวจ",
+                in_review: "กำลังตรวจ",
+                reviewed_ready: "รอส่งคืน",
+                returned: "ส่งคืนแล้ว",
+              };
+              option.textContent = `${labels[key] || key} (${toThaiNumber(count)})`;
+            });
+          }
+        };
+
+        const renderQueuePanel = (phase, host, emptyMessage) => {
+          if (!host) return;
+          host.innerHTML = "";
+          const items = listReviewerSubmissionsByPhase(phase);
+          if (!items.length) {
+            const empty = document.createElement("p");
+            empty.className = "workflow-empty";
+            empty.textContent = emptyMessage;
+            host.append(empty);
+            return;
+          }
+          items.forEach((submission) => {
+            const button = document.createElement("button");
+            const title = document.createElement("strong");
+            const meta = document.createElement("span");
+            const badge = document.createElement("span");
+            const readonly = phase === REVIEW_WORKFLOW_PHASE.returned;
+            button.className = "submission-item";
+            if (readonly) button.classList.add("is-readonly");
+            button.type = "button";
+            button.classList.toggle("is-active", currentSubmission?.id === submission.id);
+            title.textContent = submission.studentName || submission.bookTitle || "ไม่ระบุชื่อ";
+            meta.textContent = `ป.ธ. ${toThaiNumber(submission.grade || "-")} · ${formatThaiDateTime(submission.submittedAt)}`;
+            badge.className = "wf-phase-badge";
+            badge.textContent = REVIEW_WORKFLOW_LABELS[phase] || phase;
+            button.append(title, meta, badge);
+            button.addEventListener("click", () => selectSubmission(submission.id));
+            host.append(button);
+          });
+        };
+
+        const renderWorkflowQueues = () => {
+          submissions = listActiveSubmissions();
+          renderQueuePanel(
+            REVIEW_WORKFLOW_PHASE.waitingReview,
+            queueHosts[REVIEW_WORKFLOW_PHASE.waitingReview],
+            "ไม่มีงานรอตรวจ — รับจาก Inbox หรือนำเข้า submission"
+          );
+          renderQueuePanel(
+            REVIEW_WORKFLOW_PHASE.inReview,
+            queueHosts[REVIEW_WORKFLOW_PHASE.inReview],
+            "ไม่มีงานที่กำลังตรวจ — เลือกจากรอตรวจหรือรับจาก Inbox"
+          );
+          renderQueuePanel(
+            REVIEW_WORKFLOW_PHASE.reviewedReady,
+            queueHosts[REVIEW_WORKFLOW_PHASE.reviewedReady],
+            "ยังไม่มีงานที่บันทึกแล้วรอส่งคืน"
+          );
+          renderQueuePanel(
+            REVIEW_WORKFLOW_PHASE.returned,
+            queueHosts[REVIEW_WORKFLOW_PHASE.returned],
+            "ยังไม่มีงานที่ส่งคืนแล้ว"
+          );
+          updateWorkflowCounts();
         };
 
         const renderInbox = async () => {
@@ -537,12 +858,16 @@
           try {
             const data = await PaligoInboxClient.listInbox();
             const items = data.items || [];
+            inboxCount = items.length;
+            updateWorkflowCounts();
             if (!items.length) {
-              inboxList.innerHTML = `<p class='status-note'>ไม่มีงานรอรับ — ให้นักเรียนส่งตรวจจากสมุดหรือกล่องข้อความ</p>`;
+              inboxList.innerHTML = `<p class='workflow-empty'>ไม่มีงานรอรับ — ให้นักเรียนส่งตรวจจากสมุดหรือกล่องข้อความ</p>`;
               return;
             }
             inboxList.innerHTML = "";
             items.forEach((item) => {
+              const localClaim = window.PaligoInboxChat?.getInboxItemClaim?.(item.id);
+              const inboxStatus = localClaim?.status || item.status || "pending";
               const row = document.createElement("div");
               row.className = "submission-item";
               const title = document.createElement("strong");
@@ -553,16 +878,33 @@
               const claimBtn = document.createElement("button");
               claimBtn.className = "button is-primary";
               claimBtn.type = "button";
-              claimBtn.textContent = "รับเข้าคลัง";
+              claimBtn.textContent = inboxStatus === "claimed" ? "รับเข้าคลังแล้ว" : "รับเข้าคลัง";
+              claimBtn.disabled = inboxStatus === "claimed";
+              claimBtn.setAttribute("aria-disabled", inboxStatus === "claimed" ? "true" : "false");
               claimBtn.addEventListener("click", async () => {
+                if (claimBtn.disabled) return;
                 try {
                   const result = await PaligoInboxClient.claimInboxItem(item.id);
                   importBookTransfer(result.bookTransfer);
-                  renderSubmissions();
+                  const submissionId = result.bookTransfer?.submission?.id;
+                  if (submissionId) {
+                    markWorkflowClaimed(submissionId, {
+                      bookId: result.bookTransfer?.submission?.bookId || result.bookTransfer?.book?.id || "",
+                      inboxItemId: item.id,
+                    });
+                  }
+                  window.PaligoInboxChat?.markInboxItemClaimed?.(item.id, {
+                    direction: result.bookTransfer?.direction || item.direction,
+                    bookId: result.bookTransfer?.book?.id || item.bookId,
+                    bookRevision: result.bookTransfer?.book?.revision || item.bookRevision,
+                    submissionId: submissionId || null,
+                  });
+                  renderWorkflowQueues();
                   await renderInbox();
                   setStatus(`รับเข้าคลังแล้ว — ${item.bookTitle || "สมุด"}`);
-                  if (result.bookTransfer?.submission?.id) {
-                    selectSubmission(result.bookTransfer.submission.id);
+                  if (submissionId) {
+                    setActiveWorkflowTab(REVIEW_WORKFLOW_PHASE.inReview);
+                    selectSubmission(submissionId);
                   }
                 } catch (error) {
                   window.alert(error.message || "รับเข้าคลังไม่สำเร็จ");
@@ -602,28 +944,7 @@
           preflightSubmitted.textContent = formatThaiDateTime(currentSubmission.submittedAt);
         };
         const renderSubmissions = () => {
-          submissions = listActiveSubmissions();
-          list.innerHTML = "";
-          if (!submissions.length) {
-            const empty = document.createElement("p");
-            empty.className = "status-note";
-            empty.textContent = "ยังไม่มีคิว — โหลดงานใหม่หรือนำเข้าไฟล์";
-            list.append(empty);
-            return;
-          }
-          submissions.forEach((submission) => {
-            const button = document.createElement("button");
-            const title = document.createElement("strong");
-            const meta = document.createElement("span");
-            button.className = "submission-item";
-            button.type = "button";
-            button.classList.toggle("is-active", currentSubmission?.id === submission.id);
-            title.textContent = submission.studentName || "ไม่ระบุชื่อ";
-            meta.textContent = `ป.ธ. ${toThaiNumber(submission.grade || "-")} · ${formatThaiDateTime(submission.submittedAt)}`;
-            button.append(title, meta);
-            button.addEventListener("click", () => selectSubmission(submission.id));
-            list.append(button);
-          });
+          renderWorkflowQueues();
         };
         const renderAnswers = () => {
           answerView.innerHTML = "";
@@ -673,27 +994,46 @@
           });
         };
         function selectSubmission(id) {
+          submissions = listActiveSubmissions().concat(listReviewerSubmissionsByPhase(REVIEW_WORKFLOW_PHASE.returned));
           currentSubmission = submissions.find((item) => item.id === id) || null;
+          if (currentSubmission) {
+            const phase = getSubmissionPhase(currentSubmission.id);
+            if (phase === REVIEW_WORKFLOW_PHASE.waitingReview) {
+              markWorkflowInReview(currentSubmission.id, { bookId: currentSubmission.bookId || "" });
+            }
+          }
           const saved = currentSubmission ? getSavedReviewForSubmission(currentSubmission.id) : null;
           scoreStamps = saved?.scoreStamps ? saved.scoreStamps.slice() : [];
           errorStamps = saved?.errorStamps ? saved.errorStamps.slice() : [];
           reviewSignature = saved?.signature || null;
-          if (openPaperReview && currentSubmission) {
-            openPaperReview.href = `ruled-lines-card-only-template.html?mode=review&submissionId=${encodeURIComponent(currentSubmission.id)}`;
+          if (openPaperReview && currentSubmission && !isReturnedSubmission(currentSubmission.id)) {
+            openPaperReview.href = `workbook.html?mode=review&submissionId=${encodeURIComponent(currentSubmission.id)}`;
+          } else if (openPaperReview) {
+            openPaperReview.removeAttribute("href");
           }
           currentTitle.textContent = currentSubmission
             ? `ตรวจ: ${currentSubmission.studentName || "ไม่ระบุชื่อ"}`
             : "ยังไม่ได้เลือกข้อสอบ";
           renderPreflight();
-          renderSubmissions();
+          renderWorkflowQueues();
           renderAnswers();
           renderStamps();
           renderScore();
-          if (saved) setStatus("โหลดผลตรวจที่บันทึกไว้แล้ว");
+          applyReviewPanelMode();
+          if (!currentSubmission) return;
+          if (isReturnedSubmission(currentSubmission.id)) {
+            setStatus("ส่งคืนแล้ว — ดูผลตรวจอย่างเดียว");
+          } else if (saved) {
+            setStatus("โหลดผลตรวจที่บันทึกไว้แล้ว");
+          }
         }
         const addStamp = (kind, value) => {
           if (!currentSubmission) {
             setStatus("เลือกข้อสอบก่อนเพิ่ม stamp");
+            return;
+          }
+          if (isReturnedSubmission(currentSubmission.id)) {
+            setStatus("ส่งคืนแล้ว — ไม่สามารถแก้ไข stamp ได้");
             return;
           }
           const stamp = {
@@ -735,13 +1075,19 @@
             setStatus("เลือกข้อสอบก่อนบันทึก");
             return null;
           }
+          if (isReturnedSubmission(currentSubmission.id)) {
+            setStatus("ส่งคืนแล้ว — ไม่สามารถบันทึกซ้ำได้");
+            return null;
+          }
           saveReviewerProfile({
             name: reviewerName.value.trim(),
             role: reviewerRole.value,
           });
           const result = buildReviewResult();
           saveReviewResult(result);
-          setStatus("บันทึกผลตรวจแล้ว — เปิดตรวจบนกระดาษเพื่อ stamp/ลายเซ็นบนกระดาษ");
+          renderWorkflowQueues();
+          setActiveWorkflowTab(REVIEW_WORKFLOW_PHASE.reviewedReady);
+          setStatus("บันทึกผลตรวจแล้ว — พร้อมส่งคืนนักเรียน");
           return result;
         };
         const importSubmission = (payload) => {
@@ -794,32 +1140,70 @@
         document.querySelector("[data-return-package]")?.addEventListener("click", async () => {
           const result = saveReview();
           if (!result) return;
-          downloadJson(`${result.id}.paligo-review.json`, result);
-          upsertBookRecord(result.bookId, {
-            status: BOOK_STATUS.reviewed,
-            review: result,
-            reviewReceivedAt: new Date().toISOString(),
-          });
+          if (isReturnedSubmission(result.submissionId)) return;
 
-          if (window.PaligoInboxClient?.isLoggedIn?.() && PaligoInboxClient.getInboxRole?.() === "reviewer") {
+          const finishReturn = (message) => {
+            markWorkflowReturned(result.submissionId, { bookId: result.bookId || "" });
+            upsertBookRecord(result.bookId, {
+              status: BOOK_STATUS.reviewed,
+              review: result,
+              reviewReceivedAt: new Date().toISOString(),
+            });
+            renderWorkflowQueues();
+            setActiveWorkflowTab(REVIEW_WORKFLOW_PHASE.returned);
+            selectSubmission(result.submissionId);
+            setStatus(message);
+          };
+
+          if (!window.PaligoInboxClient?.isLoggedIn?.() || PaligoInboxClient.getInboxRole?.() !== "reviewer") {
+            downloadJson(`${result.id}.paligo-review.json`, result);
             try {
-              const pushResult = await PaligoExamSubmit.pushReviewToStudent(result.bookId);
-              if (pushResult.ok) {
-                setStatus(pushResult.message || "ส่งผลตรวจเข้า inbox นักเรียนแล้ว");
-                return;
-              }
-              setStatus(`${pushResult.message || "ส่งไม่สำเร็จ"} — ดาวน์โหลดไฟล์แทน`);
-            } catch (error) {
-              setStatus(`${error.message || "ส่งไม่สำเร็จ"} — ดาวน์โหลดไฟล์แทน`);
+              downloadJson(
+                `${result.bookId}.to-student.paligo-transfer.json`,
+                buildBookTransfer(result.bookId, "to-student")
+              );
+            } catch {
+              /* optional */
             }
+            finishReturn("ส่งคืนแล้ว (ดาวน์โหลดไฟล์แทน) — นำเข้าที่ผลตรวจของฉัน");
+            return;
           }
 
           try {
-            downloadJson(`${result.bookId}.to-student.paligo-transfer.json`, buildBookTransfer(result.bookId, "to-student"));
-          } catch {
-            /* optional */
+            const pushResult = await PaligoExamSubmit.pushReviewToStudent(result.bookId);
+            if (pushResult.ok) {
+              finishReturn(pushResult.message || "ส่งสมุดคืนเข้า Inbox นักเรียนแล้ว");
+              return;
+            }
+            downloadJson(`${result.id}.paligo-review.json`, result);
+            try {
+              downloadJson(
+                `${result.bookId}.to-student.paligo-transfer.json`,
+                buildBookTransfer(result.bookId, "to-student")
+              );
+            } catch {
+              /* optional */
+            }
+            finishReturn(`${pushResult.message || "ส่งไม่สำเร็จ"} — ดาวน์โหลดไฟล์แทน`);
+          } catch (error) {
+            downloadJson(`${result.id}.paligo-review.json`, result);
+            try {
+              downloadJson(
+                `${result.bookId}.to-student.paligo-transfer.json`,
+                buildBookTransfer(result.bookId, "to-student")
+              );
+            } catch {
+              /* optional */
+            }
+            finishReturn(`${error.message || "ส่งไม่สำเร็จ"} — ดาวน์โหลดไฟล์แทน`);
           }
-          setStatus("ดาวน์โหลดไฟล์ผลตรวจแล้ว — ส่งให้นักเรียนนำเข้าที่ ผลตรวจของฉัน หรือแพ็กเกจโอน");
+        });
+
+        workflowTabs.forEach((tab) => {
+          tab.addEventListener("click", () => setActiveWorkflowTab(tab.dataset.workflowTab));
+        });
+        workflowSegment?.addEventListener("change", () => {
+          setActiveWorkflowTab(workflowSegment.value);
         });
 
         reviewerName?.addEventListener("input", () => {
@@ -844,11 +1228,28 @@
         showShell();
 
         const querySubmissionId = new URLSearchParams(window.location.search).get("submissionId");
+        setActiveWorkflowTab("inbox");
         renderSubmissions();
         await renderInbox();
         renderScore();
-        if (querySubmissionId) selectSubmission(querySubmissionId);
-        else if (submissions.length === 1) selectSubmission(submissions[0].id);
+        applyReviewPanelMode();
+        if (querySubmissionId) {
+          const phase = getSubmissionPhase(querySubmissionId);
+          if (phase === REVIEW_WORKFLOW_PHASE.returned) {
+            setActiveWorkflowTab(REVIEW_WORKFLOW_PHASE.returned);
+          } else if (phase === REVIEW_WORKFLOW_PHASE.reviewedReady) {
+            setActiveWorkflowTab(REVIEW_WORKFLOW_PHASE.reviewedReady);
+          } else if (phase === REVIEW_WORKFLOW_PHASE.inReview) {
+            setActiveWorkflowTab(REVIEW_WORKFLOW_PHASE.inReview);
+          } else {
+            setActiveWorkflowTab(REVIEW_WORKFLOW_PHASE.waitingReview);
+          }
+          selectSubmission(querySubmissionId);
+        } else if (listActiveSubmissions().length === 1) {
+          const only = listActiveSubmissions()[0];
+          setActiveWorkflowTab(getSubmissionPhase(only.id));
+          selectSubmission(only.id);
+        }
       })();
     </script>
   </body>

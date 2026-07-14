@@ -225,7 +225,7 @@
       <section class="admin-card">
         <h2 class="admin-section-title">สวิตช์ระบบ (มีผลทันที)</h2>
         <p class="admin-note">
-          ปิด Import/Export เป็นค่าเริ่มต้น — ผู้ใช้ทั่วไปจะไม่เห็นเมนูย้ายไฟล์ JSON · Super Admin เห็นเสมอ
+          Import/Export ซ่อนชั่วคราวจาก UI ทั้งหมด — สวิตช์ด้านล่างเป็น future note เท่านั้น (ค่าเริ่มต้น importExportEnabled=false)
         </p>
         <div class="admin-toggle-list" data-toggle-list></div>
         <div class="admin-actions" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px">
@@ -279,8 +279,8 @@
           {
             key: "importExportEnabled",
             label: "Import / Export ไฟล์ JSON",
-            desc: "สำรองสมุด · นำเข้า submission/review · แพ็กเกจโอน",
-            live: true,
+            desc: "ซ่อนชั่วคราวจาก UI — สำรองสมุด · นำเข้า submission/review · แพ็กเกจโอน",
+            live: false,
           },
           {
             key: "inboxEnabled",
@@ -363,6 +363,9 @@
         const paintPanel = (payload) => {
           panel = payload;
           draftFlags = { ...platform.DEFAULT_FLAGS, ...(payload.flags || {}) };
+          if (platform.IMPORT_EXPORT_UI_TEMPORARILY_HIDDEN) {
+            draftFlags.importExportEnabled = false;
+          }
           const user = payload.user;
           document.querySelector("[data-admin-user-meta]").textContent =
             `${user.displayName || "—"} · ${user.email || "ไม่มีอีเมล"} · ${user.role}`;
@@ -381,10 +384,13 @@
         document.querySelector("[data-save-settings]")?.addEventListener("click", async () => {
           try {
             readDraftFlags();
+            if (platform.IMPORT_EXPORT_UI_TEMPORARILY_HIDDEN) {
+              draftFlags.importExportEnabled = false;
+            }
             await client.patchAdminSettings(draftFlags);
             await platform.boot({ force: true });
             await refreshPanel();
-            showStatus("บันทึกการตั้งค่าแล้ว — ผู้ใช้ทั่วไปจะเห็น/ไม่เห็น Import-Export ตามสวิตช์", "success");
+            showStatus("บันทึกการตั้งค่าแล้ว", "success");
           } catch (error) {
             showStatus(error.message || "บันทึกไม่สำเร็จ", "error");
           }

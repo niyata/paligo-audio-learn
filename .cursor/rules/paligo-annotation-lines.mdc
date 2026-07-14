@@ -10,7 +10,8 @@ alwaysApply: false
 
 ## ไฟล์ที่เกี่ยวข้อง
 
-- `ruled-lines-card-only-template.html` (production)
+- `workbook.html` (production)
+- `ruled-lines-card-only-template.html` (legacy backup)
 - `ruled-lines-template.html` (template อ้างอิง — ต้อง sync กับ card-only)
 
 ## CSS variables (ห้ามลบ/เปลี่ยนชื่อโดยไม่ sync JS)

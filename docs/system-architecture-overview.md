@@ -21,7 +21,7 @@
 
 หน้าหลัก:
 
-- `ruled-lines-card-only-template.html`: กระดาษคำตอบพร้อม autosave, profile wizard, ส่งตรวจ, book id
+- `workbook.html`: กระดาษคำตอบพร้อม autosave, profile wizard, ส่งตรวจ, book id
 - `ruled-lines-template.html`: template แบบมี sidebar/lesson panel
 - `exam-books.html`: หน้า grid menu สำหรับสมุดข้อสอบหลายเล่ม
 - `exam-reviewer-console.html`: console สำหรับอาจารย์/ผู้ตรวจ

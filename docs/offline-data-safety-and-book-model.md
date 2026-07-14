@@ -73,5 +73,6 @@
 - Sidebar หรือ top controls ต้องมีทางเข้า `สมุดข้อสอบ`
 - หน้า `exam-books.html` แสดงสมุดเป็นกริด
 - แต่ละการ์ดคือสมุด 1 เล่ม
-- การเปิดเล่มต้องส่ง `bookId` กลับไปที่ `ruled-lines-card-only-template.html?bookId=...`
-- การสร้างเล่มใหม่ต้องใช้ `ruled-lines-card-only-template.html?newBook=1`
+- การเปิดเล่มต้องส่ง `bookId` กลับไปที่ `workbook.html?bookId=...`
+- การสร้างเล่มใหม่ต้องใช้ `workbook.html?newBook=1`
+- `ruled-lines-card-only-template.html` เก็บไว้เป็น legacy backup ชั่วคราว

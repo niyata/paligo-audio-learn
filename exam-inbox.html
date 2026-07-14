@@ -47,13 +47,30 @@
   </head>
   <body>
     <div class="inbox-chat-shell" data-inbox-shell hidden>
-      <section class="inbox-chat-layout" aria-label="แชทกล่องข้อความ">
+      <div class="inbox-chat-workspace">
+        <aside class="inbox-contact-rail" aria-label="รายชื่อผู้ติดต่อ" data-contact-rail>
+          <div class="inbox-contact-rail__header">
+            <div class="inbox-contact-rail__heading">
+              <div>
+                <h2 class="inbox-contact-rail__title">ผู้ติดต่อ</h2>
+                <p class="inbox-contact-rail__meta" data-contact-rail-meta>เลือกห้องสนทนา</p>
+              </div>
+              <button class="paligo-btn inbox-contact-rail__create" type="button" data-open-group-sheet aria-label="สร้างกลุ่ม">
+                สร้างกลุ่ม
+              </button>
+            </div>
+          </div>
+          <div class="inbox-contact-list" data-contact-list></div>
+          <p class="inbox-contact-empty" data-contact-empty hidden>ยังไม่มีผู้ติดต่อใน inbox</p>
+        </aside>
+        <section class="inbox-chat-layout" aria-label="แชทกล่องข้อความ">
         <header class="inbox-chat-header">
           <div>
             <h1 class="inbox-chat-header__title" data-chat-peer-name>กล่องข้อความ</h1>
             <p class="inbox-chat-header__meta" data-chat-peer-meta>—</p>
           </div>
           <div class="inbox-chat-composer__tools">
+            <button class="paligo-btn is-ghost" type="button" data-open-group-sheet>สร้างกลุ่ม</button>
             <button class="paligo-btn" type="button" data-refresh-chat>โหลดใหม่</button>
             <a class="paligo-btn is-ghost" href="exam-account.html">บัญชี</a>
           </div>
@@ -84,7 +101,8 @@
             <button class="paligo-btn is-primary" type="button" data-send-text>ส่ง</button>
           </div>
         </footer>
-      </section>
+        </section>
+      </div>
     </div>
 
     <section class="inbox-chat-gate" data-inbox-gate hidden>
@@ -151,6 +169,60 @@
       </div>
     </div>
 
+    <div class="inbox-group-sheet" data-group-sheet data-paligo-overlay hidden aria-hidden="true">
+      <div class="inbox-group-sheet__panel" role="dialog" aria-labelledby="group-sheet-title">
+        <h2 class="inbox-book-sheet__title" id="group-sheet-title">สร้างกลุ่ม</h2>
+        <p class="paligo-local-note">ครูและนักเรียนสร้างกลุ่มได้ เลือกภาพโปรไฟล์/สี cover ชั่วคราว แล้วเริ่มคุยใน thread กลุ่มทันที</p>
+        <div class="inbox-group-form">
+          <label class="inbox-book-sheet__filter">
+            <span class="inbox-book-sheet__filter-label">ชื่อกลุ่ม</span>
+            <input class="inbox-book-sheet__search-input" type="text" value="กลุ่มประโยค ป.ธ. ๔" data-group-name autocomplete="off" />
+          </label>
+          <label class="inbox-book-sheet__filter">
+            <span class="inbox-book-sheet__filter-label">เจ้าของกลุ่ม</span>
+            <select class="inbox-book-sheet__filter-select" data-group-owner-role>
+              <option value="student">นักเรียน</option>
+              <option value="teacher">ครู/ผู้ตรวจ</option>
+            </select>
+          </label>
+          <label class="inbox-book-sheet__filter">
+            <span class="inbox-book-sheet__filter-label">ประเภท</span>
+            <select class="inbox-book-sheet__filter-select" data-group-kind>
+              <option value="study">กลุ่มเรียน</option>
+              <option value="review">กลุ่มตรวจ</option>
+              <option value="exam">กลุ่มข้อสอบ</option>
+            </select>
+          </label>
+          <label class="inbox-book-sheet__filter">
+            <span class="inbox-book-sheet__filter-label">โทนสี</span>
+            <select class="inbox-book-sheet__filter-select" data-group-theme>
+              <option value="blue-gold">น้ำเงินทอง</option>
+              <option value="green-cream">เขียวครีม</option>
+              <option value="indigo-rose">ครามชมพู</option>
+            </select>
+          </label>
+          <label class="inbox-book-sheet__filter inbox-group-form__wide">
+            <span class="inbox-book-sheet__filter-label">คำอธิบาย</span>
+            <input class="inbox-book-sheet__search-input" type="text" value="คิวรวม · invite สมาชิกได้" data-group-description autocomplete="off" />
+          </label>
+        </div>
+        <div class="inbox-group-preview" data-group-preview>
+          <div class="inbox-group-preview__cover" data-group-preview-cover></div>
+          <div class="inbox-group-preview__body">
+            <span class="inbox-group-preview__avatar" data-group-preview-avatar>ป.ธ.</span>
+            <div class="inbox-group-preview__text">
+              <strong data-group-preview-title>กลุ่มประโยค ป.ธ. ๔</strong>
+              <span data-group-preview-meta>สร้างโดยนักเรียน · คิวรวม · invite สมาชิกได้</span>
+            </div>
+          </div>
+        </div>
+        <div class="inbox-book-sheet__footer">
+          <button class="paligo-btn is-primary" type="button" data-create-group-submit>สร้างกลุ่ม</button>
+          <button class="paligo-btn is-ghost inbox-book-sheet__close" type="button" data-close-group-sheet>ปิด</button>
+        </div>
+      </div>
+    </div>
+
     <div class="inbox-chat-context-menu" data-chat-context-menu data-paligo-overlay hidden role="menu" aria-label="เมนูข้อความ"></div>
 
     <script src="paligo-config.js"></script>
@@ -210,6 +282,20 @@
         const linkBooks = document.querySelector("[data-link-books]");
         const linkReview = document.querySelector("[data-link-review]");
         const composer = document.querySelector("[data-chat-composer]");
+        const contactRail = document.querySelector("[data-contact-rail]");
+        const contactRailMeta = document.querySelector("[data-contact-rail-meta]");
+        const contactList = document.querySelector("[data-contact-list]");
+        const contactEmpty = document.querySelector("[data-contact-empty]");
+        const groupSheet = document.querySelector("[data-group-sheet]");
+        const groupNameInput = document.querySelector("[data-group-name]");
+        const groupOwnerRoleSelect = document.querySelector("[data-group-owner-role]");
+        const groupKindSelect = document.querySelector("[data-group-kind]");
+        const groupThemeSelect = document.querySelector("[data-group-theme]");
+        const groupDescriptionInput = document.querySelector("[data-group-description]");
+        const groupPreviewCover = document.querySelector("[data-group-preview-cover]");
+        const groupPreviewAvatar = document.querySelector("[data-group-preview-avatar]");
+        const groupPreviewTitle = document.querySelector("[data-group-preview-title]");
+        const groupPreviewMeta = document.querySelector("[data-group-preview-meta]");
 
         const subjectOptions = () => SUBJECT_OPTIONS || [];
 
@@ -232,6 +318,7 @@
           const { sheet } = getSheetRefs();
           const menu = document.querySelector("[data-chat-context-menu]");
           if (sheet && sheet.parentElement !== document.body) document.body.append(sheet);
+          if (groupSheet && groupSheet.parentElement !== document.body) document.body.append(groupSheet);
           if (menu && menu.parentElement !== document.body) document.body.append(menu);
         };
 
@@ -241,6 +328,7 @@
         let role = null;
 
         const PAIRING_CACHE_KEY = "paligo-inbox-pairing-cache-v1";
+        const GROUPS_STORAGE_KEY = "paligo-inbox-groups-v1";
         const cachePairingContext = (userId, ctx) => {
           if (!userId || !ctx) return;
           try {
@@ -255,12 +343,66 @@
             return null;
           }
         };
+        const getGroupOwnerScope = () => session?.user?.id || "anonymous";
+        const readStoredGroups = () => {
+          try {
+            const parsed = JSON.parse(localStorage.getItem(GROUPS_STORAGE_KEY) || "{}");
+            const groups = parsed?.[getGroupOwnerScope()];
+            return Array.isArray(groups) ? groups : [];
+          } catch {
+            return [];
+          }
+        };
+        const writeStoredGroups = (groups) => {
+          try {
+            const parsed = JSON.parse(localStorage.getItem(GROUPS_STORAGE_KEY) || "{}") || {};
+            parsed[getGroupOwnerScope()] = groups;
+            localStorage.setItem(GROUPS_STORAGE_KEY, JSON.stringify(parsed));
+          } catch {}
+        };
+        const groupThemes = {
+          "blue-gold": {
+            cover: "linear-gradient(135deg, #1f2d89 0%, #4654b8 58%, #f4b400 100%)",
+            avatar: "#1f2d89",
+          },
+          "green-cream": {
+            cover: "linear-gradient(135deg, #24715b 0%, #70a58f 58%, #fff0c2 100%)",
+            avatar: "#24715b",
+          },
+          "indigo-rose": {
+            cover: "linear-gradient(135deg, #28327f 0%, #7f4fb8 58%, #f5a3b7 100%)",
+            avatar: "#28327f",
+          },
+        };
+        const getGroupTheme = (themeKey) => groupThemes[themeKey] || groupThemes["blue-gold"];
+        const escapeSvgText = (value) =>
+          String(value || "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
+        const makeGroupAvatarUrl = (group) => {
+          const theme = getGroupTheme(group.themeKey);
+          const initials = contactInitials(group.name || "กลุ่ม");
+          const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" rx="60" fill="${theme.avatar}"/><circle cx="43" cy="47" r="16" fill="#fffaf0" opacity=".96"/><circle cx="77" cy="47" r="16" fill="#fffaf0" opacity=".82"/><path d="M24 106c7-28 65-28 72 0" fill="#fffaf0" opacity=".92"/><text x="60" y="72" text-anchor="middle" font-family="Sarabun, sans-serif" font-size="22" font-weight="800" fill="${theme.avatar}">${escapeSvgText(initials)}</text></svg>`;
+          return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+        };
+        const buildGroupContact = (group) => ({
+          id: group.id,
+          type: "group",
+          threadId: group.threadId,
+          name: group.name,
+          meta: group.description || "กลุ่ม · invite สมาชิกได้",
+          avatarUrl: group.avatarUrl || makeGroupAvatarUrl(group),
+          pendingCount: 0,
+          updatedAt: group.updatedAt || group.createdAt,
+        });
         let sheetBooks = [];
         let sheetSearchQuery = "";
         let sheetFilterStatus = "";
         let sheetFilterSubject = "";
         let sheetSelectedBookId = null;
         let contextMenuMessage = null;
+        const inboxContacts = new Map();
 
         const getPickerValue = (book, type) =>
           book?.draft?.pickers?.find((item) => item.type === type)?.value || "";
@@ -315,6 +457,167 @@
           return buildBookSearchHaystack(book).includes(sheetSearchQuery);
         };
 
+        const contactInitials = (name) => {
+          const text = String(name || "ผู้ใช้").replace(/\s+/g, "");
+          return text.slice(0, 2) || "ผู้";
+        };
+
+        const resolvePeerThreadId = (peerUserId) => {
+          const userId = session?.user?.id || "anonymous";
+          return chat.resolvePeerThreadId
+            ? chat.resolvePeerThreadId({
+                role,
+                userId,
+                peerUserId,
+                reviewerUserId: role === "student" ? peerUserId : undefined,
+              })
+            : role === "reviewer"
+              ? `reviewer-${userId}-student-${peerUserId || "peer"}`
+              : `student-${userId}-${peerUserId || "peer"}`;
+        };
+
+        const upsertContact = (contact) => {
+          if (!contact?.id) return null;
+          const existing = inboxContacts.get(contact.id) || {};
+          const merged = {
+            ...existing,
+            ...contact,
+            pendingCount: Math.max(existing.pendingCount || 0, contact.pendingCount || 0),
+            updatedAt: contact.updatedAt || existing.updatedAt || new Date().toISOString(),
+          };
+          inboxContacts.set(contact.id, merged);
+          return merged;
+        };
+
+        const syncHeaderFromContact = (contact) => {
+          if (!contact) {
+            if (peerName) peerName.textContent = "กล่องข้อความ";
+            if (peerMeta) peerMeta.textContent = "เลือกผู้ติดต่อเพื่อดูแชท";
+            return;
+          }
+          if (peerName) peerName.textContent = contact.name || "ผู้ติดต่อ";
+          if (peerMeta) peerMeta.textContent = contact.meta || "แชท inbox";
+        };
+
+        const renderContactList = () => {
+          if (!contactList) return;
+          const contacts = Array.from(inboxContacts.values()).sort((a, b) => {
+            const pendingDelta = (b.pendingCount || 0) - (a.pendingCount || 0);
+            if (pendingDelta) return pendingDelta;
+            return String(b.updatedAt || "").localeCompare(String(a.updatedAt || ""));
+          });
+          contactList.replaceChildren();
+          contacts.forEach((contact) => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "inbox-contact-card";
+            button.dataset.contactId = contact.id;
+            button.setAttribute("aria-pressed", String(contact.threadId === threadId));
+
+            const avatar = document.createElement("span");
+            avatar.className = "inbox-contact-card__avatar";
+            if (contact.avatarUrl) {
+              const img = document.createElement("img");
+              img.src = contact.avatarUrl;
+              img.alt = "";
+              avatar.append(img);
+            } else {
+              avatar.textContent = contactInitials(contact.name);
+            }
+
+            const main = document.createElement("span");
+            main.className = "inbox-contact-card__main";
+            const name = document.createElement("span");
+            name.className = "inbox-contact-card__name";
+            name.textContent = contact.name || "ผู้ติดต่อ";
+            const meta = document.createElement("span");
+            meta.className = "inbox-contact-card__meta";
+            meta.textContent = contact.meta || "แชท inbox";
+            main.append(name, meta);
+
+            const badge = document.createElement("span");
+            badge.className = "inbox-contact-card__badge";
+            badge.textContent = contact.pendingCount ? String(contact.pendingCount) : "";
+            badge.hidden = !contact.pendingCount;
+
+            button.append(avatar, main, badge);
+            contactList.append(button);
+          });
+
+          if (contactEmpty) contactEmpty.hidden = contacts.length > 0;
+          if (contactRailMeta) {
+            contactRailMeta.textContent = contacts.length ? `${contacts.length} ห้องสนทนา` : "ยังไม่มีคู่สนทนา";
+          }
+        };
+
+        const setActiveContact = (contactId, { repaint = true } = {}) => {
+          const contact = inboxContacts.get(contactId);
+          if (!contact) return false;
+          threadId = contact.threadId;
+          syncHeaderFromContact(contact);
+          renderContactList();
+          if (repaint) paintThread();
+          return true;
+        };
+
+        const refreshCurrentContactPendingCount = () => {
+          const current = Array.from(inboxContacts.values()).find((contact) => contact.threadId === threadId);
+          if (!current) return;
+          current.pendingCount = chat
+            .getMessages(threadId)
+            .filter((message) => message.inboxItemId && message.inboxStatus === "pending").length;
+          renderContactList();
+        };
+
+        const selectFirstContact = () => {
+          const first = Array.from(inboxContacts.values()).sort((a, b) => {
+            const pendingDelta = (b.pendingCount || 0) - (a.pendingCount || 0);
+            if (pendingDelta) return pendingDelta;
+            return String(b.updatedAt || "").localeCompare(String(a.updatedAt || ""));
+          })[0];
+          if (first) return setActiveContact(first.id, { repaint: false });
+          syncHeaderFromContact(null);
+          renderContactList();
+          return false;
+        };
+
+        const initializeContacts = () => {
+          inboxContacts.clear();
+          if (role === "student") {
+            const pairing = pairingContext?.pairing;
+            const reviewerId = pairing?.reviewerUserId || "peer";
+            upsertContact({
+              id: `reviewer:${reviewerId}`,
+              type: "reviewer",
+              peerUserId: reviewerId,
+              threadId: resolvePeerThreadId(reviewerId),
+              name: pairing?.reviewerDisplayName || "ครู",
+              meta: pairing?.reviewerRoleLabel || "ส่งสมุดข้อสอบและข้อความ",
+              avatarUrl: pairing?.reviewerAvatarUrl || "",
+              pendingCount: 0,
+            });
+          } else if (role === "reviewer") {
+            (pairingContext?.students || []).forEach((student) => {
+              const studentId = student.studentUserId || "student";
+              upsertContact({
+                id: `student:${studentId}`,
+                type: "student",
+                peerUserId: studentId,
+                threadId: resolvePeerThreadId(studentId),
+                name: student.studentDisplayName || "นักเรียน",
+                meta: "นักเรียนที่จับคู่",
+                avatarUrl: "",
+                pendingCount: 0,
+                updatedAt: student.createdAt,
+              });
+            });
+          }
+          readStoredGroups().forEach((group) => {
+            upsertContact(buildGroupContact(group));
+          });
+          selectFirstContact();
+        };
+
         const syncBookSheetFilterOptions = () => {
           const refs = getSheetRefs();
           if (!refs.filterSubject) return;
@@ -364,7 +667,20 @@
           if (rerender) renderBookSheetList();
         };
 
-        const getReviewerLabel = () => pairingContext?.pairing?.reviewerDisplayName || "ครู";
+        const getReviewerLabel = () => {
+          const pairing = pairingContext?.pairing;
+          if (!pairing) return "ครู";
+          const peerProfile = {
+            profileStatus: pairing.reviewerProfileStatus,
+            capability: pairing.reviewerCapability,
+          };
+          if (window.PaligoProfile?.formatReviewerPeerLabel) {
+            return PaligoProfile.formatReviewerPeerLabel(pairing.reviewerDisplayName, peerProfile, {
+              short: true,
+            });
+          }
+          return pairing.reviewerDisplayName || "ครู";
+        };
 
         const clearSheetSelection = () => {
           const refs = getSheetRefs();
@@ -532,6 +848,70 @@
           clearSheetSelection();
         };
 
+        const updateGroupPreview = () => {
+          const name = groupNameInput?.value?.trim() || "กลุ่มใหม่";
+          const ownerLabel = groupOwnerRoleSelect?.value === "teacher" ? "ครู/ผู้ตรวจ" : "นักเรียน";
+          const description = groupDescriptionInput?.value?.trim() || "invite สมาชิกได้";
+          const theme = getGroupTheme(groupThemeSelect?.value);
+          if (groupPreviewCover) groupPreviewCover.style.background = theme.cover;
+          if (groupPreviewAvatar) {
+            groupPreviewAvatar.style.background = theme.avatar;
+            groupPreviewAvatar.textContent = contactInitials(name);
+          }
+          if (groupPreviewTitle) groupPreviewTitle.textContent = name;
+          if (groupPreviewMeta) groupPreviewMeta.textContent = `สร้างโดย${ownerLabel} · ${description}`;
+        };
+
+        const openGroupSheet = () => {
+          ensureOverlayPortals();
+          if (!groupSheet) return;
+          if (groupOwnerRoleSelect && role === "reviewer") groupOwnerRoleSelect.value = "teacher";
+          updateGroupPreview();
+          groupSheet.hidden = false;
+          groupSheet.removeAttribute("hidden");
+          groupSheet.classList.add("is-open");
+          groupSheet.setAttribute("aria-hidden", "false");
+          window.requestAnimationFrame(() => groupNameInput?.focus());
+        };
+
+        const closeGroupSheet = () => {
+          if (!groupSheet) return;
+          groupSheet.hidden = true;
+          groupSheet.setAttribute("hidden", "");
+          groupSheet.classList.remove("is-open");
+          groupSheet.setAttribute("aria-hidden", "true");
+        };
+
+        const createGroupFromSheet = () => {
+          const name = groupNameInput?.value?.trim() || "กลุ่มใหม่";
+          const ownerRole = groupOwnerRoleSelect?.value || (role === "reviewer" ? "teacher" : "student");
+          const kind = groupKindSelect?.value || "study";
+          const themeKey = groupThemeSelect?.value || "blue-gold";
+          const description = groupDescriptionInput?.value?.trim() || "คิวรวม · invite สมาชิกได้";
+          const ownerLabel = ownerRole === "teacher" ? "ครู/ผู้ตรวจ" : "นักเรียน";
+          const kindLabel = { study: "กลุ่มเรียน", review: "กลุ่มตรวจ", exam: "กลุ่มข้อสอบ" }[kind] || "กลุ่มเรียน";
+          const id = `group:${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+          const group = {
+            id,
+            threadId: `group-${getGroupOwnerScope().replace(/[^a-zA-Z0-9_-]/g, "_")}-${id.replace(/[^a-zA-Z0-9_-]/g, "_")}`,
+            name,
+            ownerRole,
+            kind,
+            themeKey,
+            description,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          };
+          group.avatarUrl = makeGroupAvatarUrl(group);
+
+          const groups = readStoredGroups();
+          writeStoredGroups([group, ...groups]);
+          upsertContact(buildGroupContact(group));
+          closeGroupSheet();
+          setActiveContact(group.id);
+          appendSystem(`${ownerLabel}สร้าง${kindLabel}: ${name}`);
+        };
+
         const showGate = (message) => {
           shell.hidden = true;
           gate.hidden = false;
@@ -580,9 +960,38 @@
           bookRevision: item.bookRevision,
         });
 
+        const resolveReviewerAvatarUrl = () =>
+          String(pairingContext?.pairing?.reviewerAvatarUrl || "").trim();
+
+        const resolveBookCardAvatarUrl = (message, book) => {
+          const reviewerAvatar =
+            message.inboxDirection === "to-student" || message.bookStatus === BOOK_STATUS.reviewed
+              ? resolveReviewerAvatarUrl()
+              : "";
+          const candidates = [
+            message.senderAvatarUrl,
+            message.fromAvatarUrl,
+            reviewerAvatar,
+            message.profile?.avatarUrl,
+            message.studentProfile?.avatarUrl,
+            message.submission?.profile?.avatarUrl,
+            book?.profile?.avatarUrl,
+            book?.studentProfile?.avatarUrl,
+            book?.draft?.profile?.avatarUrl,
+            book?.avatarUrl,
+          ];
+          return (
+            candidates
+              .map((value) => String(value || "").trim())
+              .find((value) => value.startsWith("data:image/")) || ""
+          );
+        };
+
         const renderBookCard = (message) => {
           const book = message.book || {};
           const status = normalizeBookStatus(book.status || message.bookStatus);
+          const localClaim = chat.getInboxItemClaim?.(message.inboxItemId);
+          const inboxStatus = localClaim?.status || message.inboxStatus;
           const actions = [];
 
           if (role === "student") {
@@ -605,7 +1014,7 @@
               actions.push({
                 label: "เปิดสมุด",
                 onClick: () => {
-                  window.location.href = `ruled-lines-card-only-template.html?bookId=${encodeURIComponent(book.id || message.bookId)}`;
+                  window.location.href = `workbook.html?bookId=${encodeURIComponent(book.id || message.bookId)}`;
                 },
               });
             } else if (status === BOOK_STATUS.draft) {
@@ -625,24 +1034,28 @@
             actions.push({
               label: "เปิดสมุด",
               onClick: () => {
-                window.location.href = `ruled-lines-card-only-template.html?bookId=${encodeURIComponent(book.id || message.bookId)}`;
+                window.location.href = `workbook.html?bookId=${encodeURIComponent(book.id || message.bookId)}`;
               },
             });
           }
 
           if (role === "reviewer") {
-            if (message.inboxItemId && message.inboxStatus === "pending") {
+            if (message.inboxItemId && inboxStatus === "pending") {
               actions.push({
                 label: "รับเข้าคลัง",
                 primary: true,
                 onClick: () => claimInboxCard(message),
               });
-            } else if (message.inboxStatus === "claimed") {
+            } else if (inboxStatus === "claimed") {
+              actions.push({
+                label: "รับเข้าคลังแล้ว",
+                primary: true,
+                disabled: true,
+              });
               actions.push({
                 label: "เปิดตรวจ",
-                primary: true,
                 onClick: () => {
-                  const submissionId = message.submissionId;
+                  const submissionId = localClaim?.submissionId || message.submissionId;
                   const href = submissionId
                     ? `exam-reviewer-console.html?submissionId=${encodeURIComponent(submissionId)}`
                     : "exam-reviewer-console.html";
@@ -663,7 +1076,7 @@
               (message.direction === "out" ? pairingContext?.user?.displayName : "") ||
               "",
             senderAvatarUrl:
-              message.senderAvatarUrl ||
+              resolveBookCardAvatarUrl(message, book) ||
               (message.direction === "out" ? resolveSenderAvatarUrl() : ""),
           });
         };
@@ -912,21 +1325,41 @@
             importBookTransfer(result.bookTransfer);
             const isReturn = result.bookTransfer?.direction === "to-student";
             const nextStatus = isReturn ? BOOK_STATUS.reviewed : BOOK_STATUS.underReview;
+            const submissionId = result.bookTransfer?.submission?.id || null;
+            const fromAvatarUrl =
+              result.fromAvatarUrl ||
+              message.fromAvatarUrl ||
+              message.senderAvatarUrl ||
+              (isReturn ? resolveReviewerAvatarUrl() : "");
+            const fromDisplayName = result.fromDisplayName || message.senderName || "";
+            chat.markInboxItemClaimed?.(message.inboxItemId, {
+              direction: result.bookTransfer?.direction || message.inboxDirection,
+              bookId: result.bookTransfer?.book?.id || message.bookId,
+              bookRevision: result.bookTransfer?.book?.revision || message.book?.revision,
+              submissionId,
+              fromUserId: result.fromUserId || message.fromUserId,
+              fromAvatarUrl,
+              fromDisplayName,
+            });
             chat.upsertMessage(threadId, {
               ...message,
               inboxStatus: "claimed",
               inboxDirection: result.bookTransfer?.direction || message.inboxDirection,
               bookStatus: nextStatus,
+              senderName: fromDisplayName || message.senderName,
+              senderAvatarUrl: fromAvatarUrl,
+              fromAvatarUrl,
               book: {
                 ...(message.book || {}),
                 status: nextStatus,
               },
-              submissionId: result.bookTransfer?.submission?.id || null,
+              submissionId,
             });
             const title = message.book?.title || message.bookTitle || "สมุด";
             appendSystem(
               isReturn ? `รับผลตรวจ「${title}」แล้ว — ดูที่ ผลตรวจของฉัน` : `รับสมุด「${title}」เข้าคลังแล้ว`
             );
+            refreshCurrentContactPendingCount();
             paintThread();
           } catch (error) {
             window.alert(error.message || "รับเข้าคลังไม่สำเร็จ");
@@ -938,13 +1371,41 @@
           try {
             const data = await PaligoInboxClient.listInbox();
             const items = data.items || [];
+            inboxContacts.forEach((contact) => {
+              contact.pendingCount = 0;
+            });
             items.forEach((item) => {
               if (role === "reviewer" && item.direction !== "to-reviewer") return;
               if (role === "student" && item.direction !== "to-student") return;
 
               const isReturn = item.direction === "to-student";
+              const peerUserId =
+                role === "reviewer"
+                  ? item.fromUserId || "student"
+                  : pairingContext?.pairing?.reviewerUserId || item.fromUserId || "reviewer";
+              const contactId = `${role === "reviewer" ? "student" : "reviewer"}:${peerUserId}`;
+              const itemThreadId = resolvePeerThreadId(peerUserId);
+              const existingContact = inboxContacts.get(contactId);
+              upsertContact({
+                id: contactId,
+                type: role === "reviewer" ? "student" : "reviewer",
+                peerUserId,
+                threadId: itemThreadId,
+                name:
+                  item.fromDisplayName ||
+                  (role === "reviewer" ? "นักเรียน" : pairingContext?.pairing?.reviewerDisplayName || "ครู"),
+                meta: isReturn ? "ผลตรวจจากครู" : "ส่งสมุดเข้ามา",
+                avatarUrl: item.fromAvatarUrl || "",
+                pendingCount: (existingContact?.pendingCount || 0) + (item.status === "pending" ? 1 : 0),
+                updatedAt: item.createdAt,
+              });
               const messageId = `inbox-${item.id}`;
-              const existing = chat.getMessages(threadId).find((m) => m.id === messageId);
+              const existing = chat.getMessages(itemThreadId).find((m) => m.id === messageId);
+              const localClaim = chat.getInboxItemClaim?.(item.id);
+              const fromAvatarUrl =
+                localClaim?.fromAvatarUrl ||
+                item.fromAvatarUrl ||
+                (isReturn ? resolveReviewerAvatarUrl() : "");
               const payload = {
                 id: messageId,
                 type: "book",
@@ -960,16 +1421,23 @@
                 },
                 bookStatus: isReturn ? BOOK_STATUS.reviewed : BOOK_STATUS.underReview,
                 subtitle: isReturn ? "ผลตรวจจากครู" : `revision ${item.bookRevision || 1}`,
-                senderName: item.fromDisplayName || (isReturn ? "ครู" : "นักเรียน"),
-                senderAvatarUrl: item.fromAvatarUrl || "",
+                senderName: localClaim?.fromDisplayName || item.fromDisplayName || (isReturn ? "ครู" : "นักเรียน"),
+                senderAvatarUrl: fromAvatarUrl,
+                fromAvatarUrl,
+                fromUserId: item.fromUserId,
                 inboxItemId: item.id,
                 inboxDirection: item.direction,
-                inboxStatus: item.status || "pending",
+                inboxStatus: localClaim?.status || item.status || "pending",
                 at: item.createdAt || new Date().toISOString(),
               };
-              if (existing) chat.upsertMessage(threadId, { ...existing, ...payload });
-              else chat.appendMessage(threadId, payload);
+              if (localClaim?.submissionId) payload.submissionId = localClaim.submissionId;
+              if (existing) chat.upsertMessage(itemThreadId, { ...existing, ...payload });
+              else chat.appendMessage(itemThreadId, payload);
             });
+            renderContactList();
+            if (!inboxContacts.size || !inboxContacts.has(Array.from(inboxContacts.values()).find((item) => item.threadId === threadId)?.id)) {
+              selectFirstContact();
+            }
             paintThread();
             isOfflineMode = false;
             setSyncStatus("");
@@ -987,7 +1455,21 @@
             linkBooks.hidden = false;
             linkReview.hidden = true;
             if (peerName) peerName.textContent = pairingContext?.pairing?.reviewerDisplayName || "ครู";
-            if (peerMeta) peerMeta.textContent = "ส่งสมุดข้อสอบและข้อความให้ครู";
+            if (peerMeta) {
+              const pairing = pairingContext?.pairing;
+              const roleHint =
+                pairing?.reviewerRoleLabel ||
+                (window.PaligoProfile?.formatReviewerProfileLabel
+                  ? PaligoProfile.formatReviewerProfileLabel(
+                      {
+                        profileStatus: pairing?.reviewerProfileStatus,
+                        capability: pairing?.reviewerCapability,
+                      },
+                      { short: true }
+                    )
+                  : "");
+              peerMeta.textContent = roleHint ? `${roleHint} · ส่งสมุดและข้อความ` : "ส่งสมุดข้อสอบและข้อความให้ครู";
+            }
           } else if (role === "reviewer") {
             openBookMenu.hidden = true;
             linkBooks.hidden = true;
@@ -1011,9 +1493,7 @@
           if (platform?.boot) {
             const { inboxAllowed } = await platform.boot();
             if (!inboxAllowed) {
-              showGate(
-                "กล่องข้อความปิดชั่วคราว — ใช้「โอนไฟล์ขั้นสูง」ในบัญชีแทน"
-              );
+              showGate("กล่องข้อความปิดชั่วคราว — ติดต่อผู้ดูแลระบบ");
               return;
             }
           } else if (!PaligoInboxClient.isInboxFeatureEnabled()) {
@@ -1054,12 +1534,6 @@
             pairingContext = loadCachedPairingContext(session.user.id);
           }
 
-          const reviewerId = pairingContext?.pairing?.reviewerUserId || "peer";
-          threadId =
-            role === "reviewer"
-              ? `reviewer-inbox-${session.user.id}`
-              : `student-${session.user.id}-${reviewerId}`;
-
           if (role === "student" && !pairingContext?.pairing) {
             showGate("ยังไม่ได้จับคู่ครู — ไปที่บัญชี แท็บจับคู่");
             return;
@@ -1067,6 +1541,7 @@
 
           showChat();
           configureRoleUi();
+          initializeContacts();
           await syncInboxToChat();
           paintThread();
         };
@@ -1076,14 +1551,9 @@
           session = cached;
           role = cached.user.role;
           pairingContext = loadCachedPairingContext(cached.user.id);
-          const reviewerId = pairingContext?.pairing?.reviewerUserId || "peer";
-          threadId =
-            role === "reviewer"
-              ? `reviewer-inbox-${cached.user.id}`
-              : `student-${cached.user.id}-${reviewerId}`;
-
           showChat();
           configureRoleUi();
+          initializeContacts();
           paintThread();
           if (offline) {
             isOfflineMode = true;
@@ -1113,12 +1583,8 @@
           } catch {
             pairingContext = loadCachedPairingContext(fresh.user.id);
           }
-          const reviewerId = pairingContext?.pairing?.reviewerUserId || "peer";
-          threadId =
-            role === "reviewer"
-              ? `reviewer-inbox-${fresh.user.id}`
-              : `student-${fresh.user.id}-${reviewerId}`;
           configureRoleUi();
+          initializeContacts();
           await syncInboxToChat();
           paintThread();
           if (!isOfflineMode) setSyncStatus("เชื่อมต่อแล้ว — sync ล่าสุด", "online");
@@ -1132,6 +1598,27 @@
             document.body.dataset.inboxSheetUiBound = "true";
 
             document.body.addEventListener("click", (event) => {
+              const contactButton = event.target.closest("[data-contact-id]");
+              if (contactButton) {
+                event.preventDefault();
+                setActiveContact(contactButton.dataset.contactId);
+                return;
+              }
+              if (event.target.closest("[data-open-group-sheet]")) {
+                event.preventDefault();
+                openGroupSheet();
+                return;
+              }
+              if (event.target.closest("[data-close-group-sheet]")) {
+                event.preventDefault();
+                closeGroupSheet();
+                return;
+              }
+              if (event.target.closest("[data-create-group-submit]")) {
+                event.preventDefault();
+                createGroupFromSheet();
+                return;
+              }
               if (event.target.closest("[data-open-book-menu]")) {
                 event.preventDefault();
                 openBookSheet();
@@ -1162,13 +1649,24 @@
               if (sheet?.classList.contains("is-open") && event.target === sheet) {
                 closeBookSheet();
               }
+              if (groupSheet?.classList.contains("is-open") && event.target === groupSheet) {
+                closeGroupSheet();
+              }
             });
 
             document.body.addEventListener("input", (event) => {
               const search = event.target.closest("[data-book-sheet-search]");
-              if (!search) return;
-              sheetSearchQuery = normalizeSheetSearch(search.value);
-              renderBookSheetList();
+              if (search) {
+                sheetSearchQuery = normalizeSheetSearch(search.value);
+                renderBookSheetList();
+                return;
+              }
+              if (
+                event.target.matches("[data-group-name]") ||
+                event.target.matches("[data-group-description]")
+              ) {
+                updateGroupPreview();
+              }
             });
 
             document.body.addEventListener("change", (event) => {
@@ -1180,12 +1678,23 @@
                 sheetFilterSubject = event.target.value;
                 renderBookSheetList();
               }
+              if (
+                event.target.matches("[data-group-owner-role]") ||
+                event.target.matches("[data-group-kind]") ||
+                event.target.matches("[data-group-theme]")
+              ) {
+                updateGroupPreview();
+              }
             });
 
             document.body.addEventListener("keydown", (event) => {
               if (event.key === "Escape" && event.target.closest("[data-book-sheet-search]")) {
                 event.preventDefault();
                 closeBookSheet();
+              }
+              if (event.key === "Escape" && groupSheet?.classList.contains("is-open")) {
+                event.preventDefault();
+                closeGroupSheet();
               }
             });
           }
@@ -1226,13 +1735,14 @@
         });
         window.addEventListener("scroll", hideChatContextMenu, true);
 
-        window.PaligoExamInboxUI = { openBookSheet, closeBookSheet };
+        window.PaligoExamInboxUI = { openBookSheet, closeBookSheet, openGroupSheet, closeGroupSheet };
 
         hideChatContextMenu();
         PaligoSidebar.autoInit();
         ensureOverlayPortals();
         bindInboxUi();
         closeBookSheet();
+        closeGroupSheet();
         bootstrap();
       })();
     </script>

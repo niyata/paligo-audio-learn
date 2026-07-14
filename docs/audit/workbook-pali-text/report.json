@@ -1,0 +1,21 @@
+{
+  "auditedAt": "2026-07-13T12:15:02.593Z",
+  "url": "http://127.0.0.1:8765/workbook.html?bookId=book-audit-workbook-pali",
+  "typed": {
+    "line": "       ๑               พุทฺโธ โย มงฺคลตฺถีนํ มงฺคลํ อิติ วิสฺสุโต",
+    "includesExpected": true,
+    "hasLegacy": false,
+    "hasNiggahita": true,
+    "hasPinthu": true,
+    "startsThaiNumber": true
+  },
+  "restored": {
+    "line": "       ๑               พุทฺโธ โย มงฺคลตฺถีนํ มงฺคลํ อิติ วิสฺสุโต",
+    "includesExpected": true,
+    "hasLegacy": false,
+    "hasNiggahita": true,
+    "hasPinthu": true
+  },
+  "errors": [],
+  "pass": true
+}

@@ -103,7 +103,7 @@ flowchart LR
 - `direction: to-reviewer` — หลังส่งตรวจ (submission + book snapshot)
 - `direction: to-student` — หลังตรวจเสร็จ (review + signature + คะแนน)
 
-**UI หลัก:** `ruled-lines-card-only-template.html?mode=review&submissionId=...` — กระดาษเดียวกับนักเรียน + stamp overlay + ลายเซ็นภาพ
+**UI หลัก:** `workbook.html?mode=review&submissionId=...` — กระดาษเดียวกับนักเรียน + stamp overlay + ลายเซ็นภาพ
 
 ---
 

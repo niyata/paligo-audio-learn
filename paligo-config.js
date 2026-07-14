@@ -50,11 +50,16 @@
     /** ตั้งใน LINE Developers Console → LIFF → Endpoint URL ชี้ exam-line-liff.html */
     lineLiffId: global.PALIGO_LINE_LIFF_ID || "",
     superAdminEmails: ["tha.std@paligo.jo", "tha.tc@paligo.jp"],
+    /** sync max with workers/src/review-capacity.js DEFAULT_REVIEWER_DAILY_LIMIT_MAX */
+    reviewCapacity: {
+      dailyLimitMax: 60,
+    },
   };
 
   global.PALIGO_CONFIG = Object.freeze({
     ...config,
     features: Object.freeze({ ...config.features }),
     lineLiffId: config.lineLiffId,
+    reviewCapacity: Object.freeze({ ...config.reviewCapacity }),
   });
 })(typeof window !== "undefined" ? window : globalThis);

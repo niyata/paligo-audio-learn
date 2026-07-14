@@ -1,0 +1,1889 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>กล่องข้อความ Tailwind Prototype · Paligo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="sidebar-nav.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              paligo: {
+                paper: "#fffaf0",
+                page: "#f8f0e3",
+                ink: "#343434",
+                blue: "#1f2d89",
+                line: "rgba(31, 45, 137, 0.16)",
+                muted: "rgba(52, 52, 52, 0.62)",
+                green: "#06c755",
+              },
+            },
+            boxShadow: {
+              paligo: "0 18px 46px rgba(74, 44, 10, 0.08)",
+              lift: "0 10px 28px rgba(31, 45, 137, 0.10)",
+            },
+            fontFamily: {
+              sans: ["Sarabun", "ui-sans-serif", "system-ui", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      [hidden] {
+        display: none !important;
+      }
+
+      .book-paper {
+        background:
+          repeating-linear-gradient(
+            to bottom,
+            transparent 0 calc(1.35rem - 1px),
+            rgba(31, 45, 137, 0.24) calc(1.35rem - 1px) 1.35rem
+          ),
+          #fffaf0;
+      }
+
+      .tw-icon {
+        width: 1rem;
+        height: 1rem;
+        flex: 0 0 auto;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        fill: none;
+      }
+    </style>
+  </head>
+  <body class="min-h-dvh bg-paligo-page font-sans text-paligo-ink antialiased">
+    <svg class="hidden" aria-hidden="true" focusable="false">
+      <!-- Lucide-compatible inline outline icons. Source style: https://github.com/lucide-icons/lucide -->
+      <symbol id="tw-icon-book-open" viewBox="0 0 24 24">
+        <path d="M12 7v14" /><path d="M3 18a2 2 0 0 0 2 2h7V6H5a2 2 0 0 0-2 2z" /><path d="M21 18a2 2 0 0 1-2 2h-7V6h7a2 2 0 0 1 2 2z" />
+      </symbol>
+      <symbol id="tw-icon-calendar-clock" viewBox="0 0 24 24">
+        <path d="M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6.5" /><path d="M16 2v4" /><path d="M8 2v4" /><path d="M3 10h18" /><circle cx="17" cy="17" r="5" /><path d="M17 14.5V17l1.5 1.5" />
+      </symbol>
+      <symbol id="tw-icon-file-up" viewBox="0 0 24 24">
+        <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z" /><path d="M14 2v6h6" /><path d="M12 12v6" /><path d="m9 15 3-3 3 3" />
+      </symbol>
+      <symbol id="tw-icon-image" viewBox="0 0 24 24">
+        <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="9" cy="9" r="2" /><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21" />
+      </symbol>
+      <symbol id="tw-icon-link" viewBox="0 0 24 24">
+        <path d="M10 13a5 5 0 0 0 7.1 0l2-2a5 5 0 0 0-7.1-7.1l-1.1 1.1" /><path d="M14 11a5 5 0 0 0-7.1 0l-2 2A5 5 0 0 0 12 20.1l1.1-1.1" />
+      </symbol>
+      <symbol id="tw-icon-message-circle" viewBox="0 0 24 24">
+        <path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 9 9 0 0 1-4.2-1.1L3 21l1.6-4.8A8.5 8.5 0 1 1 21 11.5Z" />
+      </symbol>
+      <symbol id="tw-icon-send" viewBox="0 0 24 24">
+        <path d="m22 2-7 20-4-9-9-4Z" /><path d="M22 2 11 13" />
+      </symbol>
+      <symbol id="tw-icon-smile" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10" /><path d="M8 14s1.5 2 4 2 4-2 4-2" /><path d="M9 9h.01" /><path d="M15 9h.01" />
+      </symbol>
+      <symbol id="tw-icon-users" viewBox="0 0 24 24">
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.9" /><path d="M16 3.1a4 4 0 0 1 0 7.8" />
+      </symbol>
+      <symbol id="tw-icon-x" viewBox="0 0 24 24">
+        <path d="M18 6 6 18" /><path d="m6 6 12 12" />
+      </symbol>
+    </svg>
+    <main class="mx-auto flex h-[calc(100dvh-var(--topbar-height,52px)-24px)] w-full max-w-[1440px] flex-col">
+      <div class="grid min-h-0 flex-1 gap-4 xl:grid-cols-[280px_minmax(0,1fr)] 2xl:grid-cols-[280px_minmax(0,1fr)_340px]">
+      <aside class="hidden min-h-0 overflow-hidden rounded-xl border border-paligo-line bg-white shadow-paligo xl:grid xl:grid-rows-[auto_minmax(0,1fr)]" aria-label="รายชื่อผู้ติดต่อใน Inbox">
+        <header class="border-b border-paligo-line bg-[#1f2d89]/[0.04] px-4 py-4">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <h2 class="text-base font-extrabold text-paligo-blue">Inbox Contacts</h2>
+              <p class="mt-1 text-xs font-bold text-paligo-muted">เลือกผู้รับก่อนส่งสมุดตรวจ</p>
+            </div>
+            <button class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-paligo-blue text-white shadow-sm transition hover:bg-[#182474] focus:outline-none focus:ring-2 focus:ring-paligo-blue/35" type="button" data-open-create-group-sheet aria-label="สร้างกลุ่มใหม่">
+              <svg class="tw-icon" aria-hidden="true"><use href="#tw-icon-users"></use></svg>
+            </button>
+          </div>
+          <button class="mt-3 inline-flex h-10 w-full items-center justify-center rounded-lg border border-paligo-line bg-white px-3 text-sm font-extrabold text-paligo-blue transition hover:bg-paligo-paper" type="button" data-open-create-group-sheet>
+            <svg class="tw-icon mr-2" aria-hidden="true"><use href="#tw-icon-users"></use></svg><span>สร้างกลุ่ม</span>
+          </button>
+          <label class="mt-3 block">
+            <span class="sr-only">ค้นหารายชื่อ</span>
+            <input class="h-10 w-full rounded-lg border border-paligo-line bg-white px-3 text-sm font-bold text-paligo-ink outline-none placeholder:text-paligo-muted focus:border-paligo-blue/45 focus:ring-2 focus:ring-paligo-blue/15" type="search" placeholder="ค้นหาครู ผู้ตรวจ หรือห้องเรียน" data-contact-search />
+          </label>
+        </header>
+        <div class="min-h-0 overflow-y-auto p-3">
+          <div class="grid gap-2" data-contact-list>
+            <button class="rounded-lg border-2 border-paligo-blue bg-paligo-blue/5 p-3 text-left shadow-sm" type="button" data-contact-item data-contact-type="direct" data-contact-name="พระครูทดสอบ" data-contact-role="อาจารย์ · สอนและตรวจ" data-contact-status="พร้อมรับสมุด" data-contact-avatar="monk" aria-pressed="true">
+              <div class="flex items-center gap-3">
+                <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-paligo-blue text-sm font-extrabold text-white">พ</span>
+                <span class="min-w-0 flex-1">
+                  <span class="block truncate text-sm font-extrabold text-paligo-blue">พระครูทดสอบ</span>
+                  <span class="block truncate text-xs font-bold text-paligo-muted">พร้อมรับสมุด · ตอบคืนนี้</span>
+                </span>
+                <span class="h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
+              </div>
+            </button>
+
+            <button class="rounded-lg border border-paligo-line bg-white p-3 text-left transition hover:border-paligo-blue/35 hover:bg-paligo-page/70" type="button" data-contact-item data-contact-type="direct" data-contact-name="แม่ชีอารีย์" data-contact-role="ผู้ตรวจ · ไวยากรณ์" data-contact-status="ว่าง 2 คิว" data-contact-avatar="nun" aria-pressed="false">
+              <div class="flex items-center gap-3">
+                <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-amber-100 text-sm font-extrabold text-paligo-blue">อ</span>
+                <span class="min-w-0 flex-1">
+                  <span class="block truncate text-sm font-extrabold text-paligo-blue">แม่ชีอารีย์</span>
+                  <span class="block truncate text-xs font-bold text-paligo-muted">ว่าง 2 คิว · เน้นศัพท์</span>
+                </span>
+                <span class="h-2.5 w-2.5 rounded-full bg-amber-500"></span>
+              </div>
+            </button>
+
+            <button class="overflow-hidden rounded-lg border border-paligo-line bg-white text-left transition hover:border-paligo-blue/35 hover:bg-paligo-page/70" type="button" data-contact-item data-contact-type="group" data-contact-name="กลุ่มประโยค ป.ธ. ๔" data-contact-role="กลุ่มตรวจ · 4 ผู้ตรวจ" data-contact-status="ส่งเข้าคิวกลุ่ม" data-contact-avatar="team" data-contact-cover="team" aria-pressed="false">
+              <div class="h-14 bg-[linear-gradient(135deg,#1f2d89_0%,#4452b8_52%,#f4b400_100%)]"></div>
+              <div class="-mt-5 flex items-end gap-3 px-3 pb-3">
+                <span class="grid h-12 w-12 shrink-0 place-items-center rounded-full border-2 border-white bg-paligo-blue text-sm font-extrabold text-white shadow-sm">ป.ธ.๔</span>
+                <span class="min-w-0 flex-1 pb-0.5">
+                  <span class="block truncate text-sm font-extrabold text-paligo-blue">กลุ่มประโยค ป.ธ. ๔</span>
+                  <span class="block truncate text-xs font-bold text-paligo-muted">คิวรวม · invite สมาชิกได้</span>
+                </span>
+                <span class="mb-2 h-2.5 w-2.5 rounded-full bg-paligo-blue"></span>
+              </div>
+            </button>
+          </div>
+          <p class="mt-3 hidden rounded-lg bg-paligo-page px-3 py-2 text-sm font-bold text-paligo-muted" data-contact-empty>
+            ไม่พบรายชื่อตามที่ค้นหา
+          </p>
+        </div>
+      </aside>
+      <section class="grid min-h-0 flex-1 grid-rows-[auto_auto_minmax(0,1fr)_auto] overflow-hidden rounded-xl border border-paligo-line bg-white shadow-paligo" data-inbox-shell>
+        <header class="flex flex-wrap items-center justify-between gap-3 border-b border-paligo-line bg-[#1f2d89]/[0.04] px-4 py-3">
+          <div class="flex min-w-0 items-center gap-3">
+            <img
+              class="h-12 w-12 shrink-0 rounded-full border-2 border-paligo-blue/15 object-cover shadow-sm"
+              src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Crect width='120' height='120' fill='%23fffaf0'/%3E%3Ccircle cx='60' cy='44' r='24' fill='%231f2d89'/%3E%3Cpath d='M20 116c8-32 72-32 80 0' fill='%231f2d89'/%3E%3C/svg%3E"
+              alt="รูปโปรไฟล์พระครูทดสอบ"
+              data-peer-avatar
+            />
+            <div class="min-w-0">
+              <p class="text-xs font-bold text-paligo-muted">Paligo Inbox · Tailwind prototype</p>
+              <h1 class="mt-0.5 truncate text-base font-extrabold text-paligo-blue" data-chat-peer-name>พระครูทดสอบ</h1>
+              <p class="mt-0.5 text-xs font-bold text-paligo-muted sm:text-sm" data-chat-peer-meta>อาจารย์ · สอนและตรวจ · ส่งสมุดและข้อความ</p>
+            </div>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button class="inline-flex h-11 items-center justify-center rounded-lg border border-paligo-line bg-paligo-paper px-4 text-sm font-extrabold text-paligo-blue shadow-sm transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-paligo-blue/35 xl:hidden" type="button" data-open-contact-sheet>
+              ผู้รับ: <span class="ml-1" data-selected-recipient-label>พระครูทดสอบ</span>
+            </button>
+            <button class="inline-flex h-11 items-center justify-center rounded-lg border border-paligo-line bg-paligo-paper px-4 text-sm font-extrabold text-paligo-blue shadow-sm transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-paligo-blue/35" type="button" data-refresh-chat data-open-loading>
+              โหลดใหม่
+            </button>
+            <a class="inline-flex h-11 items-center justify-center rounded-lg border border-paligo-line bg-white px-4 text-sm font-extrabold text-paligo-blue transition hover:bg-paligo-paper focus:outline-none focus:ring-2 focus:ring-paligo-blue/35" href="exam-account.html">
+              บัญชี
+            </a>
+          </div>
+        </header>
+
+        <div class="flex flex-wrap items-center justify-between gap-2 bg-amber-100/70 px-4 py-2 text-sm font-bold text-amber-800" data-sync-status role="status">
+          <span data-sync-status-text>ออฟไลน์ — แสดงข้อมูลในเครื่อง</span>
+          <button class="inline-flex h-9 items-center justify-center rounded-lg border border-amber-800/20 bg-white/80 px-3 text-xs font-extrabold text-amber-800 transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-amber-700/25" type="button" data-sync-retry data-open-loading>
+            ลองเชื่อมต่อใหม่
+          </button>
+        </div>
+
+        <div class="min-h-0 overflow-y-auto bg-paligo-page/80 px-3 py-4" data-chat-thread aria-live="polite">
+          <div class="mx-auto flex w-full max-w-3xl flex-col gap-3">
+            <div class="self-center rounded-full bg-paligo-blue/10 px-3 py-1 text-xs font-bold text-paligo-muted">
+              วันนี้
+            </div>
+
+            <article class="flex max-w-[82%] items-end gap-2 self-start">
+              <img
+                class="h-8 w-8 shrink-0 rounded-full border border-paligo-line bg-white object-cover"
+                src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Crect width='80' height='80' fill='%23fffaf0'/%3E%3Ccircle cx='40' cy='30' r='17' fill='%231f2d89'/%3E%3Cpath d='M12 78c8-24 48-24 56 0' fill='%231f2d89'/%3E%3C/svg%3E"
+                alt=""
+              />
+              <div class="grid gap-1">
+                <div class="rounded-[18px] rounded-bl-md border border-paligo-line bg-white px-4 py-2.5 text-sm font-semibold leading-relaxed shadow-sm">
+                  ส่งสมุดเล่มล่าสุดมาได้เลย เดี๋ยวครูตรวจให้ภายในคืนนี้
+                </div>
+                <time class="px-1 text-[11px] font-bold text-paligo-muted">09:42</time>
+              </div>
+            </article>
+
+            <article class="flex max-w-[82%] flex-col gap-1 self-end">
+              <div class="rounded-[18px] rounded-br-md bg-paligo-green px-4 py-2.5 text-sm font-semibold leading-relaxed text-white shadow-sm">
+                กราบนมัสการครับ ผมส่งเล่ม ป.ธ. ๔ วิชาแปลมคธเป็นไทยครับ
+              </div>
+              <time class="self-end px-1 text-[11px] font-bold text-paligo-muted">09:44</time>
+            </article>
+
+            <article class="w-full max-w-sm self-end overflow-hidden rounded-lg border border-paligo-line bg-white shadow-lift" data-book-card>
+              <div class="book-paper grid min-h-36 place-items-center gap-1 px-4 py-4 text-center text-paligo-blue">
+                <img
+                  class="h-14 w-14 rounded-full border-2 border-paligo-blue/20 object-cover"
+                  src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Crect width='120' height='120' fill='%23f4b400'/%3E%3Ccircle cx='60' cy='44' r='24' fill='%231f2d89'/%3E%3Cpath d='M20 116c8-30 72-30 80 0' fill='%231f2d89'/%3E%3C/svg%3E"
+                  alt="รูปโปรไฟล์กิตติ"
+                />
+                <p class="text-xs font-bold text-paligo-blue/80">ประโยค ป.ธ. ๔</p>
+                <p class="text-base font-extrabold">วิชา แปลมคธเป็นไทย</p>
+                <p class="text-xs font-bold text-paligo-blue/80">สอบ วันที่ ๑๐ กรกฎาคม ๒๕๖๙</p>
+              </div>
+              <div class="grid gap-2 px-4 py-3">
+                <div>
+                  <h2 class="text-sm font-extrabold text-paligo-blue">สมุดคำตอบ · กิตติ</h2>
+                  <p class="mt-0.5 text-xs font-bold text-paligo-muted">revision 1 · ฉบับร่าง</p>
+                </div>
+                <div class="grid grid-cols-2 border-t border-paligo-line pt-2 text-sm font-extrabold">
+                  <button class="min-h-11 text-paligo-blue transition hover:bg-paligo-blue/5" type="button">เปิดสมุด</button>
+                  <button class="min-h-11 rounded-lg bg-paligo-blue text-white transition hover:bg-[#182474]" type="button" data-open-book-sheet>ส่งตรวจ</button>
+                </div>
+              </div>
+            </article>
+
+            <article class="flex max-w-[82%] flex-col gap-1 self-start">
+              <div class="rounded-[18px] rounded-bl-md border border-paligo-line bg-white px-4 py-2.5 text-sm font-semibold leading-relaxed shadow-sm">
+                รับแล้วครับ ครูจะ stamp คะแนนและส่งคืนในกล่องนี้
+              </div>
+              <time class="px-1 text-[11px] font-bold text-paligo-muted">09:46</time>
+            </article>
+          </div>
+        </div>
+
+        <footer class="border-t border-paligo-line bg-white px-3 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]" data-chat-composer>
+          <div class="mx-auto grid w-full max-w-3xl gap-2">
+            <div class="flex flex-wrap items-center gap-2">
+              <button class="inline-flex h-11 items-center justify-center whitespace-nowrap rounded-lg border border-paligo-line bg-paligo-paper px-4 text-sm font-extrabold text-paligo-blue shadow-sm transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-paligo-blue/35" type="button" data-open-book-menu data-open-book-sheet aria-label="เลือกสมุดข้อสอบเพื่อส่งตรวจ">
+                <svg class="tw-icon mr-2" aria-hidden="true"><use href="#tw-icon-book-open"></use></svg><span>สมุดข้อสอบ</span>
+              </button>
+              <a class="inline-flex h-11 items-center justify-center whitespace-nowrap rounded-lg border border-paligo-line bg-white px-4 text-sm font-extrabold text-paligo-blue transition hover:bg-paligo-paper focus:outline-none focus:ring-2 focus:ring-paligo-blue/35" href="exam-books.html" data-link-books>
+                จัดการสมุด
+              </a>
+              <a class="inline-flex h-11 items-center justify-center whitespace-nowrap rounded-lg border border-paligo-line bg-white px-4 text-sm font-extrabold text-paligo-blue transition hover:bg-paligo-paper focus:outline-none focus:ring-2 focus:ring-paligo-blue/35" href="exam-reviewer-console.html" data-link-review hidden>
+                เปิดตรวจ
+              </a>
+              <button class="hidden h-11 items-center justify-center whitespace-nowrap rounded-lg border border-paligo-line bg-white px-4 text-sm font-extrabold text-paligo-blue transition hover:bg-paligo-paper focus:outline-none focus:ring-2 focus:ring-paligo-blue/35" type="button" data-open-group-file-sheet data-group-only hidden>
+                <svg class="tw-icon mr-2" aria-hidden="true"><use href="#tw-icon-file-up"></use></svg><span>ส่งไฟล์</span>
+              </button>
+              <button class="hidden h-11 items-center justify-center whitespace-nowrap rounded-lg border border-paligo-line bg-white px-4 text-sm font-extrabold text-paligo-blue transition hover:bg-paligo-paper focus:outline-none focus:ring-2 focus:ring-paligo-blue/35" type="button" data-open-group-schedule-sheet data-group-only hidden>
+                <svg class="tw-icon mr-2" aria-hidden="true"><use href="#tw-icon-calendar-clock"></use></svg><span>นัดเวลา</span>
+              </button>
+              <button class="hidden h-11 items-center justify-center whitespace-nowrap rounded-lg border border-paligo-line bg-white px-4 text-sm font-extrabold text-paligo-blue transition hover:bg-paligo-paper focus:outline-none focus:ring-2 focus:ring-paligo-blue/35" type="button" data-open-group-sticker-sheet data-group-only hidden>
+                <svg class="tw-icon mr-2" aria-hidden="true"><use href="#tw-icon-smile"></use></svg><span>สติกเกอร์</span>
+              </button>
+            </div>
+            <div class="flex items-end gap-2">
+              <textarea class="min-h-11 max-h-32 flex-1 resize-none rounded-[22px] border border-paligo-line bg-paligo-page px-4 py-2.5 text-sm font-semibold outline-none transition placeholder:text-paligo-muted focus:border-paligo-blue/45 focus:ring-2 focus:ring-paligo-blue/15" rows="1" placeholder="พิมพ์ข้อความ..." data-chat-input></textarea>
+              <button class="inline-flex h-11 shrink-0 items-center justify-center rounded-lg bg-paligo-blue px-5 text-sm font-extrabold text-white shadow-sm transition hover:bg-[#182474] focus:outline-none focus:ring-2 focus:ring-paligo-blue/35" type="button" data-send-text>
+                <svg class="tw-icon mr-2" aria-hidden="true"><use href="#tw-icon-send"></use></svg><span>ส่ง</span>
+              </button>
+            </div>
+          </div>
+        </footer>
+      </section>
+      <aside class="hidden min-h-0 overflow-hidden rounded-xl border border-paligo-line bg-white shadow-paligo 2xl:grid 2xl:grid-rows-[auto_minmax(0,1fr)]" aria-label="รายละเอียดกล่องข้อความ">
+        <header class="border-b border-paligo-line bg-[#1f2d89]/[0.04] px-4 py-4">
+          <div class="flex items-center gap-3">
+            <img class="h-14 w-14 rounded-full border-2 border-paligo-blue/15 object-cover" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Crect width='120' height='120' fill='%23fffaf0'/%3E%3Ccircle cx='60' cy='44' r='24' fill='%231f2d89'/%3E%3Cpath d='M20 116c8-32 72-32 80 0' fill='%231f2d89'/%3E%3C/svg%3E" alt="" data-context-avatar />
+            <div class="min-w-0">
+              <p class="truncate text-sm font-extrabold text-paligo-blue" data-context-contact-name>พระครูทดสอบ</p>
+              <p class="text-xs font-bold text-paligo-muted" data-context-contact-status>ผู้ตรวจหลัก · พร้อมรับสมุด</p>
+            </div>
+          </div>
+        </header>
+        <div class="min-h-0 overflow-y-auto p-4">
+          <section class="grid gap-3">
+            <img class="hidden h-28 w-full rounded-lg border border-paligo-line object-cover" src="" alt="" data-context-cover hidden />
+            <div class="rounded-lg border border-paligo-line bg-paligo-paper p-3">
+              <p class="text-xs font-extrabold text-paligo-muted">สถานะรอบนี้</p>
+              <p class="mt-1 text-lg font-extrabold text-paligo-blue" data-context-round-title>1 เล่มกำลังรอส่งตรวจ</p>
+              <p class="mt-1 text-xs font-bold text-paligo-muted">ผู้รับ: <span data-selected-recipient-label>พระครูทดสอบ</span></p>
+              <div class="mt-3 h-2 overflow-hidden rounded-full bg-paligo-blue/10">
+                <div class="h-full w-2/3 rounded-full bg-paligo-blue"></div>
+              </div>
+            </div>
+
+            <div class="hidden rounded-lg border border-paligo-line bg-white p-3" data-group-workflow hidden>
+              <div class="flex items-center justify-between gap-2">
+                <div>
+                  <p class="text-xs font-extrabold text-paligo-muted">Group Workflow</p>
+                  <h2 class="mt-0.5 text-sm font-extrabold text-paligo-blue" data-group-workflow-title>กลุ่มประโยค ป.ธ. ๔</h2>
+                </div>
+                <span class="rounded-full bg-paligo-blue/10 px-2.5 py-1 text-xs font-extrabold text-paligo-blue" data-group-member-count>4 คน</span>
+              </div>
+              <div class="mt-3 grid grid-cols-2 gap-2">
+                <button class="inline-flex h-10 items-center justify-center rounded-lg bg-paligo-blue px-3 text-xs font-extrabold text-white" type="button" data-copy-invite><svg class="tw-icon mr-1.5" aria-hidden="true"><use href="#tw-icon-link"></use></svg><span>คัดลอก invite</span></button>
+                <button class="inline-flex h-10 items-center justify-center rounded-lg border border-paligo-line bg-paligo-paper px-3 text-xs font-extrabold text-paligo-blue" type="button" data-open-contact-sheet><svg class="tw-icon mr-1.5" aria-hidden="true"><use href="#tw-icon-users"></use></svg><span>เพิ่มสมาชิก</span></button>
+                <button class="inline-flex h-10 items-center justify-center rounded-lg border border-paligo-line bg-white px-3 text-xs font-extrabold text-paligo-blue" type="button" data-open-group-file-sheet><svg class="tw-icon mr-1.5" aria-hidden="true"><use href="#tw-icon-file-up"></use></svg><span>ส่งไฟล์</span></button>
+                <button class="inline-flex h-10 items-center justify-center rounded-lg border border-paligo-line bg-white px-3 text-xs font-extrabold text-paligo-blue" type="button" data-open-group-schedule-sheet><svg class="tw-icon mr-1.5" aria-hidden="true"><use href="#tw-icon-calendar-clock"></use></svg><span>นัดตรวจ</span></button>
+                <button class="inline-flex h-10 items-center justify-center rounded-lg border border-paligo-line bg-white px-3 text-xs font-extrabold text-paligo-blue" type="button" data-open-group-sticker-sheet><svg class="tw-icon mr-1.5" aria-hidden="true"><use href="#tw-icon-smile"></use></svg><span>สติกเกอร์</span></button>
+              </div>
+              <p class="mt-2 text-xs font-bold text-paligo-muted" data-invite-status>invite: PALIGO-PT4-2569</p>
+              <div class="mt-3 grid gap-2 rounded-lg border border-paligo-line bg-paligo-paper p-2">
+                <p class="text-xs font-extrabold text-paligo-muted">ไฟล์ล่าสุดในกลุ่ม</p>
+                <div class="flex items-center gap-2 rounded-lg bg-white px-2 py-2">
+                  <span class="grid h-8 w-8 place-items-center rounded-lg bg-paligo-blue/10 text-xs font-extrabold text-paligo-blue">PDF</span>
+                  <span class="min-w-0 flex-1">
+                    <span class="block truncate text-xs font-extrabold text-paligo-blue">แนวตรวจแปลมคธเป็นไทย.pdf</span>
+                    <span class="block text-[11px] font-bold text-paligo-muted">ใช้กับกลุ่มประโยค ป.ธ. ๔</span>
+                  </span>
+                </div>
+              </div>
+              <div class="mt-3 grid gap-2" data-group-member-list>
+                <div class="flex items-center gap-2 rounded-lg bg-paligo-page px-2 py-2">
+                  <span class="grid h-8 w-8 place-items-center rounded-full bg-paligo-blue text-xs font-extrabold text-white">พ</span>
+                  <span class="min-w-0 flex-1">
+                    <span class="block truncate text-xs font-extrabold text-paligo-blue">พระครูทดสอบ</span>
+                    <span class="block text-[11px] font-bold text-paligo-muted">เจ้าของกลุ่ม</span>
+                  </span>
+                </div>
+                <div class="flex items-center gap-2 rounded-lg bg-paligo-page px-2 py-2" data-group-member>
+                  <span class="grid h-8 w-8 place-items-center rounded-full bg-amber-100 text-xs font-extrabold text-paligo-blue">อ</span>
+                  <span class="min-w-0 flex-1">
+                    <span class="block truncate text-xs font-extrabold text-paligo-blue">แม่ชีอารีย์</span>
+                    <span class="block text-[11px] font-bold text-paligo-muted">ผู้ตรวจ</span>
+                  </span>
+                  <button class="rounded-md border border-paligo-line bg-white px-2 py-1 text-[11px] font-extrabold text-red-700" type="button" data-remove-member>ลบ</button>
+                </div>
+                <div class="flex items-center gap-2 rounded-lg bg-paligo-page px-2 py-2" data-group-member>
+                  <span class="grid h-8 w-8 place-items-center rounded-full bg-paligo-blue/10 text-xs font-extrabold text-paligo-blue">ส</span>
+                  <span class="min-w-0 flex-1">
+                    <span class="block truncate text-xs font-extrabold text-paligo-blue">ครูสมชาย</span>
+                    <span class="block text-[11px] font-bold text-paligo-muted">ผู้ตรวจสำรอง</span>
+                  </span>
+                  <button class="rounded-md border border-paligo-line bg-white px-2 py-1 text-[11px] font-extrabold text-red-700" type="button" data-remove-member>ลบ</button>
+                </div>
+                <div class="flex items-center gap-2 rounded-lg bg-paligo-page px-2 py-2" data-group-member>
+                  <span class="grid h-8 w-8 place-items-center rounded-full bg-paligo-blue/10 text-xs font-extrabold text-paligo-blue">น</span>
+                  <span class="min-w-0 flex-1">
+                    <span class="block truncate text-xs font-extrabold text-paligo-blue">พระมหานที</span>
+                    <span class="block text-[11px] font-bold text-paligo-muted">ผู้ตรวจ</span>
+                  </span>
+                  <button class="rounded-md border border-paligo-line bg-white px-2 py-1 text-[11px] font-extrabold text-red-700" type="button" data-remove-member>ลบ</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="rounded-lg border border-paligo-line bg-white p-3">
+              <div class="flex items-center justify-between gap-2">
+                <h2 class="text-sm font-extrabold text-paligo-blue">สมุดล่าสุด</h2>
+                <button class="text-xs font-extrabold text-paligo-blue" type="button" data-open-book-sheet>ดูทั้งหมด</button>
+              </div>
+              <div class="mt-3 grid gap-2">
+                <button class="rounded-lg border border-paligo-blue/25 bg-paligo-blue/5 p-3 text-left" type="button" data-open-book-sheet>
+                  <p class="text-sm font-extrabold text-paligo-blue">สมุดคำตอบ · กิตติ</p>
+                  <p class="mt-0.5 text-xs font-bold text-paligo-muted">ป.ธ. ๔ · แปลมคธเป็นไทย</p>
+                </button>
+                <button class="rounded-lg border border-paligo-line bg-white p-3 text-left" type="button" data-open-book-sheet>
+                  <p class="text-sm font-extrabold text-paligo-blue">สมุดคำตอบ · กิตติ</p>
+                  <p class="mt-0.5 text-xs font-bold text-paligo-muted">ป.ธ. ๕ · สัมพันธ์ไทย</p>
+                </button>
+              </div>
+            </div>
+
+            <div class="rounded-lg border border-paligo-line bg-white p-3">
+              <h2 class="text-sm font-extrabold text-paligo-blue">Workflow</h2>
+              <ol class="mt-3 grid gap-3 text-sm font-bold text-paligo-muted">
+                <li class="flex gap-3"><span class="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-paligo-blue text-xs text-white">1</span><span>เลือกสมุดจากคลัง</span></li>
+                <li class="flex gap-3"><span class="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-paligo-blue text-xs text-white">2</span><span>ส่งเข้ากล่องครู</span></li>
+                <li class="flex gap-3"><span class="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-paligo-blue/10 text-xs text-paligo-blue">3</span><span>รับผลตรวจกลับ</span></li>
+              </ol>
+            </div>
+          </section>
+        </div>
+      </aside>
+      </div>
+      <section class="mt-4 hidden rounded-xl border border-paligo-line bg-white p-5 shadow-paligo" data-inbox-gate hidden>
+        <h2 class="text-base font-extrabold text-paligo-blue">กล่องข้อความ</h2>
+        <p class="mt-1 text-sm font-bold text-paligo-muted" data-gate-message>กำลังตรวจสอบบัญชี...</p>
+        <div class="mt-4 flex flex-wrap gap-2">
+          <a class="inline-flex h-11 items-center justify-center rounded-lg bg-paligo-blue px-4 text-sm font-extrabold text-white" href="exam-account.html">เข้าสู่ระบบ</a>
+          <a class="inline-flex h-11 items-center justify-center rounded-lg border border-paligo-line bg-white px-4 text-sm font-extrabold text-paligo-blue" href="exam-books.html">สมุดข้อสอบ</a>
+        </div>
+      </section>
+    </main>
+
+    <div class="fixed inset-0 z-[490] hidden items-end justify-center bg-black/35 p-4" data-paligo-overlay data-contact-sheet aria-hidden="true">
+      <section class="grid max-h-[min(640px,calc(100dvh-2rem))] w-full max-w-md grid-rows-[auto_minmax(0,1fr)] overflow-hidden rounded-xl bg-white shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="contact-sheet-title">
+        <header class="border-b border-paligo-line bg-[#1f2d89]/[0.04] px-4 py-3">
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <h2 class="text-base font-extrabold text-paligo-blue" id="contact-sheet-title">เลือกผู้รับสมุดข้อสอบ</h2>
+              <p class="mt-1 text-xs font-bold text-paligo-muted">มุมมองนักเรียน · เลือกครูหรือกลุ่มตรวจ</p>
+            </div>
+            <button class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-paligo-line bg-white text-lg font-extrabold text-paligo-blue" type="button" data-close-contact-sheet data-close-overlays aria-label="ปิด">
+              ×
+            </button>
+          </div>
+        </header>
+        <div class="min-h-0 overflow-y-auto p-3">
+          <button class="mb-3 inline-flex h-11 w-full items-center justify-center rounded-lg bg-paligo-blue px-4 text-sm font-extrabold text-white shadow-sm" type="button" data-open-create-group-sheet>
+            <svg class="tw-icon mr-2" aria-hidden="true"><use href="#tw-icon-users"></use></svg><span>สร้างกลุ่มใหม่</span>
+          </button>
+          <div class="grid gap-2" data-contact-list="mobile">
+            <button class="rounded-lg border-2 border-paligo-blue bg-paligo-blue/5 p-3 text-left shadow-sm" type="button" data-contact-item data-contact-type="direct" data-contact-name="พระครูทดสอบ" data-contact-role="อาจารย์ · สอนและตรวจ" data-contact-status="พร้อมรับสมุด" data-contact-avatar="monk" aria-pressed="true">
+              <div class="flex items-center gap-3">
+                <span class="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-paligo-blue text-sm font-extrabold text-white">พ</span>
+                <span class="min-w-0 flex-1">
+                  <span class="block truncate text-sm font-extrabold text-paligo-blue">พระครูทดสอบ</span>
+                  <span class="block truncate text-xs font-bold text-paligo-muted">พร้อมรับสมุด · ตอบคืนนี้</span>
+                </span>
+              </div>
+            </button>
+
+            <button class="rounded-lg border border-paligo-line bg-white p-3 text-left transition hover:border-paligo-blue/35 hover:bg-paligo-page/70" type="button" data-contact-item data-contact-type="direct" data-contact-name="แม่ชีอารีย์" data-contact-role="ผู้ตรวจ · ไวยากรณ์" data-contact-status="ว่าง 2 คิว" data-contact-avatar="nun" aria-pressed="false">
+              <div class="flex items-center gap-3">
+                <span class="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-amber-100 text-sm font-extrabold text-paligo-blue">อ</span>
+                <span class="min-w-0 flex-1">
+                  <span class="block truncate text-sm font-extrabold text-paligo-blue">แม่ชีอารีย์</span>
+                  <span class="block truncate text-xs font-bold text-paligo-muted">ว่าง 2 คิว · เน้นศัพท์</span>
+                </span>
+              </div>
+            </button>
+
+            <button class="overflow-hidden rounded-lg border border-paligo-line bg-white text-left transition hover:border-paligo-blue/35 hover:bg-paligo-page/70" type="button" data-contact-item data-contact-type="group" data-contact-name="กลุ่มประโยค ป.ธ. ๔" data-contact-role="กลุ่มตรวจ · 4 ผู้ตรวจ" data-contact-status="ส่งเข้าคิวกลุ่ม" data-contact-avatar="team" data-contact-cover="team" aria-pressed="false">
+              <div class="h-16 bg-[linear-gradient(135deg,#1f2d89_0%,#4452b8_52%,#f4b400_100%)]"></div>
+              <div class="-mt-6 flex items-end gap-3 px-3 pb-3">
+                <span class="grid h-12 w-12 shrink-0 place-items-center rounded-full border-2 border-white bg-paligo-blue text-sm font-extrabold text-white shadow-sm">ป.ธ.๔</span>
+                <span class="min-w-0 flex-1 pb-0.5">
+                  <span class="block truncate text-sm font-extrabold text-paligo-blue">กลุ่มประโยค ป.ธ. ๔</span>
+                  <span class="block truncate text-xs font-bold text-paligo-muted">ส่งเข้าคิวกลุ่ม · invite สมาชิกได้</span>
+                </span>
+              </div>
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="fixed inset-0 z-[500] hidden items-end justify-center bg-black/35 p-4 sm:items-center" data-paligo-overlay data-create-group-sheet aria-hidden="true">
+      <section class="grid max-h-[min(720px,calc(100dvh-2rem))] w-full max-w-lg grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden rounded-xl bg-white shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="create-group-title">
+        <header class="border-b border-paligo-line bg-[#1f2d89]/[0.04] px-4 py-3">
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <h2 class="text-base font-extrabold text-paligo-blue" id="create-group-title">สร้างกลุ่มใหม่</h2>
+              <p class="mt-1 text-xs font-bold text-paligo-muted">ครูและนักเรียนสร้างกลุ่มได้ · invite สมาชิกภายหลัง</p>
+            </div>
+            <button class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-paligo-line bg-white text-paligo-blue" type="button" data-close-overlays aria-label="ปิด">
+              <svg class="tw-icon" aria-hidden="true"><use href="#tw-icon-x"></use></svg>
+            </button>
+          </div>
+        </header>
+        <div class="min-h-0 overflow-y-auto p-4">
+          <div class="overflow-hidden rounded-xl border border-paligo-line bg-white shadow-sm">
+            <div class="h-28 bg-[linear-gradient(135deg,#1f2d89_0%,#4452b8_52%,#f4b400_100%)]" data-create-group-cover-preview></div>
+            <div class="-mt-8 flex items-end gap-3 px-4 pb-4">
+              <span class="grid h-16 w-16 shrink-0 place-items-center rounded-full border-2 border-white bg-paligo-blue text-sm font-extrabold text-white shadow-sm" data-create-group-avatar-preview>กลุ่ม</span>
+              <span class="min-w-0 flex-1 pb-1">
+                <span class="block truncate text-base font-extrabold text-paligo-blue" data-create-group-title-preview>กลุ่มใหม่</span>
+                <span class="block truncate text-xs font-bold text-paligo-muted" data-create-group-meta-preview>สร้างโดยนักเรียน · invite สมาชิกได้</span>
+              </span>
+            </div>
+          </div>
+
+          <div class="mt-4 grid gap-3">
+            <label class="grid gap-1 text-xs font-extrabold text-paligo-muted">
+              ชื่อกลุ่ม
+              <input class="h-11 rounded-lg border border-paligo-line bg-white px-3 text-sm font-bold text-paligo-ink outline-none focus:border-paligo-blue/45 focus:ring-2 focus:ring-paligo-blue/15" type="text" value="กลุ่มประโยค ป.ธ. ๔" data-create-group-name maxlength="48" />
+            </label>
+            <div class="grid gap-3 sm:grid-cols-2">
+              <label class="grid gap-1 text-xs font-extrabold text-paligo-muted">
+                ผู้สร้าง
+                <select class="h-11 rounded-lg border border-paligo-line bg-white px-3 text-sm font-bold text-paligo-ink outline-none focus:border-paligo-blue/45 focus:ring-2 focus:ring-paligo-blue/15" data-create-group-owner-role>
+                  <option value="student">นักเรียน</option>
+                  <option value="teacher">ครู/ผู้ตรวจ</option>
+                </select>
+              </label>
+              <label class="grid gap-1 text-xs font-extrabold text-paligo-muted">
+                ประเภทกลุ่ม
+                <select class="h-11 rounded-lg border border-paligo-line bg-white px-3 text-sm font-bold text-paligo-ink outline-none focus:border-paligo-blue/45 focus:ring-2 focus:ring-paligo-blue/15" data-create-group-kind>
+                  <option value="study">กลุ่มเรียน</option>
+                  <option value="review">กลุ่มตรวจ</option>
+                  <option value="exam">กลุ่มข้อสอบ</option>
+                </select>
+              </label>
+            </div>
+            <label class="grid gap-1 text-xs font-extrabold text-paligo-muted">
+              คำอธิบายสั้น
+              <input class="h-11 rounded-lg border border-paligo-line bg-white px-3 text-sm font-bold text-paligo-ink outline-none focus:border-paligo-blue/45 focus:ring-2 focus:ring-paligo-blue/15" type="text" value="คิวรวม · แชร์สมุด ไฟล์ นัดเวลา และสติกเกอร์" data-create-group-description maxlength="80" />
+            </label>
+            <label class="grid gap-1 text-xs font-extrabold text-paligo-muted">
+              โทนปกกลุ่ม
+              <select class="h-11 rounded-lg border border-paligo-line bg-white px-3 text-sm font-bold text-paligo-ink outline-none focus:border-paligo-blue/45 focus:ring-2 focus:ring-paligo-blue/15" data-create-group-theme>
+                <option value="blue-gold">น้ำเงิน-ทอง</option>
+                <option value="green-gold">เขียว-ทอง</option>
+                <option value="rose-blue">ชมพู-น้ำเงิน</option>
+              </select>
+            </label>
+            <div class="grid gap-2">
+              <p class="text-xs font-extrabold text-paligo-muted">รูปโปรไฟล์กลุ่ม</p>
+              <div class="grid grid-cols-3 gap-2 sm:grid-cols-5" data-create-group-avatar-template-list>
+                <button class="grid min-h-[84px] place-items-center gap-1 rounded-lg border-2 border-paligo-blue bg-paligo-blue/5 p-2 text-xs font-extrabold text-paligo-blue shadow-sm" type="button" data-create-group-avatar-template="community" aria-pressed="true">
+                  <span class="grid h-11 w-11 place-items-center rounded-full bg-white" data-template-preview></span>
+                  <span>ชุมชน</span>
+                </button>
+                <button class="grid min-h-[84px] place-items-center gap-1 rounded-lg border border-paligo-line bg-white p-2 text-xs font-extrabold text-paligo-blue" type="button" data-create-group-avatar-template="scripture" aria-pressed="false">
+                  <span class="grid h-11 w-11 place-items-center rounded-full bg-white" data-template-preview></span>
+                  <span>ตำรา</span>
+                </button>
+                <button class="grid min-h-[84px] place-items-center gap-1 rounded-lg border border-paligo-line bg-white p-2 text-xs font-extrabold text-paligo-blue" type="button" data-create-group-avatar-template="exam" aria-pressed="false">
+                  <span class="grid h-11 w-11 place-items-center rounded-full bg-white" data-template-preview></span>
+                  <span>ข้อสอบ</span>
+                </button>
+                <button class="grid min-h-[84px] place-items-center gap-1 rounded-lg border border-paligo-line bg-white p-2 text-xs font-extrabold text-paligo-blue" type="button" data-create-group-avatar-template="lotus" aria-pressed="false">
+                  <span class="grid h-11 w-11 place-items-center rounded-full bg-white" data-template-preview></span>
+                  <span>ปทุม</span>
+                </button>
+                <button class="grid min-h-[84px] place-items-center gap-1 rounded-lg border border-paligo-line bg-white p-2 text-xs font-extrabold text-paligo-blue" type="button" data-create-group-avatar-template="wheel" aria-pressed="false">
+                  <span class="grid h-11 w-11 place-items-center rounded-full bg-white" data-template-preview></span>
+                  <span>ธรรมจักร</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <footer class="grid gap-2 border-t border-paligo-line bg-white px-4 py-3 sm:grid-cols-[1fr_auto_auto]">
+          <p class="self-center text-xs font-bold text-paligo-muted" data-create-group-status>กลุ่มใหม่จะถูกเพิ่มในรายชื่อผู้รับทันที</p>
+          <button class="inline-flex h-11 items-center justify-center rounded-lg bg-paligo-blue px-4 text-sm font-extrabold text-white" type="button" data-create-group-submit>
+            <svg class="tw-icon mr-2" aria-hidden="true"><use href="#tw-icon-users"></use></svg><span>สร้างกลุ่ม</span>
+          </button>
+          <button class="inline-flex h-11 items-center justify-center rounded-lg border border-paligo-line bg-white px-4 text-sm font-extrabold text-paligo-blue" type="button" data-close-overlays>ยกเลิก</button>
+        </footer>
+      </section>
+    </div>
+
+    <div class="fixed inset-0 z-[500] hidden items-end justify-center bg-black/35 p-4 sm:items-center" data-paligo-overlay data-book-sheet aria-hidden="true">
+      <section class="grid max-h-[min(720px,calc(100dvh-2rem))] w-full max-w-3xl grid-rows-[auto_auto_minmax(0,1fr)_auto] overflow-hidden rounded-xl bg-paligo-paper shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="book-sheet-title">
+        <header class="border-b border-paligo-line bg-white px-4 py-3">
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <h2 class="text-base font-extrabold text-paligo-blue" id="book-sheet-title">เลือกสมุดเพื่อส่งตรวจ</h2>
+              <p class="mt-1 text-xs font-bold text-paligo-muted">ส่งให้ <span data-book-sheet-recipient>พระครูทดสอบ</span></p>
+            </div>
+            <button class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-paligo-line bg-white text-lg font-extrabold text-paligo-blue" type="button" data-close-book-sheet data-close-overlays aria-label="ปิด">
+              ×
+            </button>
+          </div>
+        </header>
+
+        <div class="grid gap-3 border-b border-paligo-line bg-white/70 px-4 py-3 sm:grid-cols-[1fr_auto_auto]" data-book-sheet-toolbar>
+          <label class="grid gap-1 text-xs font-extrabold text-paligo-muted">
+            ค้นหา
+            <input class="h-11 rounded-lg border border-paligo-line bg-white px-3 text-sm font-bold text-paligo-ink outline-none focus:border-paligo-blue/45 focus:ring-2 focus:ring-paligo-blue/15" type="search" placeholder="ชื่อสมุด วิชา ชั้น วันสอบ..." data-book-sheet-search autocomplete="off" enterkeyhint="search" />
+          </label>
+          <label class="grid gap-1 text-xs font-extrabold text-paligo-muted">
+            สถานะ
+            <select class="h-11 rounded-lg border border-paligo-line bg-white px-3 text-sm font-bold text-paligo-ink outline-none focus:border-paligo-blue/45 focus:ring-2 focus:ring-paligo-blue/15" data-book-sheet-filter-status aria-label="กรองตามสถานะ">
+              <option value="">ทุกสถานะ</option>
+              <option value="draft">ฉบับร่าง</option>
+              <option value="under_review">อยู่ระหว่างตรวจ</option>
+            </select>
+          </label>
+          <label class="grid gap-1 text-xs font-extrabold text-paligo-muted">
+            วิชา
+            <select class="h-11 rounded-lg border border-paligo-line bg-white px-3 text-sm font-bold text-paligo-ink outline-none focus:border-paligo-blue/45 focus:ring-2 focus:ring-paligo-blue/15" data-book-sheet-filter-subject aria-label="กรองตามวิชา">
+              <option value="">ทุกวิชา</option>
+              <option value="pali-to-thai">แปลมคธเป็นไทย</option>
+              <option value="thai-relation">สัมพันธ์ไทย</option>
+            </select>
+          </label>
+          <button class="hidden h-11 self-end rounded-lg border border-paligo-line bg-white px-4 text-sm font-extrabold text-paligo-blue" type="button" data-book-sheet-filter-reset>
+            ล้าง
+          </button>
+        </div>
+
+        <p class="hidden border-b border-paligo-line bg-white/70 px-4 py-3 text-sm font-bold text-paligo-muted" data-book-sheet-filter-empty>
+          ไม่พบสมุดตามที่ค้นหา — ลองเปลี่ยนคำค้นหาหรือล้างตัวกรอง
+        </p>
+
+        <div class="min-h-0 overflow-y-auto p-4" data-book-sheet-list>
+          <div class="grid gap-3 sm:grid-cols-2">
+            <button class="overflow-hidden rounded-lg border-2 border-paligo-blue bg-white text-left shadow-lift" type="button" data-select-book>
+              <div class="book-paper grid min-h-36 place-items-center gap-1 px-4 py-4 text-center text-paligo-blue">
+                <img class="h-12 w-12 rounded-full border-2 border-paligo-blue/20 object-cover" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Crect width='120' height='120' fill='%23f4b400'/%3E%3Ccircle cx='60' cy='44' r='24' fill='%231f2d89'/%3E%3Cpath d='M20 116c8-30 72-30 80 0' fill='%231f2d89'/%3E%3C/svg%3E" alt="" />
+                <p class="text-xs font-bold text-paligo-blue/80">ประโยค ป.ธ. ๔</p>
+                <p class="text-sm font-extrabold">แปลมคธเป็นไทย</p>
+                <p class="text-xs font-bold text-paligo-blue/80">๑๐ กรกฎาคม ๒๕๖๙</p>
+              </div>
+              <div class="grid gap-1 px-4 py-3">
+                <p class="text-sm font-extrabold text-paligo-blue">สมุดคำตอบ · กิตติ</p>
+                <p class="text-xs font-bold text-paligo-muted">เลือกไว้แล้ว · revision 1</p>
+              </div>
+            </button>
+
+            <button class="overflow-hidden rounded-lg border border-paligo-line bg-white text-left shadow-sm transition hover:border-paligo-blue/35" type="button">
+              <div class="book-paper grid min-h-36 place-items-center gap-1 px-4 py-4 text-center text-paligo-blue">
+                <img class="h-12 w-12 rounded-full border-2 border-paligo-blue/20 object-cover" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Crect width='120' height='120' fill='%23f4b400'/%3E%3Ccircle cx='60' cy='44' r='24' fill='%231f2d89'/%3E%3Cpath d='M20 116c8-30 72-30 80 0' fill='%231f2d89'/%3E%3C/svg%3E" alt="" />
+                <p class="text-xs font-bold text-paligo-blue/80">ประโยค ป.ธ. ๕</p>
+                <p class="text-sm font-extrabold">สัมพันธ์ไทย</p>
+                <p class="text-xs font-bold text-paligo-blue/80">๑๒ กรกฎาคม ๒๕๖๙</p>
+              </div>
+              <div class="grid gap-1 px-4 py-3">
+                <p class="text-sm font-extrabold text-paligo-blue">สมุดคำตอบ · กิตติ</p>
+                <p class="text-xs font-bold text-paligo-muted">ฉบับร่าง · revision 2</p>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <footer class="grid gap-3 border-t border-paligo-line bg-white px-4 py-3 sm:grid-cols-[1fr_auto]">
+          <div data-book-sheet-confirm>
+            <p class="text-sm font-bold text-paligo-muted" data-book-sheet-confirm-text>เลือกแล้ว: สมุดคำตอบ · กิตติ</p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button class="inline-flex h-11 items-center justify-center rounded-lg bg-paligo-blue px-4 text-sm font-extrabold text-white" type="button" data-book-sheet-confirm-send data-close-overlays data-confirm-send-label>ยืนยันส่งตรวจ</button>
+            <button class="inline-flex h-11 items-center justify-center rounded-lg border border-paligo-line bg-white px-4 text-sm font-extrabold text-paligo-blue" type="button" data-book-sheet-clear-selection>เปลี่ยนสมุด</button>
+            <button class="inline-flex h-11 items-center justify-center rounded-lg border border-paligo-line bg-white px-4 text-sm font-extrabold text-paligo-blue" type="button" data-close-book-sheet data-close-overlays>ปิด</button>
+          </div>
+        </footer>
+      </section>
+    </div>
+
+    <div class="fixed inset-0 z-[520] hidden place-items-center bg-black/30 p-4" data-paligo-overlay data-loading-modal aria-hidden="true">
+      <div class="grid w-full max-w-xs place-items-center gap-3 rounded-xl bg-white px-6 py-5 text-center shadow-2xl">
+        <div class="h-10 w-10 animate-spin rounded-full border-4 border-paligo-blue/20 border-t-paligo-blue"></div>
+        <p class="text-sm font-extrabold text-paligo-blue">กำลังโหลดกล่องข้อความ...</p>
+        <button class="inline-flex h-10 items-center justify-center rounded-lg border border-paligo-line bg-paligo-paper px-4 text-xs font-extrabold text-paligo-blue" type="button" data-close-overlays>ปิดตัวอย่าง</button>
+      </div>
+    </div>
+
+    <div class="fixed inset-0 z-[510] hidden items-end justify-center bg-black/35 p-4 sm:items-center" data-paligo-overlay data-group-file-sheet aria-hidden="true">
+      <section class="grid max-h-[min(640px,calc(100dvh-2rem))] w-full max-w-lg grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden rounded-xl bg-white shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="group-file-title">
+        <header class="border-b border-paligo-line bg-[#1f2d89]/[0.04] px-4 py-3">
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <h2 class="text-base font-extrabold text-paligo-blue" id="group-file-title">ส่งไฟล์เข้ากลุ่ม</h2>
+              <p class="mt-1 text-xs font-bold text-paligo-muted">ส่งให้ <span data-group-file-recipient>กลุ่มประโยค ป.ธ. ๔</span></p>
+            </div>
+            <button class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-paligo-line bg-white text-lg font-extrabold text-paligo-blue" type="button" data-close-overlays aria-label="ปิด">
+              <svg class="tw-icon" aria-hidden="true"><use href="#tw-icon-x"></use></svg>
+            </button>
+          </div>
+        </header>
+        <div class="min-h-0 overflow-y-auto p-4">
+          <label class="grid min-h-40 place-items-center rounded-xl border-2 border-dashed border-paligo-blue/25 bg-paligo-paper px-4 py-6 text-center">
+            <input class="sr-only" type="file" data-group-file-input accept="image/*,.pdf,.png,.jpg,.jpeg,.webp,.gif,.doc,.docx,.pages,.txt" />
+            <span class="grid gap-2">
+              <span class="mx-auto grid h-12 w-12 place-items-center rounded-lg bg-paligo-blue text-sm font-extrabold text-white"><svg class="tw-icon h-5 w-5" aria-hidden="true"><use href="#tw-icon-file-up"></use></svg></span>
+              <span class="text-sm font-extrabold text-paligo-blue" data-group-file-name>เลือกไฟล์จากเครื่อง</span>
+              <span class="text-xs font-bold text-paligo-muted">PDF, รูปภาพ, เอกสาร หรือไฟล์ประกอบการตรวจ</span>
+            </span>
+          </label>
+          <div class="mt-4 hidden overflow-hidden rounded-xl border border-paligo-line bg-white shadow-sm" data-group-file-preview-frame hidden>
+            <img class="max-h-64 w-full bg-paligo-page object-contain" src="" alt="ตัวอย่างรูปภาพก่อนส่ง" data-group-file-preview />
+            <div class="px-3 py-2 text-xs font-bold text-paligo-muted" data-group-file-preview-meta>พร้อมส่งรูปภาพ</div>
+          </div>
+          <label class="mt-4 grid gap-1 text-xs font-extrabold text-paligo-muted">
+            หมายเหตุถึงกลุ่ม
+            <textarea class="min-h-24 resize-none rounded-lg border border-paligo-line bg-white px-3 py-2 text-sm font-bold text-paligo-ink outline-none focus:border-paligo-blue/45 focus:ring-2 focus:ring-paligo-blue/15" rows="3" placeholder="เช่น แนบ rubric สำหรับตรวจรอบนี้" data-group-file-note></textarea>
+          </label>
+        </div>
+        <footer class="grid gap-2 border-t border-paligo-line bg-white px-4 py-3 sm:grid-cols-[1fr_auto_auto]">
+          <p class="self-center text-xs font-bold text-paligo-muted" data-group-file-status>ยังไม่ได้เลือกไฟล์</p>
+          <button class="inline-flex h-11 items-center justify-center rounded-lg bg-paligo-blue px-4 text-sm font-extrabold text-white" type="button" data-send-group-file data-close-overlays><svg class="tw-icon mr-2" aria-hidden="true"><use href="#tw-icon-send"></use></svg><span>ส่งไฟล์</span></button>
+          <button class="inline-flex h-11 items-center justify-center rounded-lg border border-paligo-line bg-white px-4 text-sm font-extrabold text-paligo-blue" type="button" data-close-overlays>ยกเลิก</button>
+        </footer>
+      </section>
+    </div>
+
+    <div class="fixed inset-0 z-[510] hidden items-end justify-center bg-black/35 p-4 sm:items-center" data-paligo-overlay data-group-schedule-sheet aria-hidden="true">
+      <section class="grid max-h-[min(620px,calc(100dvh-2rem))] w-full max-w-lg grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden rounded-xl bg-white shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="group-schedule-title">
+        <header class="border-b border-paligo-line bg-[#1f2d89]/[0.04] px-4 py-3">
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <h2 class="text-base font-extrabold text-paligo-blue" id="group-schedule-title">นัดวันและเวลาตรวจ</h2>
+              <p class="mt-1 text-xs font-bold text-paligo-muted">ใช้ตัวเลือกวันที่และเวลาของระบบ</p>
+            </div>
+            <button class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-paligo-line bg-white text-lg font-extrabold text-paligo-blue" type="button" data-close-overlays aria-label="ปิด">
+              <svg class="tw-icon" aria-hidden="true"><use href="#tw-icon-x"></use></svg>
+            </button>
+          </div>
+        </header>
+        <div class="min-h-0 overflow-y-auto p-4">
+          <div class="grid gap-3 sm:grid-cols-2">
+            <label class="grid gap-1 text-xs font-extrabold text-paligo-muted">
+              วันที่ตรวจ
+              <input class="h-11 rounded-lg border border-paligo-line bg-white px-3 text-sm font-bold text-paligo-ink outline-none focus:border-paligo-blue/45 focus:ring-2 focus:ring-paligo-blue/15" type="date" data-group-date-picker />
+            </label>
+            <label class="grid gap-1 text-xs font-extrabold text-paligo-muted">
+              เวลา
+              <input class="h-11 rounded-lg border border-paligo-line bg-white px-3 text-sm font-bold text-paligo-ink outline-none focus:border-paligo-blue/45 focus:ring-2 focus:ring-paligo-blue/15" type="time" data-group-time-picker step="900" />
+            </label>
+          </div>
+          <fieldset class="mt-4 grid gap-2 rounded-lg border border-paligo-line bg-paligo-paper p-3">
+            <legend class="px-1 text-xs font-extrabold text-paligo-muted">การแจ้งเตือน</legend>
+            <label class="flex min-h-11 items-center gap-3 rounded-lg bg-white px-3 text-sm font-bold text-paligo-ink">
+              <input class="h-5 w-5 accent-paligo-blue" type="checkbox" data-group-reminder checked />
+              แจ้งเตือนสมาชิกก่อนถึงเวลา
+            </label>
+            <label class="grid gap-1 text-xs font-extrabold text-paligo-muted">
+              หัวข้อนัดหมาย
+              <input class="h-11 rounded-lg border border-paligo-line bg-white px-3 text-sm font-bold text-paligo-ink outline-none focus:border-paligo-blue/45 focus:ring-2 focus:ring-paligo-blue/15" type="text" value="ตรวจสมุดประโยค ป.ธ. ๔" data-group-schedule-title-input />
+            </label>
+          </fieldset>
+        </div>
+        <footer class="grid gap-2 border-t border-paligo-line bg-white px-4 py-3 sm:grid-cols-[1fr_auto_auto]">
+          <p class="self-center text-xs font-bold text-paligo-muted" data-group-schedule-status>เลือกวันที่และเวลาเพื่อนัดตรวจ</p>
+          <button class="inline-flex h-11 items-center justify-center rounded-lg bg-paligo-blue px-4 text-sm font-extrabold text-white" type="button" data-send-group-schedule data-close-overlays><svg class="tw-icon mr-2" aria-hidden="true"><use href="#tw-icon-send"></use></svg><span>ส่งนัดหมาย</span></button>
+          <button class="inline-flex h-11 items-center justify-center rounded-lg border border-paligo-line bg-white px-4 text-sm font-extrabold text-paligo-blue" type="button" data-close-overlays>ยกเลิก</button>
+        </footer>
+      </section>
+    </div>
+
+    <div class="fixed inset-0 z-[510] hidden items-end justify-center bg-black/35 p-4 sm:items-center" data-paligo-overlay data-group-sticker-sheet aria-hidden="true">
+      <section class="grid max-h-[min(680px,calc(100dvh-2rem))] w-full max-w-xl grid-rows-[auto_minmax(0,1fr)] overflow-hidden rounded-xl bg-white shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="group-sticker-title">
+        <header class="border-b border-paligo-line bg-[#1f2d89]/[0.04] px-4 py-3">
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <h2 class="text-base font-extrabold text-paligo-blue" id="group-sticker-title">สติกเกอร์ประจำกลุ่ม</h2>
+              <p class="mt-1 text-xs font-bold text-paligo-muted">Mascot: ป.ธ. ๔ · เลือกอารมณ์เพื่อส่งในแชท</p>
+            </div>
+            <button class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-paligo-line bg-white text-lg font-extrabold text-paligo-blue" type="button" data-close-overlays aria-label="ปิด">
+              <svg class="tw-icon" aria-hidden="true"><use href="#tw-icon-x"></use></svg>
+            </button>
+          </div>
+        </header>
+        <div class="min-h-0 overflow-y-auto bg-paligo-paper p-4">
+          <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            <button class="rounded-xl border border-paligo-line bg-white p-3 text-center shadow-sm transition hover:border-paligo-blue/35 hover:shadow-lift" type="button" data-send-group-sticker data-sticker-emotion="ดีใจ" data-sticker-tone="happy">
+              <span class="grid aspect-square place-items-center rounded-lg bg-[#fff4bf]" data-sticker-preview="happy"></span>
+              <span class="mt-2 block text-sm font-extrabold text-paligo-blue">ดีใจ</span>
+              <span class="block text-xs font-bold text-paligo-muted">พร้อมลุย</span>
+            </button>
+            <button class="rounded-xl border border-paligo-line bg-white p-3 text-center shadow-sm transition hover:border-paligo-blue/35 hover:shadow-lift" type="button" data-send-group-sticker data-sticker-emotion="รับทราบ" data-sticker-tone="ok">
+              <span class="grid aspect-square place-items-center rounded-lg bg-[#e8f5ff]" data-sticker-preview="ok"></span>
+              <span class="mt-2 block text-sm font-extrabold text-paligo-blue">รับทราบ</span>
+              <span class="block text-xs font-bold text-paligo-muted">เห็นแล้ว</span>
+            </button>
+            <button class="rounded-xl border border-paligo-line bg-white p-3 text-center shadow-sm transition hover:border-paligo-blue/35 hover:shadow-lift" type="button" data-send-group-sticker data-sticker-emotion="เร่งตรวจ" data-sticker-tone="focus">
+              <span class="grid aspect-square place-items-center rounded-lg bg-[#eef0ff]" data-sticker-preview="focus"></span>
+              <span class="mt-2 block text-sm font-extrabold text-paligo-blue">เร่งตรวจ</span>
+              <span class="block text-xs font-bold text-paligo-muted">โหมดตั้งใจ</span>
+            </button>
+            <button class="rounded-xl border border-paligo-line bg-white p-3 text-center shadow-sm transition hover:border-paligo-blue/35 hover:shadow-lift" type="button" data-send-group-sticker data-sticker-emotion="สงสัย" data-sticker-tone="question">
+              <span class="grid aspect-square place-items-center rounded-lg bg-[#fff3e8]" data-sticker-preview="question"></span>
+              <span class="mt-2 block text-sm font-extrabold text-paligo-blue">สงสัย</span>
+              <span class="block text-xs font-bold text-paligo-muted">ขอถามเพิ่ม</span>
+            </button>
+            <button class="rounded-xl border border-paligo-line bg-white p-3 text-center shadow-sm transition hover:border-paligo-blue/35 hover:shadow-lift" type="button" data-send-group-sticker data-sticker-emotion="ขอบคุณ" data-sticker-tone="thanks">
+              <span class="grid aspect-square place-items-center rounded-lg bg-[#f1ffe8]" data-sticker-preview="thanks"></span>
+              <span class="mt-2 block text-sm font-extrabold text-paligo-blue">ขอบคุณ</span>
+              <span class="block text-xs font-bold text-paligo-muted">ส่งกำลังใจ</span>
+            </button>
+            <button class="rounded-xl border border-paligo-line bg-white p-3 text-center shadow-sm transition hover:border-paligo-blue/35 hover:shadow-lift" type="button" data-send-group-sticker data-sticker-emotion="พักก่อน" data-sticker-tone="rest">
+              <span class="grid aspect-square place-items-center rounded-lg bg-[#f7f1ff]" data-sticker-preview="rest"></span>
+              <span class="mt-2 block text-sm font-extrabold text-paligo-blue">พักก่อน</span>
+              <span class="block text-xs font-bold text-paligo-muted">เดี๋ยวมาต่อ</span>
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="fixed z-[530] hidden w-52 overflow-hidden rounded-lg border border-paligo-line bg-white py-1 text-sm font-extrabold text-paligo-blue shadow-2xl" data-paligo-overlay data-chat-context-menu role="menu" aria-label="เมนูข้อความ">
+      <button class="block w-full px-4 py-2 text-left hover:bg-paligo-page" type="button">เปิดสมุด</button>
+      <button class="block w-full px-4 py-2 text-left hover:bg-paligo-page" type="button">ยกเลิกส่งตรวจ</button>
+      <button class="block w-full px-4 py-2 text-left text-red-700 hover:bg-red-50" type="button">ลบจากแชท</button>
+    </div>
+
+    <script src="paligo-inbox-client.js"></script>
+    <script>
+      (() => {
+        const mockSession = {
+          sessionToken: "tailwind-prototype",
+          expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+          user: {
+            id: "tailwind-student",
+            role: "student",
+            displayName: "กิตติ",
+            email: "prototype@paligo.local",
+          },
+        };
+        if (window.PaligoInboxClient?.getSession) {
+          window.PaligoInboxClient.getSession = () => mockSession;
+          window.PaligoInboxClient.isLoggedIn = () => true;
+          window.PaligoInboxClient.getInboxRole = () => "student";
+        }
+      })();
+    </script>
+    <script src="paligo-nav-config.js"></script>
+    <script src="paligo-platform.js"></script>
+    <script src="sidebar-nav.js"></script>
+    <script src="paligo-shell-init.js"></script>
+    <script>
+      (() => {
+        const bookSheet = document.querySelector("[data-book-sheet]");
+        const contactSheet = document.querySelector("[data-contact-sheet]");
+        const createGroupSheet = document.querySelector("[data-create-group-sheet]");
+        const groupFileSheet = document.querySelector("[data-group-file-sheet]");
+        const groupScheduleSheet = document.querySelector("[data-group-schedule-sheet]");
+        const groupStickerSheet = document.querySelector("[data-group-sticker-sheet]");
+        const loadingModal = document.querySelector("[data-loading-modal]");
+        const contextMenu = document.querySelector("[data-chat-context-menu]");
+        const chatThread = document.querySelector("[data-chat-thread] .mx-auto");
+        const chatInput = document.querySelector("[data-chat-input]");
+        const groupOnlyControls = Array.from(document.querySelectorAll("[data-group-only]"));
+        const groupFileInput = document.querySelector("[data-group-file-input]");
+        const groupFileName = document.querySelector("[data-group-file-name]");
+        const groupFileStatus = document.querySelector("[data-group-file-status]");
+        const groupFileNote = document.querySelector("[data-group-file-note]");
+        const groupFilePreviewFrame = document.querySelector("[data-group-file-preview-frame]");
+        const groupFilePreview = document.querySelector("[data-group-file-preview]");
+        const groupFilePreviewMeta = document.querySelector("[data-group-file-preview-meta]");
+        const groupDatePicker = document.querySelector("[data-group-date-picker]");
+        const groupTimePicker = document.querySelector("[data-group-time-picker]");
+        const groupScheduleStatus = document.querySelector("[data-group-schedule-status]");
+        const groupScheduleTitleInput = document.querySelector("[data-group-schedule-title-input]");
+        const sheetSearch = document.querySelector("[data-book-sheet-search]");
+        const sheetStatus = document.querySelector("[data-book-sheet-filter-status]");
+        const sheetSubject = document.querySelector("[data-book-sheet-filter-subject]");
+        const sheetReset = document.querySelector("[data-book-sheet-filter-reset]");
+        const sheetEmpty = document.querySelector("[data-book-sheet-filter-empty]");
+        const sheetItems = Array.from(document.querySelectorAll("[data-book-sheet-list] button"));
+        const confirmText = document.querySelector("[data-book-sheet-confirm-text]");
+        const syncText = document.querySelector("[data-sync-status-text]");
+        const contactSearch = document.querySelector("[data-contact-search]");
+        const contactLists = Array.from(document.querySelectorAll("[data-contact-list]"));
+        let contactItems = Array.from(document.querySelectorAll("[data-contact-item]"));
+        const contactEmpty = document.querySelector("[data-contact-empty]");
+        const peerName = document.querySelector("[data-chat-peer-name]");
+        const peerMeta = document.querySelector("[data-chat-peer-meta]");
+        const peerAvatar = document.querySelector("[data-peer-avatar]");
+        const contextName = document.querySelector("[data-context-contact-name]");
+        const contextStatus = document.querySelector("[data-context-contact-status]");
+        const contextAvatar = document.querySelector("[data-context-avatar]");
+        const contextCover = document.querySelector("[data-context-cover]");
+        const contextRoundTitle = document.querySelector("[data-context-round-title]");
+        const groupWorkflow = document.querySelector("[data-group-workflow]");
+        const groupWorkflowTitle = document.querySelector("[data-group-workflow-title]");
+        const groupMemberCount = document.querySelector("[data-group-member-count]");
+        const inviteStatus = document.querySelector("[data-invite-status]");
+        const confirmSendLabel = document.querySelector("[data-confirm-send-label]");
+        const createGroupName = document.querySelector("[data-create-group-name]");
+        const createGroupOwnerRole = document.querySelector("[data-create-group-owner-role]");
+        const createGroupKind = document.querySelector("[data-create-group-kind]");
+        const createGroupDescription = document.querySelector("[data-create-group-description]");
+        const createGroupTheme = document.querySelector("[data-create-group-theme]");
+        const createGroupAvatarTemplates = Array.from(document.querySelectorAll("[data-create-group-avatar-template]"));
+        const createGroupTitlePreview = document.querySelector("[data-create-group-title-preview]");
+        const createGroupMetaPreview = document.querySelector("[data-create-group-meta-preview]");
+        const createGroupAvatarPreview = document.querySelector("[data-create-group-avatar-preview]");
+        const createGroupCoverPreview = document.querySelector("[data-create-group-cover-preview]");
+        const createGroupStatus = document.querySelector("[data-create-group-status]");
+        const recipientLabels = Array.from(document.querySelectorAll("[data-selected-recipient-label], [data-book-sheet-recipient], [data-group-file-recipient]"));
+        const avatarSources = {
+          monk: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Crect width='120' height='120' fill='%23fffaf0'/%3E%3Ccircle cx='60' cy='44' r='24' fill='%231f2d89'/%3E%3Cpath d='M20 116c8-32 72-32 80 0' fill='%231f2d89'/%3E%3C/svg%3E",
+          nun: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Crect width='120' height='120' fill='%23fffaf0'/%3E%3Ccircle cx='60' cy='42' r='22' fill='%23f4b400'/%3E%3Cpath d='M24 118c7-34 65-34 72 0' fill='%231f2d89'/%3E%3Ctext x='60' y='50' text-anchor='middle' font-size='26' font-family='Sarabun,Arial' font-weight='800' fill='%23fffaf0'%3Eอ%3C/text%3E%3C/svg%3E",
+          student: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Crect width='120' height='120' fill='%23fffaf0'/%3E%3Ccircle cx='60' cy='42' r='23' fill='%23f4b400'/%3E%3Cpath d='M24 118c7-34 65-34 72 0' fill='%231f2d89'/%3E%3C/svg%3E",
+          teacher: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Crect width='120' height='120' fill='%23fffaf0'/%3E%3Ccircle cx='60' cy='42' r='23' fill='%231f2d89'/%3E%3Cpath d='M22 118c7-36 69-36 76 0' fill='%23f4b400'/%3E%3C/svg%3E",
+          team: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Crect width='120' height='120' rx='24' fill='%231f2d89'/%3E%3Ccircle cx='35' cy='46' r='14' fill='%23fffaf0' opacity='.92'/%3E%3Ccircle cx='60' cy='38' r='17' fill='%23f4b400'/%3E%3Ccircle cx='85' cy='46' r='14' fill='%23fffaf0' opacity='.92'/%3E%3Cpath d='M18 112c5-28 79-28 84 0' fill='%23fffaf0' opacity='.95'/%3E%3Ctext x='60' y='91' text-anchor='middle' font-size='20' font-family='Sarabun,Arial' font-weight='800' fill='%231f2d89'%3Eป.ธ.๔%3C/text%3E%3C/svg%3E",
+        };
+        const mockDomainContacts = [
+          { name: "พีท ป.ธ. ๔", email: "pete.std@paligo.jp", role: "นักเรียน · ป.ธ. ๔", status: "ออนไลน์ · ส่งสมุดได้", avatar: "student", badge: "พี", accent: "bg-amber-100 text-paligo-blue", dot: "bg-emerald-500" },
+          { name: "ครูปรีชา", email: "precha.tc@paligo.in.th", role: "ครู/ผู้ตรวจ · แปลมคธเป็นไทย", status: "พร้อมรับสมุด", avatar: "teacher", badge: "ป", accent: "bg-paligo-blue text-white", dot: "bg-emerald-500" },
+          { name: "ประทีป ป.ธ. ๕", email: "prateep.std@paligo.jp", role: "นักเรียน · ป.ธ. ๕", status: "กำลังทำแบบฝึก", avatar: "student", badge: "ปท", accent: "bg-amber-100 text-paligo-blue", dot: "bg-amber-500" },
+          { name: "พิมพ์ชนก ป.ธ. ๔", email: "pim.std@paligo.jp", role: "นักเรียน · ป.ธ. ๔", status: "รอคำแนะนำ", avatar: "student", badge: "พิ", accent: "bg-paligo-page text-paligo-blue", dot: "bg-amber-500" },
+          { name: "นิรันดร์ ป.ธ. ๓", email: "niran.std@paligo.jp", role: "นักเรียน · ป.ธ. ๓", status: "ออนไลน์", avatar: "student", badge: "นิ", accent: "bg-amber-100 text-paligo-blue", dot: "bg-emerald-500" },
+          { name: "อารยา ป.ธ. ๖", email: "araya.std@paligo.jp", role: "นักเรียน · ป.ธ. ๖", status: "ส่งสมุดล่าสุดวันนี้", avatar: "student", badge: "อา", accent: "bg-paligo-page text-paligo-blue", dot: "bg-emerald-500" },
+          { name: "ครูสมชาย", email: "somchai.tc@paligo.in.th", role: "ครู/ผู้ตรวจ · ไวยากรณ์", status: "ว่าง 2 คิว", avatar: "teacher", badge: "ส", accent: "bg-paligo-blue text-white", dot: "bg-amber-500" },
+          { name: "ครูมาลี", email: "malee.tc@paligo.in.th", role: "ครู/ผู้ตรวจ · สัมพันธ์ไทย", status: "ตรวจได้คืนนี้", avatar: "teacher", badge: "ม", accent: "bg-paligo-blue text-white", dot: "bg-emerald-500" },
+          { name: "ครูกิตติพงษ์", email: "kittipong.tc@paligo.in.th", role: "ครู/ผู้ตรวจ · ประโยคสูง", status: "รับเฉพาะกลุ่ม", avatar: "teacher", badge: "ก", accent: "bg-paligo-blue text-white", dot: "bg-slate-300" },
+          { name: "ชัญญา ป.ธ. ๔", email: "chanya.std@paligo.jp", role: "นักเรียน · ป.ธ. ๔", status: "พร้อมแชร์สมุด", avatar: "student", badge: "ช", accent: "bg-amber-100 text-paligo-blue", dot: "bg-emerald-500" },
+        ];
+        const coverSources = {
+          team: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 240'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' x2='1' y1='0' y2='1'%3E%3Cstop stop-color='%231f2d89'/%3E%3Cstop offset='.58' stop-color='%234452b8'/%3E%3Cstop offset='1' stop-color='%23f4b400'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='640' height='240' fill='url(%23g)'/%3E%3Cpath d='M0 174c95-46 172-52 258-18 86 35 171 26 268-24 48-25 86-36 114-40v148H0z' fill='%23fffaf0' opacity='.16'/%3E%3Ccircle cx='98' cy='70' r='34' fill='%23fffaf0' opacity='.18'/%3E%3Ccircle cx='548' cy='70' r='46' fill='%23fffaf0' opacity='.14'/%3E%3Ctext x='48' y='118' font-size='44' font-family='Sarabun,Arial' font-weight='800' fill='%23fffaf0'%3Eกลุ่มประโยค ป.ธ. ๔%3C/text%3E%3Ctext x='50' y='160' font-size='22' font-family='Sarabun,Arial' font-weight='700' fill='%23fffaf0' opacity='.82'%3Eคิวตรวจรวม · แปลมคธเป็นไทย · สัมพันธ์ไทย%3C/text%3E%3C/svg%3E",
+        };
+        const stickerLabels = {
+          happy: "ดีใจ",
+          ok: "รับทราบ",
+          focus: "เร่งตรวจ",
+          question: "สงสัย",
+          thanks: "ขอบคุณ",
+          rest: "พักก่อน",
+        };
+        let selectedRecipient = {
+          type: "direct",
+          name: "พีท ป.ธ. ๔",
+          email: "pete.std@paligo.jp",
+          role: "นักเรียน · ป.ธ. ๔",
+          status: "ออนไลน์ · ส่งสมุดได้",
+          avatar: "student",
+          cover: "",
+        };
+        let groupFilePreviewUrl = "";
+        let selectedGroupAvatarTemplate = "community";
+
+        const showOverlay = (node) => {
+          if (!node) return;
+          node.hidden = false;
+          node.classList.remove("hidden");
+          node.classList.add(node.dataset.chatContextMenu !== undefined ? "block" : "grid");
+          node.setAttribute("aria-hidden", "false");
+        };
+
+        const hideOverlay = (node) => {
+          if (!node) return;
+          node.hidden = true;
+          node.classList.add("hidden");
+          node.classList.remove("grid", "block");
+          node.setAttribute("aria-hidden", "true");
+        };
+
+        const groupThemeMap = {
+          "blue-gold": {
+            cover: "linear-gradient(135deg,#1f2d89 0%,#4452b8 52%,#f4b400 100%)",
+            primary: "#1f2d89",
+            secondary: "#4452b8",
+            accent: "#f4b400",
+          },
+          "green-gold": {
+            cover: "linear-gradient(135deg,#2d5016 0%,#5f8c36 56%,#f4b400 100%)",
+            primary: "#2d5016",
+            secondary: "#5f8c36",
+            accent: "#f4b400",
+          },
+          "rose-blue": {
+            cover: "linear-gradient(135deg,#9f2f68 0%,#4452b8 58%,#f7c7d9 100%)",
+            primary: "#9f2f68",
+            secondary: "#4452b8",
+            accent: "#f7c7d9",
+          },
+        };
+
+        const svgDataUrl = (svg) => `data:image/svg+xml,${encodeURIComponent(svg)}`;
+
+        const groupShortLabel = (name) => {
+          const text = String(name || "กลุ่ม").replace(/\s+/g, "");
+          const ptMatch = text.match(/ป\.?ธ\.?([๐-๙0-9]+)/);
+          if (ptMatch) return `ป.ธ.${ptMatch[1]}`;
+          return text.slice(0, 4) || "กลุ่ม";
+        };
+
+        const groupAvatarIconSvg = (templateKey, theme, label = "") => {
+          const iconColor = theme.primary;
+          const accent = theme.accent;
+          const cream = "#fffaf0";
+          const icons = {
+            community: `
+              <circle cx="49" cy="66" r="19" fill="${cream}" opacity=".92"/>
+              <circle cx="80" cy="55" r="26" fill="${accent}"/>
+              <circle cx="111" cy="66" r="19" fill="${cream}" opacity=".92"/>
+              <path d="M30 134c7-38 93-38 100 0" fill="${cream}" opacity=".95"/>
+              <path d="M53 137c5-31 49-31 54 0" fill="${iconColor}" opacity=".92"/>
+            `,
+            scripture: `
+              <path d="M42 48h33c12 0 20 8 20 20v52H57c-9 0-15-6-15-15V48z" fill="${cream}" opacity=".96"/>
+              <path d="M85 48h33v57c0 9-6 15-15 15H65V68c0-12 8-20 20-20z" fill="${accent}"/>
+              <path d="M54 70h26M54 88h26M91 70h18M91 88h18" stroke="${iconColor}" stroke-width="7" stroke-linecap="round"/>
+            `,
+            exam: `
+              <rect x="47" y="34" width="66" height="92" rx="12" fill="${cream}" opacity=".96"/>
+              <path d="M65 60h30M65 78h30M65 96h18" stroke="${iconColor}" stroke-width="7" stroke-linecap="round"/>
+              <path d="M92 101l11 11 22-27" fill="none" stroke="${accent}" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+              <rect x="62" y="26" width="36" height="18" rx="9" fill="${accent}"/>
+            `,
+            lotus: `
+              <path d="M80 38c18 18 18 42 0 61-18-19-18-43 0-61z" fill="${accent}"/>
+              <path d="M48 60c28 4 42 22 41 50-26-5-41-22-41-50z" fill="${cream}" opacity=".94"/>
+              <path d="M112 60c-28 4-42 22-41 50 26-5 41-22 41-50z" fill="${cream}" opacity=".94"/>
+              <path d="M40 108c23 17 57 17 80 0" fill="none" stroke="${iconColor}" stroke-width="9" stroke-linecap="round"/>
+            `,
+            wheel: `
+              <circle cx="80" cy="82" r="40" fill="${cream}" opacity=".96"/>
+              <circle cx="80" cy="82" r="17" fill="${accent}"/>
+              <circle cx="80" cy="82" r="34" fill="none" stroke="${iconColor}" stroke-width="8"/>
+              <path d="M80 42v80M40 82h80M52 54l56 56M108 54l-56 56" stroke="${iconColor}" stroke-width="7" stroke-linecap="round"/>
+            `,
+          };
+          const labelText = label ? `<text x="80" y="145" text-anchor="middle" font-size="16" font-family="Sarabun,Arial" font-weight="800" fill="${cream}">${label}</text>` : "";
+          return `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+              <rect width="160" height="160" rx="36" fill="${theme.primary}"/>
+              <circle cx="132" cy="31" r="20" fill="${theme.accent}" opacity=".28"/>
+              <circle cx="27" cy="130" r="26" fill="#fffaf0" opacity=".13"/>
+              ${icons[templateKey] || icons.community}
+              ${labelText}
+            </svg>
+          `;
+        };
+
+        const makeGroupAvatarUrl = (name, themeKey, templateKey = selectedGroupAvatarTemplate) => {
+          const theme = groupThemeMap[themeKey] || groupThemeMap["blue-gold"];
+          const label = groupShortLabel(name);
+          return svgDataUrl(groupAvatarIconSvg(templateKey, theme, label));
+        };
+
+        const makeGroupCoverUrl = (name, description, themeKey) => {
+          const theme = groupThemeMap[themeKey] || groupThemeMap["blue-gold"];
+          const title = String(name || "กลุ่มใหม่").slice(0, 38);
+          const subtitle = String(description || "invite สมาชิกได้").slice(0, 58);
+          return svgDataUrl(`
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 240">
+              <defs>
+                <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+                  <stop stop-color="${theme.primary}"/>
+                  <stop offset=".58" stop-color="${theme.secondary}"/>
+                  <stop offset="1" stop-color="${theme.accent}"/>
+                </linearGradient>
+              </defs>
+              <rect width="640" height="240" fill="url(#g)"/>
+              <path d="M0 174c95-46 172-52 258-18 86 35 171 26 268-24 48-25 86-36 114-40v148H0z" fill="#fffaf0" opacity=".16"/>
+              <circle cx="98" cy="70" r="34" fill="#fffaf0" opacity=".18"/>
+              <circle cx="548" cy="70" r="46" fill="#fffaf0" opacity=".14"/>
+              <text x="48" y="118" font-size="42" font-family="Sarabun,Arial" font-weight="800" fill="#fffaf0">${title}</text>
+              <text x="50" y="160" font-size="22" font-family="Sarabun,Arial" font-weight="700" fill="#fffaf0" opacity=".82">${subtitle}</text>
+            </svg>
+          `);
+        };
+
+        const renderMascotSticker = (tone) => {
+          const expression = {
+            happy: { leftEye: "M68 103q8 8 16 0", rightEye: "M136 103q8 8 16 0", mouth: "M88 145q32 28 64 0", accent: "★", arm: "M46 148q-24-20-12-48" },
+            ok: { leftEye: "M68 98h18", rightEye: "M136 98h18", mouth: "M92 146q28 14 56 0", accent: "OK", arm: "M48 146q-18 2-26-18" },
+            focus: { leftEye: "M68 98l20 6", rightEye: "M156 98l-20 6", mouth: "M96 148h48", accent: "!", arm: "M48 146q-22-6-34-28" },
+            question: { leftEye: "M70 99q8 8 16 0", rightEye: "M136 99q8-8 16 0", mouth: "M104 150q16 8 32 0", accent: "?", arm: "M48 146q-18-18-4-34" },
+            thanks: { leftEye: "M68 102q8 6 16 0", rightEye: "M136 102q8 6 16 0", mouth: "M92 145q28 20 56 0", accent: "ขอบคุณ", arm: "M50 150q-20 10-34-2" },
+            rest: { leftEye: "M68 101h18", rightEye: "M136 101h18", mouth: "M104 150q16-8 32 0", accent: "Zz", arm: "M50 150q-18 14-30 8" },
+          }[tone] || {};
+
+          return `
+            <svg viewBox="0 0 220 220" role="img" aria-label="สติกเกอร์ ${stickerLabels[tone] || "กลุ่ม"}" xmlns="http://www.w3.org/2000/svg">
+              <rect width="220" height="220" rx="36" fill="#fffaf0"/>
+              <path d="${expression.arm || "M48 146q-18 2-26-18"}" fill="none" stroke="#1f2d89" stroke-width="12" stroke-linecap="round"/>
+              <path d="M172 146q20-12 28-34" fill="none" stroke="#1f2d89" stroke-width="12" stroke-linecap="round"/>
+              <circle cx="110" cy="112" r="72" fill="#f4b400"/>
+              <path d="M48 91q62-54 124 0v34H48z" fill="#1f2d89"/>
+              <circle cx="78" cy="104" r="25" fill="#fffaf0"/>
+              <circle cx="146" cy="104" r="25" fill="#fffaf0"/>
+              <path d="${expression.leftEye || "M68 98h18"}" fill="none" stroke="#1f2d89" stroke-width="7" stroke-linecap="round"/>
+              <path d="${expression.rightEye || "M136 98h18"}" fill="none" stroke="#1f2d89" stroke-width="7" stroke-linecap="round"/>
+              <path d="${expression.mouth || "M92 146q28 14 56 0"}" fill="none" stroke="#1f2d89" stroke-width="8" stroke-linecap="round"/>
+              <rect x="72" y="166" width="76" height="28" rx="14" fill="#1f2d89"/>
+              <text x="110" y="186" text-anchor="middle" font-size="15" font-family="Sarabun, Arial" font-weight="800" fill="#fffaf0">ป.ธ.๔</text>
+              <text x="176" y="62" text-anchor="middle" font-size="${tone === "thanks" ? "18" : "30"}" font-family="Sarabun, Arial" font-weight="800" fill="#1f2d89">${expression.accent || "★"}</text>
+            </svg>
+          `;
+        };
+
+        const hydrateStickerPreviews = () => {
+          document.querySelectorAll("[data-sticker-preview]").forEach((node) => {
+            node.innerHTML = renderMascotSticker(node.dataset.stickerPreview);
+            const svg = node.querySelector("svg");
+            if (svg) svg.classList.add("h-full", "w-full", "p-2");
+          });
+        };
+
+        const scrollThreadToBottom = () => {
+          const scroller = document.querySelector("[data-chat-thread]");
+          if (scroller) scroller.scrollTop = scroller.scrollHeight;
+        };
+
+        const extractFirstUrl = (text) => {
+          const match = String(text || "").match(/https?:\/\/[^\s<>"']+/i);
+          return match?.[0] || "";
+        };
+
+        const escapeSvgText = (value) =>
+          String(value || "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
+
+        const generatedPreviewImage = (label, accent = "#1f2d89") => {
+          const safeLabel = encodeURIComponent(escapeSvgText(label).slice(0, 34));
+          const safeAccent = encodeURIComponent(accent);
+          return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 336'%3E%3Crect width='640' height='336' fill='%23fffaf0'/%3E%3Crect x='0' y='0' width='640' height='110' fill='${safeAccent}'/%3E%3Ccircle cx='92' cy='86' r='42' fill='%23f4b400'/%3E%3Cpath d='M0 256c92-62 170-72 270-30 97 40 185 24 284-42 36-24 64-36 86-42v194H0z' fill='%231f2d89' opacity='.12'/%3E%3Ctext x='48' y='194' font-size='44' font-family='Sarabun,Arial' font-weight='800' fill='%231f2d89'%3E${safeLabel}%3C/text%3E%3Ctext x='50' y='240' font-size='22' font-family='Sarabun,Arial' font-weight='700' fill='%23343434' opacity='.68'%3EPaligo link preview%3C/text%3E%3C/svg%3E`;
+        };
+
+        const buildLinkPreview = (url) => {
+          let parsed;
+          try {
+            parsed = new URL(url);
+          } catch {
+            return null;
+          }
+          const host = parsed.hostname.replace(/^www\./, "");
+          const known = {
+            "paligo.jp": {
+              title: "Paligo",
+              excerpt: "พื้นที่เรียนบาลี ส่งสมุด ตรวจงาน และแชร์บทเรียนเข้ากล่องข้อความ",
+              accent: "#1f2d89",
+            },
+            "developer.apple.com": {
+              title: "Apple Developer Documentation",
+              excerpt: "เอกสารแนวทางออกแบบและพัฒนาแอปตามแพลตฟอร์มของ Apple",
+              accent: "#111827",
+            },
+            "github.com": {
+              title: "GitHub",
+              excerpt: "Repository, issue, pull request และเอกสารโครงการสำหรับทีมพัฒนา",
+              accent: "#24292f",
+            },
+          }[host] || {
+            title: host,
+            excerpt: `ตัวอย่างพรีวิวจาก ${host} · ใน production จะดึง Open Graph title, image และ description จาก server`,
+            accent: "#1f2d89",
+          };
+          return {
+            url,
+            host,
+            title: known.title,
+            excerpt: known.excerpt,
+            image: generatedPreviewImage(known.title || host, known.accent),
+          };
+        };
+
+        const addLinkPreviewMessage = (url) => {
+          const preview = buildLinkPreview(url);
+          if (!chatThread || !preview) return;
+          const article = document.createElement("article");
+          article.className = "w-full max-w-sm self-end overflow-hidden rounded-lg border border-paligo-line bg-white shadow-lift";
+          const link = document.createElement("a");
+          link.className = "block focus:outline-none focus:ring-2 focus:ring-paligo-blue/35";
+          link.href = preview.url;
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+          const img = document.createElement("img");
+          img.className = "h-36 w-full bg-paligo-page object-cover";
+          img.src = preview.image;
+          img.alt = `พรีวิว ${preview.title}`;
+          const body = document.createElement("span");
+          body.className = "block px-4 py-3";
+          const host = document.createElement("span");
+          host.className = "block truncate text-xs font-extrabold uppercase text-paligo-muted";
+          host.textContent = preview.host;
+          const title = document.createElement("span");
+          title.className = "mt-1 block text-sm font-extrabold text-paligo-blue";
+          title.textContent = preview.title;
+          const excerpt = document.createElement("span");
+          excerpt.className = "mt-1 block text-xs font-bold leading-relaxed text-paligo-muted";
+          excerpt.textContent = preview.excerpt;
+          body.append(host, title, excerpt);
+          link.append(img, body);
+          article.append(link);
+          chatThread.append(article);
+          scrollThreadToBottom();
+        };
+
+        const addOutgoingMessage = (text) => {
+          if (!chatThread || !text.trim()) return;
+          const article = document.createElement("article");
+          article.className = "flex max-w-[82%] flex-col gap-1 self-end";
+          const bubble = document.createElement("div");
+          bubble.className =
+            "rounded-[18px] rounded-br-md bg-paligo-green px-4 py-2.5 text-sm font-semibold leading-relaxed text-white shadow-sm";
+          bubble.textContent = text.trim();
+          const time = document.createElement("time");
+          time.className = "self-end px-1 text-[11px] font-bold text-paligo-muted";
+          time.textContent = new Date().toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" });
+          article.append(bubble, time);
+          chatThread.append(article);
+          const url = extractFirstUrl(text);
+          if (url) addLinkPreviewMessage(url);
+          scrollThreadToBottom();
+        };
+
+        const addImageMessage = ({ fileName, src, note }) => {
+          if (!chatThread || !src) return;
+          const article = document.createElement("article");
+          article.className = "w-full max-w-sm self-end overflow-hidden rounded-lg border border-paligo-line bg-white shadow-lift";
+          const img = document.createElement("img");
+          img.className = "max-h-80 w-full bg-paligo-page object-contain";
+          img.src = src;
+          img.alt = fileName || "รูปภาพที่ส่งในแชท";
+          const body = document.createElement("div");
+          body.className = "px-4 py-3";
+          const title = document.createElement("p");
+          title.className = "truncate text-sm font-extrabold text-paligo-blue";
+          title.textContent = fileName || "รูปภาพ";
+          const meta = document.createElement("p");
+          meta.className = "mt-0.5 text-xs font-bold text-paligo-muted";
+          meta.textContent = note || `ส่งรูปภาพให้ ${selectedRecipient.name}`;
+          body.append(title, meta);
+          article.append(img, body);
+          chatThread.append(article);
+          scrollThreadToBottom();
+        };
+
+        const addGroupCardMessage = ({ title, detail, badge }) => {
+          if (!chatThread || !title.trim()) return;
+          const article = document.createElement("article");
+          article.className = "w-full max-w-sm self-end overflow-hidden rounded-lg border border-paligo-line bg-white shadow-lift";
+          const header = document.createElement("div");
+          header.className = "flex items-center gap-3 border-b border-paligo-line bg-paligo-blue/5 px-4 py-3";
+          const icon = document.createElement("span");
+          icon.className = "grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-paligo-blue text-xs font-extrabold text-white";
+          icon.textContent = badge || "กลุ่ม";
+          const text = document.createElement("span");
+          text.className = "min-w-0 flex-1";
+          const titleNode = document.createElement("span");
+          titleNode.className = "block truncate text-sm font-extrabold text-paligo-blue";
+          titleNode.textContent = title.trim();
+          const detailNode = document.createElement("span");
+          detailNode.className = "block text-xs font-bold text-paligo-muted";
+          detailNode.textContent = detail.trim();
+          text.append(titleNode, detailNode);
+          header.append(icon, text);
+          const footer = document.createElement("div");
+          footer.className = "px-4 py-2 text-xs font-bold text-paligo-muted";
+          footer.textContent = `ส่งให้ ${selectedRecipient.name}`;
+          article.append(header, footer);
+          chatThread.append(article);
+          scrollThreadToBottom();
+        };
+
+        const addStickerMessage = ({ tone, emotion }) => {
+          if (!chatThread) return;
+          const article = document.createElement("article");
+          article.className = "flex max-w-[78%] flex-col items-end gap-1 self-end";
+          const bubble = document.createElement("div");
+          bubble.className = "overflow-hidden rounded-[22px] rounded-br-md border border-paligo-line bg-white p-2 shadow-lift";
+          const sticker = document.createElement("div");
+          sticker.className = "h-44 w-44";
+          sticker.innerHTML = renderMascotSticker(tone);
+          const label = document.createElement("div");
+          label.className = "px-2 pb-1 text-center text-xs font-extrabold text-paligo-blue";
+          label.textContent = `${selectedRecipient.name} · ${emotion}`;
+          bubble.append(sticker, label);
+          const time = document.createElement("time");
+          time.className = "px-1 text-[11px] font-bold text-paligo-muted";
+          time.textContent = new Date().toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" });
+          article.append(bubble, time);
+          chatThread.append(article);
+          scrollThreadToBottom();
+        };
+
+        const addSystemMessage = (text) => {
+          if (!chatThread || !text.trim()) return;
+          const node = document.createElement("div");
+          node.className = "self-center rounded-full bg-paligo-blue/10 px-3 py-1 text-xs font-bold text-paligo-muted";
+          node.textContent = text.trim();
+          chatThread.append(node);
+          scrollThreadToBottom();
+        };
+
+        const refreshContactItems = () => {
+          contactItems = Array.from(document.querySelectorAll("[data-contact-item]"));
+        };
+
+        const renderDirectContactButton = (contact, compact = false) => {
+          const button = document.createElement("button");
+          button.className = "rounded-lg border border-paligo-line bg-white p-3 text-left transition hover:border-paligo-blue/35 hover:bg-paligo-page/70";
+          button.type = "button";
+          button.dataset.contactItem = "";
+          button.dataset.contactType = "direct";
+          button.dataset.contactName = contact.name;
+          button.dataset.contactEmail = contact.email;
+          button.dataset.contactRole = contact.role;
+          button.dataset.contactStatus = contact.status;
+          button.dataset.contactAvatar = contact.avatar;
+          button.setAttribute("aria-pressed", "false");
+
+          const row = document.createElement("div");
+          row.className = "flex items-center gap-3";
+
+          const avatar = document.createElement("span");
+          avatar.className = `grid ${compact ? "h-11 w-11" : "h-10 w-10"} shrink-0 place-items-center rounded-full text-sm font-extrabold ${contact.accent}`;
+          avatar.textContent = contact.badge;
+
+          const text = document.createElement("span");
+          text.className = "min-w-0 flex-1";
+          const name = document.createElement("span");
+          name.className = "block truncate text-sm font-extrabold text-paligo-blue";
+          name.textContent = contact.name;
+          const email = document.createElement("span");
+          email.className = "block truncate text-xs font-bold text-paligo-muted";
+          email.textContent = contact.email;
+          const status = document.createElement("span");
+          status.className = "block truncate text-[11px] font-bold text-paligo-muted/80";
+          status.textContent = contact.status;
+          text.append(name, email, status);
+
+          row.append(avatar, text);
+          if (!compact) {
+            const dot = document.createElement("span");
+            dot.className = `h-2.5 w-2.5 shrink-0 rounded-full ${contact.dot}`;
+            row.append(dot);
+          }
+
+          button.append(row);
+          return button;
+        };
+
+        const seedDomainContacts = () => {
+          let firstContact = null;
+
+          contactLists.forEach((list) => {
+            const compact = list.dataset.contactList === "mobile";
+            const groupAnchor = list.querySelector('[data-contact-type="group"]');
+            list.querySelectorAll('[data-contact-type="direct"]').forEach((item) => item.remove());
+
+            mockDomainContacts.forEach((contact) => {
+              const button = renderDirectContactButton(contact, compact);
+              list.insertBefore(button, groupAnchor || null);
+              if (!firstContact) firstContact = button;
+            });
+          });
+
+          refreshContactItems();
+          applyContactSearch();
+          applyRecipient(firstContact, false);
+        };
+
+        const updateGroupAvatarTemplateButtons = (themeKey) => {
+          const theme = groupThemeMap[themeKey] || groupThemeMap["blue-gold"];
+          createGroupAvatarTemplates.forEach((button) => {
+            const active = button.dataset.createGroupAvatarTemplate === selectedGroupAvatarTemplate;
+            const preview = button.querySelector("[data-template-preview]");
+            button.setAttribute("aria-pressed", String(active));
+            button.classList.toggle("border-2", active);
+            button.classList.toggle("border-paligo-blue", active);
+            button.classList.toggle("bg-paligo-blue/5", active);
+            button.classList.toggle("shadow-sm", active);
+            button.classList.toggle("border", !active);
+            button.classList.toggle("border-paligo-line", !active);
+            button.classList.toggle("bg-white", !active);
+            if (preview) {
+              preview.innerHTML = groupAvatarIconSvg(button.dataset.createGroupAvatarTemplate || "community", theme, "");
+              preview.querySelector("svg")?.classList.add("h-10", "w-10", "rounded-full");
+            }
+          });
+        };
+
+        const updateCreateGroupPreview = () => {
+          const name = createGroupName?.value?.trim() || "กลุ่มใหม่";
+          const owner = createGroupOwnerRole?.value === "teacher" ? "ครู/ผู้ตรวจ" : "นักเรียน";
+          const description = createGroupDescription?.value?.trim() || "invite สมาชิกได้";
+          const themeKey = createGroupTheme?.value || "blue-gold";
+          const theme = groupThemeMap[themeKey] || groupThemeMap["blue-gold"];
+          if (createGroupTitlePreview) createGroupTitlePreview.textContent = name;
+          if (createGroupMetaPreview) createGroupMetaPreview.textContent = `สร้างโดย${owner} · ${description}`;
+          if (createGroupAvatarPreview) {
+            createGroupAvatarPreview.textContent = "";
+            createGroupAvatarPreview.style.background = theme.primary;
+            const avatar = document.createElement("img");
+            avatar.className = "h-full w-full rounded-full object-cover";
+            avatar.src = makeGroupAvatarUrl(name, themeKey, selectedGroupAvatarTemplate);
+            avatar.alt = `รูปโปรไฟล์${name}`;
+            createGroupAvatarPreview.append(avatar);
+          }
+          if (createGroupCoverPreview) createGroupCoverPreview.style.background = theme.cover;
+          updateGroupAvatarTemplateButtons(themeKey);
+        };
+
+        const renderGroupContactButton = ({ name, role, status, description, avatarUrl, coverUrl, themeKey }, compact = false) => {
+          const button = document.createElement("button");
+          button.className = "overflow-hidden rounded-lg border border-paligo-line bg-white text-left transition hover:border-paligo-blue/35 hover:bg-paligo-page/70";
+          button.type = "button";
+          button.dataset.contactItem = "";
+          button.dataset.contactType = "group";
+          button.dataset.contactName = name;
+          button.dataset.contactRole = role;
+          button.dataset.contactStatus = status;
+          button.dataset.contactAvatar = "team";
+          button.dataset.contactCover = "team";
+          button.dataset.contactAvatarUrl = avatarUrl;
+          button.dataset.contactCoverUrl = coverUrl;
+          button.setAttribute("aria-pressed", "false");
+
+          const theme = groupThemeMap[themeKey] || groupThemeMap["blue-gold"];
+          const cover = document.createElement("div");
+          cover.className = compact ? "h-16" : "h-14";
+          cover.style.background = theme.cover;
+
+          const row = document.createElement("div");
+          row.className = compact ? "-mt-6 flex items-end gap-3 px-3 pb-3" : "-mt-5 flex items-end gap-3 px-3 pb-3";
+
+          const avatar = document.createElement("img");
+          avatar.className = "h-12 w-12 shrink-0 rounded-full border-2 border-white bg-paligo-blue object-cover shadow-sm";
+          avatar.src = avatarUrl;
+          avatar.alt = "";
+
+          const text = document.createElement("span");
+          text.className = "min-w-0 flex-1 pb-0.5";
+          const title = document.createElement("span");
+          title.className = "block truncate text-sm font-extrabold text-paligo-blue";
+          title.textContent = name;
+          const meta = document.createElement("span");
+          meta.className = "block truncate text-xs font-bold text-paligo-muted";
+          meta.textContent = description || status;
+          text.append(title, meta);
+
+          row.append(avatar, text);
+          if (!compact) {
+            const dot = document.createElement("span");
+            dot.className = "mb-2 h-2.5 w-2.5 rounded-full bg-paligo-blue";
+            row.append(dot);
+          }
+          button.append(cover, row);
+          return button;
+        };
+
+        const createGroup = () => {
+          const name = createGroupName?.value?.trim() || "กลุ่มใหม่";
+          const ownerRole = createGroupOwnerRole?.value || "student";
+          const kind = createGroupKind?.value || "study";
+          const themeKey = createGroupTheme?.value || "blue-gold";
+          const description = createGroupDescription?.value?.trim() || "คิวรวม · invite สมาชิกได้";
+          const ownerLabel = ownerRole === "teacher" ? "ครู/ผู้ตรวจ" : "นักเรียน";
+          const kindLabel = { study: "กลุ่มเรียน", review: "กลุ่มตรวจ", exam: "กลุ่มข้อสอบ" }[kind] || "กลุ่มเรียน";
+          const role = `${kindLabel} · เจ้าของเป็น${ownerLabel}`;
+          const status = "invite สมาชิกได้";
+          const avatarUrl = makeGroupAvatarUrl(name, themeKey, selectedGroupAvatarTemplate);
+          const coverUrl = makeGroupCoverUrl(name, description, themeKey);
+          let firstButton = null;
+          let newestButton = null;
+
+          contactLists.forEach((list) => {
+            const compact = list.dataset.contactList === "mobile";
+            const button = renderGroupContactButton({ name, role, status, description, avatarUrl, coverUrl, themeKey }, compact);
+            list.append(button);
+            if (!firstButton) firstButton = button;
+            newestButton = button;
+          });
+
+          refreshContactItems();
+          if (createGroupStatus) createGroupStatus.textContent = `สร้างแล้ว: ${name}`;
+          hideOverlay(createGroupSheet);
+          hideOverlay(contactSheet);
+          applyRecipient(firstButton || newestButton);
+          addSystemMessage(`${ownerLabel}สร้างกลุ่ม: ${name}`);
+        };
+
+        const applyRecipient = (button, announce = true) => {
+          if (!button) return;
+          selectedRecipient = {
+            type: button.dataset.contactType || "direct",
+            name: button.dataset.contactName || "ผู้ตรวจ",
+            email: button.dataset.contactEmail || "",
+            role: button.dataset.contactRole || "ผู้ตรวจ",
+            status: button.dataset.contactStatus || "",
+            avatar: button.dataset.contactAvatar || "monk",
+            cover: button.dataset.contactCover || "",
+            avatarUrl: button.dataset.contactAvatarUrl || "",
+            coverUrl: button.dataset.contactCoverUrl || "",
+          };
+
+          contactItems.forEach((item) => {
+            const active =
+              (item.dataset.contactName || "") === selectedRecipient.name &&
+              (item.dataset.contactEmail || "") === selectedRecipient.email &&
+              (item.dataset.contactType || "direct") === selectedRecipient.type;
+            item.setAttribute("aria-pressed", String(active));
+            item.classList.toggle("border-2", active);
+            item.classList.toggle("border-paligo-blue", active);
+            item.classList.toggle("bg-paligo-blue/5", active);
+            item.classList.toggle("shadow-sm", active);
+            item.classList.toggle("border", !active);
+            item.classList.toggle("border-paligo-line", !active);
+            item.classList.toggle("bg-white", !active);
+          });
+
+          if (peerName) peerName.textContent = selectedRecipient.name;
+          const selectedMeta = [selectedRecipient.role, selectedRecipient.email, selectedRecipient.status].filter(Boolean).join(" · ");
+          if (peerMeta) peerMeta.textContent = selectedMeta;
+          if (contextName) contextName.textContent = selectedRecipient.name;
+          if (contextStatus) contextStatus.textContent = selectedMeta;
+          const avatarUrl = selectedRecipient.avatarUrl || avatarSources[selectedRecipient.avatar] || avatarSources.monk;
+          if (peerAvatar) {
+            peerAvatar.src = avatarUrl;
+            peerAvatar.alt = `รูปโปรไฟล์${selectedRecipient.name}`;
+          }
+          if (contextAvatar) {
+            contextAvatar.src = avatarUrl;
+            contextAvatar.alt = `รูปโปรไฟล์${selectedRecipient.name}`;
+          }
+          const isGroup = selectedRecipient.type === "group";
+          if (contextCover) {
+            const coverUrl = selectedRecipient.coverUrl || coverSources[selectedRecipient.cover] || "";
+            contextCover.hidden = !isGroup || !coverUrl;
+            contextCover.classList.toggle("hidden", !isGroup || !coverUrl);
+            if (coverUrl) {
+              contextCover.src = coverUrl;
+              contextCover.alt = `ภาพปก${selectedRecipient.name}`;
+            }
+          }
+          if (contextRoundTitle) {
+            contextRoundTitle.textContent = isGroup ? "1 เล่มพร้อมส่งเข้าคิวกลุ่ม" : "1 เล่มกำลังรอส่งตรวจ";
+          }
+          if (groupWorkflow) {
+            groupWorkflow.hidden = !isGroup;
+            groupWorkflow.classList.toggle("hidden", !isGroup);
+          }
+          if (groupWorkflowTitle && isGroup) {
+            groupWorkflowTitle.textContent = selectedRecipient.name;
+          }
+          groupOnlyControls.forEach((control) => {
+            control.hidden = !isGroup;
+            control.classList.toggle("hidden", !isGroup);
+            control.classList.toggle("inline-flex", isGroup);
+          });
+          if (confirmSendLabel) {
+            confirmSendLabel.textContent = isGroup ? "ส่งเข้าคิวกลุ่ม" : "ยืนยันส่งตรวจ";
+          }
+          recipientLabels.forEach((label) => {
+            label.textContent = selectedRecipient.name;
+          });
+          if (confirmText) confirmText.textContent = `เลือกแล้ว: สมุดคำตอบ · กิตติ → ${selectedRecipient.name}`;
+          if (announce) addSystemMessage(`${selectedRecipient.type === "group" ? "เลือกกลุ่มตรวจ" : "เลือกผู้รับ"}: ${selectedRecipient.name}`);
+        };
+
+        const applyContactSearch = () => {
+          const query = String(contactSearch?.value || "").trim().toLowerCase();
+          let visible = 0;
+          contactItems.forEach((item) => {
+            const show = !query || item.textContent.toLowerCase().includes(query);
+            item.hidden = !show;
+            visible += show ? 1 : 0;
+          });
+          if (contactEmpty) contactEmpty.hidden = visible > 0;
+        };
+
+        const applySheetFilters = () => {
+          const query = String(sheetSearch?.value || "").trim().toLowerCase();
+          const status = sheetStatus?.value || "";
+          const subject = sheetSubject?.value || "";
+          let visible = 0;
+
+          sheetItems.forEach((item, index) => {
+            const text = item.textContent.toLowerCase();
+            const itemStatus = index === 0 ? "draft" : "draft";
+            const itemSubject = index === 0 ? "pali-to-thai" : "thai-relation";
+            const matchesQuery = !query || text.includes(query);
+            const matchesStatus = !status || status === itemStatus;
+            const matchesSubject = !subject || subject === itemSubject;
+            const show = matchesQuery && matchesStatus && matchesSubject;
+            item.hidden = !show;
+            visible += show ? 1 : 0;
+          });
+
+          if (sheetEmpty) sheetEmpty.hidden = visible > 0;
+          if (sheetReset) {
+            const active = Boolean(query || status || subject);
+            sheetReset.hidden = !active;
+            sheetReset.classList.toggle("hidden", !active);
+          }
+        };
+
+        const hideAll = () => {
+          hideOverlay(bookSheet);
+          hideOverlay(contactSheet);
+          hideOverlay(createGroupSheet);
+          hideOverlay(groupFileSheet);
+          hideOverlay(groupScheduleSheet);
+          hideOverlay(groupStickerSheet);
+          hideOverlay(loadingModal);
+          hideOverlay(contextMenu);
+        };
+
+        const formatScheduleDateTime = () => {
+          const date = groupDatePicker?.value || "";
+          const time = groupTimePicker?.value || "";
+          if (!date || !time) return "";
+          const value = new Date(`${date}T${time}:00`);
+          return value.toLocaleString("th-TH", {
+            dateStyle: "medium",
+            timeStyle: "short",
+          });
+        };
+
+        const updateScheduleStatus = () => {
+          if (!groupScheduleStatus) return;
+          const formatted = formatScheduleDateTime();
+          groupScheduleStatus.textContent = formatted ? `นัดหมาย: ${formatted}` : "เลือกวันที่และเวลาเพื่อนัดตรวจ";
+        };
+
+        const formatDateInputValue = (date) => {
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, "0");
+          const day = String(date.getDate()).padStart(2, "0");
+          return `${year}-${month}-${day}`;
+        };
+
+        const setDefaultSchedule = () => {
+          const today = new Date();
+          const nextDay = new Date(Date.now() + 24 * 60 * 60 * 1000);
+          if (groupDatePicker) {
+            groupDatePicker.min = formatDateInputValue(today);
+          }
+          if (groupDatePicker && !groupDatePicker.value) {
+            groupDatePicker.value = formatDateInputValue(nextDay);
+          }
+          if (groupTimePicker && !groupTimePicker.value) {
+            groupTimePicker.value = "19:00";
+          }
+          updateScheduleStatus();
+        };
+
+        const updateGroupFilePreview = () => {
+          const file = groupFileInput?.files?.[0];
+          if (groupFilePreviewUrl) {
+            URL.revokeObjectURL(groupFilePreviewUrl);
+            groupFilePreviewUrl = "";
+          }
+          if (!file) {
+            if (groupFileName) groupFileName.textContent = "เลือกไฟล์จากเครื่อง";
+            if (groupFileStatus) groupFileStatus.textContent = "ยังไม่ได้เลือกไฟล์";
+            if (groupFilePreviewFrame) {
+              groupFilePreviewFrame.hidden = true;
+              groupFilePreviewFrame.classList.add("hidden");
+            }
+            if (groupFilePreview) groupFilePreview.removeAttribute("src");
+            return;
+          }
+
+          if (groupFileName) groupFileName.textContent = file.name;
+          if (groupFileStatus) groupFileStatus.textContent = `พร้อมส่ง: ${file.name}`;
+          if (file.type.startsWith("image/")) {
+            groupFilePreviewUrl = URL.createObjectURL(file);
+            if (groupFilePreview) {
+              groupFilePreview.src = groupFilePreviewUrl;
+              groupFilePreview.alt = `ตัวอย่างรูป ${file.name}`;
+            }
+            if (groupFilePreviewMeta) {
+              const sizeKb = Math.max(1, Math.round(file.size / 1024));
+              groupFilePreviewMeta.textContent = `${file.name} · ${sizeKb.toLocaleString("th-TH")} KB`;
+            }
+            if (groupFilePreviewFrame) {
+              groupFilePreviewFrame.hidden = false;
+              groupFilePreviewFrame.classList.remove("hidden");
+            }
+            return;
+          }
+
+          if (groupFilePreviewFrame) {
+            groupFilePreviewFrame.hidden = true;
+            groupFilePreviewFrame.classList.add("hidden");
+          }
+          if (groupFilePreview) groupFilePreview.removeAttribute("src");
+        };
+
+        document.addEventListener("click", (event) => {
+          if (event.target.closest("[data-open-contact-sheet]")) {
+            showOverlay(contactSheet);
+            return;
+          }
+          if (event.target.closest("[data-open-create-group-sheet]")) {
+            updateCreateGroupPreview();
+            showOverlay(createGroupSheet);
+            return;
+          }
+          const avatarTemplate = event.target.closest("[data-create-group-avatar-template]");
+          if (avatarTemplate) {
+            selectedGroupAvatarTemplate = avatarTemplate.dataset.createGroupAvatarTemplate || "community";
+            updateCreateGroupPreview();
+            return;
+          }
+          if (event.target.closest("[data-open-book-sheet]")) {
+            showOverlay(bookSheet);
+            return;
+          }
+          if (event.target.closest("[data-open-group-file-sheet]")) {
+            if (selectedRecipient.type !== "group") {
+              addSystemMessage("เลือกกลุ่มก่อนส่งไฟล์");
+              return;
+            }
+            showOverlay(groupFileSheet);
+            return;
+          }
+          if (event.target.closest("[data-open-group-schedule-sheet]")) {
+            if (selectedRecipient.type !== "group") {
+              addSystemMessage("เลือกกลุ่มก่อนนัดเวลา");
+              return;
+            }
+            setDefaultSchedule();
+            showOverlay(groupScheduleSheet);
+            return;
+          }
+          if (event.target.closest("[data-open-group-sticker-sheet]")) {
+            if (selectedRecipient.type !== "group") {
+              addSystemMessage("เลือกกลุ่มก่อนส่งสติกเกอร์");
+              return;
+            }
+            showOverlay(groupStickerSheet);
+            return;
+          }
+          if (event.target.closest("[data-open-loading]")) {
+            showOverlay(loadingModal);
+            if (syncText) syncText.textContent = "กำลังลองเชื่อมต่อ...";
+            window.setTimeout(() => {
+              hideOverlay(loadingModal);
+              if (syncText) syncText.textContent = "ออฟไลน์ — แสดงข้อมูลในเครื่อง";
+            }, 900);
+            return;
+          }
+          if (event.target.closest("[data-send-group-file]")) {
+            const file = groupFileInput?.files?.[0];
+            const fileName = file?.name || "ไฟล์ประกอบการตรวจ";
+            const note = groupFileNote?.value?.trim();
+            if (file?.type?.startsWith("image/") && groupFilePreviewUrl) {
+              addImageMessage({
+                fileName,
+                src: groupFilePreviewUrl,
+                note: note || "ส่งรูปภาพเข้ากลุ่มตรวจ",
+              });
+              groupFilePreviewUrl = "";
+            } else {
+              addGroupCardMessage({
+                title: fileName,
+                detail: note || "ส่งไฟล์เข้ากลุ่มตรวจ",
+                badge: "ไฟล์",
+              });
+            }
+            if (groupFileStatus) groupFileStatus.textContent = `ส่งแล้ว: ${fileName}`;
+            hideOverlay(groupFileSheet);
+            return;
+          }
+          if (event.target.closest("[data-send-group-schedule]")) {
+            const formatted = formatScheduleDateTime();
+            const title = groupScheduleTitleInput?.value?.trim() || "นัดตรวจสมุด";
+            addGroupCardMessage({
+              title,
+              detail: formatted || "ยังไม่ระบุวันเวลา",
+              badge: "นัด",
+            });
+            if (groupScheduleStatus) groupScheduleStatus.textContent = formatted ? `ส่งนัดหมายแล้ว: ${formatted}` : "ส่งนัดหมายแล้ว";
+            hideOverlay(groupScheduleSheet);
+            return;
+          }
+          const stickerButton = event.target.closest("[data-send-group-sticker]");
+          if (stickerButton) {
+            addStickerMessage({
+              tone: stickerButton.dataset.stickerTone || "ok",
+              emotion: stickerButton.dataset.stickerEmotion || "สติกเกอร์",
+            });
+            hideOverlay(groupStickerSheet);
+            return;
+          }
+          if (event.target.closest("[data-close-overlays]")) {
+            hideAll();
+            return;
+          }
+          if (event.target.closest("[data-send-text]")) {
+            addOutgoingMessage(chatInput?.value || "");
+            if (chatInput) chatInput.value = "";
+            return;
+          }
+          if (event.target.closest("[data-create-group-submit]")) {
+            createGroup();
+            return;
+          }
+          const contactItem = event.target.closest("[data-contact-item]");
+          if (contactItem) {
+            applyRecipient(contactItem);
+            if (contactItem.closest("[data-contact-sheet]")) hideOverlay(contactSheet);
+            return;
+          }
+          if (event.target.closest("[data-book-sheet-filter-reset]")) {
+            if (sheetSearch) sheetSearch.value = "";
+            if (sheetStatus) sheetStatus.value = "";
+            if (sheetSubject) sheetSubject.value = "";
+            applySheetFilters();
+            return;
+          }
+          if (event.target.closest("[data-book-sheet-clear-selection]")) {
+            if (confirmText) confirmText.textContent = "ยังไม่ได้เลือกสมุด";
+            return;
+          }
+          if (event.target.closest("[data-copy-invite]")) {
+            const inviteCode = "PALIGO-PT4-2569";
+            navigator.clipboard?.writeText(inviteCode).catch(() => {});
+            if (inviteStatus) inviteStatus.textContent = `คัดลอก invite แล้ว: ${inviteCode}`;
+            addSystemMessage("คัดลอก invite กลุ่มแล้ว");
+            return;
+          }
+          const removeMemberButton = event.target.closest("[data-remove-member]");
+          if (removeMemberButton) {
+            const member = removeMemberButton.closest("[data-group-member]");
+            const memberName = member?.querySelector(".text-paligo-blue")?.textContent?.trim() || "สมาชิก";
+            member?.remove();
+            const members = document.querySelectorAll("[data-group-member-list] > div").length;
+            if (groupMemberCount) groupMemberCount.textContent = `${members} คน`;
+            addSystemMessage(`ลบ ${memberName} ออกจากกลุ่มตัวอย่างแล้ว`);
+            return;
+          }
+          const selectedBook = event.target.closest("[data-book-sheet-list] button");
+          if (selectedBook && confirmText) {
+            const title = selectedBook.querySelector("p")?.textContent?.trim() || "สมุดข้อสอบ";
+            confirmText.textContent = `เลือกแล้ว: ${title} → ${selectedRecipient.name}`;
+            return;
+          }
+          if (contextMenu && !event.target.closest("[data-chat-context-menu]")) {
+            hideOverlay(contextMenu);
+          }
+        });
+
+        document.addEventListener("input", (event) => {
+          if (event.target.matches("[data-book-sheet-search]")) applySheetFilters();
+          if (event.target.matches("[data-contact-search]")) applyContactSearch();
+          if (event.target.matches("[data-group-file-input]")) {
+            updateGroupFilePreview();
+          }
+          if (
+            event.target.matches("[data-create-group-name]") ||
+            event.target.matches("[data-create-group-description]")
+          ) {
+            updateCreateGroupPreview();
+          }
+          if (
+            event.target.matches("[data-group-date-picker]") ||
+            event.target.matches("[data-group-time-picker]")
+          ) {
+            updateScheduleStatus();
+          }
+          if (event.target.matches("[data-group-file-input]")) {
+            updateGroupFilePreview();
+          }
+          if (
+            event.target.matches("[data-create-group-owner-role]") ||
+            event.target.matches("[data-create-group-kind]") ||
+            event.target.matches("[data-create-group-theme]")
+          ) {
+            updateCreateGroupPreview();
+          }
+        });
+
+        document.addEventListener("change", (event) => {
+          if (
+            event.target.matches("[data-book-sheet-filter-status]") ||
+            event.target.matches("[data-book-sheet-filter-subject]")
+          ) {
+            applySheetFilters();
+          }
+          if (
+            event.target.matches("[data-group-date-picker]") ||
+            event.target.matches("[data-group-time-picker]")
+          ) {
+            updateScheduleStatus();
+          }
+        });
+
+        chatInput?.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" && !event.shiftKey) {
+            event.preventDefault();
+            addOutgoingMessage(chatInput.value || "");
+            chatInput.value = "";
+          }
+        });
+
+        document.addEventListener("contextmenu", (event) => {
+          const card = event.target.closest("[data-book-card]");
+          if (!card || !contextMenu) return;
+          event.preventDefault();
+          showOverlay(contextMenu);
+          contextMenu.style.left = `${Math.min(event.clientX, window.innerWidth - 220)}px`;
+          contextMenu.style.top = `${Math.min(event.clientY, window.innerHeight - 140)}px`;
+        });
+
+        document.addEventListener("keydown", (event) => {
+          if (event.key === "Escape") hideAll();
+        });
+
+        seedDomainContacts();
+        hydrateStickerPreviews();
+      })();
+    </script>
+  </body>
+</html>

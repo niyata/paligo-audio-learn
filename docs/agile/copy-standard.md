@@ -22,6 +22,38 @@
 | กล่องข้อความ | หัวข้อหน้า, ปุ่มนำทาง | Inbox (ยกเว้นแท็บบัญชีเทคนิค) |
 | บัญชี | หน้า login/สมัคร | |
 | จับคู่ | ครู–นักเรียน | |
+
+### สถานะครู (profileJson — role ยังเป็น `reviewer` เท่านั้น)
+
+| profileStatus | แสดงเป็น |
+|---------------|---------|
+| monk_teacher | พระอาจารย์ |
+| novice_teacher | สามเณรอาจารย์ |
+| lay_teacher | อาจารย์ฆราวาส |
+| teaching_assistant | ผู้ช่วยสอน |
+| reviewer | ผู้ตรวจ |
+
+| capability | แสดงเป็น |
+|------------|---------|
+| teach | ครูผู้สอน |
+| review | ผู้ตรวจ |
+| teach_review | ครูผู้สอนและผู้ตรวจ |
+
+**Wizard tiles (สมัคร/โปรไฟล์มือถือ):** `สอน` · `ตรวจสมุด` · `สอนและตรวจสมุด`
+
+รูปแบบ label: `{สถานะ} · {ความสามารถ}` — ใช้ `PaligoProfile.formatReviewerProfileLabel()`
+
+### ความพร้อมรับตรวจ (`profileJson.reviewAvailability` — #76)
+
+| status | แสดงเป็น |
+|--------|---------|
+| open | พร้อมรับตรวจ · สูงสุด N รายการ/วัน |
+| limited | รับได้จำกัด · ว่าง N คิว |
+| full | คิวเต็ม |
+| closed | ยังไม่พร้อมตรวจ |
+
+เพดานระบบ: `DEFAULT_REVIEWER_DAILY_LIMIT_MAX` / `PALIGO_CONFIG.reviewCapacity.dailyLimitMax` (default 60)
+
 | โอนไฟล์ขั้นสูง | import/export สำรอง | |
 
 ## State patterns

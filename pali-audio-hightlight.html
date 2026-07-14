@@ -6,10 +6,25 @@
     <title>ฝึกแปลบาลีด้วยเสียง · Paligo Audio Highlight</title>
     <style>
         :root {
-            --pali-text-base: 24px;
-            --pali-subtitle-base: 16px;
+            --pali-text-base: 32px;
+            --pali-subtitle-base: 18px;
             --paligo-text-scale: 1;
             --page-bg: var(--paligo-page-bg, #f8f0e3);
+            --pali-reader-font: "TH Sarabun Pali", "TH Sarabun Bali", Sarabun, sans-serif;
+        }
+
+        @font-face {
+            font-family: "TH Sarabun Pali";
+            font-style: normal;
+            font-weight: 400;
+            src: url("fonts/THSarabunPali.ttf") format("truetype");
+        }
+
+        @font-face {
+            font-family: "TH Sarabun Pali";
+            font-style: normal;
+            font-weight: 700;
+            src: url("fonts/THSarabunPali.ttf") format("truetype");
         }
 
         * { box-sizing: border-box; }
@@ -103,6 +118,44 @@
             margin-bottom: 12px;
         }
 
+        .corpus-toolbar {
+            border-top: 1px solid var(--paligo-paper-border, rgba(74, 44, 10, 0.16));
+            display: grid;
+            gap: 10px;
+            margin-top: 12px;
+            padding-top: 12px;
+        }
+
+        .corpus-toolbar[hidden] {
+            display: none;
+        }
+
+        .corpus-mode-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .corpus-item-select {
+            border: 1px solid var(--paligo-paper-border);
+            border-radius: 8px;
+            font: inherit;
+            min-height: 40px;
+            padding: 8px 10px;
+            width: 100%;
+        }
+
+        .corpus-navigation-row {
+            align-items: center;
+            display: grid;
+            gap: 8px;
+            grid-template-columns: auto minmax(0, 1fr) auto;
+        }
+
+        .corpus-navigation-row .btn {
+            white-space: nowrap;
+        }
+
         .btn {
             appearance: none;
             background: var(--paligo-paper-bg);
@@ -125,6 +178,17 @@
 
         .btn:disabled { cursor: not-allowed; opacity: 0.45; }
 
+        @media (max-width: 640px) {
+            .corpus-navigation-row {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .corpus-item-select {
+                grid-column: 1 / -1;
+                grid-row: 1;
+            }
+        }
+
         .subtitle-thai {
             color: var(--paligo-muted);
             font-size: calc(var(--pali-subtitle-base) * var(--paligo-text-scale));
@@ -135,6 +199,7 @@
             background: #fff;
             border: 1px solid #e1dbcd;
             border-radius: 16px;
+            font-family: var(--pali-reader-font);
             font-size: calc(var(--pali-text-base) * var(--paligo-text-scale));
             line-height: 2.8;
             padding: 40px;
@@ -148,6 +213,103 @@
         }
 
         .sentence-block.current-sentence-zone { background-color: #f7f4eb; }
+
+        .corpus-unit {
+            border-bottom: 1px solid rgba(74, 44, 10, 0.1);
+            margin-bottom: 22px;
+            padding-bottom: 18px;
+        }
+
+        .corpus-unit:last-child {
+            border-bottom: 0;
+            margin-bottom: 0;
+        }
+
+        .corpus-unit__meta {
+            color: var(--paligo-muted);
+            font-size: calc(0.72rem * var(--paligo-text-scale));
+            font-weight: 700;
+            line-height: 1.4;
+            margin-bottom: 8px;
+        }
+
+        .corpus-unit__title {
+            color: #1f2d89;
+            font-family: var(--pali-reader-font);
+            font-size: calc(1.05rem * var(--paligo-text-scale));
+            font-weight: 900;
+            line-height: 1.4;
+            margin-bottom: 10px;
+        }
+
+        .corpus-line {
+            border-radius: 8px;
+            display: flex;
+            gap: 8px;
+            line-height: 1.9;
+            margin: 4px 0;
+            padding: 2px 6px;
+            white-space: pre-wrap;
+        }
+
+        .corpus-line__text {
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+
+        .review-anchor {
+            align-self: flex-start;
+            appearance: none;
+            background: #fffaf0;
+            border: 1px solid rgba(31, 45, 137, 0.22);
+            border-radius: 999px;
+            color: #1f2d89;
+            cursor: pointer;
+            display: none;
+            flex: 0 0 auto;
+            font: inherit;
+            font-size: 12px;
+            font-weight: 800;
+            height: 26px;
+            line-height: 1;
+            margin-top: 8px;
+            padding: 0 8px;
+        }
+
+        body.review-mode .review-anchor {
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .review-anchor.has-review {
+            background: #fff3d6;
+            border-color: #d89700;
+            color: #6b4f00;
+        }
+
+        .corpus-line.current-sentence-zone {
+            background: #fff3d6;
+        }
+
+        .corpus-line.corpus-page-marker {
+            align-items: center;
+            color: var(--paligo-muted);
+            display: flex;
+            font-family: Sarabun, -apple-system, BlinkMacSystemFont, "SF Pro Text", ui-sans-serif, sans-serif;
+            font-size: calc(0.78rem * var(--paligo-text-scale));
+            font-weight: 700;
+            gap: 10px;
+            line-height: 1.4;
+            margin: 18px 0 8px;
+            padding: 0;
+        }
+
+        .corpus-line.corpus-page-marker::before,
+        .corpus-line.corpus-page-marker::after {
+            border-top: 1px dashed rgba(74, 44, 10, 0.24);
+            content: "";
+            flex: 1 1 auto;
+        }
 
         .pali-word {
             border-radius: 4px;
@@ -168,6 +330,83 @@
         #baliAudio {
             display: none;
         }
+
+        .review-panel {
+            background: #fffaf0;
+            border: 1px solid rgba(74, 44, 10, 0.16);
+            border-radius: 14px;
+            box-shadow: 0 10px 32px rgba(74, 44, 10, 0.16);
+            display: grid;
+            gap: 10px;
+            max-width: 520px;
+            padding: 16px;
+            position: fixed;
+            right: 18px;
+            top: 18px;
+            width: calc(100vw - 36px);
+            z-index: 30;
+        }
+
+        .review-panel[hidden] {
+            display: none;
+        }
+
+        .review-panel__header {
+            align-items: start;
+            display: flex;
+            gap: 12px;
+            justify-content: space-between;
+        }
+
+        .review-panel__title {
+            color: #1f2d89;
+            font-weight: 900;
+        }
+
+        .review-panel__target {
+            color: var(--paligo-muted);
+            font-size: 13px;
+            line-height: 1.4;
+            margin-top: 2px;
+        }
+
+        .review-panel label {
+            color: var(--paligo-ink);
+            display: grid;
+            font-size: 14px;
+            font-weight: 800;
+            gap: 5px;
+        }
+
+        .review-panel select,
+        .review-panel textarea {
+            border: 1px solid var(--paligo-paper-border);
+            border-radius: 8px;
+            font: inherit;
+            padding: 9px 10px;
+        }
+
+        .review-panel textarea {
+            min-height: 88px;
+            resize: vertical;
+        }
+
+        .review-panel__actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        @media (max-width: 640px) {
+            .review-panel {
+                bottom: 12px;
+                max-width: none;
+                right: 12px;
+                top: auto;
+                width: calc(100vw - 24px);
+            }
+        }
     </style>
     <link rel="stylesheet" href="paligo-design-tokens.css" />
     <link rel="stylesheet" href="sidebar-nav.css" />
@@ -182,7 +421,7 @@
             <select id="packSelect" aria-label="เลือกชุดฝึก"></select>
             <label class="font-size-field">
                 <span>ขนาดฟอนต์ <span id="fontScaleValue">100%</span></span>
-                <input id="fontScaleInput" type="range" min="70" max="150" step="5" value="100" aria-label="ปรับขนาดฟอนต์" />
+                <input id="fontScaleInput" type="range" min="100" max="240" step="5" value="125" aria-label="ปรับขนาดฟอนต์" />
             </label>
             <button id="btnReload" class="btn" type="button">โหลดใหม่</button>
         </div>
@@ -195,11 +434,58 @@
             <button id="btnLoop" class="btn" type="button">🔁 วนลูปประโยค</button>
             <button id="btnPause" class="btn" type="button">⏸ จบประโยคแล้วหยุด</button>
         </div>
+        <div class="corpus-toolbar" id="corpusToolbar" hidden>
+            <div class="corpus-mode-row" aria-label="โหมดแสดงตำรา">
+                <button class="btn active" type="button" data-corpus-mode="sentence" aria-pressed="true">ทีละบรรทัด</button>
+                <button class="btn" type="button" data-corpus-mode="kho" aria-pressed="false">ทีละข้อ</button>
+                <button class="btn" type="button" data-corpus-mode="chapter" aria-pressed="false">ทีละเรื่อง</button>
+                <button class="btn" type="button" data-corpus-mode="page" aria-pressed="false">ทีละหน้า</button>
+                <button id="reviewModeButton" class="btn" type="button" aria-pressed="false">โหมดรีวิว: ปิด</button>
+            </div>
+            <div class="corpus-navigation-row" aria-label="นำทางหน่วยเรียน">
+                <button class="btn" type="button" data-corpus-prev disabled>‹ หน้าที่แล้ว</button>
+                <select class="corpus-item-select" id="corpusItemSelect" aria-label="เลือกหน่วยเรียน"></select>
+                <button class="btn" type="button" data-corpus-next disabled>หน้าถัดไป ›</button>
+            </div>
+        </div>
         <div id="thaiSubtitle" class="subtitle-thai">เลือกคำศัพท์บาลีเพื่อกระโดดไปยังคำนั้น (ต้องมีไฟล์เสียงและเวลา alignment)</div>
     </div>
 
     <div class="text-display-box" id="paliTextBox"></div>
 </div>
+
+<form class="review-panel" id="reviewPanel" hidden>
+    <div class="review-panel__header">
+        <div>
+            <div class="review-panel__title">สลักความเห็นรีวิว</div>
+            <div class="review-panel__target" id="reviewTargetLabel">ยังไม่ได้เลือกบรรทัด</div>
+        </div>
+        <button class="btn" id="reviewCloseButton" type="button">ปิด</button>
+    </div>
+    <label>
+        ประเภทความเห็น
+        <select id="reviewCategory">
+            <option value="segmentation">แบ่งประโยค/หน่วยแปลผิด</option>
+            <option value="footnote">เชิงอรรถหรือเลขยกลอย</option>
+            <option value="hyphen">คำถูกตัด/ต่อผิด</option>
+            <option value="ocr">OCR หรือฟอนต์ผิด</option>
+            <option value="translation">คำแปลหรือคำอธิบาย</option>
+            <option value="other">อื่นๆ</option>
+        </select>
+    </label>
+    <label>
+        ความเห็น
+        <textarea id="reviewComment" placeholder="บันทึกข้อสังเกตสั้นๆ" required></textarea>
+    </label>
+    <label>
+        ข้อเสนอการแก้ไข
+        <textarea id="reviewSuggestion" placeholder="ถ้ามีข้อเสนอ ให้เขียนไว้ตรงนี้"></textarea>
+    </label>
+    <div class="review-panel__actions">
+        <button class="btn" id="reviewDeleteButton" type="button">ลบความเห็น</button>
+        <button class="btn active" type="submit">บันทึก</button>
+    </div>
+</form>
 
 <audio id="baliAudio" preload="metadata"></audio>
 
@@ -249,6 +535,7 @@ document.getElementById("paligoMainContent")?.classList.add("paligo-content--wit
 const SPEED_STEPS = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
 const SPEED_STORAGE_KEY = 'paligo-audio-playback-rate';
 const VOLUME_STORAGE_KEY = 'paligo-audio-volume';
+const REVIEW_STORAGE_KEY = 'paligo-corpus-review-notes-v1';
 
 const DEMO_ALIGNMENT = [
     { mid_code: 'w001', sid: 's1', pali: 'จกฺขุปาลเถรวตฺถุ', thai_read: 'เรื่องพระจักขุบาลเถระ', start: 0.0, end: 3.2, s_start: 0.0, s_end: 3.2 },
@@ -274,10 +561,17 @@ const MODE_LABELS = {
 let playMode = 'normal';
 let alignmentData = [];
 let currentPack = null;
+let currentCorpus = null;
+let corpusBaseUrl = '';
+let corpusDisplayMode = 'page';
+let corpusSelectionId = '';
 let packBaseUrl = '';
 let bookBaseUrl = '';
 let speedIndex = 2;
 let isSeeking = false;
+let reviewMode = false;
+let reviewNotes = [];
+let activeReviewTarget = null;
 
 const paliTextBox = document.getElementById('paliTextBox');
 const audio = document.getElementById('baliAudio');
@@ -287,6 +581,36 @@ const packMeta = document.getElementById('packMeta');
 const packTitle = document.getElementById('packTitle');
 const footerTitle = document.getElementById('footerTitle');
 const footerMode = document.getElementById('footerMode');
+const corpusToolbar = document.getElementById('corpusToolbar');
+const corpusItemSelect = document.getElementById('corpusItemSelect');
+const corpusPrevButton = document.querySelector('[data-corpus-prev]');
+const corpusNextButton = document.querySelector('[data-corpus-next]');
+const reviewModeButton = document.getElementById('reviewModeButton');
+const reviewPanel = document.getElementById('reviewPanel');
+const reviewTargetLabel = document.getElementById('reviewTargetLabel');
+const reviewCategory = document.getElementById('reviewCategory');
+const reviewComment = document.getElementById('reviewComment');
+const reviewSuggestion = document.getElementById('reviewSuggestion');
+const reviewCloseButton = document.getElementById('reviewCloseButton');
+const reviewDeleteButton = document.getElementById('reviewDeleteButton');
+const CORPUS_NAV_LABELS = {
+    sentence: {
+        prev: '‹ บรรทัดที่แล้ว',
+        next: 'บรรทัดถัดไป ›',
+    },
+    kho: {
+        prev: '‹ ข้อที่แล้ว',
+        next: 'ข้อถัดไป ›',
+    },
+    page: {
+        prev: '‹ หน้าที่แล้ว',
+        next: 'หน้าถัดไป ›',
+    },
+    chapter: {
+        prev: '‹ เรื่องที่แล้ว',
+        next: 'เรื่องถัดไป ›',
+    },
+};
 const btnPlayPause = document.getElementById('btnPlayPause');
 const iconPlay = document.getElementById('iconPlay');
 const iconPause = document.getElementById('iconPause');
@@ -439,6 +763,11 @@ function updateProgressUi() {
 }
 
 function renderText() {
+    if (currentCorpus) {
+        renderCorpusText();
+        return;
+    }
+
     paliTextBox.innerHTML = '';
     let currentSid = null;
     let sentenceSpan = null;
@@ -468,6 +797,331 @@ function renderText() {
 
         sentenceSpan.appendChild(wordSpan);
     });
+}
+
+function loadReviewNotes() {
+    try {
+        const parsed = JSON.parse(localStorage.getItem(REVIEW_STORAGE_KEY) || '[]');
+        reviewNotes = Array.isArray(parsed) ? parsed : [];
+    } catch (_error) {
+        reviewNotes = [];
+    }
+}
+
+function saveReviewNotes() {
+    localStorage.setItem(REVIEW_STORAGE_KEY, JSON.stringify(reviewNotes));
+}
+
+function reviewKey(target) {
+    return [
+        target.corpusId || '',
+        target.itemId || '',
+        target.sourcePage || '',
+        target.khoNo || '',
+    ].join('::');
+}
+
+function findReviewNote(target) {
+    const key = reviewKey(target);
+    return reviewNotes.find((note) => note.key === key);
+}
+
+function formatReviewTarget(target) {
+    const parts = [];
+    if (target.khoLabel) parts.push(target.khoLabel);
+    if (target.sourcePageLabel || target.sourcePage) parts.push(`หน้า ${target.sourcePageLabel || target.sourcePage}`);
+    if (target.itemId) parts.push(target.itemId);
+    return parts.join(' · ');
+}
+
+function makeReviewTarget(line) {
+    return {
+        corpusId: currentCorpus?.corpusId || '',
+        itemId: line.itemId || '',
+        parentItemId: line.parentItemId || '',
+        chapterId: line.chapterId || '',
+        sourcePage: line.sourcePage || '',
+        sourcePageLabel: line.sourcePageLabel || '',
+        khoNo: line.khoNo || '',
+        khoLabel: line.khoLabel || '',
+        selectedText: line.text || '',
+        displayMode: corpusDisplayMode,
+    };
+}
+
+function openReviewPanel(target) {
+    activeReviewTarget = target;
+    const existing = findReviewNote(target);
+    reviewTargetLabel.textContent = formatReviewTarget(target) || 'บรรทัดที่เลือก';
+    reviewCategory.value = existing?.category || 'segmentation';
+    reviewComment.value = existing?.comment || '';
+    reviewSuggestion.value = existing?.suggestion || '';
+    reviewDeleteButton.hidden = !existing;
+    reviewPanel.hidden = false;
+    reviewComment.focus();
+}
+
+function closeReviewPanel() {
+    reviewPanel.hidden = true;
+    activeReviewTarget = null;
+}
+
+function setReviewMode(enabled) {
+    reviewMode = enabled;
+    document.body.classList.toggle('review-mode', enabled);
+    if (reviewModeButton) {
+        reviewModeButton.classList.toggle('active', enabled);
+        reviewModeButton.setAttribute('aria-pressed', String(enabled));
+        reviewModeButton.textContent = `โหมดรีวิว: ${enabled ? 'เปิด' : 'ปิด'}`;
+    }
+    if (!enabled) closeReviewPanel();
+}
+
+function getCorpusPages() {
+    return (currentCorpus?.items || []).filter((item) => item.itemType === 'page');
+}
+
+function getCorpusSentences() {
+    return getCorpusPages().flatMap((page) => page.children || []);
+}
+
+function getCorpusKhos() {
+    return (currentCorpus?.items || []).filter((item) => item.itemType === 'kho');
+}
+
+function getCorpusChapters() {
+    return currentCorpus?.chapters || [];
+}
+
+function getCurrentCorpusList() {
+    if (!currentCorpus) return [];
+    if (corpusDisplayMode === 'sentence') return getCorpusSentences();
+    if (corpusDisplayMode === 'kho') return getCorpusKhos();
+    if (corpusDisplayMode === 'chapter') return getCorpusChapters();
+    return getCorpusPages();
+}
+
+function updateCorpusNavigationButtons(list = getCurrentCorpusList()) {
+    const index = list.findIndex((item) => item.itemId === corpusSelectionId);
+    const hasSelection = index >= 0;
+    const labels = CORPUS_NAV_LABELS[corpusDisplayMode] || CORPUS_NAV_LABELS.page;
+    if (corpusPrevButton) {
+        corpusPrevButton.textContent = labels.prev;
+        corpusPrevButton.disabled = !hasSelection || index <= 0;
+    }
+    if (corpusNextButton) {
+        corpusNextButton.textContent = labels.next;
+        corpusNextButton.disabled = !hasSelection || index >= list.length - 1;
+    }
+}
+
+function setCorpusDisplayMode(mode) {
+    corpusDisplayMode = mode;
+    document.querySelectorAll('[data-corpus-mode]').forEach((button) => {
+        const isActive = button.dataset.corpusMode === mode;
+        button.classList.toggle('active', isActive);
+        button.setAttribute('aria-pressed', String(isActive));
+    });
+    populateCorpusItemSelect();
+    renderCorpusText();
+}
+
+function corpusOptionLabel(item) {
+    if (!item) return '—';
+    if (item.itemType === 'chapter') return `${item.title || item.chapterId}`;
+    if (item.itemType === 'kho') return `${item.khoLabel || `ข้อ ${item.itemNo}`} · หน้า ${item.sourcePageLabel || item.sourcePage}`;
+    if (item.itemType === 'page') return `หน้า ${item.sourcePageLabel || item.sourcePage || item.itemNo} · ${item.title || item.itemId}`;
+    if (item.itemType === 'sentence') return `หน้า ${item.sourcePageLabel || item.sourcePage} · บรรทัด ${item.itemNo}`;
+    return item.title || item.itemId;
+}
+
+function populateCorpusItemSelect() {
+    if (!corpusItemSelect || !currentCorpus) return;
+    const list = getCurrentCorpusList();
+
+    corpusItemSelect.innerHTML = '';
+    list.forEach((item) => {
+        const option = document.createElement('option');
+        option.value = item.itemId;
+        option.textContent = corpusOptionLabel(item);
+        corpusItemSelect.appendChild(option);
+    });
+    if (!corpusSelectionId || !list.some((item) => item.itemId === corpusSelectionId)) {
+        corpusSelectionId = list[0]?.itemId || '';
+    }
+    corpusItemSelect.value = corpusSelectionId;
+    updateCorpusNavigationButtons(list);
+}
+
+function navigateCorpusSelection(direction) {
+    const list = getCurrentCorpusList();
+    if (!list.length) return;
+    const currentIndex = list.findIndex((item) => item.itemId === corpusSelectionId);
+    const fallbackIndex = direction > 0 ? -1 : list.length;
+    const nextIndex = Math.min(list.length - 1, Math.max(0, (currentIndex >= 0 ? currentIndex : fallbackIndex) + direction));
+    corpusSelectionId = list[nextIndex].itemId;
+    if (corpusItemSelect) corpusItemSelect.value = corpusSelectionId;
+    updateCorpusNavigationButtons(list);
+    renderCorpusText();
+}
+
+function makeCorpusLine(lineData, className = '') {
+    const line = document.createElement('span');
+    line.className = `corpus-line${className ? ` ${className}` : ''}`;
+    const text = typeof lineData === 'string' ? lineData : lineData?.text;
+    const textSpan = document.createElement('span');
+    textSpan.className = 'corpus-line__text';
+    textSpan.textContent = text || '—';
+    line.append(textSpan);
+
+    if (currentCorpus && typeof lineData === 'object' && !lineData.skipReview) {
+        const target = makeReviewTarget(lineData);
+        const button = document.createElement('button');
+        button.className = 'review-anchor';
+        if (findReviewNote(target)) button.classList.add('has-review');
+        button.type = 'button';
+        button.textContent = 'รีวิว';
+        button.setAttribute('aria-label', 'สลักความเห็นรีวิวบรรทัดนี้');
+        button.addEventListener('click', () => openReviewPanel(target));
+        line.append(button);
+    }
+    return line;
+}
+
+function renderCorpusUnit({ title, meta, lines, activeItemId }) {
+    const section = document.createElement('section');
+    section.className = 'corpus-unit';
+    if (meta) {
+        const metaEl = document.createElement('div');
+        metaEl.className = 'corpus-unit__meta';
+        metaEl.textContent = meta;
+        section.append(metaEl);
+    }
+    if (title) {
+        const titleEl = document.createElement('div');
+        titleEl.className = 'corpus-unit__title';
+        titleEl.textContent = title;
+        section.append(titleEl);
+    }
+    lines.forEach((line) => {
+        const classes = [
+            line.className || '',
+            line.itemId === activeItemId ? 'current-sentence-zone' : '',
+        ].filter(Boolean).join(' ');
+        section.append(makeCorpusLine(line, classes));
+    });
+    return section;
+}
+
+function buildKhoDisplayLines(item) {
+    const displayLines = [];
+    let lastPage = item.sourcePage;
+    (item.lines || []).forEach((line, index) => {
+        const isNewPage = line.sourcePage && line.sourcePage !== lastPage;
+        if (isNewPage) {
+            displayLines.push({
+                itemId: `${item.itemId}-page-${line.sourcePage}`,
+                text: `${item.khoLabel || item.title || 'ข้อ'} ต่อหน้า ${line.sourcePageLabel || line.sourcePage}`,
+                className: 'corpus-page-marker',
+                skipReview: true,
+            });
+            lastPage = line.sourcePage;
+        }
+        displayLines.push({
+            itemId: `${item.itemId}-line-${index + 1}`,
+            parentItemId: item.itemId,
+            chapterId: item.chapterId,
+            sourcePage: line.sourcePage,
+            sourcePageLabel: line.sourcePageLabel,
+            khoNo: item.khoNo,
+            khoLabel: item.khoLabel,
+            text: line.text,
+        });
+    });
+    return displayLines;
+}
+
+function renderCorpusText() {
+    paliTextBox.innerHTML = '';
+    if (!currentCorpus) return;
+
+    if (corpusDisplayMode === 'sentence') {
+        const item = getCorpusSentences().find((sentence) => sentence.itemId === corpusSelectionId);
+        if (!item) return;
+        paliTextBox.append(
+            renderCorpusUnit({
+                title: item.pali,
+                meta: `itemId: ${item.itemId} · chapterId: ${item.chapterId} · หน้า ${item.sourcePageLabel || item.sourcePage}`,
+                lines: [{
+                    itemId: item.itemId,
+                    parentItemId: item.parentItemId,
+                    chapterId: item.chapterId,
+                    sourcePage: item.sourcePage,
+                    sourcePageLabel: item.sourcePageLabel,
+                    text: item.pali,
+                }],
+                activeItemId: item.itemId,
+            })
+        );
+        thaiSubtitle.textContent = item.thaiRead || item.thaiLiteral || item.thaiMeaning || 'ยังไม่มีเสียง/คำแปลไทยที่ align กับบรรทัดนี้';
+        return;
+    }
+
+    if (corpusDisplayMode === 'kho') {
+        const item = getCorpusKhos().find((kho) => kho.itemId === corpusSelectionId);
+        if (!item) return;
+        paliTextBox.append(
+            renderCorpusUnit({
+                title: item.title,
+                meta: `itemId: ${item.itemId} · chapterId: ${item.chapterId} · เริ่มหน้า ${item.sourcePageLabel || item.sourcePage}`,
+                lines: buildKhoDisplayLines(item),
+            })
+        );
+        thaiSubtitle.textContent = `${item.khoLabel || item.title} · ${item.lines?.length || 0} บรรทัด`;
+        return;
+    }
+
+    if (corpusDisplayMode === 'chapter') {
+        const chapter = getCorpusChapters().find((item) => item.itemId === corpusSelectionId);
+        if (!chapter) return;
+        const pages = getCorpusPages().filter((page) => page.chapterId === chapter.chapterId);
+        pages.forEach((page) => {
+            paliTextBox.append(
+                renderCorpusUnit({
+                    title: page.title,
+                    meta: `chapterId: ${page.chapterId} · itemId: ${page.itemId}`,
+                    lines: (page.children || []).map((sentence) => ({
+                        itemId: sentence.itemId,
+                        parentItemId: sentence.parentItemId,
+                        chapterId: sentence.chapterId,
+                        sourcePage: sentence.sourcePage,
+                        sourcePageLabel: sentence.sourcePageLabel,
+                        text: sentence.pali,
+                    })),
+                })
+            );
+        });
+        thaiSubtitle.textContent = `${chapter.title} · ${pages.length} หน้า`;
+        return;
+    }
+
+    const page = getCorpusPages().find((item) => item.itemId === corpusSelectionId);
+    if (!page) return;
+    paliTextBox.append(
+        renderCorpusUnit({
+            title: page.title,
+            meta: `itemId: ${page.itemId} · chapterId: ${page.chapterId}`,
+            lines: (page.children || []).map((sentence) => ({
+                itemId: sentence.itemId,
+                parentItemId: sentence.parentItemId,
+                chapterId: sentence.chapterId,
+                sourcePage: sentence.sourcePage,
+                sourcePageLabel: sentence.sourcePageLabel,
+                text: sentence.pali,
+            })),
+        })
+    );
+    thaiSubtitle.textContent = `หน้า ${page.sourcePageLabel || page.sourcePage} · ${page.children?.length || 0} บรรทัด`;
 }
 
 function updateStatusBanner(pack) {
@@ -511,6 +1165,9 @@ async function loadAudioForPack(pack) {
 }
 
 async function applyPack(pack, baseUrl) {
+    currentCorpus = null;
+    corpusToolbar.hidden = true;
+    setReviewMode(false);
     currentPack = pack;
     packBaseUrl = baseUrl;
     bookBaseUrl = dirname(resolveQueryParam('manifest') || baseUrl);
@@ -522,6 +1179,43 @@ async function applyPack(pack, baseUrl) {
     updateStatusBanner(pack);
     renderText();
     await loadAudioForPack(pack);
+}
+
+async function loadCorpusManifest(manifestPath) {
+    const manifest = await fetchJson(manifestPath);
+    corpusBaseUrl = dirname(manifestPath);
+    const corpusPath = joinUrl(corpusBaseUrl, manifest.corpus || 'corpus.json');
+    currentCorpus = await fetchJson(corpusPath);
+    currentPack = null;
+    alignmentData = [];
+    packBaseUrl = corpusBaseUrl;
+    corpusDisplayMode = manifest.defaultDisplayMode || 'page';
+    corpusSelectionId = '';
+
+    packSelect.innerHTML = '';
+    const option = document.createElement('option');
+    option.value = manifestPath;
+    option.textContent = manifest.title || currentCorpus.title || 'ตำราเรียน';
+    option.selected = true;
+    packSelect.appendChild(option);
+    packSelect.disabled = true;
+    corpusToolbar.hidden = false;
+    audio.removeAttribute('src');
+    audio.load();
+    updateProgressUi();
+    updatePlayButton(false);
+
+    const title = manifest.title || currentCorpus.title || 'ตำราเรียน';
+    packTitle.textContent = title;
+    footerTitle.textContent = title;
+    footerMode.textContent = 'โหมดอ่านตำรา';
+    statusBanner.classList.add('ready');
+    const khoCount = getCorpusKhos().length;
+    statusBanner.textContent = khoCount
+        ? `โหลด corpus แล้ว (${getCorpusPages().length} หน้า · ${khoCount} ข้อ · ${getCorpusSentences().length} บรรทัด)`
+        : `โหลด corpus แล้ว (${getCorpusPages().length} หน้า · ${getCorpusSentences().length} บรรทัด)`;
+    packMeta.textContent = `${currentCorpus.grade || ''} · ${currentCorpus.sourceType || 'corpus'}`;
+    setCorpusDisplayMode(corpusDisplayMode);
 }
 
 function populatePackSelect(packs, selectedFile) {
@@ -568,8 +1262,13 @@ async function loadDirectPack(packPath) {
 async function bootstrap() {
     const manifestPath = resolveQueryParam('manifest');
     const packPath = resolveQueryParam('pack');
+    const corpusPath = resolveQueryParam('corpus');
 
     try {
+        if (corpusPath) {
+            await loadCorpusManifest(corpusPath);
+            return;
+        }
         if (manifestPath) {
             await loadPackFromManifest(manifestPath, packPath);
             return;
@@ -590,6 +1289,35 @@ function applyTextScale(scale) {
     document.documentElement.style.setProperty('--paligo-text-scale', String(scale / 100));
 }
 
+function bindReaderScale(input, valueEl) {
+    const storageKey = 'paligo-pali-reader-scale-v1';
+    const min = 100;
+    const max = 240;
+    const defaultScale = 125;
+    const clamp = (value) => {
+        const scale = Number(value);
+        if (!Number.isFinite(scale)) return defaultScale;
+        return Math.min(max, Math.max(min, Math.round(scale)));
+    };
+    const stored = clamp(localStorage.getItem(storageKey) || defaultScale);
+
+    input.min = String(min);
+    input.max = String(max);
+    input.step = '5';
+    input.value = String(stored);
+
+    const apply = (value) => {
+        const next = clamp(value);
+        input.value = String(next);
+        if (valueEl) valueEl.textContent = `${next}%`;
+        localStorage.setItem(storageKey, String(next));
+        applyTextScale(next);
+    };
+
+    input.addEventListener('input', () => apply(input.value));
+    apply(stored);
+}
+
 document.getElementById('btnNormal').addEventListener('click', () => setPlayMode('normal'));
 document.getElementById('btnLoop').addEventListener('click', () => setPlayMode('loop'));
 document.getElementById('btnPause').addEventListener('click', () => setPlayMode('pause'));
@@ -604,12 +1332,66 @@ packSelect.addEventListener('change', async () => {
     await applyPack(pack, bookBaseUrl);
 });
 
+document.querySelectorAll('[data-corpus-mode]').forEach((button) => {
+    button.addEventListener('click', () => setCorpusDisplayMode(button.dataset.corpusMode));
+});
+
+corpusItemSelect.addEventListener('change', () => {
+    corpusSelectionId = corpusItemSelect.value;
+    updateCorpusNavigationButtons();
+    renderCorpusText();
+});
+
+corpusPrevButton?.addEventListener('click', () => navigateCorpusSelection(-1));
+corpusNextButton?.addEventListener('click', () => navigateCorpusSelection(1));
+
+reviewModeButton?.addEventListener('click', () => setReviewMode(!reviewMode));
+reviewCloseButton?.addEventListener('click', closeReviewPanel);
+reviewDeleteButton?.addEventListener('click', () => {
+    if (!activeReviewTarget) return;
+    const key = reviewKey(activeReviewTarget);
+    reviewNotes = reviewNotes.filter((note) => note.key !== key);
+    saveReviewNotes();
+    closeReviewPanel();
+    renderCorpusText();
+});
+
+reviewPanel?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    if (!activeReviewTarget) return;
+    const key = reviewKey(activeReviewTarget);
+    const nextNote = {
+        key,
+        target: activeReviewTarget,
+        category: reviewCategory.value,
+        comment: reviewComment.value.trim(),
+        suggestion: reviewSuggestion.value.trim(),
+        status: 'open',
+        updatedAt: new Date().toISOString(),
+    };
+    const existingIndex = reviewNotes.findIndex((note) => note.key === key);
+    if (existingIndex >= 0) {
+        reviewNotes[existingIndex] = {
+            ...reviewNotes[existingIndex],
+            ...nextNote,
+            createdAt: reviewNotes[existingIndex].createdAt || nextNote.updatedAt,
+        };
+    } else {
+        reviewNotes.push({
+            ...nextNote,
+            createdAt: nextNote.updatedAt,
+        });
+    }
+    saveReviewNotes();
+    closeReviewPanel();
+    renderCorpusText();
+});
+
 document.getElementById('btnReload').addEventListener('click', () => bootstrap());
 
-window.PaligoBookFonts?.bindScaleRange?.(
+bindReaderScale(
     document.getElementById('fontScaleInput'),
-    document.getElementById('fontScaleValue'),
-    applyTextScale
+    document.getElementById('fontScaleValue')
 );
 
 btnPlayPause.addEventListener('click', () => {
@@ -704,6 +1486,7 @@ if (Number.isFinite(storedVolume)) {
 }
 applyVolume();
 setPlayMode('normal');
+loadReviewNotes();
 bootstrap();
 </script>
 </body>

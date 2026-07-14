@@ -21,9 +21,31 @@ function avatarFromProfileJson(profileJson) {
 }
 
 /**
+ * @param {unknown} payloadJson
+ */
+function avatarFromPackagePayload(payloadJson) {
+  if (!payloadJson) return null;
+  try {
+    const parsed = typeof payloadJson === "string" ? JSON.parse(payloadJson) : payloadJson;
+    const candidates = [
+      parsed?.submission?.profile?.avatarUrl,
+      parsed?.submission?.studentProfile?.avatarUrl,
+      parsed?.book?.profile?.avatarUrl,
+      parsed?.book?.studentProfile?.avatarUrl,
+      parsed?.profile?.avatarUrl,
+    ];
+    const url = candidates.map((value) => String(value || "").trim()).find((value) => value.startsWith("data:image/"));
+    return url || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * @param {Record<string, unknown>} row
  */
 function mapInboxItem(row) {
+  const profileAvatar = avatarFromProfileJson(row.from_profile_json);
   return {
     id: row.id,
     status: row.status,
@@ -34,8 +56,9 @@ function mapInboxItem(row) {
     direction: row.direction,
     bookId: row.book_id,
     bookRevision: row.book_revision,
+    fromUserId: row.from_user_id,
     fromDisplayName: row.from_display_name,
-    fromAvatarUrl: avatarFromProfileJson(row.from_profile_json),
+    fromAvatarUrl: profileAvatar || avatarFromPackagePayload(row.payload_json),
     createdAt: row.created_at,
     expiresAt: row.expires_at,
   };
@@ -57,6 +80,8 @@ export async function handleGetInbox(request, env) {
   const result = await env.DB.prepare(
     `SELECT i.id, i.status, i.intended_recipient_label, i.book_title, i.subject, i.grade,
             i.created_at, i.expires_at, p.direction, p.book_id, p.book_revision,
+            p.payload_json,
+            i.from_user_id,
             u.display_name AS from_display_name, u.profile_json AS from_profile_json
      FROM inbox_items i
      INNER JOIN packages p ON p.id = i.package_id
@@ -88,9 +113,11 @@ export async function handleClaimInbox(request, env, inboxId) {
 
   const row = await env.DB.prepare(
     `SELECT i.id, i.to_user_id, i.from_user_id, i.status, i.intended_recipient_label,
-            p.payload_json, p.direction
+            p.payload_json, p.direction,
+            u.display_name AS from_display_name, u.profile_json AS from_profile_json
      FROM inbox_items i
      INNER JOIN packages p ON p.id = i.package_id
+     INNER JOIN users u ON u.id = i.from_user_id
      WHERE i.id = ?1`
   )
     .bind(inboxId)
@@ -136,6 +163,9 @@ export async function handleClaimInbox(request, env, inboxId) {
 
   return jsonResponse(request, {
     inboxItemId: inboxId,
+    fromUserId: row.from_user_id,
+    fromDisplayName: row.from_display_name,
+    fromAvatarUrl: avatarFromProfileJson(row.from_profile_json) || avatarFromPackagePayload(row.payload_json),
     bookTransfer,
   });
 }

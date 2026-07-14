@@ -11,7 +11,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
 const BOOK_ID = "book-d06b397f-964d-4ea3-9f26-bc31573e19fe";
 const TEST_TEXT = "ทดสอบเลื่อนตัวอักษร";
-const URL = `http://127.0.0.1:8765/ruled-lines-card-only-template.html?bookId=${BOOK_ID}`;
+const PALI_LEGACY_TEXT = "พุทฺโธ โย มงฺคลตฺถีน มงฺคล อิติ วิสฺสุโต";
+const PALI_NORMALIZED_TEXT = "พุทฺโธ โย มงฺคลตฺถีนํ มงฺคลํ อิติ วิสฺสุโต";
+const URL = `http://127.0.0.1:8765/workbook.html?bookId=${BOOK_ID}`;
 const OUT_DIR = path.join(ROOT, "docs", "audit", "tab-indent");
 
 function seedLocalStorage() {
@@ -79,11 +81,16 @@ async function measureParagraphStartPx(page) {
     const marginLinePx = gutterCh * frameCtx.measureText("0").width;
     const charStep = ctx.measureText("ก").width;
     const bodyStartPx = marginLinePx + charStep * 0.5;
+    const paragraphStartPx = bodyStartPx + charStep * 5;
     let bodyIndent = "";
     while (ctx.measureText(bodyIndent).width < bodyStartPx) bodyIndent += " ";
+    let paragraphIndent = bodyIndent;
+    while (ctx.measureText(paragraphIndent).width < paragraphStartPx) paragraphIndent += " ";
     return {
       bodyStartPx,
+      paragraphStartPx,
       bodyIndentLen: bodyIndent.length,
+      paragraphIndentLen: paragraphIndent.length,
       editorBound: editor.dataset.editorBound === "true",
     };
   });
@@ -96,7 +103,7 @@ async function textStartPx(page, line) {
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
     ctx.font = `${styles.fontStyle} ${styles.fontVariant} ${styles.fontWeight} ${styles.fontSize} ${styles.fontFamily}`;
-    const idx = lineText.search(/[^\s\d.)]/);
+    const idx = lineText.search(/[^\s\d๐-๙.)]/);
     if (idx < 0) return { textStartPx: 0, idx: -1 };
     return { textStartPx: ctx.measureText(lineText.slice(0, idx)).width, idx, line: lineText };
   }, line);
@@ -126,8 +133,9 @@ async function runScenario(page, name, afterNumberKeys) {
   const aligned =
     layout &&
     textPos.idx >= 0 &&
-    Math.abs(textPos.textStartPx - layout.bodyStartPx) <= tolerancePx &&
-    firstLine.includes(TEST_TEXT);
+    Math.abs(textPos.textStartPx - layout.paragraphStartPx) <= tolerancePx &&
+    firstLine.includes(TEST_TEXT) &&
+    firstLine.trimStart().startsWith("๑");
   return { name, firstLine, aligned, layout, textPos, value };
 }
 
@@ -181,8 +189,25 @@ async function main() {
   const charJumpAligned =
     layoutForChar &&
     textPosChar.idx >= 0 &&
-    Math.abs(textPosChar.textStartPx - layoutForChar.bodyStartPx) <= 4 &&
-    charJumpLine.includes(TEST_TEXT);
+    Math.abs(textPosChar.textStartPx - layoutForChar.paragraphStartPx) <= 4 &&
+    charJumpLine.includes(TEST_TEXT) &&
+    charJumpLine.trimStart().startsWith("๑");
+
+  await page.evaluate(() => {
+    const editor = document.querySelector(".ruled-editor");
+    editor.value = "";
+    editor.focus();
+    editor.setSelectionRange(0, 0);
+  });
+  await page.keyboard.insertText(`1${PALI_LEGACY_TEXT}`);
+  const paliLegacyValue = await page.evaluate(() => document.querySelector(".ruled-editor")?.value || "");
+  const paliLegacyLine = paliLegacyValue.split("\n")[0] || "";
+  const paliLegacyPass =
+    paliLegacyLine.includes(PALI_NORMALIZED_TEXT) &&
+    !paliLegacyLine.includes("") &&
+    paliLegacyLine.includes("ํ") &&
+    paliLegacyLine.includes("ฺ") &&
+    paliLegacyLine.trimStart().startsWith("๑");
 
   await page.screenshot({ path: path.join(OUT_DIR, "final-audit-snapshot.png"), fullPage: true });
 
@@ -195,11 +220,18 @@ async function main() {
     tabScenario: tabResult,
     spaceScenario: spaceResult,
     charJumpScenario: { line: charJumpLine, aligned: charJumpAligned, textPos: textPosChar },
+    paliLegacyScenario: {
+      input: PALI_LEGACY_TEXT,
+      expected: PALI_NORMALIZED_TEXT,
+      line: paliLegacyLine,
+      pass: paliLegacyPass,
+    },
     pass:
       bound.every((e) => e.bound) &&
       tabResult.aligned &&
       spaceResult.aligned &&
       charJumpAligned &&
+      paliLegacyPass &&
       charJumpLine.includes(TEST_TEXT),
     snapshots: [
       "docs/audit/tab-indent/after-tab.png",

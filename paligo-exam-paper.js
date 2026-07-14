@@ -8,7 +8,21 @@
     "wrong-pa": "ผิด ป.",
   };
 
+  const SCORE_LABELS = {
+    "score-1": "๑ ให้",
+    "score-2": "๒ ให้",
+    "score-3": "๓ ให้",
+  };
+
+  const REVIEW_LABELS = {
+    ...ERROR_LABELS,
+    ...SCORE_LABELS,
+  };
+
   const HIGHLIGHT_COLORS = {
+    "score-1": "rgba(36, 113, 91, 0.2)",
+    "score-2": "rgba(36, 113, 91, 0.28)",
+    "score-3": "rgba(36, 113, 91, 0.36)",
     "wrong-word": "rgba(255, 214, 0, 0.42)",
     "wrong-relation": "rgba(255, 159, 64, 0.42)",
     "wrong-pa": "rgba(255, 107, 107, 0.38)",
@@ -94,8 +108,8 @@
         el.style.setProperty("--line-n", String(item.line));
         el.style.setProperty("--hl-bg", HIGHLIGHT_COLORS[item.kind] || HIGHLIGHT_COLORS["wrong-word"]);
         el.dataset.highlightId = item.id;
-        el.title = `${ERROR_LABELS[item.kind] || item.kind}: ${item.text || ""}`;
-        el.innerHTML = `<span class="review-highlight-mark__bar" aria-hidden="true"></span><span class="review-highlight-mark__label">${ERROR_LABELS[item.kind] || item.kind}</span><span class="review-highlight-mark__text">${item.text || ""}</span>`;
+        el.title = `${REVIEW_LABELS[item.kind] || item.kind}: ${item.text || ""}`;
+        el.innerHTML = `<span class="review-highlight-mark__bar" aria-hidden="true"></span><span class="review-highlight-mark__label">${REVIEW_LABELS[item.kind] || item.kind}</span><span class="review-highlight-mark__text">${item.text || ""}</span>`;
         if (typeof onHighlightClick === "function") {
           el.addEventListener("click", (event) => {
             event.preventDefault();
@@ -243,6 +257,8 @@
 
   window.PaligoExamPaper = {
     ERROR_LABELS,
+    SCORE_LABELS,
+    REVIEW_LABELS,
     HIGHLIGHT_COLORS,
     displayPageToIndex,
     indexToDisplayPage,

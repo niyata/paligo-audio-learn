@@ -36,7 +36,8 @@ alwaysApply: true
 | หน้า | ตรวจ |
 |------|------|
 | `exam-books.html` | แสดงสมุดเก่า · สร้างสมุดใหม่ · ส่งออก · นำเข้า |
-| `ruled-lines-card-only-template.html` | เปิดเล่ม · autosave · ส่งตรวจ · **ตีเส้น/ลบเส้นทับเส้นกระดาษ** (ดู `.cursor/rules/paligo-annotation-lines.mdc`) |
+| `workbook.html` | เปิดเล่ม · autosave · ส่งตรวจ · **ตีเส้น/ลบเส้นทับเส้นกระดาษ** (ดู `.cursor/rules/paligo-annotation-lines.mdc`) |
+| `ruled-lines-card-only-template.html` | legacy backup ของ workbook route — ห้ามลบจนกว่าจะมี compatibility plan |
 | `exam-reviewer-console.html` | นำเข้า · stamp · ส่งคืน |
 
 Local: `python3 -m http.server 8765` แล้ว hard refresh (Cmd+Shift+R)

@@ -2,7 +2,9 @@
 
 **วัตถุประสงค์:** ยืนยันวงจรสมบูรณ์ นักเรียน → ครู → นักเรียน ผ่าน Inbox (ไม่พึ่ง import/export ไฟล์)
 
-**API smoke (อัตโนมัติ):** `bash scripts/smoke-inbox-api.sh` (ต้อง `cd workers && npm run dev`)
+**API audit (อัตโนมัติ):** `node scripts/audit-inbox-loop-api.mjs` (ต้อง `cd workers && npm run dev`)
+
+**API smoke legacy:** `bash scripts/smoke-inbox-api.sh`
 
 ---
 
@@ -49,6 +51,7 @@
 | # | กรณี | ผลที่คาดหวัง |
 |---|------|-------------|
 | R1 | นักเรียน claim inbox `to-reviewer` | 403 |
+| R1b | ครู claim inbox `to-student` | 403 |
 | R2 | Import/export ปิด (ค่าเริ่มต้น) | ไม่เห็นแท็บ「โอนไฟล์ (ขั้นสูง)」 |
 | R3 | Super Admin เปิด import/export | เห็นแท็บขั้นสูง |
 | R4 | ปิด Inbox API ใน Super Admin | ส่งตรวจ API คืน 503 · หน้า inbox แสดง gate |
@@ -59,7 +62,7 @@
 ## Definition of Done — Phase 4 E2E
 
 - [ ] ขั้น A–C ผ่านบน localhost ทั้งคู่
-- [ ] `scripts/smoke-inbox-api.sh` ผ่าน
+- [ ] `node scripts/audit-inbox-loop-api.mjs` ผ่าน และมี report ที่ `docs/audit/inbox-loop-api/report.json`
 - [ ] Regression R1–R2 ผ่าน
 - [ ] PO อนุมัติบน board
 

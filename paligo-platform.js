@@ -5,6 +5,9 @@
   const FLAGS_CACHE_KEY = "paligo-platform-flags-v1";
   const SUPER_ADMIN_EMAILS = new Set(["tha.std@paligo.jo", "tha.tc@paligo.jp"]);
 
+  /** Issue #78 — ซ่อน Import/Export ชั่วคราวจาก UI (อย่าลบ gate/logic เดิม) */
+  const IMPORT_EXPORT_UI_TEMPORARILY_HIDDEN = true;
+
   const DEFAULT_FLAGS = {
     importExportEnabled: false,
     inboxEnabled: true,
@@ -61,6 +64,7 @@
   }
 
   function canUseImportExport(user, flags) {
+    if (IMPORT_EXPORT_UI_TEMPORARILY_HIDDEN) return false;
     if (isSuperAdmin(user)) return true;
     return Boolean(flags?.importExportEnabled);
   }
@@ -73,8 +77,10 @@
   }
 
   function applyImportExportGate(flags, user, { offlineFallback = false } = {}) {
-    // เครื่องมือ import/export ทำงานในเครื่องล้วน — เมื่อ API offline ให้เป็นทางสำรองได้เสมอ
-    const allowed = offlineFallback || canUseImportExport(user, flags);
+    // เดิม: offlineFallback เปิดทางสำรองเมื่อ API offline — ปิดชั่วคราว (#78)
+    const allowed =
+      !IMPORT_EXPORT_UI_TEMPORARILY_HIDDEN &&
+      (offlineFallback || canUseImportExport(user, flags));
     const nodes = global.document?.querySelectorAll(
       "[data-paligo-import-export], [data-paligo-import-export-tab]"
     );
@@ -153,6 +159,7 @@
 
   global.PaligoPlatform = {
     SUPER_ADMIN_EMAILS,
+    IMPORT_EXPORT_UI_TEMPORARILY_HIDDEN,
     DEFAULT_FLAGS,
     isSuperAdmin,
     fetchFlags,

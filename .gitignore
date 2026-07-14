@@ -9,6 +9,8 @@ npm-debug.log*
 # Env
 .env
 .env.local
+.dev.vars
+.dev.vars.local
 
 # Editor
 .vscode/
@@ -27,3 +29,5 @@ korsob/
 # Generated book HTML from PDF conversion (do not commit copyrighted books)
 output/
 tmp/
+*.pdf
+ตัวอย่างการดึงเนื้อหามาฝึกแปล/

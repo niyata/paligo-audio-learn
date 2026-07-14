@@ -1,0 +1,10 @@
+{
+  "name": "@paligo/line-issue-bot-core",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Portable LINE-to-GitHub issue triage core",
+  "exports": {
+    ".": "./src/index.js"
+  }
+}

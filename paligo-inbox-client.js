@@ -36,6 +36,24 @@
     return getConfig().apiBase.replace(/\/$/, "");
   }
 
+  function getApiDiagnostics() {
+    const cfg = getConfig();
+    const base = getApiBase();
+    const host = global.location?.hostname || "";
+    const isPages = host === "app.paligo.jp" || /\.pages\.dev$/i.test(host);
+    return {
+      apiBase: base,
+      isLocal: isLocalDev(),
+      isPages,
+      host,
+      appOrigin: cfg.appOrigin || global.location?.origin || "",
+      localPorts: DEV_PORTS.slice(),
+      localCommand: "cd workers && npm run dev",
+      localHint: `รัน Workers dev แล้วเปิดหน้านี้ใหม่ หรือใช้ ?apiPort=8788 ถ้า port เปลี่ยน`,
+      cloudHint: `ตรวจ Workers route/CORS ที่ ${base} และ DNS api.paligo.jp`,
+    };
+  }
+
   function getSession() {
     try {
       const parsed = JSON.parse(global.localStorage?.getItem(SESSION_KEY) || "null");
@@ -150,9 +168,13 @@
     }
     const port = await discoverApiPort();
     if (port) return getApiBase();
-    throw new Error(
-      `ไม่พบ Inbox API บน localhost (${DEV_PORTS.join(", ")}) — รัน: cd workers && npm run dev`
-    );
+    const diag = getApiDiagnostics();
+    const message = diag.isLocal
+      ? `ไม่พบ Inbox API บน localhost (${DEV_PORTS.join(", ")}) — รัน: ${diag.localCommand}`
+      : `ไม่ติด Inbox API ที่ ${diag.apiBase} — ตรวจ Workers route/CORS และ DNS`;
+    const error = new Error(message);
+    error.diagnostics = diag;
+    throw error;
   }
 
   /**
@@ -210,12 +232,13 @@
 
   function wrapNetworkError(error) {
     if (error instanceof TypeError || error.message === "Failed to fetch") {
-      const base = getApiBase();
-      const hint = isLocalDev()
-        ? `ไม่ติด API ที่ ${base} — รัน \`cd workers && npm run dev\` ใน terminal แยก (API ใช้ port 8788)`
-        : `ไม่ติด API ที่ ${base} — ตรวจว่า deploy Workers ที่ api.paligo.jp แล้ว`;
+      const diag = getApiDiagnostics();
+      const hint = diag.isLocal
+        ? `ไม่ติด Inbox API ที่ ${diag.apiBase} — รัน: ${diag.localCommand}`
+        : `ไม่ติด Inbox API ที่ ${diag.apiBase} — ตรวจ Workers route/CORS และ DNS api.paligo.jp`;
       const wrapped = new Error(hint);
       wrapped.cause = error;
+      wrapped.diagnostics = diag;
       return wrapped;
     }
     return error;
@@ -240,11 +263,13 @@
     return safeRequest("/health", { method: "GET", auth: false });
   }
 
-  async function register({ role, displayName, email, pin }) {
+  async function register({ role, displayName, email, pin, profileJson }) {
+    const json = { role, displayName, email: email || null, pin };
+    if (profileJson !== undefined) json.profileJson = profileJson;
     const payload = await safeRequest("/auth/register", {
       method: "POST",
       auth: false,
-      json: { role, displayName, email: email || null, pin },
+      json,
     });
     setSession(payload);
     return payload;
@@ -365,6 +390,7 @@
     API_PORT_KEY,
     getConfig,
     getApiBase,
+    getApiDiagnostics,
     getSession,
     setSession,
     clearSession,

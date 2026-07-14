@@ -1,0 +1,26 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "line-issue-bot-worker",
+  "main": "src/index.js",
+  "compatibility_date": "2026-07-11",
+  "workers_dev": true,
+  "routes": [
+    { "pattern": "chat.paligo.jp", "custom_domain": true }
+  ],
+  "vars": {
+    "ISSUE_BOT_USER_AGENT": "line-issue-bot-worker",
+    "ISSUE_BOT_PUBLIC_ORIGIN": "https://chat.paligo.jp"
+  },
+  "kv_namespaces": [
+    {
+      "binding": "LINE_ISSUE_DRAFTS",
+      "id": "76e28b1372ba46bd992ea8e10d19745d"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "LINE_ISSUE_ASSETS",
+      "bucket_name": "line-issue-bot-assets"
+    }
+  ]
+}

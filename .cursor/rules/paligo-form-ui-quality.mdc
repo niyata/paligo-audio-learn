@@ -1,0 +1,160 @@
+---
+description: มาตรฐาน Form UI — hierarchy, density, tiles, copy, actions (อ่านก่อนแก้หน้า form/profile/settings)
+globs: "**/*.{html,css}"
+alwaysApply: false
+---
+
+# Paligo Form UI Quality
+
+อ่านก่อนแก้หน้า form-heavy: `exam-profile.html`, `exam-account.html`, settings, onboarding wizard
+
+อ้างอิง copy: `docs/agile/copy-standard.md`
+
+## 0. Design references (ปรับเข้าธีม — ห้ามลอก visual ตรงๆ)
+
+| ระบบ | เอาอะไรมาใช้ |
+|------|-------------|
+| **Apple HIG** (แกนหลัก) | inset-grouped cards, touch ≥44px, ชัด/เรียบ, helper เป็น footnote |
+| **GitHub Primer** | form control: label บน → input → caption ล่าง → error state |
+| **Atlassian** | status = **lozenge** (pill tint ตามความหมาย), message = **SectionMessage** (fill + left accent) |
+| **Linear** | layout สะอาด แน่น muted borders, shadow น้อย, สัญญาณสูง-รบกวนต่ำ |
+
+**ธีม Paligo ที่ต้องคง:** paper background, exam blue `#1f2d89` (สงวนไว้เฉพาะ interactive/primary), compact sections, soft borders, **minimal shadow**, Thai label อ่านง่าย, mobile-first 390px, touch 44px, primary เด่น **หนึ่งเดียว**
+
+## 1. Form hierarchy
+
+แบ่งเป็น **compact sections** — หนึ่ง section = หนึ่ง concept:
+
+| ลำดับ | Section ตัวอย่าง |
+|------|------------------|
+| Header | สรุปผู้ใช้ (avatar, ชื่อ, บทบาท, User ID) |
+| Identity | รูปโปรไฟล์ |
+| Public display | ชื่อที่แสดง |
+| Role | ข้อมูลนักเรียน / ครู |
+| Status | สถานะโปรไฟล์, หน้าที่ |
+| Availability | ความพร้อมรับตรวจ |
+| Connections | จับคู่ |
+| Actions | บันทึก (primary เดียว) |
+
+แต่ละ section = **การ์ด grouped (HIG inset-grouped)** — soft border + radius, ไม่มีเงา (แยกด้วย gap) ต้องมี:
+- **Title สั้น** ink เข้ม (สงวน accent น้ำเงินไว้ interactive) ห่อ title+lead ใน `.profile-section__head`
+- **Helper ไม่เกิน 1 บรรทัด** (`.profile-section__lead` / `.profile-field-hint`)
+- สงวนสีน้ำเงินไว้เฉพาะ tile ที่เลือก · primary · tab active · ลิงก์ (ห้ามหัวข้อสีน้ำเงินทั้งหน้า → ตาลาย)
+- ห้ามวาง concept คนละเรื่องในแถวเดียว (เช่น ชื่อ + status tiles)
+
+```html
+<section class="profile-section">
+  <div class="profile-section__head">
+    <h2 class="profile-section__title">สถานะโปรไฟล์</h2>
+    <p class="profile-section__lead">เลือกสถานะที่ตรงกับท่าน</p>
+  </div>
+  <!-- fields -->
+</section>
+```
+
+## 2. Density และ rhythm
+
+| Token | ค่า |
+|-------|-----|
+| short text input สูง | **44px** (ไม่ใช่กล่องสูงเหมือน textarea) |
+| field gap | 12–14px |
+| section (card) gap | 14px |
+| card padding | 16px (mobile 14px) |
+| option tile gap | 8px |
+| mobile | 1 column |
+| desktop 2 col | เฉพาะ field คู่ที่สัมพันธ์ (ชื่อ+นามสกุล) |
+
+- ห้าม `min-height` เกิน 52px สำหรับ `<input type="text">` / `<select>`
+- ห้าม padding แนวตั้งเกินจำเป็น (สูงสุด ~10–12px)
+
+**Field grid (Primer rhythm)**
+
+```html
+<div class="profile-field-grid is-2col">
+  <div class="profile-field">
+    <label class="profile-field__label" for="...">ชื่อในกล่องข้อความ</label>
+    <input class="profile-input profile-field__control" id="..." />
+    <span class="profile-field__hint is-empty" aria-hidden="true"></span>
+  </div>
+  <div class="profile-field">
+    <label class="profile-field__label" for="...">ชื่อสาธารณะ</label>
+    <input class="profile-input profile-field__control" id="..." />
+    <span class="profile-field__hint">ใช้เมื่อแสดงบนฟีดหรือกระดานคะแนน</span>
+  </div>
+</div>
+```
+
+- **section helper** = `.profile-section__lead` (อยู่ใน `.profile-section__head` แยกจาก field label)
+- **field label** = `.profile-field__label` · **caption** = `.profile-field__hint`
+- คู่ 2 คอลัมน์บน desktop: จอง hint slot เสมอ (`is-empty` ถ้าไม่มีข้อความ) เพื่อให้ label+input ระนาบเดียวกัน
+- control ซับซ้อน (combobox/tiles): `.profile-field--stack` ไม่มี hint row
+
+## 3. Option controls
+
+| ชนิดข้อมูล | Control |
+|-----------|---------|
+| เลือกเดียว 2–5 ตัว | compact radio tiles (`.wizard-option` + `.profile-option-grid--compact`) |
+| เลือกหลายตัว | checkbox chips (`.profile-check`) |
+| ตัวเลข | `<input type="number">` + helper |
+| action | button |
+
+**Option tile**
+- `min-height: 44px`
+- label สั้น · helper optional ห้ามทำ tile สูงเกิน
+- selected: border + background อ่อน (ไม่หนัก)
+- grid: `repeat(auto-fill, minmax(132px, 1fr))` บน mobile/desktop ตามความยาวคำ
+
+ใช้ `PaligoProfile.mountOptionTiles()` — อย่าสร้าง `<select>` แยกถ้ามี tiles แล้ว
+
+## 3.5 Status & messages
+
+- **Lozenge** (Atlassian) — badge สถานะ pill tint ตามความหมาย ไม่ใช้ dot ซ้ำ:
+  - พร้อม/สำเร็จ = เขียว · จำกัด/เตือน = เหลืองอำพัน · เต็ม/ผิดพลาด = แดง · ปิด/กลาง = เทา
+  - ใช้กับ live preview เช่น `.profile-availability-badge` + eyebrow `ตัวอย่างที่ผู้เรียนเห็น`
+- **SectionMessage** (Atlassian) — inline message = tint fill + **left accent 3px** ตามสถานะ (`.profile-status.is-error/.is-success/.is-warning`)
+- Error/helper วางใต้ field (Primer caption) ไม่แยกไปไกลจากจุดกรอก
+
+## 4. Copy (human-readable)
+
+หลีกเลี่ยงศัพท์เทคนิคใน label หลัก:
+
+| ห้าม | ใช้แทน |
+|-----|--------|
+| `feed/leaderboard` ใน label | label: `ชื่อสาธารณะ` · helper: `ใช้เมื่อแสดงบนฟีดหรือกระดานคะแนน` |
+| `รูปโปรไฟล์บนปกสมุด (แชท)` | `รูปโปรไฟล์` · helper: `แสดงบนปกสมุดและกล่องข้อความ` |
+| `สถานะครู` | `สถานะโปรไฟล์` |
+| `API` / `schema` / field name | ภาษาไทยที่ผู้ใช้เข้าใจ |
+
+ตัวเลขสถานะ/web UI: **เลขอารบิก** · เนื้อหาสมุด: เลขไทย (ดู `paligo-change-audit.mdc`)
+
+## 5. Action placement
+
+- **Primary หนึ่งเดียว** ต่อ panel (เช่น `บันทึกโปรไฟล์`)
+- Secondary: ghost/link (`เปิดกล่องข้อความ`)
+- Destructive: เล็กกว่า primary (`ลบรูป` เป็น ghost)
+- จัดใน `.profile-actions--footer` — primary บน mobile กว้างเต็มแถวได้
+
+```html
+<footer class="profile-actions profile-actions--footer">
+  <button class="paligo-btn is-primary" type="button">บันทึกโปรไฟล์</button>
+  <div class="profile-actions__secondary">
+    <a class="paligo-btn is-ghost" href="...">เปิดกล่องข้อความ</a>
+  </div>
+</footer>
+```
+
+## 6. Mobile (390px)
+
+- ไม่ล้นแนวนอน · card ไม่กว้างเกิน viewport
+- tiles ไม่บังคับ 2 คอลัมน์ถ้าคำยาว
+- combobox list `max-height` จำกัด
+- smoke: `node scripts/audit-form-ui-profile.mjs`
+
+## Checklist ก่อนจบงาน form UI
+
+- [ ] section hierarchy ชัด · ไม่ตาลาย
+- [ ] short input ≈44px · tiles compact
+- [ ] label ภาษาไทย human-readable
+- [ ] primary action เด่นหนึ่งเดียว
+- [ ] mobile 390px + desktop ไม่ regression save/avatar/status/capacity
+- [ ] `node scripts/audit-form-ui-profile.mjs` ผ่าน

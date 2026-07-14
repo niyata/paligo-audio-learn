@@ -8,12 +8,13 @@
 2. รับงานจาก **Ready** ที่ label `agent:*` ตรงกับตัวเอง
 3. ทำ `priority:P0` ก่อน `P1` ก่อน `P2`
 4. ย้าย issue → **In Progress** แล้ว comment สั้นๆ
+5. ถ้าเจอ dirty tree / ไฟล์ค้างข้าม agent / rename migration ให้ส่งต่อ **Paligo Integrator** ก่อนเคลมเอง
 
 ## Repo map
 
 | Area | Path | Docs |
 |------|------|------|
-| Exam book | `ruled-lines-card-only-template.html`, `paligo-exam-*.js` | `docs/exam-flow-ux-audit.md` |
+| Exam book | `workbook.html` (production), `ruled-lines-card-only-template.html` (legacy backup), `paligo-exam-*.js` | `docs/exam-flow-ux-audit.md` |
 | Audio / PDF | `scripts/`, `pali-audio-hightlight.html` | `docs/system-architecture-overview.md` |
 | Navigation shell | `sidebar-nav.*`, `paligo-nav-config.js` | `docs/navigation-and-shell-prd.md` |
 | Agile | `.github/`, `docs/agile/` | `docs/agile/SCRUM-WORKFLOW.md` |
@@ -24,6 +25,7 @@
 - **Minimize scope** — diff เล็ก ตรง issue
 - **Change audit** — ก่อนจบงาน ตรวจ regression ฟีเจอร์ที่เกี่ยวข้อง; ห้ามทำโค้ดนอกคำสั่งพัง (ดู `.cursor/rules/paligo-change-audit.mdc`)
 - **ไม่ commit** จน user ขอ
+- **Paligo Integrator owns cross-agent cleanup** — dirty tree, abandoned files, broad rename, release prep, compatibility migration ต้องผ่าน role นี้ (ดู `docs/agile/PALIGO-INTEGRATOR.md`)
 - **Shell ทุกหน้า user-facing** — ใช้ `PaligoSidebar.autoInit()`
 - **Exam handoff** — ใช้ `paligo-exam-shared.js` + book transfer schemas
 - **ตีเส้นบรรทัด** — ห้าม regression ตำแหน่ง/ลบเส้น (ดู `.cursor/rules/paligo-annotation-lines.mdc`)

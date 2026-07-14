@@ -1,0 +1,4360 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>สมุดข้อสอบ · Paligo</title>
+    <link rel="stylesheet" href="paligo-design-tokens.css" />
+    <link rel="stylesheet" href="sidebar-nav.css" />
+    <link rel="stylesheet" href="paligo-exam-ui.css" />
+    <style>
+      :root {
+        --page-bg: #f8f0e3;
+        --paper-bg: #fffaf0;
+        --paper-border: rgba(74, 44, 10, 0.22);
+        --card-bg: rgba(255, 255, 255, 0.78);
+        --card-border: rgba(74, 44, 10, 0.16);
+        --ink: #3a3a3a;
+        --exam-blue: rgba(31, 45, 137, 0.72);
+        --rule-color: var(--exam-blue);
+        --margin-color: var(--exam-blue);
+        --line-height: 30px;
+        --line-width: 0.75px;
+        --emphasis-line-width: 1px;
+        --number-gutter: 5ch;
+        --editor-font-size: 14px;
+        --header-text-y-offset: 2px;
+        --text-y-offset: var(--header-text-y-offset);
+        --paper-padding-block: 28px;
+        --paper-padding-inline: clamp(22px, 5vw, 56px);
+        --paper-padding-inline-end: clamp(8px, 1.4vw, 18px);
+        --paper-width: 22cm;
+        --lines-first-page: 29;
+        --lines-per-page: 33;
+        /* First page: 2×edge-blank + emphasis + padding-block = 89px overhead;
+           5 non-writing lines (4 header + 1 prefilled) + lines-first-page writing lines */
+        --paper-height: calc(
+          2 * var(--paper-edge-blank) +
+          var(--emphasis-line-width) +
+          var(--paper-padding-block) +
+          5 * var(--line-height) +
+          var(--lines-first-page) * var(--line-height)
+        );
+        /* Continuation page: no header — emphasis + padding-block + edge-blank = 59px overhead */
+        --paper-height-continuation: calc(
+          var(--emphasis-line-width) +
+          var(--paper-padding-block) +
+          var(--paper-edge-blank) +
+          var(--lines-per-page) * var(--line-height)
+        );
+        --paper-edge-blank: 30px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        background: var(--page-bg);
+        color: var(--ink);
+        font-family: Sarabun, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        line-height: 1.5;
+        margin: 0;
+        min-height: 100vh;
+        padding: 0;
+      }
+
+      .template-shell {
+        margin: 0 auto;
+        max-width: calc(var(--paper-width) + 46px);
+      }
+
+      .template-controls,
+      .answer-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 8px;
+        box-shadow: 0 18px 46px rgba(74, 44, 10, 0.1);
+      }
+
+      .profile-wizard {
+        align-items: center;
+        background: rgba(28, 24, 18, 0.32);
+        display: none;
+        inset: 0;
+        justify-content: center;
+        padding: 18px;
+        position: fixed;
+        z-index: 40;
+      }
+
+      body.needs-profile .profile-wizard {
+        display: flex;
+      }
+
+      .profile-wizard-card {
+        background: var(--paper-bg);
+        border: 1px solid var(--exam-blue);
+        border-radius: 8px;
+        box-shadow: 0 24px 70px rgba(31, 45, 137, 0.18);
+        color: var(--exam-blue);
+        max-width: 680px;
+        padding: 22px;
+        position: relative;
+        width: min(100%, 680px);
+      }
+
+      .profile-close-button {
+        appearance: none;
+        align-items: center;
+        background: transparent;
+        border: 1px solid rgba(31, 45, 137, 0.2);
+        border-radius: 999px;
+        color: var(--exam-blue);
+        cursor: pointer;
+        display: inline-flex;
+        font: inherit;
+        font-size: 1.1rem;
+        font-weight: 900;
+        height: 32px;
+        justify-content: center;
+        line-height: 1;
+        position: absolute;
+        right: 12px;
+        top: 12px;
+        width: 32px;
+      }
+
+      .profile-wizard-title {
+        font-size: 1.45rem;
+        font-weight: 800;
+        margin: 0 0 4px;
+      }
+
+      .profile-wizard-note {
+        color: rgba(31, 45, 137, 0.68);
+        font-size: 0.9rem;
+        margin: 0 0 18px;
+      }
+
+      .profile-wizard-grid {
+        display: grid;
+        gap: 12px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .profile-field {
+        display: grid;
+        gap: 5px;
+      }
+
+      .profile-field.is-wide {
+        grid-column: 1 / -1;
+      }
+
+      .profile-label {
+        font-size: 0.82rem;
+        font-weight: 800;
+      }
+
+      .profile-input,
+      .profile-select {
+        appearance: none;
+        background: rgba(255, 250, 240, 0.78);
+        border: 1px solid rgba(31, 45, 137, 0.28);
+        border-radius: 5px;
+        color: var(--exam-blue);
+        font: inherit;
+        min-height: 36px;
+        padding: 6px 9px;
+      }
+
+      .profile-choice-grid {
+        display: grid;
+        gap: 7px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .profile-choice-grid.is-role-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .profile-choice {
+        align-items: center;
+        border: 1px solid rgba(31, 45, 137, 0.2);
+        border-radius: 5px;
+        cursor: pointer;
+        display: flex;
+        font-weight: 800;
+        justify-content: center;
+        min-height: 36px;
+        padding: 4px 8px;
+      }
+
+      .profile-choice input {
+        clip: rect(0 0 0 0);
+        height: 1px;
+        overflow: hidden;
+        position: absolute;
+        width: 1px;
+      }
+
+      .profile-choice:has(input:checked) {
+        background: rgba(31, 45, 137, 0.12);
+        border-color: var(--exam-blue);
+        box-shadow: 0 0 0 2px rgba(31, 45, 137, 0.18);
+      }
+
+      .profile-wizard-error {
+        background: rgba(176, 32, 32, 0.08);
+        border: 1px solid rgba(176, 32, 32, 0.28);
+        border-radius: 5px;
+        color: #8b1a1a;
+        font-size: 0.88rem;
+        font-weight: 700;
+        margin: 0 0 14px;
+        padding: 8px 10px;
+      }
+
+      .profile-wizard-error[hidden] {
+        display: none;
+      }
+
+      .profile-field.is-invalid .profile-label {
+        color: #8b1a1a;
+      }
+
+      .profile-field.is-invalid .profile-input,
+      .profile-field.is-invalid .profile-select,
+      .profile-field.is-invalid .profile-choice {
+        border-color: rgba(176, 32, 32, 0.45);
+        box-shadow: 0 0 0 2px rgba(176, 32, 32, 0.12);
+      }
+
+      .profile-wizard-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+        margin-top: 18px;
+      }
+
+      .profile-save-button {
+        appearance: none;
+        background: var(--exam-blue);
+        border: 0;
+        border-radius: 5px;
+        color: #fffaf0;
+        cursor: pointer;
+        font: inherit;
+        font-weight: 800;
+        min-height: 38px;
+        padding: 7px 18px;
+      }
+
+      .profile-skip-button {
+        appearance: none;
+        background: transparent;
+        border: 1px solid rgba(31, 45, 137, 0.24);
+        border-radius: 5px;
+        color: var(--exam-blue);
+        cursor: pointer;
+        font: inherit;
+        font-weight: 800;
+        min-height: 38px;
+        padding: 7px 14px;
+      }
+
+      .template-controls {
+        margin-bottom: 14px;
+        padding: 14px 18px;
+      }
+
+      .control-grid {
+        align-items: center;
+        display: grid;
+        gap: 10px 12px;
+        grid-template-columns: auto minmax(130px, 1fr) auto auto auto auto;
+      }
+
+      .control-label,
+      .control-value,
+      .save-status,
+      .pagination-status {
+        color: rgba(58, 58, 58, 0.72);
+        font-size: 0.86rem;
+        font-weight: 700;
+      }
+
+      .control-slider {
+        accent-color: var(--exam-blue);
+        min-width: 0;
+        width: 100%;
+      }
+
+      .pagination-button,
+      .save-button,
+      .clear-line-button {
+        appearance: none;
+        align-items: center;
+        background: var(--paper-bg);
+        border: 1px solid var(--paper-border);
+        border-radius: 6px;
+        color: var(--exam-blue);
+        cursor: pointer;
+        display: inline-flex;
+        font: inherit;
+        font-size: 0.82rem;
+        font-weight: 700;
+        gap: 6px;
+        justify-content: center;
+        min-height: 34px;
+        padding: 6px 10px;
+      }
+
+      .pagination-button[data-page-prev] {
+        background: rgba(31, 45, 137, 0.06);
+        border-color: rgba(31, 45, 137, 0.18);
+        color: rgba(31, 45, 137, 0.76);
+      }
+
+      .pagination-button[data-page-next] {
+        background: var(--exam-blue);
+        border-color: var(--exam-blue);
+        box-shadow: 0 8px 18px rgba(31, 45, 137, 0.14);
+        color: #fffaf0;
+      }
+
+      .pagination-button[data-page-prev]:not(:disabled):hover {
+        background: rgba(31, 45, 137, 0.1);
+        border-color: rgba(31, 45, 137, 0.26);
+      }
+
+      .pagination-button[data-page-next]:not(:disabled):hover {
+        background: rgba(31, 45, 137, 0.82);
+        border-color: rgba(31, 45, 137, 0.82);
+      }
+
+      .exam-icon {
+        fill: none;
+        flex: 0 0 auto;
+        height: 1em;
+        stroke: currentColor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 2.2;
+        width: 1em;
+      }
+
+      .exam-icon-sprite {
+        display: none;
+      }
+
+      .pali-reference-button {
+        align-items: center;
+        display: inline-flex;
+        gap: 6px;
+      }
+
+      .pali-reference-pip {
+        background: rgba(255, 250, 240, 0.96);
+        border: 1px solid rgba(31, 45, 137, 0.24);
+        border-radius: 8px;
+        box-shadow:
+          0 24px 70px rgba(31, 45, 137, 0.2),
+          0 10px 28px rgba(74, 44, 10, 0.16);
+        display: grid;
+        grid-template-rows: auto 1fr;
+        height: min(72vh, 620px);
+        inset: auto 24px 24px auto;
+        min-height: 260px;
+        min-width: 320px;
+        overflow: hidden;
+        position: fixed;
+        resize: both;
+        width: min(46vw, 620px);
+        z-index: 120;
+      }
+
+      .pali-reference-pip[hidden] {
+        display: none;
+      }
+
+      .pali-reference-pip.is-minimized {
+        height: auto !important;
+        min-height: 0;
+        resize: none;
+      }
+
+      .pali-reference-pip__bar {
+        align-items: center;
+        background: rgba(255, 255, 255, 0.76);
+        border-bottom: 1px solid rgba(31, 45, 137, 0.16);
+        cursor: grab;
+        display: flex;
+        gap: 10px;
+        justify-content: space-between;
+        min-height: 44px;
+        padding: 8px 10px 8px 14px;
+        user-select: none;
+      }
+
+      .pali-reference-pip__bar:active {
+        cursor: grabbing;
+      }
+
+      .pali-reference-pip__title {
+        color: var(--exam-blue);
+        font-size: 0.92rem;
+        font-weight: 900;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .pali-reference-pip__actions {
+        display: flex;
+        gap: 6px;
+      }
+
+      .pali-reference-pip__action {
+        appearance: none;
+        align-items: center;
+        background: var(--paper-bg);
+        border: 1px solid rgba(31, 45, 137, 0.22);
+        border-radius: 6px;
+        color: var(--exam-blue);
+        cursor: pointer;
+        display: inline-flex;
+        font: inherit;
+        font-size: 0.82rem;
+        font-weight: 900;
+        height: 30px;
+        justify-content: center;
+        min-width: 30px;
+        padding: 4px 8px;
+      }
+
+      .pali-reference-pip__body {
+        background: #fffaf0;
+        min-height: 0;
+      }
+
+      .pali-reference-pip.is-minimized .pali-reference-pip__body {
+        display: none;
+      }
+
+      .pali-reference-pip__frame {
+        border: 0;
+        display: block;
+        height: 100%;
+        width: 100%;
+      }
+
+      a.save-button {
+        align-items: center;
+        display: inline-flex;
+        text-decoration: none;
+      }
+
+      .pagination-button:disabled {
+        cursor: default;
+        opacity: 0.42;
+      }
+
+      .save-status {
+        text-align: right;
+      }
+
+      .answer-card {
+        min-width: 0;
+        padding: clamp(14px, 2.4vw, 22px);
+      }
+
+      .exam-page-stack {
+        display: grid;
+        gap: 18px;
+      }
+
+      .exam-page {
+        background: var(--paper-bg);
+        border: 1px solid var(--paper-border);
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        height: var(--paper-height);
+        box-shadow:
+          inset 0 1px rgba(255, 255, 255, 0.74),
+          0 10px 26px rgba(74, 44, 10, 0.08);
+        margin: 0 auto;
+        overflow: hidden;
+        width: min(100%, var(--paper-width));
+      }
+
+      .exam-page[hidden] {
+        display: none;
+      }
+
+      .exam-page.is-first {
+        padding-top: var(--paper-edge-blank);
+      }
+
+      .exam-page.is-continuation {
+        height: var(--paper-height-continuation);
+        padding-top: 0;
+      }
+
+      /* ── Annotation (ruler / emphasis-line) tool ─────────────────── */
+      /* LOCKED: สูตรตำแหน่ง sync กับ getAnnotationLineFromPointer — ดู .cursor/rules/paligo-annotation-lines.mdc */
+      :root {
+        --annotation-line-width: calc(var(--line-width) + 0.4px + 0.5 * var(--emphasis-line-width));
+        --annotation-line-shift: 0;
+        --annotation-line-nudge: -1px;
+      }
+
+      .exam-page.is-first .ruled-editor-frame {
+        --annotation-page-offset: 0px;
+      }
+
+      .exam-page.is-first.has-prefilled-line .ruled-editor-frame {
+        --annotation-page-offset: var(--line-height);
+      }
+
+      .exam-page.is-continuation .ruled-editor-frame {
+        --annotation-page-offset: 0px;
+      }
+
+      .annotation-lines {
+        bottom: 0;
+        left: 0;
+        pointer-events: none;
+        position: absolute;
+        right: 0;
+        top: 0;
+        z-index: 3;
+      }
+
+      .annotation-line {
+        background: var(--exam-blue);
+        height: var(--annotation-line-width);
+        left: calc(var(--paper-padding-inline) + var(--number-gutter));
+        pointer-events: none;
+        position: absolute;
+        right: 0;
+        top: calc(
+          var(--annotation-page-offset, 0px) +
+          (var(--line-n, 1) + var(--annotation-line-shift, 0)) * var(--line-height) -
+          var(--line-width) -
+          var(--text-y-offset) +
+          var(--annotation-line-nudge, 0px)
+        );
+        z-index: 3;
+      }
+
+      .annotation-canvas {
+        bottom: 0;
+        cursor: default;
+        left: 0;
+        pointer-events: none;
+        position: absolute;
+        right: 0;
+        top: 0;
+        user-select: none;
+        z-index: 5;
+      }
+
+      .is-annotating .annotation-canvas {
+        cursor: crosshair;
+        pointer-events: auto;
+      }
+
+      .is-annotating .annotation-canvas:hover {
+        background: rgba(31, 45, 137, 0.04);
+      }
+
+      .annotation-toggle-button {
+        appearance: none;
+        background: var(--paper-bg);
+        border: 1px solid var(--paper-border);
+        border-radius: 6px;
+        color: var(--exam-blue);
+        cursor: pointer;
+        font: inherit;
+        min-height: 34px;
+        padding: 5px 9px;
+        position: relative;
+      }
+
+      .annotation-toggle-button:hover:not(.is-active) {
+        background: rgba(31, 45, 137, 0.06);
+      }
+
+      .annotation-toggle-button.is-active {
+        background: rgba(31, 45, 137, 0.88);
+        border-color: rgba(31, 45, 137, 0.88);
+        color: #fff;
+      }
+
+      /* Tooltip แจ้งวิธีใช้เครื่องมือตีเส้น — เข้าชุดกับ .number-area-tooltip */
+      .annotation-toggle-button::after {
+        background: #fff0a8;
+        border: 1px solid #e5c400;
+        border-radius: 6px;
+        bottom: calc(100% + 9px);
+        box-shadow: 0 10px 24px rgba(74, 44, 10, 0.16);
+        color: #3a3a3a;
+        content: "ตีเส้นบรรทัด แตะเพื่อตีเส้น\A แตะซ้ำ เอาเส้นออก";
+        font-size: 0.74rem;
+        font-weight: 700;
+        left: 50%;
+        line-height: 1.5;
+        opacity: 0;
+        padding: 7px 11px;
+        pointer-events: none;
+        position: absolute;
+        text-align: center;
+        transform: translateX(-50%) translateY(4px);
+        transition: opacity 140ms ease, transform 140ms ease;
+        white-space: pre;
+        z-index: 300;
+      }
+
+      .annotation-toggle-button::before {
+        border: 6px solid transparent;
+        border-top-color: #e5c400;
+        bottom: calc(100% + 3px);
+        content: "";
+        left: 50%;
+        opacity: 0;
+        pointer-events: none;
+        position: absolute;
+        transform: translateX(-50%);
+        transition: opacity 140ms ease;
+        z-index: 301;
+      }
+
+      .annotation-toggle-button:hover::after,
+      .annotation-toggle-button:focus-visible::after {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+
+      .annotation-toggle-button:hover::before,
+      .annotation-toggle-button:focus-visible::before {
+        opacity: 1;
+      }
+
+      /* ── View-all / print-preview mode ─────────────────────────── */
+      .view-all-button {
+        appearance: none;
+        background: var(--paper-bg);
+        border: 1px solid var(--paper-border);
+        border-radius: 6px;
+        color: var(--exam-blue);
+        cursor: pointer;
+        font: inherit;
+        min-height: 34px;
+        padding: 5px 9px;
+      }
+
+      .view-all-button:hover:not([aria-pressed="true"]) {
+        background: rgba(31, 45, 137, 0.06);
+      }
+
+      .view-all-button[aria-pressed="true"] {
+        background: rgba(31, 45, 137, 0.1);
+        border-color: var(--exam-blue);
+      }
+
+      .view-all-icon-compress { display: none; }
+
+      body.is-view-all .view-all-icon-expand { display: none; }
+      body.is-view-all .view-all-icon-compress { display: inline-flex; }
+
+      body.is-view-all .exam-page,
+      body.is-view-all .exam-page[hidden] {
+        display: flex !important;
+        height: auto;
+        min-height: var(--paper-height);
+        overflow: visible;
+      }
+
+      body.is-view-all .exam-page.is-continuation,
+      body.is-view-all .exam-page.is-continuation[hidden] {
+        min-height: var(--paper-height-continuation);
+      }
+
+      body.is-view-all .exam-page-stack {
+        gap: 32px;
+      }
+
+      body.is-view-all .ruled-editor {
+        height: auto;
+        min-height: 0;
+        overflow: visible;
+      }
+
+      .exam-header-lines {
+        background:
+          repeating-linear-gradient(
+            to bottom,
+            transparent 0 calc(var(--line-height) - var(--line-width)),
+            var(--rule-color) calc(var(--line-height) - var(--line-width)) var(--line-height)
+          ),
+          var(--paper-bg);
+        color: var(--exam-blue);
+        display: grid;
+        font-size: var(--editor-font-size);
+        font-weight: 700;
+        line-height: var(--line-height);
+        min-height: calc(var(--line-height) * 4);
+        padding: 0 var(--paper-padding-inline);
+        place-items: center;
+        position: relative;
+        text-align: center;
+        z-index: 4;
+      }
+
+      .exam-footer-lines {
+        background: var(--paper-bg);
+        border-top: var(--emphasis-line-width) solid var(--exam-blue);
+        min-height: var(--paper-edge-blank);
+      }
+
+      .exam-header-line {
+        min-height: var(--line-height);
+        transform: translateY(var(--header-text-y-offset));
+      }
+
+      .exam-date-line {
+        align-items: center;
+        display: inline-flex;
+        gap: 6px;
+        justify-content: center;
+        min-height: var(--line-height);
+        position: relative;
+        white-space: nowrap;
+        z-index: 10;
+      }
+
+      .exam-picker {
+        display: inline-flex;
+        position: relative;
+      }
+
+      .exam-picker-trigger {
+        appearance: none;
+        background: transparent;
+        border: 0;
+        color: var(--exam-blue);
+        cursor: pointer;
+        font: inherit;
+        font-weight: 700;
+        height: calc(var(--line-height) - 2px);
+        line-height: calc(var(--line-height) - 2px);
+        padding: 0 2px;
+        text-align: center;
+      }
+
+      .exam-picker-trigger:focus-visible {
+        outline: 1px solid var(--exam-blue);
+        outline-offset: 2px;
+      }
+
+      .picker-placeholder {
+        font-size: 0.64em;
+        letter-spacing: 0;
+        opacity: 0.72;
+      }
+
+      .exam-picker-trigger.has-value .picker-placeholder,
+      .picker-value:empty {
+        display: none;
+      }
+
+      .exam-date-day {
+        min-width: 5ch;
+      }
+
+      .exam-date-month {
+        min-width: 11ch;
+      }
+
+      .exam-date-year {
+        min-width: 8ch;
+      }
+
+      .exam-picker-popover {
+        background: var(--paper-bg);
+        border: var(--emphasis-line-width) solid var(--exam-blue);
+        border-radius: 6px;
+        box-shadow: 0 12px 28px rgba(31, 45, 137, 0.18);
+        left: 50%;
+        min-width: 180px;
+        padding: 8px;
+        pointer-events: auto;
+        position: absolute;
+        top: calc(100% + 4px);
+        transform: translateX(-50%);
+        z-index: 100;
+      }
+
+      .exam-picker-title {
+        font-size: 0.72rem;
+        line-height: 1.2;
+        margin-bottom: 6px;
+        text-align: center;
+      }
+
+      .exam-picker-grid {
+        display: grid;
+        gap: 4px;
+        grid-template-columns: repeat(7, minmax(24px, 1fr));
+      }
+
+      .exam-year-grid {
+        grid-template-columns: repeat(4, minmax(42px, 1fr));
+        max-height: 210px;
+        overflow: auto;
+      }
+
+      .exam-month-grid {
+        grid-template-columns: repeat(2, minmax(90px, 1fr));
+      }
+
+      .exam-grade-line {
+        align-items: center;
+        display: inline-flex;
+        gap: 4px;
+        justify-content: center;
+        min-height: var(--line-height);
+        position: relative;
+        white-space: nowrap;
+        z-index: 12;
+      }
+
+      .exam-subject-line {
+        align-items: center;
+        display: inline-flex;
+        gap: 4px;
+        justify-content: center;
+        min-height: var(--line-height);
+        position: relative;
+        white-space: nowrap;
+        z-index: 11;
+      }
+
+      .exam-grade-trigger {
+        min-width: 0;
+        padding-left: 0;
+        text-align: left;
+      }
+
+      .exam-grade-grid {
+        grid-template-columns: repeat(4, minmax(40px, 1fr));
+      }
+
+      .exam-subject-trigger {
+        min-width: 12ch;
+        text-align: left;
+      }
+
+      .exam-subject-grid {
+        grid-template-columns: minmax(168px, 1fr);
+      }
+
+      .exam-picker-option {
+        appearance: none;
+        background: transparent;
+        border: 1px solid rgba(31, 45, 137, 0.18);
+        border-radius: 4px;
+        color: var(--exam-blue);
+        cursor: pointer;
+        font: inherit;
+        font-size: 0.78rem;
+        font-weight: 700;
+        line-height: 1.4;
+        min-height: 24px;
+        padding: 2px 4px;
+      }
+
+      .exam-picker-option:hover,
+      .exam-picker-option.is-selected {
+        background: rgba(31, 45, 137, 0.1);
+      }
+
+      .exam-picker-option.is-current {
+        background: rgba(31, 45, 137, 0.06);
+        border-color: var(--exam-blue);
+        box-shadow: 0 0 0 2px rgba(31, 45, 137, 0.18);
+      }
+
+      .exam-picker-option.is-current.is-selected {
+        background: rgba(31, 45, 137, 0.16);
+        box-shadow: 0 0 0 2px rgba(31, 45, 137, 0.28);
+      }
+
+      .exam-emphasis-line {
+        border-top: var(--emphasis-line-width) solid var(--exam-blue);
+        margin: 0;
+      }
+
+      .prefilled-answer-line {
+        background:
+          repeating-linear-gradient(
+            to bottom,
+            transparent 0 calc(var(--line-height) - var(--line-width)),
+            var(--rule-color) calc(var(--line-height) - var(--line-width)) var(--line-height)
+          ),
+          var(--paper-bg);
+        color: var(--exam-blue);
+        flex: 0 0 auto;
+        font-size: var(--editor-font-size);
+        font-weight: 700;
+        line-height: var(--line-height);
+        min-height: var(--line-height);
+        padding: 0 var(--paper-padding-inline);
+        pointer-events: none;
+        text-align: center;
+        transform: translateY(var(--header-text-y-offset));
+        user-select: none;
+      }
+
+      .prefilled-answer-line[hidden] {
+        display: none !important;
+      }
+
+      .ruled-editor-frame {
+        display: flex;
+        flex: 1 1 auto;
+        flex-direction: column;
+        min-height: 0;
+        position: relative;
+        z-index: 1;
+      }
+
+      .exam-page.is-continuation .ruled-editor-frame {
+        border-top: var(--emphasis-line-width) solid var(--exam-blue);
+      }
+
+      .ruled-editor-frame::before {
+        background: var(--margin-color);
+        bottom: 0;
+        content: "";
+        left: calc(var(--paper-padding-inline) + var(--number-gutter));
+        position: absolute;
+        top: 0;
+        width: var(--emphasis-line-width);
+        z-index: 1;
+      }
+
+      .exam-page.is-first .ruled-editor-frame::after {
+        background: var(--paper-bg);
+        bottom: 0;
+        content: "";
+        height: calc(var(--line-width) + 1px);
+        left: 0;
+        pointer-events: none;
+        position: absolute;
+        right: 0;
+        z-index: 2;
+      }
+
+      .ruled-editor {
+        appearance: none;
+        background:
+          repeating-linear-gradient(
+            to bottom,
+            transparent 0 calc(var(--line-height) - var(--line-width)),
+            var(--rule-color) calc(var(--line-height) - var(--line-width)) var(--line-height)
+          ),
+          var(--paper-bg);
+        background-attachment: local, scroll;
+        background-origin: padding-box, padding-box;
+        background-position:
+          0 calc(var(--text-y-offset) * -1),
+          0 0;
+        background-size: 100% var(--line-height), auto;
+        border: 0;
+        border-radius: 0;
+        color: var(--exam-blue);
+        display: block;
+        font: inherit;
+        font-family: "Noto Sans Thai", Sarabun, Thonburi, ui-sans-serif, system-ui, -apple-system,
+          BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-size: var(--editor-font-size);
+        font-weight: 400;
+        flex: 1 1 auto;
+        height: auto;
+        line-height: var(--line-height);
+        min-height: 0;
+        outline: none;
+        overflow: hidden;
+        padding: var(--paper-padding-block) var(--paper-padding-inline);
+        padding-inline: var(--paper-padding-inline) var(--paper-padding-inline-end);
+        padding-block:
+          var(--text-y-offset)
+          calc(var(--paper-padding-block) - var(--text-y-offset));
+        resize: none;
+        tab-size: 5;
+        width: 100%;
+      }
+
+      .exam-page.is-continuation .ruled-editor {
+        padding-block:
+          var(--text-y-offset)
+          calc(var(--paper-padding-block) - var(--text-y-offset));
+      }
+
+      .ruled-editor.is-after-prefilled {
+        padding-block:
+          var(--text-y-offset)
+          calc(var(--paper-padding-block) - var(--text-y-offset));
+      }
+
+      .template-credit {
+        color: rgba(58, 58, 58, 0.58);
+        font-size: 0.72rem;
+        font-weight: 700;
+        margin-top: 12px;
+        text-align: right;
+      }
+
+      .toast-notice {
+        background: rgba(255, 250, 240, 0.96);
+        border: 1px solid var(--paper-border);
+        border-left: 3px solid var(--exam-blue);
+        border-radius: 6px;
+        bottom: 18px;
+        box-shadow: 0 14px 34px rgba(74, 44, 10, 0.16);
+        color: var(--exam-blue);
+        font-size: 0.86rem;
+        font-weight: 700;
+        left: 18px;
+        max-width: min(340px, calc(100vw - 36px));
+        opacity: 0;
+        padding: 10px 12px;
+        pointer-events: none;
+        position: fixed;
+        transform: translateY(10px);
+        transition:
+          opacity 180ms ease,
+          transform 180ms ease;
+        z-index: 200;
+      }
+
+      .toast-notice.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .number-area-tooltip {
+        background: #fff0a8;
+        border: 1px solid #e5c400;
+        border-radius: 6px;
+        box-shadow: 0 10px 24px rgba(74, 44, 10, 0.16);
+        color: #3a3a3a;
+        font-size: 0.8rem;
+        font-weight: 700;
+        line-height: 1.45;
+        max-width: min(260px, calc(100vw - 24px));
+        opacity: 0;
+        padding: 8px 10px;
+        pointer-events: none;
+        position: fixed;
+        transform: translateY(calc(-100% - 6px));
+        transition: opacity 140ms ease;
+        z-index: 300;
+      }
+
+      .number-area-tooltip.is-visible {
+        opacity: 1;
+      }
+
+      @media (max-width: 640px) {
+        :root {
+          --line-height: 30px;
+          --number-gutter: 4.5ch;
+          --editor-font-size: 12px;
+          --paper-padding-block: 22px;
+          --paper-padding-inline: 30px;
+        }
+
+        .control-grid {
+          grid-template-columns: 1fr auto;
+        }
+
+        .control-slider,
+        .pagination-status,
+        .save-status {
+          grid-column: 1 / -1;
+        }
+
+        .save-status {
+          text-align: left;
+        }
+
+        .pali-reference-pip {
+          bottom: 12px;
+          left: 12px;
+          right: 12px;
+          top: auto;
+          width: auto;
+          height: min(64vh, 520px);
+          min-width: 0;
+        }
+
+        .pali-reference-pip__title {
+          font-size: 0.82rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <svg class="exam-icon-sprite" aria-hidden="true" focusable="false">
+      <!-- Lucide-compatible inline outline icons. Source style: https://github.com/lucide-icons/lucide -->
+      <symbol id="exam-icon-align-left" viewBox="0 0 24 24">
+        <path d="M4 6h16" /><path d="M4 12h12" /><path d="M4 18h18" />
+      </symbol>
+      <symbol id="exam-icon-book-open" viewBox="0 0 24 24">
+        <path d="M12 7v14" /><path d="M3 18a2 2 0 0 0 2 2h7V6H5a2 2 0 0 0-2 2z" /><path d="M21 18a2 2 0 0 1-2 2h-7V6h7a2 2 0 0 1 2 2z" />
+      </symbol>
+      <symbol id="exam-icon-check" viewBox="0 0 24 24">
+        <path d="M20 6 9 17l-5-5" />
+      </symbol>
+      <symbol id="exam-icon-chevron-left" viewBox="0 0 24 24">
+        <path d="m15 18-6-6 6-6" />
+      </symbol>
+      <symbol id="exam-icon-chevron-right" viewBox="0 0 24 24">
+        <path d="m9 18 6-6-6-6" />
+      </symbol>
+      <symbol id="exam-icon-circle-dot" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="1" />
+      </symbol>
+      <symbol id="exam-icon-eraser" viewBox="0 0 24 24">
+        <path d="m7 21-4-4 11-11a2.8 2.8 0 0 1 4 0l1 1a2.8 2.8 0 0 1 0 4L9 21z" /><path d="M22 21H7" /><path d="m5 15 4 4" />
+      </symbol>
+      <symbol id="exam-icon-expand" viewBox="0 0 24 24">
+        <path d="M8 3H5a2 2 0 0 0-2 2v3" /><path d="M16 3h3a2 2 0 0 1 2 2v3" /><path d="M8 21H5a2 2 0 0 1-2-2v-3" /><path d="M16 21h3a2 2 0 0 0 2-2v-3" />
+      </symbol>
+      <symbol id="exam-icon-external-link" viewBox="0 0 24 24">
+        <path d="M15 3h6v6" /><path d="M10 14 21 3" /><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+      </symbol>
+      <symbol id="exam-icon-file-text" viewBox="0 0 24 24">
+        <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z" /><path d="M14 2v6h6" /><path d="M8 13h8" /><path d="M8 17h6" />
+      </symbol>
+      <symbol id="exam-icon-highlighter" viewBox="0 0 24 24">
+        <path d="m9 11-6 6v3h9l3-3" /><path d="m22 12-4.6 4.6a2 2 0 0 1-2.8 0L7.4 9.4a2 2 0 0 1 0-2.8L12 2z" />
+      </symbol>
+      <symbol id="exam-icon-message-warning" viewBox="0 0 24 24">
+        <path d="M21 15a4 4 0 0 1-4 4H7l-4 4V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z" /><path d="M12 7v5" /><path d="M12 16h.01" />
+      </symbol>
+      <symbol id="exam-icon-minus" viewBox="0 0 24 24">
+        <path d="M5 12h14" />
+      </symbol>
+      <symbol id="exam-icon-pen-line" viewBox="0 0 24 24">
+        <path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
+      </symbol>
+      <symbol id="exam-icon-refresh" viewBox="0 0 24 24">
+        <path d="M3 12a9 9 0 0 1 15-6.7L21 8" /><path d="M21 3v5h-5" /><path d="M21 12a9 9 0 0 1-15 6.7L3 16" /><path d="M3 21v-5h5" />
+      </symbol>
+      <symbol id="exam-icon-ruler" viewBox="0 0 24 24">
+        <path d="M21.3 15.3 15 21.6 2.4 9 8.7 2.7z" /><path d="m14.5 4.5-2 2" /><path d="m11.5 7.5-2 2" /><path d="m8.5 10.5-2 2" />
+      </symbol>
+      <symbol id="exam-icon-save" viewBox="0 0 24 24">
+        <path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" /><path d="M17 21v-8H7v8" /><path d="M7 3v5h8" />
+      </symbol>
+      <symbol id="exam-icon-send" viewBox="0 0 24 24">
+        <path d="m22 2-7 20-4-9-9-4z" /><path d="M22 2 11 13" />
+      </symbol>
+      <symbol id="exam-icon-signature" viewBox="0 0 24 24">
+        <path d="M3 17c3 0 3-10 6-10s3 10 6 10 3-4 6-4" /><path d="M3 21h18" />
+      </symbol>
+      <symbol id="exam-icon-stamp" viewBox="0 0 24 24">
+        <path d="M6 20h12" /><path d="M8 14h8l1 6H7z" /><path d="M9 14V8a3 3 0 0 1 6 0v6" />
+      </symbol>
+      <symbol id="exam-icon-trash" viewBox="0 0 24 24">
+        <path d="M3 6h18" /><path d="M8 6V4h8v2" /><path d="m19 6-1 14H6L5 6" /><path d="M10 11v6" /><path d="M14 11v6" />
+      </symbol>
+      <symbol id="exam-icon-upload" viewBox="0 0 24 24">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><path d="m17 8-5-5-5 5" /><path d="M12 3v12" />
+      </symbol>
+      <symbol id="exam-icon-x" viewBox="0 0 24 24">
+        <path d="M18 6 6 18" /><path d="m6 6 12 12" />
+      </symbol>
+    </svg>
+    <section class="profile-wizard" aria-label="ตั้งค่าโปรไฟล์ผู้เรียน" data-profile-wizard>
+      <form class="profile-wizard-card" data-profile-form novalidate>
+        <button class="profile-close-button" type="button" data-profile-dismiss aria-label="ปิดหน้าตั้งค่า">×</button>
+        <h1 class="profile-wizard-title">ตั้งค่าผู้เรียน</h1>
+        <p class="profile-wizard-note">บันทึกในเครื่อง — ใช้งานออฟไลน์และส่งตรวจได้</p>
+        <p class="profile-wizard-error" data-profile-error hidden role="alert"></p>
+        <div class="profile-wizard-grid">
+          <div class="profile-field is-wide">
+            <span class="profile-label">บทบาทผู้ใช้</span>
+            <div class="profile-choice-grid is-role-grid">
+              <label class="profile-choice"><input type="radio" name="userRole" value="student" checked required />นักเรียน</label>
+              <label class="profile-choice"><input type="radio" name="userRole" value="teacher" />อาจารย์ผู้สอน</label>
+              <label class="profile-choice"><input type="radio" name="userRole" value="reviewer" />ผู้ตรวจ</label>
+              <label class="profile-choice"><input type="radio" name="userRole" value="teacher-reviewer" />ผู้สอนและผู้ตรวจ</label>
+            </div>
+          </div>
+          <div class="profile-field is-wide">
+            <span class="profile-label">คำนำหน้า</span>
+            <div class="profile-choice-grid">
+              <label class="profile-choice"><input type="radio" name="prefix" value="กัลฯ" required />กัลฯ</label>
+              <label class="profile-choice"><input type="radio" name="prefix" value="สามเณร" />สามเณร</label>
+              <label class="profile-choice"><input type="radio" name="prefix" value="พระ" />พระ</label>
+              <label class="profile-choice"><input type="radio" name="prefix" value="พระมหา" />พระมหา</label>
+              <label class="profile-choice"><input type="radio" name="prefix" value="อุบาสิกา" />อุบาสิกา</label>
+              <label class="profile-choice"><input type="radio" name="prefix" value="อุบาสก" />อุบาสก</label>
+            </div>
+          </div>
+          <label class="profile-field">
+            <span class="profile-label">ชื่อ</span>
+            <input class="profile-input" name="firstName" autocomplete="given-name" required />
+          </label>
+          <label class="profile-field">
+            <span class="profile-label">นามสกุล</span>
+            <input class="profile-input" name="lastName" autocomplete="family-name" />
+          </label>
+          <label class="profile-field">
+            <span class="profile-label">ฉายา</span>
+            <input class="profile-input" name="monasticName" />
+          </label>
+          <label class="profile-field">
+            <span class="profile-label">สมัครเรียนชั้นประโยค ป.ธ.</span>
+            <select class="profile-select" name="grade" required>
+              <option value="1-2">๑-๒</option>
+              <option value="3">๓</option>
+              <option value="4" selected>๔</option>
+              <option value="5">๕</option>
+              <option value="6">๖</option>
+              <option value="7">๗</option>
+              <option value="8">๘</option>
+              <option value="9">๙</option>
+            </select>
+          </label>
+          <label class="profile-field">
+            <span class="profile-label">อาจารย์ผู้สอน / ผู้ตรวจ</span>
+            <input class="profile-input" name="teacherName" />
+          </label>
+          <label class="profile-field">
+            <span class="profile-label">บทบาทอาจารย์ปลายทาง</span>
+            <select class="profile-select" name="teacherRole">
+              <option value="teacher-reviewer" selected>ผู้สอนและผู้ตรวจ</option>
+              <option value="teacher">อาจารย์ผู้สอน</option>
+              <option value="reviewer">ผู้ตรวจ</option>
+            </select>
+          </label>
+          <label class="profile-field">
+            <span class="profile-label">ช่องทางส่งตรวจ</span>
+            <select class="profile-select" name="deliveryMethod" required>
+              <option value="line" selected>LINE Flex Message</option>
+              <option value="email">อีเมล</option>
+              <option value="facebook">Facebook inbox</option>
+            </select>
+          </label>
+        </div>
+        <div class="profile-wizard-actions">
+          <button class="profile-skip-button" type="button" data-profile-dismiss>ตั้งค่าภายหลัง</button>
+          <button class="profile-save-button" type="submit">เริ่มใช้งาน</button>
+        </div>
+      </form>
+    </section>
+    <main class="template-shell">
+      <div class="paligo-book-bar" data-book-bar>
+        <div class="paligo-book-bar__main">
+          <h1 class="paligo-book-bar__title" data-book-bar-title>สมุดข้อสอบ</h1>
+          <p class="paligo-book-bar__meta" data-book-bar-meta>ฉบับร่าง</p>
+        </div>
+        <div class="paligo-book-bar__actions">
+          <span class="paligo-tooltip-host" data-cancel-submit-wrap hidden>
+            <button class="paligo-btn" type="button" data-cancel-submit><svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-x"></use></svg><span>ยกเลิกส่งตรวจ</span></button>
+          </span>
+          <span class="paligo-status-chip is-draft" data-book-bar-status>ฉบับร่าง</span>
+        </div>
+      </div>
+      <div class="paligo-permission-banner" data-permission-banner>ฉบับร่าง — แก้ไขคำตอบได้</div>
+      <section class="review-toolbar" data-review-toolbar hidden aria-label="แผงตรวจบนกระดาษ">
+        <div class="review-toolbar__label">โหมดผู้ตรวจ — คำตอบถูกล็อก · stamp คะแนน · ไฮไลท์คำศัพท์ · ลงลายเซ็น</div>
+        <div class="review-toolbar__row">
+          <button class="paligo-btn" type="button" data-review-stamp-mode><svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-stamp"></use></svg><span>แตะบรรทัดเพื่อ stamp คะแนน</span></button>
+          <button class="paligo-btn" type="button" data-score-stamp="1"><svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-circle-dot"></use></svg><span>๑ ให้</span></button>
+          <button class="paligo-btn" type="button" data-score-stamp="2"><svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-circle-dot"></use></svg><span>๒ ให้</span></button>
+          <button class="paligo-btn" type="button" data-score-stamp="3"><svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-circle-dot"></use></svg><span>๓ ให้</span></button>
+          <button class="paligo-btn" type="button" data-highlight-mode><svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-highlighter"></use></svg><span>ไฮไลท์คำศัพท์</span></button>
+          <button class="paligo-btn" type="button" data-clear-all-stamps><svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-trash"></use></svg><span>ล้าง stamp ทั้งหมด</span></button>
+        </div>
+        <div class="review-toolbar__row">
+          <button class="paligo-btn" type="button" data-open-signature-modal><svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-signature"></use></svg><span>ลงลายเซ็น</span></button>
+          <button class="paligo-btn is-primary" type="button" data-save-review-paper><svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-save"></use></svg><span>บันทึกการตรวจ</span></button>
+          <button class="paligo-btn" type="button" data-return-review-paper><svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-send"></use></svg><span>ส่งคืนนักเรียน</span></button>
+        </div>
+      </section>
+      <button class="paligo-btn" type="button" data-start-new-revision hidden style="margin-bottom: 12px">
+        <svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-refresh"></use></svg><span>ทำรอบใหม่ (revision ถัดไป)</span>
+      </button>
+      <section class="template-controls" aria-label="แผงควบคุมพื้นที่เขียน">
+        <div class="control-grid">
+          <label class="control-label" for="line-height-control">ระยะบรรทัด</label>
+          <input
+            class="control-slider"
+            id="line-height-control"
+            type="range"
+            min="22"
+            max="35"
+            step="1"
+            value="30"
+            data-line-height-control
+          />
+          <output class="control-value" id="line-height-value" for="line-height-control">30px</output>
+          <button class="pagination-button" type="button" data-page-prev><svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-chevron-left"></use></svg><span>ก่อนหน้า</span></button>
+          <output class="pagination-status" data-page-status>หน้า ๑ / ๒</output>
+          <button class="pagination-button" type="button" data-page-next><svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-chevron-right"></use></svg><span>ถัดไป</span></button>
+          <button class="view-all-button" type="button" data-view-all aria-pressed="false" title="เปิดดูทั้งหมด — แสดงเนื้อหาครบทุกบรรทัด เตรียมก่อนปริ้นท์">
+            <span class="view-all-icon-expand" aria-hidden="true">
+              <svg class="exam-icon" viewBox="0 0 24 24">
+                <use href="#exam-icon-expand"></use>
+              </svg>
+            </span>
+            <span class="view-all-icon-compress" aria-hidden="true">
+              <svg class="exam-icon" viewBox="0 0 24 24">
+                <use href="#exam-icon-minus"></use>
+              </svg>
+            </span>
+          </button>
+          <button class="annotation-toggle-button" type="button" data-annotation-toggle aria-label="ตีเส้นบรรทัด แตะเพื่อตีเส้น แตะซ้ำ เอาเส้นออก">
+            <svg width="18" height="16" viewBox="0 0 18 16" fill="none" aria-hidden="true">
+              <rect x="0.75" y="3" width="16.5" height="7" rx="1.5" stroke="currentColor" stroke-width="1.25"/>
+              <line x1="4" y1="5.2" x2="4" y2="7.6" stroke="currentColor" stroke-width="1"/>
+              <line x1="7" y1="5.2" x2="7" y2="8.5" stroke="currentColor" stroke-width="1"/>
+              <line x1="10" y1="5.2" x2="10" y2="7.6" stroke="currentColor" stroke-width="1"/>
+              <line x1="13" y1="5.2" x2="13" y2="8.5" stroke="currentColor" stroke-width="1"/>
+              <line x1="1" y1="13.5" x2="17" y2="13.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+          </button>
+          <button class="clear-line-button" type="button" data-clear-bottom-line><svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-eraser"></use></svg><span>ล้างบรรทัดล่าง</span></button>
+          <button class="save-button pali-reference-button" type="button" data-open-pali-reference aria-controls="paliReferencePip" aria-expanded="false">
+            <svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-book-open"></use></svg><span>เปิดตำรา</span>
+          </button>
+          <button class="save-button" type="button" data-save-draft><svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-save"></use></svg><span>บันทึก</span></button>
+          <button class="save-button" type="button" data-submit-review><svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-send"></use></svg><span>ส่งตรวจ</span></button>
+          <a class="save-button" href="exam-books.html"><svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-file-text"></use></svg><span>สมุดข้อสอบ</span></a>
+          <output class="save-status" data-save-status>กดบันทึก หรือ ⌘/Ctrl+S</output>
+        </div>
+      </section>
+
+      <aside
+        class="pali-reference-pip"
+        id="paliReferencePip"
+        data-pali-reference-pip
+        hidden
+        aria-label="หน้าต่างตำราบาลี"
+      >
+        <div class="pali-reference-pip__bar" data-pali-reference-drag>
+          <div class="pali-reference-pip__title">มังคลัตถทีปนีบาลี (ปฐโม ภาโค) · ดูโจทย์ควบคู่กับสมุด</div>
+          <div class="pali-reference-pip__actions">
+            <a
+              class="pali-reference-pip__action"
+              data-pali-reference-full
+              href="pali-reference-pip.html?corpus=data/corpora/mangalattha-pali-pathamo/manifest.json"
+              target="_blank"
+              rel="noopener"
+              aria-label="เปิดตำราเต็มหน้า"
+            ><svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-external-link"></use></svg></a>
+            <button class="pali-reference-pip__action" type="button" data-pali-reference-minimize aria-label="ย่อหน้าต่าง"><svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-minus"></use></svg></button>
+            <button class="pali-reference-pip__action" type="button" data-pali-reference-close aria-label="ปิดหน้าต่าง"><svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-x"></use></svg></button>
+          </div>
+        </div>
+        <div class="pali-reference-pip__body">
+          <iframe
+            class="pali-reference-pip__frame"
+            data-pali-reference-frame
+            title="ตำรามังคลัตถทีปนี"
+            loading="lazy"
+          ></iframe>
+        </div>
+      </aside>
+
+      <section class="answer-card" aria-label="การ์ดพื้นที่เขียนคำตอบ">
+        <div class="exam-page-stack">
+          <article class="exam-page is-first" aria-label="กระดาษคำตอบหน้าแรก">
+            <div class="exam-header-lines" aria-label="หัวกระดาษหน้าแรก">
+              <div class="exam-header-line" aria-hidden="true"></div>
+              <div class="exam-header-line exam-grade-line">
+                <span>ประโยค ป.ธ.</span>
+                <div class="exam-picker exam-grade-picker" data-exam-picker="grade" data-current="4" data-default="4">
+                  <button
+                    class="exam-picker-trigger exam-grade-trigger"
+                    type="button"
+                    aria-label="เลือกชั้นประโยค ป.ธ."
+                    aria-haspopup="dialog"
+                    aria-expanded="false"
+                  >
+                    <span class="picker-value" data-picker-value></span>
+                    <span class="picker-placeholder" data-picker-placeholder>....</span>
+                  </button>
+                  <div class="exam-picker-popover" data-picker-popover hidden>
+                    <div class="exam-picker-title">ชั้นประโยค</div>
+                    <div class="exam-picker-grid exam-grade-grid" data-picker-options></div>
+                  </div>
+                </div>
+              </div>
+              <div class="exam-header-line exam-subject-line">
+                <span>วิชา </span>
+                <div
+                  class="exam-picker exam-subject-picker"
+                  data-exam-picker="subject"
+                  data-current="pali-to-thai"
+                  data-default="pali-to-thai"
+                >
+                  <button
+                    class="exam-picker-trigger exam-subject-trigger"
+                    type="button"
+                    aria-label="เลือกวิชา"
+                    aria-haspopup="dialog"
+                    aria-expanded="false"
+                  >
+                    <span class="picker-value" data-picker-value></span>
+                    <span class="picker-placeholder" data-picker-placeholder>........</span>
+                  </button>
+                  <div class="exam-picker-popover" data-picker-popover hidden>
+                    <div class="exam-picker-title">วิชา</div>
+                    <div class="exam-picker-grid exam-subject-grid" data-picker-options></div>
+                  </div>
+                </div>
+              </div>
+              <div class="exam-header-line exam-date-line">
+                <span>สอบ วันที่</span>
+                <div class="exam-picker" data-exam-picker="day" data-min="1" data-max="31">
+                  <button
+                    class="exam-picker-trigger exam-date-day"
+                    type="button"
+                    aria-label="เลือกวันที่สอบ"
+                    aria-haspopup="dialog"
+                    aria-expanded="false"
+                  >
+                    <span class="picker-value" data-picker-value></span>
+                    <span class="picker-placeholder" data-picker-placeholder>.......</span>
+                  </button>
+                  <div class="exam-picker-popover" data-picker-popover hidden>
+                    <div class="exam-picker-title">วันที่</div>
+                    <div class="exam-picker-grid" data-picker-options></div>
+                  </div>
+                </div>
+                <div class="exam-picker" data-exam-picker="month">
+                  <button
+                    class="exam-picker-trigger exam-date-month"
+                    type="button"
+                    aria-label="เลือกเดือนที่สอบ"
+                    aria-haspopup="dialog"
+                    aria-expanded="false"
+                  >
+                    <span class="picker-value" data-picker-value></span>
+                    <span class="picker-placeholder" data-picker-placeholder>.......</span>
+                  </button>
+                  <div class="exam-picker-popover" data-picker-popover hidden>
+                    <div class="exam-picker-title">เดือน</div>
+                    <div class="exam-picker-grid exam-month-grid" data-picker-options></div>
+                  </div>
+                </div>
+                <div class="exam-picker" data-exam-picker="year" data-year-window="4">
+                  <button
+                    class="exam-picker-trigger exam-date-year"
+                    type="button"
+                    aria-label="เลือกปี พ.ศ. ที่สอบ"
+                    aria-haspopup="dialog"
+                    aria-expanded="false"
+                  >
+                    <span class="picker-value" data-picker-value></span>
+                    <span class="picker-placeholder" data-picker-placeholder>.......</span>
+                  </button>
+                  <div class="exam-picker-popover" data-picker-popover hidden>
+                    <div class="exam-picker-title">พ.ศ.</div>
+                    <div class="exam-picker-grid exam-year-grid" data-picker-options></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="exam-emphasis-line" aria-hidden="true"></div>
+            <div class="ruled-editor-frame">
+              <div class="prefilled-answer-line" data-prefilled-answer-line hidden aria-hidden="true">แปลโดยพยัญชนะ</div>
+              <textarea
+                class="ruled-editor"
+                aria-label="พื้นที่เขียนคำตอบหน้าแรก"
+                data-auto-indent="numbered-homework"
+                data-page-editor="0"
+                spellcheck="false"
+              ></textarea>
+              <div class="annotation-lines" data-annotation-lines aria-hidden="true"></div>
+              <div class="review-layer" data-review-layer aria-hidden="true"></div>
+              <div class="annotation-canvas" data-annotation-canvas aria-hidden="true"></div>
+              <div class="review-canvas" data-review-canvas hidden aria-hidden="true"></div>
+            </div>
+            <div class="exam-footer-lines" aria-label="ท้ายกระดาษหน้าแรก" aria-hidden="true"></div>
+          </article>
+
+          <article class="exam-page is-continuation" aria-label="กระดาษคำตอบหน้าถัดไป" hidden>
+            <div class="ruled-editor-frame">
+              <textarea
+                class="ruled-editor"
+                aria-label="พื้นที่เขียนคำตอบหน้าถัดไป"
+                data-auto-indent="numbered-homework"
+                data-page-editor="1"
+                spellcheck="false"
+              ></textarea>
+              <div class="annotation-lines" data-annotation-lines aria-hidden="true"></div>
+              <div class="review-layer" data-review-layer aria-hidden="true"></div>
+              <div class="annotation-canvas" data-annotation-canvas aria-hidden="true"></div>
+              <div class="review-canvas" data-review-canvas hidden aria-hidden="true"></div>
+            </div>
+            <div class="exam-footer-lines" aria-label="ท้ายกระดาษหน้าถัดไป" aria-hidden="true"></div>
+          </article>
+        </div>
+        <div class="template-credit">Ruled paper template by niyatajayo · v1.0.0 · 2026-07-01</div>
+      </section>
+    </main>
+    <div class="paligo-modal-backdrop" data-highlight-picker-modal hidden>
+      <div class="paligo-modal" role="dialog" aria-labelledby="highlight-picker-title">
+        <h2 class="paligo-modal__title" id="highlight-picker-title">ใส่ข้อคิดเห็นในคำศัพท์</h2>
+        <p class="highlight-picker-quote" data-highlight-picker-quote></p>
+        <div class="paligo-modal__actions">
+          <button class="paligo-btn" type="button" data-highlight-kind="score-1"><svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-circle-dot"></use></svg><span>๑ ให้</span></button>
+          <button class="paligo-btn" type="button" data-highlight-kind="score-2"><svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-circle-dot"></use></svg><span>๒ ให้</span></button>
+          <button class="paligo-btn" type="button" data-highlight-kind="score-3"><svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-circle-dot"></use></svg><span>๓ ให้</span></button>
+          <button class="paligo-btn" type="button" data-highlight-kind="wrong-word"><svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-message-warning"></use></svg><span>ผิดศัพท์</span></button>
+          <button class="paligo-btn" type="button" data-highlight-kind="wrong-relation"><svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-message-warning"></use></svg><span>ผิดสัมพันธ์</span></button>
+          <button class="paligo-btn" type="button" data-highlight-kind="wrong-pa"><svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-message-warning"></use></svg><span>ผิด ป.</span></button>
+          <button class="paligo-btn is-ghost" type="button" data-close-highlight-picker><svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-x"></use></svg><span>ยกเลิก</span></button>
+        </div>
+      </div>
+    </div>
+    <div class="paligo-modal-backdrop" data-highlight-view-modal hidden>
+      <div class="paligo-modal" role="dialog" aria-labelledby="highlight-view-title">
+        <h2 class="paligo-modal__title" id="highlight-view-title" data-highlight-view-label>ข้อคิดเห็นจากผู้ตรวจ</h2>
+        <p class="highlight-picker-quote" data-highlight-view-quote></p>
+        <p class="paligo-modal__body" data-highlight-view-meta></p>
+        <div class="paligo-modal__actions">
+          <button class="paligo-btn is-primary" type="button" data-close-highlight-view><svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-check"></use></svg><span>ตกลง</span></button>
+          <button class="paligo-btn is-ghost" type="button" data-remove-highlight hidden><svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-trash"></use></svg><span>ลบไฮไลท์นี้</span></button>
+        </div>
+      </div>
+    </div>
+    <div class="paligo-modal-backdrop" data-signature-modal hidden>
+      <div class="paligo-modal" role="dialog" aria-labelledby="signature-modal-title">
+        <h2 class="paligo-modal__title" id="signature-modal-title">ลงลายเซ็น</h2>
+        <p class="paligo-modal__body">อัปโหลดลายเซ็นครั้งเดียว — ใช้ลงในสมุดทุกเล่มได้ต่อเนื่อง</p>
+        <div class="signature-modal-preview is-empty" data-signature-preview>ยังไม่มีลายเซ็นที่บันทึก</div>
+        <label class="paligo-btn signature-upload-zone">
+          <svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-upload"></use></svg><span>เลือกไฟล์ลายเซ็น (PNG/JPG)</span>
+          <input type="file" accept="image/png,image/jpeg,image/webp" data-signature-file />
+        </label>
+        <div class="paligo-modal__actions is-row" style="margin-top: 16px">
+          <button class="paligo-btn is-primary" type="button" data-apply-signature><svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-signature"></use></svg><span>ใช้ลายเซ็นนี้ในหน้านี้</span></button>
+          <button class="paligo-btn" type="button" data-clear-saved-signature><svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-trash"></use></svg><span>ลบลายเซ็นที่บันทึก</span></button>
+          <button class="paligo-btn is-ghost" type="button" data-close-signature-modal><svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-x"></use></svg><span>ปิด</span></button>
+        </div>
+      </div>
+    </div>
+    <div class="paligo-modal-backdrop" data-submit-modal hidden>
+      <div class="paligo-modal" role="dialog" aria-labelledby="submit-modal-title" aria-modal="true">
+        <h2 class="paligo-modal__title" id="submit-modal-title">ส่งเข้าแชต Inbox แล้ว</h2>
+        <p class="paligo-modal__body">
+          ส่งตรวจแล้ว — คำตอบถูกล็อกชั่วคราว
+        </p>
+        <div class="paligo-modal__meta" data-submit-modal-meta></div>
+        <div class="paligo-modal__chat-preview" data-submit-chat-preview aria-label="ตัวอย่างข้อความในแชต"></div>
+        <div class="paligo-modal__actions">
+          <a class="paligo-btn is-primary" href="exam-inbox.html"><svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-message-warning"></use></svg><span>เปิดกล่องข้อความ</span></a>
+          <a class="paligo-btn" data-paper-review-link href="#"><svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-pen-line"></use></svg><span>ตรวจบนกระดาษ</span></a>
+          <a class="paligo-btn" href="exam-review-results.html"><svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-check"></use></svg><span>ผลตรวจของฉัน</span></a>
+          <a class="paligo-btn" href="exam-books.html"><svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-file-text"></use></svg><span>กลับสมุดข้อสอบ</span></a>
+          <button class="paligo-btn is-ghost" type="button" data-close-submit-modal><svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-x"></use></svg><span>ปิด</span></button>
+        </div>
+        <details class="paligo-modal__advanced">
+          <summary>เพิ่มเติม — ดาวน์โหลดไฟล์ (ขั้นสูง)</summary>
+          <div class="paligo-modal__advanced-actions">
+            <button class="paligo-btn" type="button" data-download-submission><svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-file-text"></use></svg><span>ดาวน์โหลด submission (.json)</span></button>
+            <button class="paligo-btn" type="button" data-export-transfer><svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-send"></use></svg><span>ดาวน์โหลดแพ็กเกจโอน (→ ผู้ตรวจ)</span></button>
+          </div>
+        </details>
+      </div>
+    </div>
+    <div class="toast-notice" role="status" aria-live="polite" data-toast-notice></div>
+    <div class="number-area-tooltip" role="tooltip" data-number-area-tooltip hidden>
+      กด Tab หรือ เริ่มพิมพ์อักขระ สร้างย่อหน้าอัตโนมัติ
+    </div>
+    <script src="paligo-config.js"></script>
+    <script src="paligo-inbox-client.js"></script>
+    <script src="paligo-exam-shared.js"></script>
+    <script src="paligo-exam-submit.js"></script>
+    <script src="paligo-exam-book-cover.js"></script>
+    <script src="paligo-inbox-chat.js"></script>
+    <script src="paligo-exam-paper.js"></script>
+    <script src="paligo-nav-config.js"></script>
+    <script src="sidebar-nav.js"></script>
+    <script>
+      (() => {
+        const shared = window.PaligoExamShared;
+        if (!shared) {
+          window.alert("โหลดระบบสมุดข้อสอบไม่ครบ — ลองรีเฟรชหน้า (Cmd+Shift+R)");
+          return;
+        }
+        const { KEYS, getList, setList, readRaw, writeRaw, guardExamPageRole } = shared;
+
+        const storageKey = "ruled-lines-card-only-draft-v1";
+        const profileStorageKey = KEYS.studentProfile;
+        const profileDraftStorageKey = "paligo-exam-student-profile-draft-v1";
+        const submissionsStorageKey = KEYS.submissions;
+        const booksStorageKey = KEYS.books;
+        const activeBookStorageKey = KEYS.activeBook;
+        const ownerStorageKey = KEYS.owner;
+        const paliReferencePipStorageKey = "paligo-pali-reference-pip-v1";
+        const paliReferenceUrl = "pali-reference-pip.html?corpus=data/corpora/mangalattha-pali-pathamo/manifest.json";
+        const numberedLinePattern = /^\s*([0-9๐-๙]+)(?:[.)])?\s*(.*)$/;
+        const digitKeyPattern = /^[0-9๐-๙]$/;
+        const combiningMarkPattern = /[\u0300-\u036f\u0e31\u0e34-\u0e3a\u0e47-\u0e4e]/u;
+        const paliLegacyGlyphMap = new Map([
+          ["", "ฐ"],
+          ["", "ญ"],
+          ["", "ฺ"],
+          ["", "ั"],
+          ["", "ิ"],
+          ["", "ี"],
+          ["", "ึ"],
+          ["", "ื"],
+          ["", "็"],
+          ["", "์"],
+          ["", "ํ"],
+        ]);
+        const wrapRightGap = 1;
+        const marginTextGapSteps = 0.5;
+        const paragraphIndentSteps = 5;
+        const numberMarginClearanceSteps = 0.4;
+
+        const normalizePaliLegacyText = (value) =>
+          String(value ?? "").replace(/[]/g, (char) => paliLegacyGlyphMap.get(char) || char);
+
+        const getNumberGutterCh = () => {
+          const raw = getComputedStyle(document.documentElement).getPropertyValue("--number-gutter").trim();
+          const match = raw.match(/^([\d.]+)\s*ch$/);
+          return match ? Number.parseFloat(match[1]) : 5;
+        };
+
+        const measureFontContext = (styles) => {
+          const canvas = measureFontContext._canvas || (measureFontContext._canvas = document.createElement("canvas"));
+          const context = canvas.getContext("2d");
+          context.font = `${styles.fontStyle} ${styles.fontVariant} ${styles.fontWeight} ${styles.fontSize} ${styles.fontFamily}`;
+          return context;
+        };
+
+        // เส้นคั่นหน้า — ใช้ font ของ frame ให้ตรง CSS ::before (--number-gutter ch)
+        const getMarginLinePx = (editor) => {
+          const frame = editor.closest(".ruled-editor-frame");
+          const frameStyles = frame ? getComputedStyle(frame) : getComputedStyle(document.body);
+          const frameCtx = measureFontContext(frameStyles);
+          return getNumberGutterCh() * frameCtx.measureText("0").width;
+        };
+
+        const getMarginLayout = (editor) => {
+          const editorStyles = getComputedStyle(editor);
+          const editorCtx = measureFontContext(editorStyles);
+          const marginLinePx = getMarginLinePx(editor);
+          const charStep = editorCtx.measureText("ก").width;
+          const bodyStartPx = marginLinePx + charStep * marginTextGapSteps;
+          const paragraphStartPx = bodyStartPx + charStep * paragraphIndentSteps;
+
+          let bodyIndent = "";
+          while (editorCtx.measureText(bodyIndent).width < bodyStartPx) bodyIndent += " ";
+
+          let paragraphIndent = bodyIndent;
+          while (editorCtx.measureText(paragraphIndent).width < paragraphStartPx) paragraphIndent += " ";
+
+          return { marginLinePx, bodyStartPx, paragraphStartPx, bodyIndent, paragraphIndent, charStep };
+        };
+
+        const computeContinuationIndent = (() => {
+          let _cacheKey = null;
+          let _cached = "";
+          const fn = (editor) => {
+            const editorStyles = getComputedStyle(editor);
+            const gutterCh = getNumberGutterCh();
+            const cacheKey = `${editorStyles.fontSize}|${gutterCh}|${marginTextGapSteps}|${numberMarginClearanceSteps}`;
+
+            if (cacheKey === _cacheKey) return _cached;
+
+            _cached = getMarginLayout(editor).bodyIndent;
+            _cacheKey = cacheKey;
+            return _cached;
+          };
+          fn.reset = () => {
+            _cacheKey = null;
+            _cached = "";
+          };
+          return fn;
+        })();
+        const minPageCount = 2;
+        const maxPageCount = 8;
+        let editors = Array.from(document.querySelectorAll('[data-auto-indent="numbered-homework"]'));
+        const lineHeightControls = document.querySelectorAll("[data-line-height-control]");
+        const lineHeightValue = document.getElementById("line-height-value");
+        const examPickers = document.querySelectorAll("[data-exam-picker]");
+        const pageStack = document.querySelector(".exam-page-stack");
+        const bookBarTitle = document.querySelector("[data-book-bar-title]");
+        const bookBarMeta = document.querySelector("[data-book-bar-meta]");
+        const bookBarStatus = document.querySelector("[data-book-bar-status]");
+        const permissionBanner = document.querySelector("[data-permission-banner]");
+        const reviewToolbar = document.querySelector("[data-review-toolbar]");
+        const startNewRevisionButton = document.querySelector("[data-start-new-revision]");
+        const cancelSubmitWrap = document.querySelector("[data-cancel-submit-wrap]");
+        const cancelSubmitButton = document.querySelector("[data-cancel-submit]");
+        const submitModal = document.querySelector("[data-submit-modal]");
+        const submitModalMeta = document.querySelector("[data-submit-modal-meta]");
+        const submitChatPreview = document.querySelector("[data-submit-chat-preview]");
+        const pushInboxButton = document.querySelector("[data-push-inbox]");
+        const reviewerLink = document.querySelector("[data-reviewer-link]");
+        const paperReviewLink = document.querySelector("[data-paper-review-link]");
+        const exportTransferButton = document.querySelector("[data-export-transfer]");
+        const downloadSubmissionButton = document.querySelector("[data-download-submission]");
+        const signatureFileInput = document.querySelector("[data-signature-file]");
+        const signatureModal = document.querySelector("[data-signature-modal]");
+        const signaturePreview = document.querySelector("[data-signature-preview]");
+        const highlightPickerModal = document.querySelector("[data-highlight-picker-modal]");
+        const highlightPickerQuote = document.querySelector("[data-highlight-picker-quote]");
+        const highlightViewModal = document.querySelector("[data-highlight-view-modal]");
+        const highlightViewLabel = document.querySelector("[data-highlight-view-label]");
+        const highlightViewQuote = document.querySelector("[data-highlight-view-quote]");
+        const highlightViewMeta = document.querySelector("[data-highlight-view-meta]");
+        const removeHighlightButton = document.querySelector("[data-remove-highlight]");
+        const highlightModeButton = document.querySelector("[data-highlight-mode]");
+        let examPages = Array.from(document.querySelectorAll(".exam-page"));
+        const pagePrevButton = document.querySelector("[data-page-prev]");
+        const pageNextButton = document.querySelector("[data-page-next]");
+        const pageStatus = document.querySelector("[data-page-status]");
+        const saveButton = document.querySelector("[data-save-draft]");
+        const submitReviewButton = document.querySelector("[data-submit-review]");
+        const clearBottomLineButton = document.querySelector("[data-clear-bottom-line]");
+        const saveStatus = document.querySelector("[data-save-status]");
+        const toastNotice = document.querySelector("[data-toast-notice]");
+        const answerCard = document.querySelector(".answer-card");
+        const annotationToggle = document.querySelector("[data-annotation-toggle]");
+        const profileForm = document.querySelector("[data-profile-form]");
+        const profileDismissButtons = document.querySelectorAll("[data-profile-dismiss]");
+        const profileError = document.querySelector("[data-profile-error]");
+        const paliReferencePip = document.querySelector("[data-pali-reference-pip]");
+        const openPaliReferenceButton = document.querySelector("[data-open-pali-reference]");
+        const closePaliReferenceButton = document.querySelector("[data-pali-reference-close]");
+        const minimizePaliReferenceButton = document.querySelector("[data-pali-reference-minimize]");
+        const paliReferenceDragHandle = document.querySelector("[data-pali-reference-drag]");
+        const paliReferenceFrame = document.querySelector("[data-pali-reference-frame]");
+        const paliReferenceFullLink = document.querySelector("[data-pali-reference-full]");
+        const thaiDigits = new Map([
+          ["0", "๐"],
+          ["1", "๑"],
+          ["2", "๒"],
+          ["3", "๓"],
+          ["4", "๔"],
+          ["5", "๕"],
+          ["6", "๖"],
+          ["7", "๗"],
+          ["8", "๘"],
+          ["9", "๙"],
+        ]);
+
+        const toThaiNumber = (value) => String(value).replace(/[0-9]/g, (digit) => thaiDigits.get(digit));
+        const normalizeQuestionNumber = (value) => toThaiNumber(String(value || ""));
+        const setExamButtonLabel = (button, label, iconName = "") => {
+          if (!button) return;
+          button.replaceChildren();
+          if (iconName) {
+            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            svg.classList.add("exam-icon");
+            svg.setAttribute("aria-hidden", "true");
+            const use = document.createElementNS("http://www.w3.org/2000/svg", "use");
+            use.setAttribute("href", `#exam-icon-${iconName}`);
+            svg.append(use);
+            button.append(svg);
+          }
+          const span = document.createElement("span");
+          span.textContent = label;
+          button.append(span);
+        };
+        const thaiMonthNames = [
+          "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน",
+          "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม",
+          "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม",
+        ];
+        const gradeValues = ["1-2", "3", "4", "5", "6", "7", "8", "9"];
+        const {
+          SUBJECT_OPTIONS: subjectOptions,
+          getSubjectOptionsForGrade: getAllowedSubjectsForGrade,
+          getSubjectLabelByValue,
+          getSubjectOption,
+        } = window.PaligoExamShared;
+        const queryParams = new URLSearchParams(window.location.search);
+        const wantsNewBook = queryParams.get("newBook") === "1";
+        const wantsResume = queryParams.get("resume") === "1";
+        const reviewMode = queryParams.get("mode") === "review";
+        const reviewSubmissionId = queryParams.get("submissionId");
+
+        const roleGuard = guardExamPageRole({ page: "student", reviewMode });
+        if (!roleGuard.ok) {
+          window.location.replace(roleGuard.redirect);
+          return;
+        }
+
+        const workspaceRole = reviewMode ? "reviewer" : "student";
+
+        const createId = (prefix) => {
+          const random = window.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+          return `${prefix}-${random}`;
+        };
+
+        const getLocalOwnerId = () => {
+          const existing = readRaw(ownerStorageKey);
+          if (existing) return existing;
+
+          const ownerId = createId("owner");
+          writeRaw(ownerStorageKey, ownerId);
+          return ownerId;
+        };
+
+        const localOwnerId = getLocalOwnerId();
+        let currentBookId = wantsNewBook
+          ? createId("book")
+          : wantsResume
+            ? readRaw(activeBookStorageKey) || createId("book")
+            : queryParams.get("bookId") || readRaw(activeBookStorageKey) || createId("book");
+        writeRaw(activeBookStorageKey, currentBookId);
+
+        const getStoredList = (key) => getList(key);
+
+        const setStoredList = (key, value) => setList(key, value);
+
+        const loadStudentProfile = () => {
+          try {
+            const raw = readRaw(profileStorageKey);
+            return raw ? JSON.parse(raw) : null;
+          } catch {
+            return null;
+          }
+        };
+
+        const saveStudentProfile = (profile) => {
+          writeRaw(profileStorageKey, JSON.stringify(profile));
+        };
+
+        const loadProfileDraft = () => {
+          try {
+            const raw = localStorage.getItem(profileDraftStorageKey);
+            return raw ? JSON.parse(raw) : null;
+          } catch {
+            return null;
+          }
+        };
+
+        const readProfileFormValues = () => {
+          if (!profileForm) return null;
+
+          const formData = new FormData(profileForm);
+          return {
+            userRole: String(formData.get("userRole") || "student"),
+            prefix: String(formData.get("prefix") || ""),
+            firstName: String(formData.get("firstName") || "").trim(),
+            lastName: String(formData.get("lastName") || "").trim(),
+            monasticName: String(formData.get("monasticName") || "").trim(),
+            grade: String(formData.get("grade") || "4"),
+            teacherName: String(formData.get("teacherName") || "").trim(),
+            teacherRole: String(formData.get("teacherRole") || "teacher-reviewer"),
+            deliveryMethod: String(formData.get("deliveryMethod") || "line"),
+          };
+        };
+
+        const persistProfileDraft = () => {
+          const values = readProfileFormValues();
+          if (!values) return;
+
+          try {
+            localStorage.setItem(
+              profileDraftStorageKey,
+              JSON.stringify({ ...values, savedAt: new Date().toISOString() })
+            );
+          } catch {
+            /* ignore quota / privacy mode */
+          }
+        };
+
+        let profileDraftTimer;
+        const scheduleProfileDraftSave = () => {
+          clearTimeout(profileDraftTimer);
+          profileDraftTimer = setTimeout(persistProfileDraft, 250);
+        };
+
+        const profileValidationMessages = {
+          userRole: "กรุณาเลือกบทบาทผู้ใช้",
+          prefix: "กรุณาเลือกคำนำหน้า",
+          firstName: "กรุณากรอกชื่อ",
+          grade: "กรุณาเลือกชั้นประโยค ป.ธ.",
+          deliveryMethod: "กรุณาเลือกช่องทางส่งตรวจ",
+        };
+
+        const isProfileRadioGroup = (field) => Boolean(field?.length && field[0]?.type === "radio");
+
+        const getProfileFieldContainer = (name) =>
+          profileForm?.querySelector(`[name="${name}"]`)?.closest(".profile-field") || null;
+
+        const clearProfileFieldInvalidState = (name) => {
+          getProfileFieldContainer(name)?.classList.remove("is-invalid");
+        };
+
+        const setProfileFieldInvalidState = (name) => {
+          getProfileFieldContainer(name)?.classList.add("is-invalid");
+        };
+
+        const showProfileError = (message) => {
+          if (!profileError) return;
+          profileError.textContent = message;
+          profileError.hidden = false;
+        };
+
+        const clearProfileError = () => {
+          if (!profileError) return;
+          profileError.textContent = "";
+          profileError.hidden = true;
+        };
+
+        const clearProfileFieldValidity = (name) => {
+          const field = profileForm?.elements[name];
+          if (!field) return;
+
+          if (isProfileRadioGroup(field)) {
+            Array.from(field).forEach((item) => item.setCustomValidity(""));
+          } else if (typeof field.setCustomValidity === "function") {
+            field.setCustomValidity("");
+          }
+
+          clearProfileFieldInvalidState(name);
+        };
+
+        const validateProfileForm = () => {
+          if (!profileForm) return true;
+
+          clearProfileError();
+          Object.keys(profileValidationMessages).forEach(clearProfileFieldValidity);
+
+          for (const [name, message] of Object.entries(profileValidationMessages)) {
+            const field = profileForm.elements[name];
+            const isRadioGroup = isProfileRadioGroup(field);
+            const fields = isRadioGroup ? Array.from(field) : [field];
+            const hasValue = isRadioGroup
+              ? fields.some((item) => item.checked)
+              : String(field?.value || "").trim().length > 0;
+
+            if (!hasValue) {
+              setProfileFieldInvalidState(name);
+              showProfileError(message);
+              const focusTarget = isRadioGroup
+                ? fields.find((item) => item.checked) || fields[0]
+                : field;
+              focusTarget?.focus?.();
+              return false;
+            }
+          }
+
+          return true;
+        };
+
+        profileForm?.addEventListener("input", (event) => {
+          if (event.target?.name) {
+            clearProfileFieldValidity(event.target.name);
+            clearProfileError();
+            scheduleProfileDraftSave();
+          }
+        });
+
+        profileForm?.addEventListener("change", (event) => {
+          if (event.target?.name) {
+            clearProfileFieldValidity(event.target.name);
+            clearProfileError();
+            scheduleProfileDraftSave();
+          }
+        });
+
+        const dismissProfileWizard = () => {
+          persistProfileDraft();
+          clearProfileError();
+          document.body.classList.remove("needs-profile");
+          focusWritingEditorIfReady();
+        };
+
+        profileDismissButtons.forEach((button) => {
+          button.addEventListener("click", dismissProfileWizard);
+        });
+
+        const setProfileFormValues = (profile) => {
+          if (!profileForm || !profile) return;
+
+          const prefix = profile.prefix
+            ? profileForm.querySelector(`[name="prefix"][value="${profile.prefix}"]`)
+            : null;
+          if (prefix) prefix.checked = true;
+          const userRole = profileForm.querySelector(`[name="userRole"][value="${profile.userRole || "student"}"]`);
+          if (userRole) userRole.checked = true;
+          ["firstName", "lastName", "monasticName", "teacherName", "teacherRole", "grade", "deliveryMethod"].forEach((name) => {
+            if (profile[name] != null && profileForm.elements[name]) profileForm.elements[name].value = profile[name];
+          });
+        };
+
+        let studentProfile = loadStudentProfile();
+        const profileDraft = loadProfileDraft();
+        if (studentProfile || profileDraft) {
+          setProfileFormValues(studentProfile || profileDraft);
+        }
+        const currentProfileGrade = studentProfile?.grade || "4";
+        const gradePicker = document.querySelector('[data-exam-picker="grade"]');
+        const subjectPicker = document.querySelector('[data-exam-picker="subject"]');
+        const prefilledAnswerLine = document.querySelector("[data-prefilled-answer-line]");
+        if (gradePicker) {
+          gradePicker.dataset.current = currentProfileGrade;
+          gradePicker.dataset.default = currentProfileGrade;
+        }
+
+        let currentPageIndex = 0;
+        let saveStatusTimer;
+        let autoSaveTimer;
+        let isApplyingSpill = false;
+        let toastTimer;
+        let activePaliReferenceDrag = null;
+
+        const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+
+        const loadPaliReferenceState = () => {
+          try {
+            const raw = localStorage.getItem(paliReferencePipStorageKey);
+            return raw ? JSON.parse(raw) : null;
+          } catch {
+            return null;
+          }
+        };
+
+        const savePaliReferenceState = () => {
+          if (!paliReferencePip || paliReferencePip.hidden) return;
+          const rect = paliReferencePip.getBoundingClientRect();
+          try {
+            localStorage.setItem(
+              paliReferencePipStorageKey,
+              JSON.stringify({
+                left: Math.round(rect.left),
+                top: Math.round(rect.top),
+                width: Math.round(rect.width),
+                height: Math.round(rect.height),
+                minimized: paliReferencePip.classList.contains("is-minimized"),
+              })
+            );
+          } catch {
+            /* ignore quota / privacy mode */
+          }
+        };
+
+        const applyPaliReferenceState = () => {
+          if (!paliReferencePip) return;
+          const state = loadPaliReferenceState();
+          const viewportWidth = window.innerWidth;
+          const viewportHeight = window.innerHeight;
+          const width = clamp(state?.width || Math.min(620, Math.round(viewportWidth * 0.46)), 320, viewportWidth - 24);
+          const height = clamp(state?.height || Math.min(620, Math.round(viewportHeight * 0.72)), 260, viewportHeight - 24);
+          const left = clamp(state?.left ?? viewportWidth - width - 24, 12, Math.max(12, viewportWidth - width - 12));
+          const maxTop = state?.minimized ? Math.max(12, viewportHeight - 44) : Math.max(12, viewportHeight - height - 12);
+          const top = clamp(state?.top ?? viewportHeight - height - 24, 12, maxTop);
+
+          paliReferencePip.style.left = `${left}px`;
+          paliReferencePip.style.top = `${top}px`;
+          paliReferencePip.style.right = "auto";
+          paliReferencePip.style.bottom = "auto";
+          paliReferencePip.style.width = `${width}px`;
+          if (!state?.minimized) paliReferencePip.style.height = `${height}px`;
+          paliReferencePip.classList.toggle("is-minimized", Boolean(state?.minimized));
+          if (minimizePaliReferenceButton) {
+            setExamButtonLabel(minimizePaliReferenceButton, state?.minimized ? "+" : "", state?.minimized ? "expand" : "minus");
+            minimizePaliReferenceButton.setAttribute("aria-label", state?.minimized ? "ขยายหน้าต่าง" : "ย่อหน้าต่าง");
+          }
+        };
+
+        const ensurePaliReferenceFrame = () => {
+          if (!paliReferenceFrame) return;
+          if (paliReferenceFrame.getAttribute("src") !== paliReferenceUrl) {
+            paliReferenceFrame.src = paliReferenceUrl;
+          }
+        };
+
+        const openPaliReferencePip = () => {
+          if (!paliReferencePip) return;
+          ensurePaliReferenceFrame();
+          paliReferencePip.hidden = false;
+          applyPaliReferenceState();
+          openPaliReferenceButton?.setAttribute("aria-expanded", "true");
+          openPaliReferenceButton?.classList.add("is-active");
+        };
+
+        const closePaliReferencePip = () => {
+          if (!paliReferencePip) return;
+          savePaliReferenceState();
+          paliReferencePip.hidden = true;
+          openPaliReferenceButton?.setAttribute("aria-expanded", "false");
+          openPaliReferenceButton?.classList.remove("is-active");
+          focusWritingEditorIfReady();
+        };
+
+        const togglePaliReferenceMinimized = () => {
+          if (!paliReferencePip) return;
+          const next = !paliReferencePip.classList.contains("is-minimized");
+          paliReferencePip.classList.toggle("is-minimized", next);
+          if (minimizePaliReferenceButton) {
+            setExamButtonLabel(minimizePaliReferenceButton, next ? "+" : "", next ? "expand" : "minus");
+            minimizePaliReferenceButton.setAttribute("aria-label", next ? "ขยายหน้าต่าง" : "ย่อหน้าต่าง");
+          }
+          savePaliReferenceState();
+        };
+
+        const movePaliReferencePip = (clientX, clientY) => {
+          if (!paliReferencePip || !activePaliReferenceDrag) return;
+          const rect = paliReferencePip.getBoundingClientRect();
+          const left = clamp(clientX - activePaliReferenceDrag.offsetX, 8, Math.max(8, window.innerWidth - rect.width - 8));
+          const maxTop = paliReferencePip.classList.contains("is-minimized")
+            ? Math.max(8, window.innerHeight - 44)
+            : Math.max(8, window.innerHeight - rect.height - 8);
+          const top = clamp(clientY - activePaliReferenceDrag.offsetY, 8, maxTop);
+          paliReferencePip.style.left = `${left}px`;
+          paliReferencePip.style.top = `${top}px`;
+          paliReferencePip.style.right = "auto";
+          paliReferencePip.style.bottom = "auto";
+        };
+
+        const setSaveStatus = (message) => {
+          if (!saveStatus) return;
+          saveStatus.value = message;
+          clearTimeout(saveStatusTimer);
+          saveStatusTimer = setTimeout(() => {
+            saveStatus.value = "กดบันทึก หรือ ⌘/Ctrl+S";
+          }, 2200);
+        };
+
+        writeRaw(activeBookStorageKey, currentBookId);
+
+        let activeSubmission = null;
+        let scoreStamps = [];
+        let errorStamps = [];
+        let textHighlights = [];
+        let reviewSignature = null;
+        let activeStampKind = null;
+        let isReviewStamping = false;
+        let isHighlightMode = false;
+        let pendingHighlightSelection = null;
+        let savedReviewerSignature = null;
+        let lastSubmissionPackage = null;
+
+        const {
+          BOOK_STATUS,
+          formatThaiDateTime,
+          getReviewForBook,
+          getSavedReviewForSubmission,
+          getBookPermissions,
+          getCancelSubmitState,
+          cancelBookSubmit,
+          normalizeBookStatus,
+          getStatusLabel,
+          computeScore,
+          computeAnswerHash,
+          saveReviewResult,
+          upsertBookRecord,
+          buildBookTransfer,
+          getLatestSubmissionForBook,
+          upsertBookInList,
+          getReviewerSignature,
+          saveReviewerSignature,
+          downloadJson: sharedDownloadJson,
+          markWorkflowReturned,
+        } = window.PaligoExamShared;
+        const {
+          REVIEW_LABELS,
+          renderAllReviewLayers,
+          bindReviewCanvas,
+          bindHighlightSelection,
+          upsertScoreStamp,
+          upsertTextHighlight,
+          removeTextHighlight,
+          createHighlightId,
+          indexToDisplayPage,
+        } = window.PaligoExamPaper;
+
+        const getCurrentBook = () => getStoredList(booksStorageKey).find((book) => book.id === currentBookId) || null;
+
+        const applyCancelSubmitButton = (book) => {
+          if (!cancelSubmitWrap || !cancelSubmitButton || reviewMode) {
+            cancelSubmitWrap?.toggleAttribute("hidden", true);
+            return;
+          }
+
+          const status = normalizeBookStatus(book?.status);
+          if (workspaceRole !== "student" || status === BOOK_STATUS.draft) {
+            cancelSubmitWrap.hidden = true;
+            setExamButtonLabel(cancelSubmitButton, "ยกเลิกส่งตรวจ", "x");
+            return;
+          }
+
+          const cancelState = getCancelSubmitState(book, workspaceRole);
+          cancelSubmitWrap.hidden = !cancelState.showButton;
+          cancelSubmitButton.disabled = cancelState.disabled;
+          setExamButtonLabel(cancelSubmitButton, "ยกเลิกส่งตรวจ", "x");
+          cancelSubmitWrap.title = cancelState.tooltip || "";
+          cancelSubmitButton.title = cancelState.disabled ? "" : cancelState.tooltip;
+        };
+
+        const handleCancelSubmit = () => {
+          const book = getCurrentBook();
+          const cancelState = getCancelSubmitState(book, workspaceRole);
+          if (!cancelState.canCancel) return;
+          if (
+            !window.confirm(
+              "ยกเลิกส่งตรวจ — สมุดจะกลับเป็นฉบับร่างและแก้ไขคำตอบได้อีกครั้ง ต้องการดำเนินการต่อหรือไม่?"
+            )
+          ) {
+            return;
+          }
+          try {
+            cancelBookSubmit(currentBookId);
+            applyPermissions();
+            setSaveStatus("ยกเลิกส่งตรวจแล้ว — แก้ไขคำตอบได้อีกครั้ง");
+          } catch (error) {
+            setSaveStatus(error.message || "ยกเลิกส่งตรวจไม่ได้");
+          }
+        };
+
+        const updateBookBar = () => {
+          const book = getCurrentBook();
+          const review = getReviewForBook(currentBookId) || book?.review;
+          const status = normalizeBookStatus(book?.status);
+          if (bookBarTitle) bookBarTitle.textContent = book?.title || activeSubmission?.bookTitle || "สมุดข้อสอบ";
+          if (bookBarMeta) {
+            bookBarMeta.textContent = `${getStudentDisplayName() || activeSubmission?.studentName || "ไม่ระบุชื่อ"} · revision ${book?.revision || activeSubmission?.bookRevision || 1} · ป.ธ. ${toThaiNumber(book?.grade || studentProfile?.grade || "-")}`;
+          }
+          if (bookBarStatus) {
+            bookBarStatus.textContent = review ? getStatusLabel(BOOK_STATUS.reviewed) : getStatusLabel(status);
+            bookBarStatus.className = `paligo-status-chip ${
+              review || status === BOOK_STATUS.reviewed
+                ? "is-reviewed"
+                : status === BOOK_STATUS.underReview
+                  ? "is-under-review"
+                  : "is-draft"
+            }`;
+          }
+        };
+
+        const renderReviewOverlays = () => {
+          const canClickHighlights = reviewMode || normalizeBookStatus(getCurrentBook()?.status) === BOOK_STATUS.reviewed;
+          renderAllReviewLayers(
+            examPages,
+            {
+              scoreStamps,
+              errorStamps,
+              textHighlights,
+              signature: reviewSignature,
+            },
+            {
+              onHighlightClick: canClickHighlights
+                ? (item) => showHighlightViewModal(item, reviewMode)
+                : null,
+            }
+          );
+        };
+
+        const focusWritingEditorIfReady = () => {
+          if (reviewMode) return;
+          const book = getCurrentBook();
+          const perms = getBookPermissions(book || { status: BOOK_STATUS.draft }, workspaceRole);
+          if (!perms.canEditAnswer) return;
+          const editor = editors[currentPageIndex];
+          if (!editor || editor.readOnly) return;
+          editor.focus();
+        };
+
+        const getPermissionMessage = (book) => {
+          const status = normalizeBookStatus(book?.status);
+          const perms = getBookPermissions(book || { status }, workspaceRole);
+          if (reviewMode) {
+            return "อยู่ระหว่างตรวจ — คำตอบถูกล็อกทั้งนักเรียนและผู้ตรวจ · ผู้ตรวจ stamp/ลายเซ็นบนกระดาษได้";
+          }
+          if (status === BOOK_STATUS.draft) return "ฉบับร่าง — นักเรียนแก้ไขคำตอบได้";
+          if (status === BOOK_STATUS.underReview) {
+            return "อยู่ระหว่างตรวจ — คำตอบถูกล็อกทั้งนักเรียนและผู้ตรวจ · รอผู้ตรวจ stamp และส่งคืน";
+          }
+          if (status === BOOK_STATUS.reviewed) {
+            return `ได้รับผลตรวจแล้ว — กดไฮไลท์บนกระดาษเพื่อดูข้อคิดเห็น · คะแนน ${window.PaligoExamShared.toThaiPercent((getReviewForBook(currentBookId)?.score?.percent) || 0)}`;
+          }
+          return perms.canEditAnswer ? "แก้ไขคำตอบได้" : "คำตอบถูกล็อก";
+        };
+
+        const applyPermissions = () => {
+          const book = getCurrentBook() || (activeSubmission ? { status: BOOK_STATUS.underReview, id: currentBookId } : { status: BOOK_STATUS.draft });
+          const perms = getBookPermissions(book, workspaceRole);
+          const answerLocked = reviewMode || !perms.canEditAnswer;
+
+          if (permissionBanner) {
+            permissionBanner.textContent = getPermissionMessage(book);
+            permissionBanner.classList.toggle("is-locked", answerLocked);
+          }
+
+          pageStack?.classList.toggle("is-readonly", answerLocked);
+          pageStack?.classList.toggle("is-review-stamping", isReviewStamping && perms.canStamp);
+          pageStack?.classList.toggle("is-highlight-mode", isHighlightMode && reviewMode);
+          highlightModeButton?.classList.toggle("is-active", isHighlightMode);
+          editors.forEach((editor) => {
+            editor.readOnly = answerLocked;
+          });
+          annotationToggle?.toggleAttribute("disabled", answerLocked);
+          submitReviewButton?.toggleAttribute("disabled", !perms.canSubmit);
+          submitReviewButton?.toggleAttribute("hidden", reviewMode);
+          startNewRevisionButton?.toggleAttribute("hidden", !perms.canStartNewRevision);
+          applyCancelSubmitButton(book);
+          reviewToolbar?.toggleAttribute("hidden", !(reviewMode && (perms.canStamp || perms.canSign)));
+
+          examPages.forEach((page) => {
+            const canvas = page.querySelector("[data-review-canvas]");
+            if (canvas) canvas.hidden = !(reviewMode && isReviewStamping && perms.canStamp);
+          });
+
+          renderReviewOverlays();
+          updateBookBar();
+        };
+
+        const applySubmittedLock = applyPermissions;
+
+        const showSubmitModal = async (submission, result = {}) => {
+          if (!submitModal) return;
+          lastSubmissionPackage = submission;
+          submitModalMeta.textContent = `${submission.bookTitle} · revision ${submission.bookRevision} · ${formatThaiDateTime(submission.submittedAt)}`;
+          if (result.partial) {
+            submitModalMeta.textContent += " · ส่งไม่สำเร็จ — ลองจากกล่องข้อความ";
+          } else if (result.push?.intendedRecipientLabel) {
+            submitModalMeta.textContent += ` · ส่งให้ ${result.push.intendedRecipientLabel}`;
+          }
+          if (reviewerLink) {
+            reviewerLink.href = `exam-reviewer-console.html?submissionId=${encodeURIComponent(submission.id)}`;
+            reviewerLink.hidden = true;
+          }
+          if (paperReviewLink) {
+            paperReviewLink.href = `workbook.html?mode=review&submissionId=${encodeURIComponent(submission.id)}`;
+          }
+          pushInboxButton?.toggleAttribute("hidden", true);
+
+          if (submitChatPreview) {
+            submitChatPreview.replaceChildren();
+            try {
+              const book = getCurrentBook();
+              const chat = window.PaligoInboxChat;
+              let previewMessage = null;
+              if (chat?.recordBookSubmission) {
+                const recorded = await chat.recordBookSubmission({ book, result, submission });
+                previewMessage = recorded?.message || null;
+              }
+              if (!previewMessage && chat?.bookSnapshot) {
+                previewMessage = {
+                  id: "preview",
+                  type: "book",
+                  direction: "out",
+                  bookId: book?.id || currentBookId,
+                  book: chat.bookSnapshot(book),
+                  at: submission.submittedAt,
+                  subtitle: `revision ${submission.bookRevision || book?.revision || 1}`,
+                };
+              }
+              if (previewMessage && chat?.renderBookFlexCard) {
+                const card = chat.renderBookFlexCard({
+                  message: previewMessage,
+                  book: previewMessage.book || book,
+                  statusLabel: getStatusLabel(BOOK_STATUS.underReview),
+                  subtitle: previewMessage.subtitle || "",
+                  actions: [],
+                });
+                if (card) submitChatPreview.append(card);
+              }
+            } catch (error) {
+              console.warn("แสดงตัวอย่างแชตไม่สำเร็จ", error);
+            }
+          }
+
+          submitModal.hidden = false;
+        };
+
+        const closeSubmitModal = () => {
+          if (submitModal) submitModal.hidden = true;
+        };
+
+        const showToast = (message) => {
+          if (!toastNotice) return;
+
+          toastNotice.textContent = message;
+          toastNotice.classList.add("is-visible");
+          clearTimeout(toastTimer);
+          toastTimer = setTimeout(() => {
+            toastNotice.classList.remove("is-visible");
+          }, 2800);
+        };
+
+        const showPage = (nextPageIndex) => {
+          if (!examPages.length) return;
+
+          currentPageIndex = Math.min(Math.max(nextPageIndex, 0), examPages.length - 1);
+
+          examPages.forEach((page, index) => {
+            page.hidden = index !== currentPageIndex;
+          });
+
+          if (pagePrevButton) pagePrevButton.disabled = currentPageIndex === 0;
+          if (pageNextButton) pageNextButton.disabled = currentPageIndex === examPages.length - 1;
+          if (pageStatus) {
+            pageStatus.value = `หน้า ${toThaiNumber(currentPageIndex + 1)} / ${toThaiNumber(examPages.length)}`;
+          }
+
+          balanceCurrentPageLines();
+          scheduleAutoSave();
+        };
+
+        const createContinuationPage = (pageIndex) => {
+          const page = document.createElement("article");
+          const frame = document.createElement("div");
+          const editor = document.createElement("textarea");
+          const footer = document.createElement("div");
+
+          page.className = "exam-page is-continuation";
+          page.setAttribute("aria-label", `กระดาษคำตอบหน้าที่ ${pageIndex + 1}`);
+          page.hidden = true;
+
+          frame.className = "ruled-editor-frame";
+          editor.className = "ruled-editor";
+          editor.setAttribute("aria-label", `พื้นที่เขียนคำตอบหน้าที่ ${pageIndex + 1}`);
+          editor.dataset.autoIndent = "numbered-homework";
+          editor.dataset.pageEditor = String(pageIndex);
+          editor.spellcheck = false;
+
+          footer.className = "exam-footer-lines";
+          footer.setAttribute("aria-label", `ท้ายกระดาษหน้าที่ ${pageIndex + 1}`);
+          footer.setAttribute("aria-hidden", "true");
+
+          const annotationLines = document.createElement("div");
+          const annotationCanvas = document.createElement("div");
+          annotationLines.className = "annotation-lines";
+          annotationLines.setAttribute("data-annotation-lines", "");
+          annotationLines.setAttribute("aria-hidden", "true");
+          annotationCanvas.className = "annotation-canvas";
+          annotationCanvas.setAttribute("data-annotation-canvas", "");
+          annotationCanvas.setAttribute("aria-hidden", "true");
+
+          const reviewLayer = document.createElement("div");
+          const reviewCanvas = document.createElement("div");
+          reviewLayer.className = "review-layer";
+          reviewLayer.setAttribute("data-review-layer", "");
+          reviewLayer.setAttribute("aria-hidden", "true");
+          reviewCanvas.className = "review-canvas";
+          reviewCanvas.setAttribute("data-review-canvas", "");
+          reviewCanvas.hidden = true;
+          reviewCanvas.setAttribute("aria-hidden", "true");
+
+          frame.append(editor, annotationLines, reviewLayer, annotationCanvas, reviewCanvas);
+          page.append(frame, footer);
+          return page;
+        };
+
+        const refreshPageCollections = () => {
+          examPages = Array.from(document.querySelectorAll(".exam-page"));
+          editors = Array.from(document.querySelectorAll('[data-auto-indent="numbered-homework"]'));
+        };
+
+        // ── Annotation state (LOCKED — see .cursor/rules/paligo-annotation-lines.mdc) ──
+        let annotations = []; // [{page: number, line: number (1-based)}]
+        let isAnnotating = false;
+
+        const renderAnnotations = () => {
+          examPages.forEach((page, pageIndex) => {
+            const container = page.querySelector("[data-annotation-lines]");
+            if (!container) return;
+
+            container.innerHTML = "";
+            annotations
+              .filter((a) => a.page === pageIndex)
+              .forEach(({ line }) => {
+                const el = document.createElement("div");
+                el.className = "annotation-line";
+                el.style.setProperty("--line-n", String(line));
+                container.append(el);
+              });
+          });
+        };
+
+        const getAnnotationLineShift = () =>
+          Number.parseFloat(
+            getComputedStyle(document.documentElement).getPropertyValue("--annotation-line-shift").trim()
+          ) || 0;
+
+        const getAnnotationLineWidth = () =>
+          Number.parseFloat(
+            getComputedStyle(document.documentElement).getPropertyValue("--line-width").trim()
+          ) || 0.75;
+
+        const getTextYOffset = () =>
+          Number.parseFloat(
+            getComputedStyle(document.documentElement).getPropertyValue("--text-y-offset").trim()
+          ) || 0;
+
+        const getAnnotationLineNudge = () =>
+          Number.parseFloat(
+            getComputedStyle(document.documentElement).getPropertyValue("--annotation-line-nudge").trim()
+          ) || 0;
+
+        const getAnnotationLineFromPointer = (event, frame) => {
+          const lineHeight =
+            Number.parseFloat(
+              getComputedStyle(document.documentElement).getPropertyValue("--line-height").trim()
+            ) || 30;
+          const frameRect = frame.getBoundingClientRect();
+          const offset =
+            Number.parseFloat(
+              getComputedStyle(frame).getPropertyValue("--annotation-page-offset").trim()
+            ) || 0;
+          const relativeY = event.clientY - frameRect.top;
+          return (
+            Math.round(
+              (relativeY -
+                offset +
+                getAnnotationLineWidth() +
+                getTextYOffset() -
+                getAnnotationLineNudge()) /
+                lineHeight
+            ) - getAnnotationLineShift()
+          );
+        };
+
+        const bindAnnotationCanvas = (canvas, pageIndex) => {
+          if (canvas.dataset.annotationBound === "true") return;
+          canvas.dataset.annotationBound = "true";
+
+          canvas.addEventListener("click", (e) => {
+            if (!isAnnotating) return;
+            const book = getCurrentBook() || { status: BOOK_STATUS.draft };
+            if (!getBookPermissions(book, workspaceRole).canEditAnswer) return;
+
+            const frame = canvas.closest(".ruled-editor-frame");
+            if (!frame) return;
+
+            const lineN = getAnnotationLineFromPointer(e, frame);
+            const maxLines = pageIndex === 0 ? linesFirstPage : linesPerPage;
+
+            if (lineN < 1 || lineN > maxLines) return;
+
+            const existingIdx = annotations.findIndex(
+              (a) => a.page === pageIndex && a.line === lineN
+            );
+            if (existingIdx >= 0) {
+              annotations.splice(existingIdx, 1);
+            } else {
+              annotations.push({ page: pageIndex, line: lineN });
+            }
+
+            renderAnnotations();
+            scheduleAutoSave();
+          });
+        };
+
+        const linesFirstPage =
+          parseInt(getComputedStyle(document.documentElement).getPropertyValue("--lines-first-page").trim()) || 29;
+        const linesPerPage =
+          parseInt(getComputedStyle(document.documentElement).getPropertyValue("--lines-per-page").trim()) || 33;
+
+        const getEditorInnerWidth = (editor) => {
+          const styles = getComputedStyle(editor);
+          const paddingLeft = Number.parseFloat(styles.paddingLeft) || 0;
+          const paddingRight = Number.parseFloat(styles.paddingRight) || 0;
+          let inner = editor.clientWidth - paddingLeft - paddingRight;
+          if (inner > 80) return inner;
+
+          const visibleEditor =
+            editors.find((item, index) => item.clientWidth > 80 && !examPages[index]?.hidden) || editors[0];
+          if (visibleEditor) {
+            const visibleStyles = getComputedStyle(visibleEditor);
+            inner =
+              visibleEditor.clientWidth -
+              (Number.parseFloat(visibleStyles.paddingLeft) || 0) -
+              (Number.parseFloat(visibleStyles.paddingRight) || 0);
+            if (inner > 80) return inner;
+          }
+
+          const paperWidth = getComputedStyle(document.documentElement).getPropertyValue("--paper-width").trim();
+          const cmMatch = paperWidth.match(/^([\d.]+)cm$/);
+          if (cmMatch) {
+            inner = (parseFloat(cmMatch[1]) / 2.54) * 96 - paddingLeft - paddingRight;
+          }
+          return Math.max(240, inner);
+        };
+
+        const getEditorVisibleLineCount = (editor) => {
+          const styles = getComputedStyle(editor);
+          const lineHeight =
+            Number.parseFloat(styles.lineHeight) ||
+            Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--line-height")) ||
+            30;
+          const paddingTop = Number.parseFloat(styles.paddingTop) || 0;
+          const paddingBottom = Number.parseFloat(styles.paddingBottom) || 0;
+          const writableHeight = editor.clientHeight - paddingTop - paddingBottom;
+
+          if (writableHeight > lineHeight) {
+            return Math.max(1, Math.floor(writableHeight / lineHeight));
+          }
+
+          const pageIndex = Number(editor.dataset.pageEditor || 0);
+          return pageIndex === 0 ? linesFirstPage : linesPerPage;
+        };
+
+        const getCaretLineNumber = (editor) => editor.value.slice(0, editor.selectionStart).split("\n").length;
+
+        const getMaxLines = (editor) => {
+          const pageIndex = Number(editor.dataset.pageEditor || 0);
+          const cssCap = pageIndex === 0 ? linesFirstPage : linesPerPage;
+          return Math.max(1, Math.min(getEditorVisibleLineCount(editor), cssCap));
+        };
+
+        const stripLeadingEmptyLines = (lines) => {
+          const copy = [...lines];
+          while (copy.length && !copy[0].trim()) copy.shift();
+          return copy;
+        };
+
+        const numberAreaTooltip = document.querySelector("[data-number-area-tooltip]");
+
+        const getLineContextAtCaret = (editor) => {
+          const value = editor.value;
+          const pos = editor.selectionStart;
+          const lineStart = value.lastIndexOf("\n", pos - 1) + 1;
+          const lineEndIndex = value.indexOf("\n", pos);
+          const lineEnd = lineEndIndex === -1 ? value.length : lineEndIndex;
+
+          return {
+            line: value.slice(lineStart, lineEnd),
+            caretInLine: pos - lineStart,
+          };
+        };
+
+        const isLineAtBodyColumn = (line, editor) => {
+          if (!line.length) return false;
+          const editorCtx = measureFontContext(getComputedStyle(editor));
+          const { bodyStartPx } = getMarginLayout(editor);
+          const leading = line.match(/^(\s*)/)?.[1] || "";
+          return editorCtx.measureText(leading).width >= bodyStartPx - 0.5;
+        };
+
+        const isCaretInNumberArea = (editor) => {
+          const { line, caretInLine } = getLineContextAtCaret(editor);
+          const editorCtx = measureFontContext(getComputedStyle(editor));
+          const caretPx = editorCtx.measureText(line.slice(0, caretInLine)).width;
+          const numbered = line.match(numberedLinePattern);
+
+          if (numbered) {
+            if (!String(numbered[2] || "").trim()) {
+              const gutterEndPx = editorCtx.measureText(
+                formatNumberedHomeworkLine(editor, numbered[1], "")
+              ).width;
+              return caretPx <= gutterEndPx + 0.5;
+            }
+            const numberAreaEndPx = editorCtx.measureText(formatNumberedLine(editor, numbered[1], "")).width;
+            return caretPx < numberAreaEndPx;
+          }
+
+          const partial = line.slice(0, caretInLine);
+          const leading = partial.match(/^(\s*)([0-9๐-๙]*)/);
+          if (!leading) return false;
+
+          const paragraphColumnPx = getParagraphColumnPx(editor);
+          return caretPx < paragraphColumnPx && leading[2].length > 0;
+        };
+
+        const shouldJumpToParagraph = (editor) => {
+          if (isCaretInNumberArea(editor)) return true;
+          const { line, caretInLine } = getLineContextAtCaret(editor);
+          if (!line.trim()) {
+            if (line.length > 0 && isLineAtBodyColumn(line, editor)) {
+              const editorCtx = measureFontContext(getComputedStyle(editor));
+              const caretPx = editorCtx.measureText(line.slice(0, caretInLine)).width;
+              const { bodyStartPx } = getMarginLayout(editor);
+              return caretPx < bodyStartPx - 0.5;
+            }
+            return true;
+          }
+          return false;
+        };
+
+        const caretAtParagraphColumn = (editor, lineText, insertedText = "") => {
+          const numbered = lineText.match(numberedLinePattern);
+          if (numbered) {
+            const body = `${numbered[2] || ""}${insertedText}`;
+            return formatNumberedLine(editor, numbered[1], body).length;
+          }
+          const { paragraphIndent } = getMarginLayout(editor);
+          return paragraphIndent.length + insertedText.length;
+        };
+
+        const lineStartOffset = (text, lineIndex) => {
+          if (lineIndex <= 0) return 0;
+          const lines = text.split("\n");
+          let offset = 0;
+          for (let i = 0; i < lineIndex; i += 1) {
+            offset += lines[i].length + 1;
+          }
+          return offset;
+        };
+
+        const positionNumberAreaTooltip = (editor) => {
+          if (!numberAreaTooltip) return;
+
+          const styles = getComputedStyle(editor);
+          const lineHeight = Number.parseFloat(styles.lineHeight) || 30;
+          const paddingTop = Number.parseFloat(styles.paddingTop) || 0;
+          const paddingLeft = Number.parseFloat(styles.paddingLeft) || 0;
+          const gutterPx = getMarginLinePx(editor);
+          const rect = editor.getBoundingClientRect();
+          const lineNum = getCaretLineNumber(editor);
+
+          numberAreaTooltip.style.top = `${rect.top + paddingTop + (lineNum - 1) * lineHeight}px`;
+          numberAreaTooltip.style.left = `${rect.left + paddingLeft + gutterPx + 8}px`;
+        };
+
+        const hideNumberAreaTooltip = () => {
+          if (!numberAreaTooltip) return;
+          numberAreaTooltip.classList.remove("is-visible");
+          numberAreaTooltip.hidden = true;
+        };
+
+        const jumpToParagraphFromNumberArea = (editor, insertedText = "") => {
+          const normalizedInsertedText = normalizePaliLegacyText(insertedText);
+          const value = editor.value;
+          const pos = editor.selectionStart;
+          const lineStart = value.lastIndexOf("\n", pos - 1) + 1;
+          const lineEndIndex = value.indexOf("\n", pos);
+          const lineEnd = lineEndIndex === -1 ? value.length : lineEndIndex;
+          const line = value.slice(lineStart, lineEnd);
+          const caretInLine = pos - lineStart;
+          const numbered = line.match(numberedLinePattern);
+
+          if (numbered) {
+            const draftLine = formatNumberedLine(
+              editor,
+              numbered[1],
+              `${numbered[2] || ""}${normalizedInsertedText}`
+            );
+            const draftValue = `${value.slice(0, lineStart)}${draftLine}${value.slice(lineEnd)}`;
+            const caretPos = lineStart + formatNumberedLine(editor, numbered[1], normalizedInsertedText).length;
+
+            isApplyingSpill = true;
+            try {
+              const result = applyEditorContentWithSpill(editor, draftValue, caretPos, caretPos);
+              if (result.focusPageIndex !== currentPageIndex) showPage(result.focusPageIndex);
+              result.editor.focus();
+              result.editor.setSelectionRange(result.selectionStart, result.selectionEnd);
+              maybePrepareNextPage(result.editor);
+              syncNumberAreaTooltip(result.editor);
+            } finally {
+              isApplyingSpill = false;
+            }
+          } else if (!normalizedInsertedText && !line.trim()) {
+            insertAtSelection(editor, getMarginLayout(editor).paragraphIndent);
+            editor.dispatchEvent(new Event("input", { bubbles: true }));
+            syncNumberAreaTooltip(editor);
+          } else if (normalizedInsertedText) {
+            const linePrefix = line.slice(0, caretInLine);
+            const pad = spacesToParagraphColumn(editor, linePrefix);
+            insertAtSelection(editor, pad + normalizedInsertedText);
+            editor.dispatchEvent(new Event("input", { bubbles: true }));
+          } else {
+            const linePrefix = line.slice(0, caretInLine);
+            const pad = spacesToParagraphColumn(editor, linePrefix);
+            insertAtSelection(editor, pad);
+            editor.dispatchEvent(new Event("input", { bubbles: true }));
+            syncNumberAreaTooltip(editor);
+          }
+
+          hideNumberAreaTooltip();
+          scheduleAutoSave();
+        };
+
+        const buildInitialQuestionLine = (editor) => formatNumberedLine(editor, "1", "");
+
+        const ensureInitialQuestionNumber = ({ autosave = false } = {}) => {
+          if (reviewMode) return false;
+          const editor = editors[0];
+          if (!editor || editor.readOnly || editor.value.trim()) return false;
+
+          const initialLine = buildInitialQuestionLine(editor);
+          editor.value = initialLine;
+          editor.setSelectionRange(initialLine.length, initialLine.length);
+          syncNumberAreaTooltip(editor);
+          if (autosave) scheduleAutoSave();
+          return true;
+        };
+
+        const syncNumberAreaTooltip = (editor) => {
+          if (!numberAreaTooltip) return;
+
+          if (isCaretInNumberArea(editor)) {
+            positionNumberAreaTooltip(editor);
+            numberAreaTooltip.hidden = false;
+            numberAreaTooltip.classList.add("is-visible");
+            return;
+          }
+
+          hideNumberAreaTooltip();
+        };
+
+        const bindNumberAreaTooltip = (editor) => {
+          if (editor.dataset.numberTooltipBound === "true") return;
+          editor.dataset.numberTooltipBound = "true";
+
+          editor.addEventListener("input", () => syncNumberAreaTooltip(editor));
+          editor.addEventListener("keyup", () => syncNumberAreaTooltip(editor));
+          editor.addEventListener("click", () => syncNumberAreaTooltip(editor));
+          editor.addEventListener("blur", hideNumberAreaTooltip);
+        };
+
+        const balanceCurrentPageLines = () => {
+          window.requestAnimationFrame(() => {
+            const page = examPages[currentPageIndex];
+            const editor = editors[currentPageIndex];
+            const footer = page?.querySelector(".exam-footer-lines");
+
+            if (!page || !editor || !footer) return;
+
+            footer.style.minHeight = "";
+
+            window.requestAnimationFrame(() => {
+              const styles = getComputedStyle(editor);
+              const lineHeight = Number.parseFloat(styles.lineHeight) || 30;
+              const paddingTop = Number.parseFloat(styles.paddingTop) || 0;
+              const paddingBottom = Number.parseFloat(styles.paddingBottom) || 0;
+              const writableHeight = Math.max(0, editor.clientHeight - paddingTop - paddingBottom);
+              const remainder = writableHeight % lineHeight;
+              const adjustment = remainder < 0.5 ? 0 : remainder;
+
+              footer.style.minHeight = `calc(var(--paper-edge-blank) + ${adjustment}px)`;
+            });
+          });
+        };
+
+        const TRANSLATION_SUBJECTS = new Set(["pali-to-thai", "thai-to-pali"]);
+        const TRANSLATION_GRADES = new Set(["1-2", "3"]);
+
+        const shouldShowPrefilledTranslationLine = () => {
+          const grade = String(gradePicker?.dataset.value || "");
+          const subject = String(subjectPicker?.dataset.value || "");
+          return TRANSLATION_GRADES.has(grade) && TRANSLATION_SUBJECTS.has(subject);
+        };
+
+        const syncPrefilledAnswerLine = () => {
+          const firstPageEditor = editors[0];
+          const firstPage = examPages[0];
+          if (!prefilledAnswerLine || !firstPageEditor) return;
+
+          const show = shouldShowPrefilledTranslationLine();
+          prefilledAnswerLine.hidden = !show;
+          prefilledAnswerLine.setAttribute("aria-hidden", String(!show));
+          firstPageEditor.classList.toggle("is-after-prefilled", show);
+          firstPage?.classList.toggle("has-prefilled-line", show);
+          balanceCurrentPageLines();
+          renderAnnotations();
+        };
+
+        const getReadonlyEditHint = () => {
+          const book = getCurrentBook();
+          const status = normalizeBookStatus(book?.status);
+          if (reviewMode) return "โหมดตรวจ — คำตอบถูกล็อก · แตะบรรทัดเพื่อ stamp";
+          if (status === BOOK_STATUS.underReview) {
+            return "สมุดถูกล็อกระหว่างส่งตรวจ — กด「ยกเลิกการส่ง」หรือรอผลตรวจ";
+          }
+          if (status === BOOK_STATUS.reviewed) {
+            return "ได้รับผลตรวจแล้ว — กด「ทำรอบใหม่」เพื่อแก้คำตอบ";
+          }
+          return "คำตอบถูกล็อกในสถานะนี้";
+        };
+
+        const bindEditor = (editor) => {
+          if (editor.dataset.editorBound === "true") return;
+          editor.dataset.editorBound = "true";
+
+          editor.addEventListener("mousedown", () => {
+            if (!editor.readOnly) editor.focus();
+          });
+
+          editor.addEventListener("keydown", (event) => {
+            if (editor.readOnly) {
+              if (event.key === "Tab" || event.key === " " || event.key === "Spacebar") {
+                event.preventDefault();
+                setSaveStatus(getReadonlyEditHint());
+              }
+              return;
+            }
+
+            if (event.key === "Enter") {
+              event.preventDefault();
+              const pageIndex = Number(editor.dataset.pageEditor || 0);
+              const caretLine = getCaretLineNumber(editor);
+              const maxLines = getMaxLines(editor);
+
+              if (caretLine >= maxLines) {
+                if (pageIndex >= examPages.length - 1) ensurePageCount(examPages.length + 1, true);
+                showPage(pageIndex + 1);
+                const nextEditor = editors[pageIndex + 1];
+                if (nextEditor) { nextEditor.focus(); nextEditor.setSelectionRange(0, 0); }
+                return;
+              }
+
+              insertAtSelection(editor, `\n${computeContinuationIndent(editor)}`);
+              maybePrepareNextPage(editor);
+              scheduleAutoSave();
+            }
+
+            if (event.key === "Tab") {
+              event.preventDefault();
+              if (shouldJumpToParagraph(editor)) {
+                jumpToParagraphFromNumberArea(editor);
+              } else {
+                const { line, caretInLine } = getLineContextAtCaret(editor);
+                const linePrefix = line.slice(0, caretInLine);
+                const pad = spacesToTargetColumn(createMeasureContext(editor), linePrefix, getParagraphColumnPx(editor));
+                insertAtSelection(editor, pad || " ");
+                editor.dispatchEvent(new Event("input", { bubbles: true }));
+              }
+              return;
+            }
+
+            if (
+              shouldJumpToParagraph(editor) &&
+              !event.ctrlKey &&
+              !event.metaKey &&
+              !event.altKey &&
+              !digitKeyPattern.test(event.key)
+            ) {
+              if (event.key === " " || event.key === "Spacebar") {
+                event.preventDefault();
+                jumpToParagraphFromNumberArea(editor);
+                return;
+              }
+              if (event.key.length === 1) {
+                event.preventDefault();
+                jumpToParagraphFromNumberArea(editor, event.key);
+              }
+            }
+          });
+
+          bindNumberAreaTooltip(editor);
+
+          editor.addEventListener("input", () => {
+            if (isApplyingSpill) return;
+
+            const before = editor.value;
+            const selectionStart = editor.selectionStart;
+            const selectionEnd = editor.selectionEnd;
+            let after = normalizeValue(before, editor);
+
+            let selStart = selectionStart;
+            let selEnd = selectionEnd;
+            if (after !== before) {
+              const delta = after.length - before.length;
+              selStart = Math.max(0, Math.min(selectionStart + delta, after.length));
+              selEnd = Math.max(0, Math.min(selectionEnd + delta, after.length));
+            }
+
+            isApplyingSpill = true;
+            try {
+              const result = applyEditorContentWithSpill(editor, after, selStart, selEnd);
+              if (result.focusPageIndex !== currentPageIndex) {
+                showPage(result.focusPageIndex);
+              }
+              result.editor.focus();
+              result.editor.setSelectionRange(result.selectionStart, result.selectionEnd);
+              maybePrepareNextPage(result.editor);
+              syncNumberAreaTooltip(result.editor);
+            } finally {
+              isApplyingSpill = false;
+            }
+
+            scheduleAutoSave();
+          });
+        };
+
+        const ensurePageCount = (targetCount, shouldNotify = false) => {
+          if (!pageStack) return false;
+
+          const nextCount = Math.min(Math.max(targetCount, minPageCount), maxPageCount);
+          let didCreate = false;
+
+          while (examPages.length < nextCount) {
+            const page = createContinuationPage(examPages.length);
+
+            pageStack.append(page);
+            refreshPageCollections();
+            editors.forEach(bindEditor);
+            const newCanvas = page.querySelector("[data-annotation-canvas]");
+            if (newCanvas) bindAnnotationCanvas(newCanvas, examPages.length - 1);
+            didCreate = true;
+          }
+
+          if (didCreate) {
+            showPage(currentPageIndex);
+            if (shouldNotify) showToast("สร้างหน้าถัดไปรอแล้วนะ");
+            scheduleAutoSave();
+          }
+
+          return didCreate;
+        };
+
+        const maybePrepareNextPage = (editor) => {
+          const pageIndex = Number(editor.dataset.pageEditor || 0);
+          const isLatestGeneratedPage = pageIndex === examPages.length - 1;
+          const isAtLastLine = getCaretLineNumber(editor) >= getMaxLines(editor);
+
+          if (!isLatestGeneratedPage || !isAtLastLine) return;
+
+          ensurePageCount(examPages.length + 1, true);
+        };
+
+        const closePickers = (exceptPicker) => {
+          examPickers.forEach((picker) => {
+            if (picker === exceptPicker) return;
+
+            const trigger = picker.querySelector(".exam-picker-trigger");
+            const popover = picker.querySelector("[data-picker-popover]");
+
+            trigger?.setAttribute("aria-expanded", "false");
+            if (popover) popover.hidden = true;
+          });
+        };
+
+        const selectPickerValue = (picker, value) => {
+          const trigger = picker.querySelector(".exam-picker-trigger");
+          const valueDisplay = picker.querySelector("[data-picker-value]");
+          const popover = picker.querySelector("[data-picker-popover]");
+          const options = picker.querySelector("[data-picker-options]");
+
+          if (!trigger || !valueDisplay || !popover || !options) return;
+
+          picker.dataset.value = String(value);
+          const pickerType = picker.dataset.examPicker;
+          const isMonthPicker = pickerType === "month";
+          const isSubjectPicker = pickerType === "subject";
+          valueDisplay.textContent = isSubjectPicker
+            ? getSubjectLabelByValue(value)
+            : isMonthPicker
+              ? thaiMonthNames[Number(value) - 1]
+              : toThaiNumber(value);
+          trigger.classList.add("has-value");
+          trigger.setAttribute("aria-expanded", "false");
+          popover.hidden = true;
+          options.querySelectorAll(".exam-picker-option").forEach((item) => {
+            item.classList.toggle("is-selected", item.dataset.value === String(value));
+          });
+          if (pickerType === "subject" || pickerType === "grade") {
+            syncPrefilledAnswerLine();
+          }
+        };
+
+        const updatePickerCurrentValue = (picker, value) => {
+          const options = picker.querySelector("[data-picker-options]");
+          if (!options) return;
+
+          picker.dataset.current = String(value);
+          options.querySelectorAll(".exam-picker-option").forEach((item) => {
+            const isCurrent = item.dataset.value === String(value);
+            item.classList.toggle("is-current", isCurrent);
+            if (isCurrent) item.setAttribute("aria-current", "true");
+            else item.removeAttribute("aria-current");
+          });
+        };
+
+        const currentExamDate = new Date();
+        const currentExamValues = {
+          day: String(currentExamDate.getDate()),
+          month: String(currentExamDate.getMonth() + 1),
+          year: String(currentExamDate.getFullYear() + 543),
+          grade: currentProfileGrade,
+          subject: getCurrentBook()?.subject || "pali-to-thai",
+        };
+
+        const rebuildSubjectPickerOptions = (preferredValue) => {
+          if (!subjectPicker) return;
+
+          const grade = gradePicker?.dataset.value || currentProfileGrade || "4";
+          const allowed = getAllowedSubjectsForGrade(grade);
+          let value = preferredValue || subjectPicker.dataset.value || subjectPicker.dataset.default || "pali-to-thai";
+          if (!allowed.some((item) => item.value === value)) {
+            value = allowed[0]?.value || "pali-to-thai";
+          }
+
+          const trigger = subjectPicker.querySelector(".exam-picker-trigger");
+          const popover = subjectPicker.querySelector("[data-picker-popover]");
+          const options = subjectPicker.querySelector("[data-picker-options]");
+          if (!trigger || !popover || !options) return;
+
+          options.replaceChildren();
+          allowed.forEach(({ value: optionValue, label }) => {
+            const option = document.createElement("button");
+
+            option.className = "exam-picker-option";
+            option.type = "button";
+            option.textContent = label;
+            option.dataset.value = optionValue;
+            if (optionValue === value) {
+              option.classList.add("is-current");
+              option.setAttribute("aria-current", "true");
+            }
+            option.addEventListener("click", (event) => {
+              event.stopPropagation();
+              selectPickerValue(subjectPicker, optionValue);
+              scheduleAutoSave();
+            });
+            options.append(option);
+          });
+
+          selectPickerValue(subjectPicker, value);
+          updatePickerCurrentValue(subjectPicker, value);
+          syncPrefilledAnswerLine();
+        };
+
+        examPickers.forEach((picker) => {
+          const currentBuddhistYear = currentExamDate.getFullYear() + 543;
+          const pickerType = picker.dataset.examPicker;
+          if (pickerType === "subject") return;
+          const yearWindow = Number(picker.dataset.yearWindow || 0);
+          const isMonthPicker = pickerType === "month";
+          const isGradePicker = pickerType === "grade";
+          const currentValue = picker.dataset.current || currentExamValues[pickerType] || "";
+          const trigger = picker.querySelector(".exam-picker-trigger");
+          const popover = picker.querySelector("[data-picker-popover]");
+          const options = picker.querySelector("[data-picker-options]");
+
+          if (!trigger || !popover || !options) return;
+
+          let optionValues;
+          if (isGradePicker) {
+            optionValues = gradeValues.slice();
+          } else {
+            const min = isMonthPicker ? 1 : (yearWindow ? currentBuddhistYear : Number(picker.dataset.min));
+            const max = isMonthPicker ? 12 : (yearWindow ? currentBuddhistYear + yearWindow - 1 : Number(picker.dataset.max));
+            optionValues = [];
+            for (let value = min; value <= max; value += 1) optionValues.push(value);
+          }
+
+          optionValues.forEach((value) => {
+            const option = document.createElement("button");
+
+            option.className = "exam-picker-option";
+            option.type = "button";
+            option.textContent = isMonthPicker ? thaiMonthNames[value - 1] : toThaiNumber(value);
+            option.dataset.value = String(value);
+            if (String(value) === currentValue) {
+              option.classList.add("is-current");
+              option.setAttribute("aria-current", "true");
+            }
+            option.addEventListener("click", (event) => {
+              event.stopPropagation();
+              selectPickerValue(picker, value);
+              if (isGradePicker) rebuildSubjectPickerOptions();
+              scheduleAutoSave();
+            });
+            options.append(option);
+          });
+
+          if (picker.dataset.default) selectPickerValue(picker, picker.dataset.default);
+
+          trigger.addEventListener("click", (event) => {
+            event.stopPropagation();
+            const willOpen = popover.hidden;
+
+            closePickers(picker);
+            popover.hidden = !willOpen;
+            trigger.setAttribute("aria-expanded", String(willOpen));
+            if (willOpen) options.querySelector(".exam-picker-option")?.focus();
+          });
+
+          picker.addEventListener("click", (event) => {
+            event.stopPropagation();
+          });
+        });
+
+        if (subjectPicker) {
+          rebuildSubjectPickerOptions(currentExamValues.subject);
+
+          const trigger = subjectPicker.querySelector(".exam-picker-trigger");
+          const popover = subjectPicker.querySelector("[data-picker-popover]");
+          const options = subjectPicker.querySelector("[data-picker-options]");
+
+          trigger?.addEventListener("click", (event) => {
+            event.stopPropagation();
+            const willOpen = popover.hidden;
+
+            closePickers(subjectPicker);
+            popover.hidden = !willOpen;
+            trigger.setAttribute("aria-expanded", String(willOpen));
+            if (willOpen) options.querySelector(".exam-picker-option")?.focus();
+          });
+
+          subjectPicker.addEventListener("click", (event) => {
+            event.stopPropagation();
+          });
+        }
+
+        document.addEventListener("click", (event) => {
+          if (!(event.target instanceof Element)) return;
+          if (event.target.closest("[data-exam-picker]")) return;
+
+          closePickers();
+        });
+
+        document.addEventListener("keydown", (event) => {
+          if (event.key === "Escape") {
+            closePickers();
+            dismissProfileWizard();
+            if (submitModal && !submitModal.hidden) closeSubmitModal();
+          }
+        });
+
+        const getGutterWidthPx = (editor) => getMarginLinePx(editor);
+
+        const getBodyTextStartPx = (editor) => getMarginLayout(editor).bodyStartPx;
+
+        const getParagraphColumnPx = (editor) => {
+          const editorCtx = measureFontContext(getComputedStyle(editor));
+          return editorCtx.measureText(getMarginLayout(editor).paragraphIndent).width;
+        };
+
+        /** เลขข้อชิดขวาใน gutter — อยู่นอกเส้นคั่น ใกล้เส้นแต่ไม่ล้ำ */
+        const buildNumberPrefix = (editor, digits) => {
+          const normalizedDigits = normalizeQuestionNumber(digits);
+          const editorCtx = measureFontContext(getComputedStyle(editor));
+          const marginLinePx = getMarginLinePx(editor);
+          const charStep = editorCtx.measureText("0").width || editorCtx.measureText("ก").width;
+          const maxEndPx = marginLinePx - charStep * numberMarginClearanceSteps;
+
+          if (editorCtx.measureText(normalizedDigits).width > maxEndPx) return normalizedDigits;
+
+          let leading = "";
+          let best = normalizedDigits;
+          while (editorCtx.measureText(leading + normalizedDigits).width <= maxEndPx) {
+            best = leading + normalizedDigits;
+            leading += " ";
+          }
+          return best;
+        };
+
+        const spacesToTargetColumn = (editorCtx, prefix, targetPx) => {
+          let pad = "";
+          let best = "";
+          let bestDelta = Math.abs(editorCtx.measureText(prefix).width - targetPx);
+
+          while (editorCtx.measureText(prefix + pad).width < targetPx) {
+            pad += " ";
+            const delta = Math.abs(editorCtx.measureText(prefix + pad).width - targetPx);
+            if (delta < bestDelta) {
+              best = pad;
+              bestDelta = delta;
+            }
+          }
+
+          return best;
+        };
+
+        /** บรรทัดมีเลข: prefix + gap → คอลัมน์ย่อหน้า (auto-indent หลังเลข) */
+        const formatNumberedLine = (editor, numberStr, bodyText) => {
+          const editorCtx = measureFontContext(getComputedStyle(editor));
+          const paragraphColumnPx = getParagraphColumnPx(editor);
+          const prefix = buildNumberPrefix(editor, normalizeQuestionNumber(numberStr));
+          const composed = prefix + spacesToTargetColumn(editorCtx, prefix, paragraphColumnPx);
+          return composed + String(bodyText || "").trimStart();
+        };
+
+        /** เลขข้อเท่านั้น — ยังไม่ขยายไปคอลัมน์ย่อหน้า (รอ Tab หรือพิมพ์ตัวอักษร) */
+        const formatNumberedHomeworkLine = (editor, numberStr, bodyText = "", rawLine = null) => {
+          const body = String(bodyText ?? "");
+          if (!body.trim()) {
+            if (rawLine != null) {
+              const editorCtx = measureFontContext(getComputedStyle(editor));
+              const paragraphColumnPx = getParagraphColumnPx(editor);
+              if (editorCtx.measureText(rawLine).width >= paragraphColumnPx - 1) {
+                return formatNumberedLine(editor, numberStr, "");
+              }
+            }
+            return buildNumberPrefix(editor, String(numberStr));
+          }
+          return formatNumberedLine(editor, numberStr, body);
+        };
+
+        const spacesToParagraphColumn = (editor, linePrefix = "") => {
+          const editorCtx = measureFontContext(getComputedStyle(editor));
+          const paragraphColumnPx = getParagraphColumnPx(editor);
+          const usedPx = editorCtx.measureText(linePrefix).width;
+          if (usedPx >= paragraphColumnPx) return "";
+          return spacesToTargetColumn(editorCtx, linePrefix, paragraphColumnPx);
+        };
+
+        /** ป้องกันตัวอักษร (ที่ไม่ใช่เลขข้อ) อยู่นอกเส้นคั่นหน้า — เฉพาะเลขข้อสอบใน gutter ได้ */
+        const enforceMarginBoundaries = (line, editor) => {
+          if (!line.trim()) {
+            if (isLineAtBodyColumn(line, editor)) return line;
+            return "";
+          }
+
+          const numbered = line.match(numberedLinePattern);
+          if (numbered) return formatNumberedHomeworkLine(editor, numbered[1], numbered[2], line);
+
+          const editorCtx = measureFontContext(getComputedStyle(editor));
+          const { bodyStartPx, bodyIndent } = getMarginLayout(editor);
+
+          for (let i = 0; i < line.length; i += 1) {
+            const ch = line[i];
+            if (ch === " " || digitKeyPattern.test(ch)) continue;
+
+            const posPx = editorCtx.measureText(line.slice(0, i + 1)).width;
+            if (posPx < bodyStartPx) {
+              const body = line.slice(i).replace(/^\s+/, "");
+              return body ? bodyIndent + body : line.slice(0, i).trimEnd();
+            }
+            break;
+          }
+
+          const leading = line.match(/^(\s*)/)?.[1] || "";
+          if (editorCtx.measureText(leading).width < bodyStartPx && line.trim()) {
+            return bodyIndent + line.replace(/^\s+/, "");
+          }
+
+          return line;
+        };
+
+        const normalizeLine = (line, indent, editor) => {
+          if (!line.trim()) {
+            if (line.length === 0) return "";
+            if (isLineAtBodyColumn(line, editor)) return line;
+            if (indent && line === indent) return line;
+            return "";
+          }
+
+          const numbered = line.match(numberedLinePattern);
+          if (numbered) return formatNumberedHomeworkLine(editor, numbered[1], numbered[2], line);
+
+          if (isLineAtBodyColumn(line, editor)) return line;
+
+          const { bodyIndent } = getMarginLayout(editor);
+          return bodyIndent + line.trimStart();
+        };
+
+        const createMeasureContext = (editor) => {
+          const canvas = createMeasureContext.canvas || document.createElement("canvas");
+          const context = canvas.getContext("2d");
+          const styles = getComputedStyle(editor);
+
+          createMeasureContext.canvas = canvas;
+          context.font = `${styles.fontStyle} ${styles.fontVariant} ${styles.fontWeight} ${styles.fontSize} ${styles.fontFamily}`;
+          return context;
+        };
+
+        const splitGraphemes = (text) => {
+          if (typeof Intl !== "undefined" && Intl.Segmenter) {
+            const segmenter = splitGraphemes.segmenter || (splitGraphemes.segmenter = new Intl.Segmenter("th", { granularity: "grapheme" }));
+            return Array.from(segmenter.segment(String(text)), (item) => item.segment);
+          }
+
+          const clusters = [];
+          for (const char of Array.from(String(text))) {
+            if (combiningMarkPattern.test(char) && clusters.length) {
+              clusters[clusters.length - 1] += char;
+            } else {
+              clusters.push(char);
+            }
+          }
+          return clusters;
+        };
+
+        const wrapLineToEditor = (line, editor, indent) => {
+          if (!line.trim()) {
+            if (line.length > 0 && isLineAtBodyColumn(line, editor)) return [line];
+            return [""];
+          }
+
+          const context = createMeasureContext(editor);
+          const wrapped = [];
+          let current = "";
+          let segmentStart = "";
+
+          const getWritableForSegment = () => {
+            const innerWidth = getEditorInnerWidth(editor);
+            const segmentStartPx = context.measureText(segmentStart).width;
+            return Math.max(40, innerWidth - segmentStartPx - wrapRightGap);
+          };
+
+          splitGraphemes(line).forEach((cluster) => {
+            const candidate = `${current}${cluster}`;
+            const writableWidth = getWritableForSegment();
+
+            if (current && context.measureText(candidate).width > writableWidth) {
+              wrapped.push(current.trimEnd());
+              current = `${indent}${cluster}`;
+              segmentStart = indent;
+              return;
+            }
+
+            current = candidate;
+          });
+
+          wrapped.push(current);
+          return wrapped;
+        };
+
+        const normalizeValue = (value, editor) => {
+          const indent = computeContinuationIndent(editor);
+          return normalizePaliLegacyText(value)
+            .split("\n")
+            .map((line) => normalizeLine(line, indent, editor))
+            .flatMap((line) => wrapLineToEditor(line, editor, indent))
+            .map((line) => enforceMarginBoundaries(line, editor))
+            .join("\n");
+        };
+
+        const insertAtSelection = (editor, text) => {
+          const start = editor.selectionStart;
+          const end = editor.selectionEnd;
+          const normalizedText = normalizePaliLegacyText(text);
+
+          editor.value = `${editor.value.slice(0, start)}${normalizedText}${editor.value.slice(end)}`;
+          editor.setSelectionRange(start + normalizedText.length, start + normalizedText.length);
+        };
+
+        const applyEditorContentWithSpill = (editor, normalizedText, selectionStart, selectionEnd) => {
+          const pageIndex = Number(editor.dataset.pageEditor || 0);
+          const maxLines = getMaxLines(editor);
+          const lines = normalizedText.split("\n");
+
+          if (lines.length <= maxLines) {
+            editor.value = normalizedText;
+            return {
+              editor,
+              focusPageIndex: pageIndex,
+              selectionStart: Math.min(selectionStart, normalizedText.length),
+              selectionEnd: Math.min(selectionEnd, normalizedText.length),
+            };
+          }
+
+          const keepValue = lines.slice(0, maxLines).join("\n");
+          const overflowLines = stripLeadingEmptyLines(lines.slice(maxLines));
+          const overflowValue = overflowLines.join("\n");
+
+          editor.value = keepValue;
+
+          if (!overflowValue) {
+            return {
+              editor,
+              focusPageIndex: pageIndex,
+              selectionStart: Math.min(selectionStart, keepValue.length),
+              selectionEnd: Math.min(selectionEnd, keepValue.length),
+            };
+          }
+
+          const spillBoundary =
+            keepValue.length + (keepValue.length > 0 && overflowValue.length > 0 ? 1 : 0);
+          const cursorInSpill = selectionStart >= spillBoundary;
+          const clampedStart = Math.min(selectionStart, keepValue.length);
+          const clampedEnd = Math.min(selectionEnd, keepValue.length);
+
+          if (pageIndex >= maxPageCount - 1) {
+            if (overflowValue.length) showToast("ถึงจำนวนหน้าสูงสุดแล้ว — ส่วนที่เกินถูกตัด");
+            return {
+              editor,
+              focusPageIndex: pageIndex,
+              selectionStart: clampedStart,
+              selectionEnd: clampedEnd,
+            };
+          }
+
+          if (pageIndex >= examPages.length - 1) {
+            ensurePageCount(examPages.length + 1, false);
+          }
+
+          const nextEditor = editors[pageIndex + 1];
+          if (!nextEditor) {
+            return {
+              editor,
+              focusPageIndex: pageIndex,
+              selectionStart: clampedStart,
+              selectionEnd: clampedEnd,
+            };
+          }
+
+          const mergedNext =
+            overflowValue + (nextEditor.value.trim() ? `\n${nextEditor.value.trim()}` : "");
+          const normalizedNext = normalizeValue(mergedNext, nextEditor);
+
+          if (cursorInSpill) {
+            const nextSelStart = Math.max(0, selectionStart - spillBoundary);
+            const nextSelEnd = Math.max(0, selectionEnd - spillBoundary);
+            return applyEditorContentWithSpill(nextEditor, normalizedNext, nextSelStart, nextSelEnd);
+          }
+
+          applyEditorContentWithSpill(nextEditor, normalizedNext, 0, 0);
+          return {
+            editor,
+            focusPageIndex: pageIndex,
+            selectionStart: clampedStart,
+            selectionEnd: clampedEnd,
+          };
+        };
+
+        editors.forEach(bindEditor);
+
+        const applyLineHeightOnly = (lineHeight) => {
+          const fontSize = Math.round(lineHeight * 0.54);
+
+          document.documentElement.style.setProperty("--line-height", `${lineHeight}px`);
+          document.documentElement.style.setProperty("--editor-font-size", `${fontSize}px`);
+          if (lineHeightValue) lineHeightValue.value = `${lineHeight}px`;
+        };
+
+        const reflowAllPagesAfterLayoutChange = () => {
+          if (!editors.length) return;
+
+          computeContinuationIndent.reset();
+          const combined = editors
+            .map((editor) => editor.value.trimEnd())
+            .filter(Boolean)
+            .join("\n");
+
+          editors.forEach((editor) => {
+            editor.value = "";
+          });
+
+          if (!combined) {
+            balanceCurrentPageLines();
+            return;
+          }
+
+          isApplyingSpill = true;
+          try {
+            const normalized = normalizeValue(combined, editors[0]);
+            applyEditorContentWithSpill(editors[0], normalized, 0, 0);
+          } finally {
+            isApplyingSpill = false;
+          }
+
+          balanceCurrentPageLines();
+        };
+
+        const applyLineHeight = (lineHeight) => {
+          applyLineHeightOnly(lineHeight);
+          reflowAllPagesAfterLayoutChange();
+        };
+
+        const getStudentDisplayName = () => [
+          studentProfile?.prefix,
+          studentProfile?.firstName,
+          studentProfile?.lastName,
+          studentProfile?.monasticName ? `(${studentProfile.monasticName})` : "",
+        ].filter(Boolean).join(" ") || "ไม่ระบุชื่อ";
+
+        const getExamDateLabel = () => {
+          const dayPicker = document.querySelector('[data-exam-picker="day"]');
+          const monthPicker = document.querySelector('[data-exam-picker="month"]');
+          const yearPicker = document.querySelector('[data-exam-picker="year"]');
+          const day = dayPicker?.dataset.value || "";
+          const month = monthPicker?.dataset.value || "";
+          const year = yearPicker?.dataset.value || "";
+          if (day && month && year) {
+            return `${toThaiNumber(day)} ${thaiMonthNames[Number(month) - 1]} ${toThaiNumber(year)}`;
+          }
+          return new Date().toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "numeric" });
+        };
+
+        const getBookTitle = (draft) => {
+          const grade = gradePicker?.dataset.value || studentProfile?.grade || "4";
+          const subjectLabel = getSubjectLabelByValue(subjectPicker?.dataset.value || "pali-to-thai");
+          return `สมุดคำตอบ ป.ธ. ${toThaiNumber(grade)} · ${subjectLabel} · ${getExamDateLabel()}`;
+        };
+
+        const buildDraftSnapshot = () => ({
+          schema: "paligo.exam.answerBookDraft.v1",
+          ownerId: localOwnerId,
+          bookId: currentBookId,
+          lineHeight: lineHeightControls[0]?.value || "30",
+          page: currentPageIndex,
+          profile: studentProfile ? { ...studentProfile } : null,
+          deliveryMethod: studentProfile?.deliveryMethod || "line",
+          pickers: Array.from(examPickers).map((picker) => ({
+            type: picker.dataset.examPicker,
+            value: picker.dataset.value || "",
+          })),
+          pages: editors.map((editor) => normalizePaliLegacyText(editor.value)),
+          annotations: annotations.slice(),
+          savedAt: new Date().toISOString(),
+        });
+
+        const upsertAnswerBook = (draft) => {
+          const books = getStoredList(booksStorageKey);
+          const existing = books.find((book) => book.id === currentBookId);
+          const nextRevision = Number(existing?.revision || 0) + 1;
+          const subjectValue = subjectPicker?.dataset.value || existing?.subject || "pali-to-thai";
+          const subjectLabel = getSubjectLabelByValue(subjectValue);
+          const nextBook = {
+            id: currentBookId,
+            schema: "paligo.exam.answerBook.v1",
+            ownerId: localOwnerId,
+            title: getBookTitle(draft),
+            studentName: getStudentDisplayName(),
+            grade: gradePicker?.dataset.value || studentProfile?.grade || "4",
+            subject: subjectValue,
+            subjectLabel,
+            deliveryMethod: studentProfile?.deliveryMethod || "line",
+            status: existing?.status || BOOK_STATUS.draft,
+            revision: nextRevision,
+            createdAt: existing?.createdAt || draft.savedAt,
+            updatedAt: draft.savedAt,
+            draft,
+          };
+          setStoredList(booksStorageKey, upsertBookInList(books, nextBook));
+          writeRaw(activeBookStorageKey, currentBookId);
+          return nextBook;
+        };
+
+        const saveDraft = ({ silent = false } = {}) => {
+          const book = getCurrentBook() || { status: BOOK_STATUS.draft };
+          if (!getBookPermissions(book, workspaceRole).canEditAnswer) {
+            if (!silent) setSaveStatus("คำตอบถูกล็อก — บันทึกไม่ได้");
+            return;
+          }
+
+          const draft = buildDraftSnapshot();
+
+          localStorage.setItem(storageKey, JSON.stringify(draft));
+          upsertAnswerBook(draft);
+          if (!silent) {
+            setSaveStatus("บันทึกแล้ว");
+            updateBookBar();
+          }
+        };
+
+        const getActiveBookDraft = () => {
+          if (wantsNewBook) return null;
+
+          const books = getStoredList(booksStorageKey);
+          const activeBook = books.find((book) => book.id === currentBookId);
+          if (activeBook?.draft) return activeBook.draft;
+
+          try {
+            return JSON.parse(localStorage.getItem(storageKey) || "null");
+          } catch {
+            return null;
+          }
+        };
+
+        const downloadJson = (fileName, payload) => {
+          const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = fileName;
+          document.body.append(link);
+          link.click();
+          link.remove();
+          URL.revokeObjectURL(url);
+        };
+
+        const createSubmissionPackage = async () => {
+          const submittedAt = new Date().toISOString();
+          const draft = buildDraftSnapshot();
+          const book = upsertAnswerBook(draft);
+          const pages = draft.pages.map((text, index) => ({ index, text }));
+          const answerHash = await computeAnswerHash(pages);
+
+          return {
+            schema: "paligo.exam.submission.v1",
+            id: createId("submission"),
+            ownerId: localOwnerId,
+            bookId: currentBookId,
+            bookRevision: book.revision,
+            bookTitle: book.title,
+            submittedAt,
+            answerHash,
+            studentName: getStudentDisplayName(),
+            studentRole: "student",
+            teacherRole: studentProfile?.teacherRole || "teacher-reviewer",
+            teacherName: studentProfile?.teacherName || "",
+            deliveryMethod: studentProfile?.deliveryMethod || "line",
+            profile: studentProfile ? { ...studentProfile } : null,
+            grade: gradePicker?.dataset.value || studentProfile?.grade || "4",
+            pickers: draft.pickers,
+            pages,
+            annotations: annotations.slice(),
+          };
+        };
+
+        const submitForReview = async () => {
+          const book = getCurrentBook();
+          const status = normalizeBookStatus(book?.status);
+          if (status === BOOK_STATUS.underReview) {
+            setSaveStatus("อยู่ระหว่างตรวจ — คำตอบถูกล็อก");
+            return;
+          }
+          if (status === BOOK_STATUS.reviewed) {
+            setSaveStatus("ได้รับผลตรวจแล้ว — กดทำรอบใหม่หากต้องการส่ง revision ถัดไป");
+            return;
+          }
+
+          saveDraft({ silent: true });
+
+          let result = await PaligoExamSubmit.submitBookToInbox(currentBookId);
+          if (!result.ok && result.reason === "resubmit_confirm") {
+            if (
+              !window.confirm(`${result.message} — ต้องการดำเนินการต่อหรือไม่?`)
+            ) {
+              return;
+            }
+            result = await PaligoExamSubmit.submitBookToInbox(currentBookId, { skipResubmitConfirm: true });
+          }
+
+          if (!result.ok) {
+            if (result.reason === "no_profile") {
+              document.body.classList.add("needs-profile");
+            }
+            setSaveStatus(result.message || "ส่งตรวจไม่ได้");
+            return;
+          }
+
+          applyPermissions();
+          const submission = result.submission || getLatestSubmissionForBook(currentBookId);
+          if (submission) await showSubmitModal(submission, result);
+          setSaveStatus(result.message || "ส่งตรวจแล้ว");
+        };
+
+        const saveProfileFromForm = () => {
+          if (!validateProfileForm()) return false;
+
+          studentProfile = {
+            ...readProfileFormValues(),
+            updatedAt: new Date().toISOString(),
+          };
+
+          try {
+            saveStudentProfile(studentProfile);
+            persistProfileDraft();
+          } catch (error) {
+            showProfileError("บันทึกโปรไฟล์ไม่ได้ — ตรวจสอบการอนุญาต localStorage ของเบราว์เซอร์");
+            return false;
+          }
+
+          dismissProfileWizard();
+
+          try {
+            if (gradePicker) {
+              updatePickerCurrentValue(gradePicker, studentProfile.grade);
+              selectPickerValue(gradePicker, studentProfile.grade);
+              rebuildSubjectPickerOptions();
+            }
+            saveDraft({ silent: true });
+            updateBookBar();
+          } catch {
+            setSaveStatus("บันทึกโปรไฟล์แล้ว — แต่บันทึกสมุดไม่สำเร็จ");
+          }
+
+          return true;
+        };
+
+        profileForm?.addEventListener("submit", (event) => {
+          event.preventDefault();
+          saveProfileFromForm();
+        });
+
+        document.querySelector(".profile-save-button")?.addEventListener("click", (event) => {
+          if (event.defaultPrevented) return;
+          event.preventDefault();
+          saveProfileFromForm();
+        });
+
+        if (!studentProfile) {
+          document.body.classList.add("needs-profile");
+        }
+
+        const scheduleAutoSave = () => {
+          clearTimeout(autoSaveTimer);
+          autoSaveTimer = setTimeout(() => {
+            saveDraft({ silent: true });
+          }, 650);
+        };
+
+        const clearBottomLine = () => {
+          const editor = editors[currentPageIndex];
+          if (!editor) return;
+
+          const lines = editor.value.split("\n");
+          let targetIndex = lines.length - 1;
+
+          while (targetIndex >= 0 && !lines[targetIndex].trim()) targetIndex -= 1;
+          if (targetIndex < 0) return;
+
+          lines.splice(targetIndex, 1);
+          editor.value = lines.join("\n");
+          editor.focus();
+          editor.setSelectionRange(editor.value.length, editor.value.length);
+          scheduleAutoSave();
+        };
+
+        const restoreDraft = () => {
+          const draft = getActiveBookDraft();
+          if (!draft) return false;
+
+          try {
+            if (draft.bookId) {
+              currentBookId = draft.bookId;
+              writeRaw(activeBookStorageKey, currentBookId);
+            }
+            const lineHeight = Number(draft.lineHeight || 30);
+
+            lineHeightControls.forEach((control) => {
+              control.value = String(lineHeight);
+            });
+            applyLineHeightOnly(lineHeight);
+
+            ensurePageCount(draft.pages?.length || minPageCount);
+
+            draft.pages?.forEach((value, index) => {
+              if (editors[index]) editors[index].value = normalizePaliLegacyText(value);
+            });
+
+            draft.pickers?.forEach(({ type, value }) => {
+              if (!value) return;
+              const picker = Array.from(examPickers).find((item) => item.dataset.examPicker === type);
+              if (picker?.dataset.examPicker === "subject") {
+                rebuildSubjectPickerOptions(value);
+                return;
+              }
+              if (picker) selectPickerValue(picker, value);
+            });
+
+            const book = getCurrentBook();
+            if (book?.subject && !draft.pickers?.some((item) => item.type === "subject")) {
+              rebuildSubjectPickerOptions(book.subject);
+            }
+
+            syncPrefilledAnswerLine();
+            reflowAllPagesAfterLayoutChange();
+
+            annotations = Array.isArray(draft.annotations) ? draft.annotations : [];
+            renderAnnotations();
+
+            showPage(Number(draft.page || 0));
+            setSaveStatus("กู้คืนร่างแล้ว");
+            return true;
+          } catch {
+            setSaveStatus("กู้คืนร่างไม่ได้");
+            return false;
+          }
+        };
+
+        annotationToggle?.addEventListener("click", () => {
+          isAnnotating = !isAnnotating;
+          answerCard?.classList.toggle("is-annotating", isAnnotating);
+          annotationToggle.classList.toggle("is-active", isAnnotating);
+        });
+
+        const viewAllButton = document.querySelector("[data-view-all]");
+        viewAllButton?.addEventListener("click", () => {
+          const isNowActive = document.body.classList.toggle("is-view-all");
+          viewAllButton.setAttribute("aria-pressed", String(isNowActive));
+          viewAllButton.setAttribute(
+            "title",
+            isNowActive
+              ? "ปิดดูทั้งหมด — กลับโหมดแก้ไขปกติ"
+              : "เปิดดูทั้งหมด — แสดงเนื้อหาครบทุกบรรทัด เตรียมก่อนปริ้นท์"
+          );
+        });
+
+          examPages.forEach((page, pageIndex) => {
+          const canvas = page.querySelector("[data-annotation-canvas]");
+          if (canvas) bindAnnotationCanvas(canvas, pageIndex);
+          const reviewCanvas = page.querySelector("[data-review-canvas]");
+          bindReviewCanvas({
+            canvas: reviewCanvas,
+            pageIndex,
+            linesFirstPage,
+            linesPerPage,
+            canStamp: () => reviewMode && Boolean(activeStampKind),
+            getActiveStampKind: () => activeStampKind,
+            onScoreStamp: ({ page, line, value }) => {
+              scoreStamps = upsertScoreStamp(scoreStamps, { page, line, value });
+              renderReviewOverlays();
+            },
+          });
+          const editor = page.querySelector(".ruled-editor");
+          bindHighlightSelection({
+            editor,
+            pageIndex,
+            isActive: () => reviewMode && isHighlightMode,
+            onSelection: (selection) => {
+              pendingHighlightSelection = selection;
+              showHighlightPickerModal(selection);
+            },
+          });
+        });
+
+        editors.forEach(bindEditor);
+
+        pagePrevButton?.addEventListener("click", () => showPage(currentPageIndex - 1));
+        pageNextButton?.addEventListener("click", () => showPage(currentPageIndex + 1));
+        saveButton?.addEventListener("click", saveDraft);
+
+        const initReviewMode = () => {
+          if (!reviewMode || !reviewSubmissionId) return false;
+          activeSubmission =
+            getStoredList(submissionsStorageKey).find((item) => item.id === reviewSubmissionId) || null;
+          if (!activeSubmission) {
+            setSaveStatus("ไม่พบ submission ในเครื่อง — นำเข้าไฟล์ที่ console ก่อน");
+            return false;
+          }
+
+          currentBookId = activeSubmission.bookId;
+          writeRaw(activeBookStorageKey, currentBookId);
+          const pageTexts = (activeSubmission.pages || []).map((page) => page.text || "");
+          ensurePageCount(Math.max(pageTexts.length, minPageCount));
+          pageTexts.forEach((text, index) => {
+            if (editors[index]) editors[index].value = text;
+          });
+          annotations = Array.isArray(activeSubmission.annotations) ? activeSubmission.annotations.slice() : [];
+          renderAnnotations();
+
+          const saved = getSavedReviewForSubmission(activeSubmission.id);
+          if (saved) {
+            scoreStamps = saved.scoreStamps ? saved.scoreStamps.slice() : [];
+            errorStamps = saved.errorStamps ? saved.errorStamps.slice() : [];
+            textHighlights = saved.textHighlights ? saved.textHighlights.slice() : [];
+            reviewSignature = saved.signature || null;
+          }
+          savedReviewerSignature = getReviewerSignature();
+          return true;
+        };
+
+        const loadReviewLayerForStudent = () => {
+          if (reviewMode) return;
+          const review = getReviewForBook(currentBookId) || getCurrentBook()?.review;
+          if (!review) return;
+          scoreStamps = review.scoreStamps || [];
+          errorStamps = review.errorStamps || [];
+          textHighlights = review.textHighlights || [];
+          reviewSignature = review.signature || null;
+        };
+
+        const buildReviewFromPaper = () => {
+          if (!activeSubmission) return null;
+          let reviewerProfile = null;
+          try {
+            reviewerProfile = JSON.parse(readRaw(KEYS.reviewerProfile) || "null");
+          } catch {
+            reviewerProfile = null;
+          }
+          const score = computeScore(scoreStamps);
+          return {
+            schema: "paligo.exam.review.v1",
+            id: `review-${activeSubmission.id}`,
+            submissionId: activeSubmission.id,
+            ownerId: activeSubmission.ownerId || "",
+            bookId: activeSubmission.bookId || "",
+            bookRevision: activeSubmission.bookRevision || 0,
+            bookTitle: activeSubmission.bookTitle || "",
+            studentName: activeSubmission.studentName,
+            grade: activeSubmission.grade,
+            profile: activeSubmission.profile,
+            teacherName: reviewerProfile?.name || activeSubmission.teacherName || "",
+            reviewerRole: reviewerProfile?.role || "teacher-reviewer",
+            scoreStamps: scoreStamps.slice(),
+            errorStamps: errorStamps.slice(),
+            textHighlights: textHighlights.slice(),
+            signature: reviewSignature,
+            score,
+            reviewedAt: new Date().toISOString(),
+          };
+        };
+
+        const saveReviewFromPaper = () => {
+          const result = buildReviewFromPaper();
+          if (!result) return null;
+          saveReviewResult(result);
+          setSaveStatus("บันทึกการตรวจแล้ว");
+          return result;
+        };
+
+        const setActiveStampKind = (kind) => {
+          activeStampKind = kind;
+          isReviewStamping = Boolean(kind);
+          if (kind) {
+            isHighlightMode = false;
+          }
+          applyPermissions();
+        };
+
+        const setHighlightMode = (enabled) => {
+          isHighlightMode = enabled;
+          if (enabled) {
+            activeStampKind = null;
+            isReviewStamping = false;
+          }
+          applyPermissions();
+          setSaveStatus(
+            enabled ? "โหมดไฮไลท์ — ลากเลือกคำศัพท์บนกระดาษ" : "ปิดโหมดไฮไลท์"
+          );
+        };
+
+        const closeHighlightPickerModal = () => {
+          if (!highlightPickerModal) return;
+          highlightPickerModal.hidden = true;
+          pendingHighlightSelection = null;
+        };
+
+        const showHighlightPickerModal = (selection) => {
+          if (!highlightPickerModal || !highlightPickerQuote) return;
+          highlightPickerQuote.textContent = `「${selection.text}」`;
+          highlightPickerModal.hidden = false;
+        };
+
+        const closeHighlightViewModal = () => {
+          if (!highlightViewModal) return;
+          highlightViewModal.hidden = true;
+          highlightViewModal.dataset.highlightId = "";
+        };
+
+        const showHighlightViewModal = (item, allowRemove = false) => {
+          if (!highlightViewModal || !highlightViewQuote || !highlightViewLabel) return;
+          highlightViewLabel.textContent = REVIEW_LABELS[item.kind] || item.kind;
+          highlightViewQuote.textContent = `「${item.text || ""}」`;
+          if (highlightViewMeta) {
+            highlightViewMeta.textContent = `หน้า ${toThaiNumber(item.page)} · บรรทัด ${toThaiNumber(item.line)}`;
+          }
+          highlightViewModal.dataset.highlightId = item.id;
+          if (removeHighlightButton) {
+            removeHighlightButton.hidden = !allowRemove;
+          }
+          highlightViewModal.hidden = false;
+        };
+
+        const renderSignaturePreview = () => {
+          if (!signaturePreview) return;
+          const source = savedReviewerSignature;
+          if (!source?.dataUrl) {
+            signaturePreview.classList.add("is-empty");
+            signaturePreview.replaceChildren();
+            signaturePreview.textContent = "ยังไม่มีลายเซ็นที่บันทึก";
+            return;
+          }
+          signaturePreview.classList.remove("is-empty");
+          signaturePreview.replaceChildren();
+          const img = document.createElement("img");
+          img.src = source.dataUrl;
+          img.alt = source.label || "ลายเซ็นผู้ตรวจ";
+          signaturePreview.append(img);
+        };
+
+        const openSignatureModal = () => {
+          savedReviewerSignature = getReviewerSignature();
+          renderSignaturePreview();
+          if (signatureModal) signatureModal.hidden = false;
+        };
+
+        const closeSignatureModal = () => {
+          if (signatureModal) signatureModal.hidden = true;
+        };
+
+        const applySavedSignatureToPage = () => {
+          const source = savedReviewerSignature;
+          if (!source?.dataUrl) {
+            setSaveStatus("อัปโหลดลายเซ็นใน modal ก่อน");
+            return;
+          }
+          reviewSignature = {
+            dataUrl: source.dataUrl,
+            page: indexToDisplayPage(currentPageIndex),
+            line: currentPageIndex === 0 ? linesFirstPage : linesPerPage,
+            widthPx: source.widthPx || 120,
+            label: source.label || "ลายเซ็นผู้ตรวจ",
+          };
+          renderReviewOverlays();
+          setSaveStatus("ลงลายเซ็นบนหน้าปัจจุบันแล้ว");
+          closeSignatureModal();
+        };
+
+        document.querySelector("[data-review-stamp-mode]")?.addEventListener("click", () => {
+          const nextKind = isReviewStamping ? null : "score-3";
+          setActiveStampKind(nextKind);
+          setSaveStatus(nextKind ? "โหมด stamp คะแนน — แตะบรรทัดบนกระดาษ" : "ปิดโหมด stamp");
+        });
+
+        document.querySelectorAll("[data-score-stamp]").forEach((button) => {
+          button.addEventListener("click", () => {
+            setActiveStampKind(`score-${button.dataset.scoreStamp}`);
+          });
+        });
+
+        highlightModeButton?.addEventListener("click", () => {
+          setHighlightMode(!isHighlightMode);
+        });
+
+        document.querySelector("[data-clear-all-stamps]")?.addEventListener("click", () => {
+          if (
+            !window.confirm(
+              "ล้าง stamp คะแนนและไฮไลท์คำศัพท์ทั้งหมดในสมุดนี้หรือไม่?"
+            )
+          ) {
+            return;
+          }
+          scoreStamps = [];
+          errorStamps = [];
+          textHighlights = [];
+          renderReviewOverlays();
+          setSaveStatus("ล้าง stamp ทั้งหมดแล้ว");
+        });
+
+        document.querySelectorAll("[data-highlight-kind]").forEach((button) => {
+          button.addEventListener("click", () => {
+            if (!pendingHighlightSelection) return;
+            textHighlights = upsertTextHighlight(textHighlights, {
+              ...pendingHighlightSelection,
+              id: createHighlightId(),
+              kind: button.dataset.highlightKind,
+            });
+            closeHighlightPickerModal();
+            renderReviewOverlays();
+            setSaveStatus(`ติดป้าย「${REVIEW_LABELS[button.dataset.highlightKind] || button.dataset.highlightKind}」แล้ว`);
+          });
+        });
+
+        document.querySelector("[data-close-highlight-picker]")?.addEventListener("click", closeHighlightPickerModal);
+        highlightPickerModal?.addEventListener("click", (event) => {
+          if (event.target === highlightPickerModal) closeHighlightPickerModal();
+        });
+
+        document.querySelector("[data-close-highlight-view]")?.addEventListener("click", closeHighlightViewModal);
+        highlightViewModal?.addEventListener("click", (event) => {
+          if (event.target === highlightViewModal) closeHighlightViewModal();
+        });
+
+        removeHighlightButton?.addEventListener("click", () => {
+          const highlightId = highlightViewModal?.dataset.highlightId;
+          if (!highlightId) return;
+          textHighlights = removeTextHighlight(textHighlights, highlightId);
+          closeHighlightViewModal();
+          renderReviewOverlays();
+          setSaveStatus("ลบไฮไลท์แล้ว");
+        });
+
+        document.querySelector("[data-open-signature-modal]")?.addEventListener("click", openSignatureModal);
+        document.querySelector("[data-close-signature-modal]")?.addEventListener("click", closeSignatureModal);
+        document.querySelector("[data-apply-signature]")?.addEventListener("click", applySavedSignatureToPage);
+        signatureModal?.addEventListener("click", (event) => {
+          if (event.target === signatureModal) closeSignatureModal();
+        });
+
+        document.querySelector("[data-clear-saved-signature]")?.addEventListener("click", () => {
+          savedReviewerSignature = saveReviewerSignature(null);
+          renderSignaturePreview();
+          setSaveStatus("ลบลายเซ็นที่บันทึกแล้ว");
+        });
+
+        signatureFileInput?.addEventListener("change", async () => {
+          const file = signatureFileInput.files?.[0];
+          if (!file) return;
+          try {
+            const dataUrl = await new Promise((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = () => resolve(String(reader.result || ""));
+              reader.onerror = reject;
+              reader.readAsDataURL(file);
+            });
+            savedReviewerSignature = saveReviewerSignature({
+              dataUrl,
+              widthPx: 120,
+              label: "ลายเซ็นผู้ตรวจ",
+            });
+            renderSignaturePreview();
+            setSaveStatus("บันทึกลายเซ็นแล้ว — กด「ใช้ลายเซ็นนี้ในหน้านี้」");
+          } catch {
+            setSaveStatus("อัปโหลดลายเซ็นไม่สำเร็จ");
+          } finally {
+            signatureFileInput.value = "";
+          }
+        });
+
+        document.querySelector("[data-save-review-paper]")?.addEventListener("click", saveReviewFromPaper);
+        document.querySelector("[data-return-review-paper]")?.addEventListener("click", async () => {
+          const result = saveReviewFromPaper();
+          if (!result) return;
+          downloadJson(`${result.id}.paligo-review.json`, result);
+          upsertBookRecord(result.bookId, {
+            status: BOOK_STATUS.reviewed,
+            review: result,
+            reviewReceivedAt: new Date().toISOString(),
+          });
+
+          const finishReturn = (message) => {
+            markWorkflowReturned(result.submissionId, { bookId: result.bookId || "" });
+            setSaveStatus(message);
+          };
+
+          if (window.PaligoInboxClient?.isLoggedIn?.() && PaligoInboxClient.getInboxRole?.() === "reviewer") {
+            try {
+              const pushResult = await PaligoExamSubmit.pushReviewToStudent(result.bookId);
+              if (pushResult.ok) {
+                finishReturn(pushResult.message || "ส่งผลตรวจให้นักเรียนแล้ว");
+                return;
+              }
+              setSaveStatus(`${pushResult.message || "ส่งไม่สำเร็จ"} — ดาวน์โหลดไฟล์แทน`);
+            } catch (error) {
+              setSaveStatus(`${error.message || "ส่งไม่สำเร็จ"} — ดาวน์โหลดไฟล์แทน`);
+            }
+          }
+
+          try {
+            sharedDownloadJson(
+              `${result.bookId}.to-student.paligo-transfer.json`,
+              buildBookTransfer(result.bookId, "to-student")
+            );
+          } catch {
+            /* transfer optional if book missing locally */
+          }
+          finishReturn("ส่งคืนนักเรียนแล้ว — นำเข้าที่ผลตรวจของฉัน");
+        });
+
+        startNewRevisionButton?.addEventListener("click", () => {
+          if (!window.confirm("เริ่ม revision ใหม่ — แก้ไขคำตอบได้อีกครั้ง ผลตรวจเดิมยังดูได้")) return;
+          upsertBookRecord(currentBookId, { status: BOOK_STATUS.draft });
+          applyPermissions();
+          setSaveStatus("เริ่ม revision ใหม่แล้ว");
+        });
+
+        cancelSubmitButton?.addEventListener("click", handleCancelSubmit);
+
+        exportTransferButton?.addEventListener("click", () => {
+          if (!lastSubmissionPackage) return;
+          try {
+            sharedDownloadJson(
+              `${currentBookId}.to-reviewer.paligo-transfer.json`,
+              buildBookTransfer(currentBookId, "to-reviewer")
+            );
+          } catch (error) {
+            setSaveStatus(error.message || "ส่งออกแพ็กเกจไม่ได้");
+          }
+        });
+
+        downloadSubmissionButton?.addEventListener("click", () => {
+          if (!lastSubmissionPackage) return;
+          sharedDownloadJson(`${lastSubmissionPackage.id}.paligo-submission.json`, lastSubmissionPackage);
+        });
+
+        document.querySelector("[data-close-submit-modal]")?.addEventListener("click", closeSubmitModal);
+        submitModal?.addEventListener("click", (event) => {
+          if (event.target === submitModal) closeSubmitModal();
+        });
+
+        submitReviewButton?.addEventListener("click", () => {
+          submitForReview();
+        });
+        clearBottomLineButton?.addEventListener("click", clearBottomLine);
+
+        document.addEventListener("keydown", (event) => {
+          const usesModifier = event.metaKey || event.ctrlKey;
+
+          if (usesModifier && event.key.toLowerCase() === "s") {
+            event.preventDefault();
+            saveDraft();
+          }
+
+          if (usesModifier && event.key === "ArrowLeft") {
+            event.preventDefault();
+            showPage(currentPageIndex - 1);
+          }
+
+          if (usesModifier && event.key === "ArrowRight") {
+            event.preventDefault();
+            showPage(currentPageIndex + 1);
+          }
+        });
+
+        lineHeightControls.forEach((control) => {
+          const responsiveDefault = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--line-height").trim()) || 30;
+          control.value = String(responsiveDefault);
+          control.addEventListener("input", () => {
+            applyLineHeight(Number(control.value));
+            scheduleAutoSave();
+          });
+          applyLineHeight(Number(control.value));
+        });
+
+        if (paliReferenceFullLink) {
+          paliReferenceFullLink.href = paliReferenceUrl;
+        }
+
+        openPaliReferenceButton?.addEventListener("click", () => {
+          if (paliReferencePip?.hidden) {
+            openPaliReferencePip();
+          } else {
+            closePaliReferencePip();
+          }
+        });
+
+        closePaliReferenceButton?.addEventListener("click", closePaliReferencePip);
+        minimizePaliReferenceButton?.addEventListener("click", togglePaliReferenceMinimized);
+
+        paliReferenceDragHandle?.addEventListener("pointerdown", (event) => {
+          if (event.target?.closest?.("button, a")) return;
+          if (!paliReferencePip) return;
+
+          const rect = paliReferencePip.getBoundingClientRect();
+          activePaliReferenceDrag = {
+            pointerId: event.pointerId,
+            offsetX: event.clientX - rect.left,
+            offsetY: event.clientY - rect.top,
+          };
+          paliReferenceDragHandle.setPointerCapture?.(event.pointerId);
+          event.preventDefault();
+        });
+
+        paliReferenceDragHandle?.addEventListener("pointermove", (event) => {
+          if (!activePaliReferenceDrag || activePaliReferenceDrag.pointerId !== event.pointerId) return;
+          movePaliReferencePip(event.clientX, event.clientY);
+        });
+
+        const endPaliReferenceDrag = (event) => {
+          if (!activePaliReferenceDrag || activePaliReferenceDrag.pointerId !== event.pointerId) return;
+          activePaliReferenceDrag = null;
+          savePaliReferenceState();
+        };
+
+        paliReferenceDragHandle?.addEventListener("pointerup", endPaliReferenceDrag);
+        paliReferenceDragHandle?.addEventListener("pointercancel", endPaliReferenceDrag);
+        window.addEventListener("resize", () => {
+          if (!paliReferencePip || paliReferencePip.hidden) return;
+          applyPaliReferenceState();
+        });
+
+        showPage(0);
+        if (initReviewMode()) {
+          /* loaded from submission */
+        } else {
+          restoreDraft();
+          ensureInitialQuestionNumber({ autosave: true });
+          loadReviewLayerForStudent();
+        }
+        syncPrefilledAnswerLine();
+        applyPermissions();
+        focusWritingEditorIfReady();
+      })();
+      PaligoSidebar.autoInit();
+    </script>
+  </body>
+</html>

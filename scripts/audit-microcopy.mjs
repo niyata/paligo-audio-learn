@@ -11,7 +11,7 @@ const ROOT = new URL("..", import.meta.url).pathname;
 const SCOPE_FILES = [
   "index.html",
   "exam-books.html",
-  "ruled-lines-card-only-template.html",
+  "workbook.html",
   "exam-profile.html",
   "exam-account.html",
   "exam-inbox.html",

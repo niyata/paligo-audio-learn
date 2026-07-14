@@ -1,0 +1,319 @@
+{
+  "schema": "paligo.audit.inboxLoopApi.v1",
+  "apiBase": "http://localhost:8788/v1",
+  "startedAt": "2026-07-14T04:52:08.354Z",
+  "status": "passed",
+  "steps": [
+    {
+      "name": "health",
+      "at": "2026-07-14T04:52:08.360Z"
+    },
+    {
+      "name": "register reviewer",
+      "at": "2026-07-14T04:52:08.463Z",
+      "email": "reviewer-loop-1784004728354-74z2rs@paligo.test"
+    },
+    {
+      "name": "register student",
+      "at": "2026-07-14T04:52:08.544Z",
+      "email": "student-loop-1784004728354-74z2rs@paligo.test"
+    },
+    {
+      "name": "reviewer creates invite",
+      "at": "2026-07-14T04:52:08.569Z"
+    },
+    {
+      "name": "student joins pairing",
+      "at": "2026-07-14T04:52:08.585Z",
+      "inviteCode": "CD9Z9FUF"
+    },
+    {
+      "name": "student pushes book to reviewer",
+      "at": "2026-07-14T04:52:08.597Z",
+      "bookId": "book-loop-1784004728354-74z2rs"
+    },
+    {
+      "name": "reviewer lists pending inbox",
+      "at": "2026-07-14T04:52:08.615Z"
+    },
+    {
+      "name": "student cannot claim reviewer inbox item",
+      "at": "2026-07-14T04:52:08.624Z",
+      "inboxItemId": "f62132b3-32ee-4450-a909-f91d94fea1aa"
+    },
+    {
+      "name": "reviewer claims student submission",
+      "at": "2026-07-14T04:52:08.642Z",
+      "inboxItemId": "f62132b3-32ee-4450-a909-f91d94fea1aa"
+    },
+    {
+      "name": "reviewer pushes result to student",
+      "at": "2026-07-14T04:52:08.697Z",
+      "bookId": "book-loop-1784004728354-74z2rs"
+    },
+    {
+      "name": "student lists pending result",
+      "at": "2026-07-14T04:52:08.709Z"
+    },
+    {
+      "name": "reviewer cannot claim student inbox item",
+      "at": "2026-07-14T04:52:08.721Z",
+      "inboxItemId": "e9f236e7-07d0-49e2-9521-adade9511fb3"
+    },
+    {
+      "name": "student claims reviewed result",
+      "at": "2026-07-14T04:52:08.730Z",
+      "inboxItemId": "e9f236e7-07d0-49e2-9521-adade9511fb3"
+    },
+    {
+      "name": "student inbox item disappears after claim",
+      "at": "2026-07-14T04:52:08.736Z"
+    }
+  ],
+  "assertions": [
+    {
+      "message": "Inbox API health must be ok",
+      "passed": true,
+      "detail": {
+        "ok": true,
+        "service": "paligo-inbox-api",
+        "version": "v1",
+        "schema": "paligo.inbox.api.v1",
+        "env": "production",
+        "phase": 4
+      }
+    },
+    {
+      "message": "Reviewer registration returns session token",
+      "passed": true,
+      "detail": {}
+    },
+    {
+      "message": "Student registration returns session token",
+      "passed": true,
+      "detail": {}
+    },
+    {
+      "message": "Reviewer invite code is available",
+      "passed": true,
+      "detail": {
+        "inviteCode": "CD9Z9FUF",
+        "createdAt": "2026-07-14 04:52:08",
+        "reused": false
+      }
+    },
+    {
+      "message": "Student pairing returns reviewer user id",
+      "passed": true,
+      "detail": {
+        "pairingId": "67dc3b20-61b5-4899-9d5c-65a099570cbd",
+        "reviewerUserId": "055863b1-dc42-4d82-a9f2-cecbc3fa85b2",
+        "reviewerDisplayName": "ครู Audit",
+        "inviteCode": "CD9Z9FUF",
+        "reused": false
+      }
+    },
+    {
+      "message": "Push to reviewer returns inbox item id",
+      "passed": true,
+      "detail": {
+        "packageId": "5d62700d-b8db-4f1b-92ff-11cb8dfa74ed",
+        "inboxItemId": "f62132b3-32ee-4450-a909-f91d94fea1aa",
+        "status": "pending",
+        "intendedRecipientLabel": "ครู ครู Audit"
+      }
+    },
+    {
+      "message": "Reviewer sees student submission in inbox",
+      "passed": true,
+      "detail": {
+        "items": [
+          {
+            "id": "f62132b3-32ee-4450-a909-f91d94fea1aa",
+            "status": "pending",
+            "intendedRecipientLabel": "ครู ครู Audit",
+            "bookTitle": "สมุด audit inbox loop",
+            "subject": "แปลมคธเป็นไทย",
+            "grade": "ป.ธ. ๔",
+            "direction": "to-reviewer",
+            "bookId": "book-loop-1784004728354-74z2rs",
+            "bookRevision": 1,
+            "fromUserId": "58724cdc-9d56-475e-972d-7d2131ab560b",
+            "fromDisplayName": "สามเณร Audit",
+            "fromAvatarUrl": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI5NiIgaGVpZ2h0PSI5NiIgdmlld0JveD0iMCAwIDk2IDk2Ij48cmVjdCB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHJ4PSIyOCIgZmlsbD0iI2Y1YjcwMCIvPjx0ZXh0IHg9IjQ4IiB5PSI1OCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjM0IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjZmZmIj7guKo8L3RleHQ+PC9zdmc+",
+            "createdAt": "2026-07-14 04:52:08",
+            "expiresAt": "2026-08-13T04:52:08.608Z"
+          }
+        ]
+      }
+    },
+    {
+      "message": "Reviewer inbox item direction is to-reviewer",
+      "passed": true,
+      "detail": {
+        "id": "f62132b3-32ee-4450-a909-f91d94fea1aa",
+        "status": "pending",
+        "intendedRecipientLabel": "ครู ครู Audit",
+        "bookTitle": "สมุด audit inbox loop",
+        "subject": "แปลมคธเป็นไทย",
+        "grade": "ป.ธ. ๔",
+        "direction": "to-reviewer",
+        "bookId": "book-loop-1784004728354-74z2rs",
+        "bookRevision": 1,
+        "fromUserId": "58724cdc-9d56-475e-972d-7d2131ab560b",
+        "fromDisplayName": "สามเณร Audit",
+        "fromAvatarUrl": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI5NiIgaGVpZ2h0PSI5NiIgdmlld0JveD0iMCAwIDk2IDk2Ij48cmVjdCB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHJ4PSIyOCIgZmlsbD0iI2Y1YjcwMCIvPjx0ZXh0IHg9IjQ4IiB5PSI1OCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjM0IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjZmZmIj7guKo8L3RleHQ+PC9zdmc+",
+        "createdAt": "2026-07-14 04:52:08",
+        "expiresAt": "2026-08-13T04:52:08.608Z"
+      }
+    },
+    {
+      "message": "Reviewer inbox item includes sender avatar",
+      "passed": true,
+      "detail": {
+        "id": "f62132b3-32ee-4450-a909-f91d94fea1aa",
+        "status": "pending",
+        "intendedRecipientLabel": "ครู ครู Audit",
+        "bookTitle": "สมุด audit inbox loop",
+        "subject": "แปลมคธเป็นไทย",
+        "grade": "ป.ธ. ๔",
+        "direction": "to-reviewer",
+        "bookId": "book-loop-1784004728354-74z2rs",
+        "bookRevision": 1,
+        "fromUserId": "58724cdc-9d56-475e-972d-7d2131ab560b",
+        "fromDisplayName": "สามเณร Audit",
+        "fromAvatarUrl": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI5NiIgaGVpZ2h0PSI5NiIgdmlld0JveD0iMCAwIDk2IDk2Ij48cmVjdCB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHJ4PSIyOCIgZmlsbD0iI2Y1YjcwMCIvPjx0ZXh0IHg9IjQ4IiB5PSI1OCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjM0IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjZmZmIj7guKo8L3RleHQ+PC9zdmc+",
+        "createdAt": "2026-07-14 04:52:08",
+        "expiresAt": "2026-08-13T04:52:08.608Z"
+      }
+    },
+    {
+      "message": "Student claim of to-reviewer inbox is forbidden",
+      "passed": true,
+      "detail": {
+        "error": "forbidden",
+        "message": "แพ็กนี้สำหรับ ครู ครู Audit — ไม่ใช่บัญชีนี้"
+      }
+    },
+    {
+      "message": "Reviewer claim returns to-reviewer transfer",
+      "passed": true,
+      "detail": {}
+    },
+    {
+      "message": "Reviewer claim returns expected book id",
+      "passed": true,
+      "detail": {}
+    },
+    {
+      "message": "Reviewer claim includes sender avatar",
+      "passed": true,
+      "detail": {}
+    },
+    {
+      "message": "Push to student returns inbox item id",
+      "passed": true,
+      "detail": {
+        "packageId": "4a863e1e-a9b0-4d04-a10e-f987c190495b",
+        "inboxItemId": "e9f236e7-07d0-49e2-9521-adade9511fb3",
+        "status": "pending",
+        "intendedRecipientLabel": "นักเรียน สามเณร Audit"
+      }
+    },
+    {
+      "message": "Student sees reviewed result in inbox",
+      "passed": true,
+      "detail": {
+        "items": [
+          {
+            "id": "e9f236e7-07d0-49e2-9521-adade9511fb3",
+            "status": "pending",
+            "intendedRecipientLabel": "นักเรียน สามเณร Audit",
+            "bookTitle": "สมุด audit inbox loop",
+            "subject": "แปลมคธเป็นไทย",
+            "grade": "ป.ธ. ๔",
+            "direction": "to-student",
+            "bookId": "book-loop-1784004728354-74z2rs",
+            "bookRevision": 1,
+            "fromUserId": "055863b1-dc42-4d82-a9f2-cecbc3fa85b2",
+            "fromDisplayName": "ครู Audit",
+            "fromAvatarUrl": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI5NiIgaGVpZ2h0PSI5NiIgdmlld0JveD0iMCAwIDk2IDk2Ij48cmVjdCB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHJ4PSIyOCIgZmlsbD0iIzI0MzE5OSIvPjx0ZXh0IHg9IjQ4IiB5PSI1OCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjM0IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjZmZmIj7guITguKM8L3RleHQ+PC9zdmc+",
+            "createdAt": "2026-07-14 04:52:08",
+            "expiresAt": "2026-08-13T04:52:08.705Z"
+          }
+        ]
+      }
+    },
+    {
+      "message": "Student inbox item direction is to-student",
+      "passed": true,
+      "detail": {
+        "id": "e9f236e7-07d0-49e2-9521-adade9511fb3",
+        "status": "pending",
+        "intendedRecipientLabel": "นักเรียน สามเณร Audit",
+        "bookTitle": "สมุด audit inbox loop",
+        "subject": "แปลมคธเป็นไทย",
+        "grade": "ป.ธ. ๔",
+        "direction": "to-student",
+        "bookId": "book-loop-1784004728354-74z2rs",
+        "bookRevision": 1,
+        "fromUserId": "055863b1-dc42-4d82-a9f2-cecbc3fa85b2",
+        "fromDisplayName": "ครู Audit",
+        "fromAvatarUrl": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI5NiIgaGVpZ2h0PSI5NiIgdmlld0JveD0iMCAwIDk2IDk2Ij48cmVjdCB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHJ4PSIyOCIgZmlsbD0iIzI0MzE5OSIvPjx0ZXh0IHg9IjQ4IiB5PSI1OCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjM0IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjZmZmIj7guITguKM8L3RleHQ+PC9zdmc+",
+        "createdAt": "2026-07-14 04:52:08",
+        "expiresAt": "2026-08-13T04:52:08.705Z"
+      }
+    },
+    {
+      "message": "Student result item includes reviewer avatar",
+      "passed": true,
+      "detail": {
+        "id": "e9f236e7-07d0-49e2-9521-adade9511fb3",
+        "status": "pending",
+        "intendedRecipientLabel": "นักเรียน สามเณร Audit",
+        "bookTitle": "สมุด audit inbox loop",
+        "subject": "แปลมคธเป็นไทย",
+        "grade": "ป.ธ. ๔",
+        "direction": "to-student",
+        "bookId": "book-loop-1784004728354-74z2rs",
+        "bookRevision": 1,
+        "fromUserId": "055863b1-dc42-4d82-a9f2-cecbc3fa85b2",
+        "fromDisplayName": "ครู Audit",
+        "fromAvatarUrl": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI5NiIgaGVpZ2h0PSI5NiIgdmlld0JveD0iMCAwIDk2IDk2Ij48cmVjdCB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHJ4PSIyOCIgZmlsbD0iIzI0MzE5OSIvPjx0ZXh0IHg9IjQ4IiB5PSI1OCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjM0IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjZmZmIj7guITguKM8L3RleHQ+PC9zdmc+",
+        "createdAt": "2026-07-14 04:52:08",
+        "expiresAt": "2026-08-13T04:52:08.705Z"
+      }
+    },
+    {
+      "message": "Reviewer claim of to-student inbox is forbidden",
+      "passed": true,
+      "detail": {
+        "error": "forbidden",
+        "message": "แพ็กนี้สำหรับ นักเรียน สามเณร Audit — ไม่ใช่บัญชีนี้"
+      }
+    },
+    {
+      "message": "Student claim returns to-student transfer",
+      "passed": true,
+      "detail": {}
+    },
+    {
+      "message": "Student result includes review score",
+      "passed": true,
+      "detail": {}
+    },
+    {
+      "message": "Returned book status is reviewed",
+      "passed": true,
+      "detail": {}
+    },
+    {
+      "message": "Claimed result is no longer pending in student inbox",
+      "passed": true,
+      "detail": {
+        "items": []
+      }
+    }
+  ],
+  "finishedAt": "2026-07-14T04:52:08.744Z"
+}

@@ -3,6 +3,7 @@
  */
 (function (global) {
   const STORAGE_KEY = "paligo-inbox-chat-v1";
+  const CLAIMED_ITEMS_KEY = "paligo-inbox-claimed-items-v1";
 
   function createId(prefix) {
     const random = global.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -38,6 +39,37 @@
   function saveMessages(threadId, messages) {
     writeRaw(storageKeyForThread(threadId), JSON.stringify(messages));
     return messages;
+  }
+
+  function readClaimedItems() {
+    try {
+      const parsed = JSON.parse(readRaw(CLAIMED_ITEMS_KEY) || "{}");
+      return parsed && typeof parsed === "object" ? parsed : {};
+    } catch {
+      return {};
+    }
+  }
+
+  function markInboxItemClaimed(inboxItemId, patch = {}) {
+    if (!inboxItemId) return null;
+    const items = readClaimedItems();
+    const claimedAt = patch.claimedAt || new Date().toISOString();
+    const record = {
+      ...(items[inboxItemId] || {}),
+      ...patch,
+      inboxItemId,
+      status: "claimed",
+      claimedAt,
+      updatedAt: new Date().toISOString(),
+    };
+    items[inboxItemId] = record;
+    writeRaw(CLAIMED_ITEMS_KEY, JSON.stringify(items));
+    return record;
+  }
+
+  function getInboxItemClaim(inboxItemId) {
+    if (!inboxItemId) return null;
+    return readClaimedItems()[inboxItemId] || null;
   }
 
   function appendMessage(threadId, message) {
@@ -92,6 +124,9 @@
       status: book.status,
       revision: book.revision || 1,
       studentName: book.studentName,
+      avatarUrl: book.avatarUrl || book.profile?.avatarUrl || book.studentProfile?.avatarUrl || "",
+      profile: book.profile ? { avatarUrl: book.profile.avatarUrl || "" } : null,
+      studentProfile: book.studentProfile ? { avatarUrl: book.studentProfile.avatarUrl || "" } : null,
       updatedAt: book.updatedAt,
       draft: book.draft
         ? {
@@ -114,6 +149,17 @@
   function resolveThreadId({ role, userId, reviewerUserId }) {
     if (role === "reviewer") return `reviewer-inbox-${userId}`;
     return `student-${userId}-${reviewerUserId || "peer"}`;
+  }
+
+  function normalizeThreadPart(value) {
+    return String(value || "peer").replace(/[^a-zA-Z0-9_-]/g, "_");
+  }
+
+  function resolvePeerThreadId({ role, userId, peerUserId, reviewerUserId }) {
+    if (role === "reviewer") {
+      return `reviewer-${normalizeThreadPart(userId)}-student-${normalizeThreadPart(peerUserId)}`;
+    }
+    return resolveThreadId({ role, userId, reviewerUserId: reviewerUserId || peerUserId });
   }
 
   async function resolveThreadIdForSession() {
@@ -339,8 +385,11 @@
     appendSystemMessage,
     upsertMessage,
     removeMessage,
+    markInboxItemClaimed,
+    getInboxItemClaim,
     bookSnapshot,
     resolveThreadId,
+    resolvePeerThreadId,
     resolveThreadIdForSession,
     upsertBookMessage,
     recordBookSubmission,

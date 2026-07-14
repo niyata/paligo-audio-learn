@@ -1,0 +1,22 @@
+# Cloudflare Pages — cache rules for app.paligo.jp
+# ไฟล์นี้ยังไม่มี fingerprint/hash ใน filename เลย ตั้ง cache แบบ conservative
+# (สั้น + ให้ revalidate) เพื่อกัน user ค้าง asset เก่าหลัง deploy ใหม่
+# อ้างอิง: docs/deploy-cloudflare.md §1
+
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+/*.js
+  Cache-Control: public, max-age=300, must-revalidate
+
+/*.css
+  Cache-Control: public, max-age=300, must-revalidate
+
+/fonts/*
+  Cache-Control: public, max-age=604800, immutable
+
+/*.mp3
+  Cache-Control: public, max-age=604800
+
+/*.json
+  Cache-Control: public, max-age=0, must-revalidate

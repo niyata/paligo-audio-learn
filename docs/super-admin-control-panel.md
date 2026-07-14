@@ -53,7 +53,7 @@
 - `exam-account.html` — แท็บ「ขั้นสูง」
 - `exam-review-results.html` — นำเข้าไฟล์ผลตรวจ
 - `exam-reviewer-console.html` — นำเข้า JSON
-- `ruled-lines-card-only-template.html` — ดาวน์โหลด submission/transfer
+- `workbook.html` — ดาวน์โหลด submission/transfer
 - `book-page-qa.html` — verification import/export
 
 Client: `paligo-platform.js` → `PaligoPlatform.boot()`

@@ -208,6 +208,27 @@ Phase 6  Scale prep    → backup D1 · แผนย้าย Postgres บน DO
 
 ---
 
+## Phase 11 — Lesson/Text Reference Cards → Inbox (Backlog)
+
+> **สเปคเต็ม:** [`docs/lesson-text-reference-inbox-prd.md`](../lesson-text-reference-inbox-prd.md)
+
+| # | Issue | Priority | Agent |
+|---|-------|----------|-------|
+| 11.1 | แชร์บทเรียนเป็น Lesson Card เข้า inbox/group | P1 | cursor-ai |
+| 11.2 | Text range selection: page/line/token anchor ภายในหน้าเดียว | P1 | cursor-ai |
+| 11.3 | Cross-page selection: เลือกต้นประโยคข้ามหน้าไปท้ายประโยค | P1 | cursor-ai |
+| 11.4 | Inbox Text Reference Card + เปิดกลับตำแหน่งต้นทางพร้อม highlight | P1 | cursor-ai |
+| 11.5 | เปิด reference เป็นข้อสอบ/แบบฝึกหัดในสมุดข้อสอบ | P2 | cursor-ai |
+
+### ไอเดียสรุป (PO)
+
+- เนื้อหาบทเรียนต้องถูก @mention หรือกดแชร์เพื่อส่งเป็น card UI เข้า inbox ได้
+- ข้อความในตำราต้อง select เป็นช่วงละเอียดระดับหน้า/ข้อ/ย่อหน้า/บรรทัด/คำ และข้ามหน้าได้
+- Card ต้องแสดง handle แบบพิกัดข้อความ เช่น `หน้าที่ ๑๓ บรรทัดที่ ๕ เริ่มที่ศัพท์ ... - หน้าที่ ๑๕ บรรทัดที่ ๑๑ จบที่คำศัพท์ ...`
+- นี่คือ pattern การออกข้อสอบของครูบาลี: เลือกต้นประโยคถึงท้ายประโยค แล้วส่งเป็นข้อสอบ/แบบฝึกหัดเข้า inbox/group
+
+---
+
 ## การตัดสินใจของ PO (คุณ)
 
 หลัง seed issues แล้ว ให้ triage บน board:
@@ -226,6 +247,7 @@ Phase 6  Scale prep    → backup D1 · แผนย้าย Postgres บน DO
 - `docs/exam-review-queue-backlog.md` — Phase 7 คิวตรวจ
 - `docs/phase-line-reply-webhook.md` — Phase 8 LINE reply webhook
 - `docs/phase-social-relations-feed.md` — Phase 9–10 มิตร/ศิษย์/feed
+- `docs/lesson-text-reference-inbox-prd.md` — Phase 11 แชร์บทเรียน/พิกัดข้อความตำราเข้า inbox
 - `docs/pali-ai/CLOUD-CODE-ALIGNMENT.md` — Paligo web vs Cloud Code PALI-AI (handoff ไม่แทน sprint นี้)
 - `docs/agile/SCRUM-WORKFLOW.md`
 - `workers/README.md`
