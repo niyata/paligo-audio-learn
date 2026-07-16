@@ -15,4 +15,4 @@ VALUES (
 );
 
 UPDATE users SET is_super_admin = 1
-WHERE lower(email) IN ('tha.std@paligo.jo', 'tha.tc@paligo.jp');
+WHERE lower(email) IN ('tha.std@paligo.jp', '1.tha.tc@paligo.jp');

@@ -105,7 +105,7 @@
     .pip-control-grid {
       display: grid;
       gap: 9px;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-columns: minmax(280px, 3fr) minmax(0, 7fr);
     }
 
     .pip-tool-section {
@@ -123,6 +123,19 @@
       font-size: 0.76rem;
       font-weight: 900;
       line-height: 1.2;
+    }
+
+    .pip-control-group {
+      display: grid;
+      gap: 5px;
+      min-width: 0;
+    }
+
+    .pip-control-group__label {
+      color: rgba(31, 45, 137, 0.68);
+      font-size: 0.7rem;
+      font-weight: 900;
+      line-height: 1.15;
     }
 
     .pip-tool-row {
@@ -259,6 +272,11 @@
     .pip-btn:disabled {
       cursor: default;
       opacity: 0.45;
+    }
+
+    .pip-btn.is-planned {
+      border-style: dashed;
+      color: rgba(31, 45, 137, 0.62);
     }
 
     .pip-review-btn {
@@ -935,24 +953,34 @@
 
           <section class="pip-tool-section" aria-label="เครื่องมือตัวกรองและนำทาง">
             <div class="pip-tool-section__title">เนื้อหา</div>
-            <label class="pip-subject-select-wrap">
-              <select class="pip-subject-select" data-subject-select aria-label="เลือกวิชา">
-                <option value="thai-to-pali">ป.ธ. ๔ · แปลไทยเป็นมคธ</option>
-                <option value="pali-to-thai">ป.ธ. ๔ · แปลมคธเป็นไทย</option>
-              </select>
-            </label>
-            <div class="pip-tool-row" aria-label="โหมดแสดงตำรา">
-              <button class="pip-btn" type="button" data-mode="kho" aria-pressed="true"><svg class="pip-icon" aria-hidden="true"><use href="#pip-icon-list-checks"></use></svg><span>ทีละข้อ</span></button>
-              <button class="pip-btn" type="button" data-mode="page" aria-pressed="false"><svg class="pip-icon" aria-hidden="true"><use href="#pip-icon-file-text"></use></svg><span>ทีละหน้า</span></button>
-              <button class="pip-btn" type="button" data-mode="sentence" aria-pressed="false"><svg class="pip-icon" aria-hidden="true"><use href="#pip-icon-align-left"></use></svg><span>ทีละบรรทัด</span></button>
-              <button class="pip-btn" type="button" data-mode="topic" aria-pressed="false" hidden><svg class="pip-icon" aria-hidden="true"><use href="#pip-icon-list-checks"></use></svg><span>ทีละประเด็น</span></button>
-              <button class="pip-btn" type="button" data-mode="chapter" aria-pressed="false"><svg class="pip-icon" aria-hidden="true"><use href="#pip-icon-layers"></use></svg><span>ทีละเรื่อง</span></button>
+            <div class="pip-control-group">
+              <div class="pip-control-group__label">วิชา</div>
+              <label class="pip-subject-select-wrap">
+                <select class="pip-subject-select" data-subject-select aria-label="เลือกวิชา">
+                  <option value="thai-to-pali">ป.ธ. ๔ · แปลไทยเป็นมคธ</option>
+                  <option value="pali-to-thai">ป.ธ. ๔ · แปลมคธเป็นไทย</option>
+                </select>
+              </label>
             </div>
-            <div class="pip-tool-row pip-lang-row" data-lang-row hidden aria-label="แสดงภาษา">
-              <button class="pip-btn" type="button" data-lang="thaiMeaning" aria-pressed="false"><span>ไทย (อรรถ)</span></button>
-              <button class="pip-btn" type="button" data-lang="thaiLiteral" aria-pressed="false"><span>ไทย (พยัญชนะ)</span></button>
-              <button class="pip-btn" type="button" data-lang="pali" aria-pressed="false"><span>บาลี (เฉลย)</span></button>
-              <button class="pip-btn" type="button" data-lang="both" aria-pressed="true"><span>ทั้งคู่</span></button>
+            <div class="pip-control-group">
+              <div class="pip-control-group__label">ดูเนื้อหา</div>
+              <div class="pip-tool-row" aria-label="โหมดแสดงตำรา">
+                <button class="pip-btn" type="button" data-mode="kho" aria-pressed="true"><svg class="pip-icon" aria-hidden="true"><use href="#pip-icon-list-checks"></use></svg><span>ทีละข้อ</span></button>
+                <button class="pip-btn" type="button" data-mode="page" aria-pressed="false"><svg class="pip-icon" aria-hidden="true"><use href="#pip-icon-file-text"></use></svg><span>ทีละหน้า</span></button>
+                <button class="pip-btn" type="button" data-mode="sentence" aria-pressed="false"><svg class="pip-icon" aria-hidden="true"><use href="#pip-icon-align-left"></use></svg><span>ทีละบรรทัด</span></button>
+                <button class="pip-btn" type="button" data-mode="topic" aria-pressed="false" hidden><svg class="pip-icon" aria-hidden="true"><use href="#pip-icon-list-checks"></use></svg><span>ทีละประเด็น</span></button>
+                <button class="pip-btn" type="button" data-mode="chapter" aria-pressed="false"><svg class="pip-icon" aria-hidden="true"><use href="#pip-icon-layers"></use></svg><span>ทีละเรื่อง</span></button>
+              </div>
+            </div>
+            <div class="pip-control-group">
+              <div class="pip-control-group__label">เลือกเล่ม</div>
+              <div class="pip-tool-row pip-lang-row" data-lang-row hidden aria-label="เลือกเล่ม">
+                <button class="pip-btn" type="button" data-lang="thaiMeaning" aria-pressed="false"><span>ไทย (อรรถ)</span></button>
+                <button class="pip-btn" type="button" data-lang="thaiLiteral" aria-pressed="false"><span>ไทย (พยัญชนะ)</span></button>
+                <button class="pip-btn" type="button" data-lang="pali" aria-pressed="false"><span>บาลี (เฉลย)</span></button>
+                <button class="pip-btn" type="button" data-lang="both" aria-pressed="true" title="ไทย (อรรถ) + บาลี"><span>2 in 1</span></button>
+                <button class="pip-btn is-planned" type="button" data-glossary-book disabled title="ต้องเตรียม corpus คัณฐี/ยกศัพท์ก่อน"><span>ยกศัพท์</span></button>
+              </div>
             </div>
           </section>
         </div>
@@ -1150,6 +1178,11 @@
         subjectLabel: source.label.replace(/^ป\.ธ\. ๔ · /, ''),
         manifest: source.manifest,
       }, '*');
+    }
+
+    function defaultLanguageForSubject(subject) {
+      if (subject === 'thai-to-pali') return 'thaiMeaning';
+      return '';
     }
 
     async function fetchJson(url) {
@@ -1427,6 +1460,39 @@
     function pageDisplayTitle(page) {
       if (!page?.title) return '';
       return isReferenceContextLine(page.title) ? '' : page.title;
+    }
+
+    function cleanReferenceStoryLabel(label) {
+      return normalizeBreadcrumbText(label)
+        .replace(/^\s*[0-9๐-๙]+\s*[.)]\s*/u, '')
+        .replace(/\*+$/u, '')
+        .trim();
+    }
+
+    function baseDisplayTitle() {
+      const raw = currentManifest?.title || currentCorpus?.title || 'ตำรา';
+      return String(raw)
+        .replace(/\s*\([^)]*(?:prototype|เรื่อง)[^)]*\)\s*/giu, ' ')
+        .replace(/\s{2,}/g, ' ')
+        .trim() || raw;
+    }
+
+    function pageStoryTitle(page) {
+      const story = breadcrumbItemsForPage(page).find((item) => item.kind === 'story');
+      return story ? cleanReferenceStoryLabel(story.label) : '';
+    }
+
+    function updateWindowTitleForContext({ page = null, fallbackTitle = '' } = {}) {
+      const storyTitle = page ? pageStoryTitle(page) : '';
+      const title = storyTitle
+        ? `${baseDisplayTitle()} (${storyTitle})`
+        : (fallbackTitle || currentManifest?.title || currentCorpus?.title || 'ตำรา');
+      if (titleEl) titleEl.textContent = title;
+      document.title = `${title} · PiP`;
+      window.parent?.postMessage({
+        type: 'paligo:pip-title-change',
+        title,
+      }, '*');
     }
 
     function topicById(topicId) {
@@ -1798,9 +1864,10 @@
         setLanguageVisibility('both', { persist: false });
         return;
       }
+      const subjectDefault = defaultLanguageForSubject(currentManifest?.subjectHint || subjectForManifestPath(queryParam('corpus') || DEFAULT_CORPUS));
       const fromManifest = currentManifest?.defaultLanguageVisibility;
       const stored = localStorage.getItem(LANG_KEY);
-      setLanguageVisibility(stored || fromManifest || 'pali', { persist: false });
+      setLanguageVisibility(subjectDefault || stored || fromManifest || 'pali', { persist: false });
     }
 
     function makeReviewTarget(item = currentItem()) {
@@ -2191,12 +2258,14 @@
       if (mode === 'kho') {
         const item = khos().find((entry) => entry.itemId === selectedId);
         if (!item) return;
+        const itemPage = pages().find((page) => String(page.sourcePage) === String(item.sourcePage)) || null;
         readerEl.append(renderUnit({
           title: item.title,
           meta: `เริ่มหน้า ${item.sourcePageLabel || item.sourcePage}`,
           unitLines: khoLines(item),
         }));
         statusEl.textContent = `${item.khoLabel || item.title} · ${item.lines?.length || 0} บรรทัด`;
+        updateWindowTitleForContext({ page: itemPage, fallbackTitle: item.title });
         updateReviewButton();
         return;
       }
@@ -2204,6 +2273,7 @@
       if (mode === 'sentence') {
         const item = lines().find((entry) => entry.itemId === selectedId);
         if (!item) return;
+        const itemPage = pages().find((page) => String(page.sourcePage) === String(item.sourcePage)) || null;
         const preferred = preferredLanguage();
         readerEl.append(renderUnit({
           title: '',
@@ -2219,6 +2289,7 @@
           activeItemId: item.itemId,
         }));
         statusEl.textContent = `บรรทัด ${item.itemNo} · หน้า ${item.sourcePageLabel || item.sourcePage}`;
+        updateWindowTitleForContext({ page: itemPage });
         updateReviewButton();
         return;
       }
@@ -2241,6 +2312,7 @@
           activeItemId: item.anchorItemId,
         }));
         statusEl.textContent = `${item.title} · ${item.lines.length} บรรทัด`;
+        updateWindowTitleForContext({ page: topicPage, fallbackTitle: item.title });
         updateReviewButton();
         requestAnimationFrame(() => {
           document.getElementById(item.anchorId)?.scrollIntoView({ block: 'start', behavior: 'smooth' });
@@ -2267,6 +2339,7 @@
         statusEl.textContent = filterTopic
           ? `${chapter.title} · กรองประเด็น ${filterTopic.title}`
           : `${chapter.title} · ${chapterPages.length} หน้า`;
+        updateWindowTitleForContext({ page: pagesToRender[0] || null, fallbackTitle: chapter.title });
         updateReviewButton();
         return;
       }
@@ -2283,6 +2356,7 @@
       statusEl.textContent = filterTopic
         ? `หน้า ${page.sourcePageLabel || page.sourcePage} · กรองประเด็น ${filterTopic.title}`
         : `หน้า ${page.sourcePageLabel || page.sourcePage} · ${page.children?.length || 0} บรรทัด`;
+      updateWindowTitleForContext({ page });
       updateReviewButton();
     }
 

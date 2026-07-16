@@ -51,7 +51,7 @@ export async function getUserById(db, userId) {
 export async function getUserByEmail(db, email) {
   const row = await db
     .prepare(
-      `SELECT id, role, display_name, email, password_hash, password_salt, created_at
+      `SELECT id, role, display_name, email, password_hash, password_salt, created_at, profile_json, is_super_admin
        FROM users WHERE email = ?1`
     )
     .bind(email)
@@ -62,7 +62,7 @@ export async function getUserByEmail(db, email) {
 export async function getUserByIdWithSecret(db, userId) {
   return db
     .prepare(
-      `SELECT id, role, display_name, email, password_hash, password_salt, created_at
+      `SELECT id, role, display_name, email, password_hash, password_salt, created_at, profile_json, is_super_admin
        FROM users WHERE id = ?1`
     )
     .bind(userId)

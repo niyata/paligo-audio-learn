@@ -3,7 +3,7 @@
  */
 (function (global) {
   const FLAGS_CACHE_KEY = "paligo-platform-flags-v1";
-  const SUPER_ADMIN_EMAILS = new Set(["tha.std@paligo.jo", "tha.tc@paligo.jp"]);
+  const SUPER_ADMIN_EMAILS = new Set(["tha.std@paligo.jp", "1.tha.tc@paligo.jp"]);
 
   /** Issue #78 — ซ่อน Import/Export ชั่วคราวจาก UI (อย่าลบ gate/logic เดิม) */
   const IMPORT_EXPORT_UI_TEMPORARILY_HIDDEN = true;

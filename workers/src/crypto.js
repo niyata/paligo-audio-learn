@@ -26,7 +26,7 @@ export async function hashPin(pin, saltHex) {
     {
       name: "PBKDF2",
       salt: saltBytes,
-      iterations: 120_000,
+      iterations: 100_000,
       hash: "SHA-256",
     },
     keyMaterial,

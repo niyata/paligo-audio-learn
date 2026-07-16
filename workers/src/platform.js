@@ -5,7 +5,7 @@
 import { getUserBySession } from "./db.js";
 import { errorResponse, jsonResponse, parseJsonBody, readBearerToken } from "./http.js";
 
-export const SUPER_ADMIN_EMAILS = new Set(["tha.std@paligo.jo", "tha.tc@paligo.jp"]);
+export const SUPER_ADMIN_EMAILS = new Set(["tha.std@paligo.jp", "1.tha.tc@paligo.jp"]);
 
 export const DEFAULT_PLATFORM_FLAGS = {
   importExportEnabled: false,

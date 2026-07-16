@@ -6,7 +6,7 @@
   "defaultDisplayMode": "page",
   "subjectHint": "thai-to-pali",
   "languageToggle": false,
-  "defaultLanguageVisibility": "pali",
+  "defaultLanguageVisibility": "thaiMeaning",
   "translationCompanions": {
     "thaiMeaning": {
       "label": "ไทย (อรรถ)",

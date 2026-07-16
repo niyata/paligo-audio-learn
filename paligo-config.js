@@ -49,7 +49,7 @@
     },
     /** ตั้งใน LINE Developers Console → LIFF → Endpoint URL ชี้ exam-line-liff.html */
     lineLiffId: global.PALIGO_LINE_LIFF_ID || "",
-    superAdminEmails: ["tha.std@paligo.jo", "tha.tc@paligo.jp"],
+    superAdminEmails: ["tha.std@paligo.jp", "1.tha.tc@paligo.jp"],
     /** sync max with workers/src/review-capacity.js DEFAULT_REVIEWER_DAILY_LIMIT_MAX */
     reviewCapacity: {
       dailyLimitMax: 60,

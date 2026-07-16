@@ -3264,7 +3264,18 @@
         window.addEventListener("message", (event) => {
           if (event.source !== paliReferenceFrame?.contentWindow) return;
           const message = event.data;
-          if (!message || message.type !== "paligo:pip-subject-change") return;
+          if (!message) return;
+          if (message.type === "paligo:pip-title-change") {
+            const nextTitle = String(message.title || "").trim();
+            if (nextTitle && paliReferenceTitle) {
+              paliReferenceTitle.textContent = `${nextTitle} · ดูโจทย์ควบคู่กับสมุด`;
+            }
+            if (nextTitle && paliReferenceFrame) {
+              paliReferenceFrame.title = nextTitle;
+            }
+            return;
+          }
+          if (message.type !== "paligo:pip-subject-change") return;
           const nextSubject = String(message.subject || "");
           const nextGrade = String(message.grade || gradePicker?.dataset.value || currentProfileGrade || "4");
           const allowed = getAllowedSubjectsForGrade(nextGrade);
