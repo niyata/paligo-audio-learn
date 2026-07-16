@@ -11,6 +11,7 @@
       --reader-text-base: 30px;
       --reader-font: "TH Sarabun Pali", "TH Sarabun Bali", Sarabun, sans-serif;
       --reader-muted: var(--paligo-muted, rgba(58, 58, 58, 0.68));
+      --pip-footer-height: 64px;
     }
 
     @font-face {
@@ -36,7 +37,12 @@
       line-height: 1.45;
       margin: 0;
       min-height: 100vh;
+      padding-bottom: var(--pip-footer-height);
       -webkit-font-smoothing: antialiased;
+    }
+
+    body.is-footer-hidden {
+      padding-bottom: 0;
     }
 
     .pip-shell {
@@ -432,16 +438,238 @@
       justify-content: flex-end;
     }
 
+    .pip-footer-bar {
+      align-items: center;
+      backdrop-filter: blur(18px);
+      background: rgba(255, 250, 240, 0.92);
+      border-top: 1px solid rgba(31, 45, 137, 0.14);
+      bottom: 0;
+      box-shadow: 0 -12px 34px rgba(74, 44, 10, 0.12);
+      display: grid;
+      gap: 8px;
+      grid-template-columns: auto auto auto auto minmax(180px, 1fr);
+      left: 0;
+      min-height: var(--pip-footer-height);
+      padding: 9px 16px;
+      position: fixed;
+      right: 0;
+      transition: transform 150ms ease;
+      z-index: 18;
+    }
+
+    body.is-footer-hidden .pip-footer-bar {
+      transform: translateY(calc(100% + 8px));
+    }
+
+    .pip-footer-gear {
+      align-items: center;
+      background: #fffdf7;
+      border: 1px solid rgba(31, 45, 137, 0.18);
+      border-radius: 999px;
+      bottom: 12px;
+      box-shadow: 0 10px 24px rgba(31, 45, 137, 0.16);
+      color: #1f2d89;
+      cursor: pointer;
+      display: inline-flex;
+      height: 42px;
+      justify-content: center;
+      position: fixed;
+      right: 14px;
+      transition: background 120ms ease, border-color 120ms ease, color 120ms ease, bottom 150ms ease;
+      width: 42px;
+      z-index: 21;
+    }
+
+    .pip-footer-gear:hover,
+    .pip-footer-gear:focus-visible {
+      background: #fff3d6;
+      border-color: #f2a600;
+      color: #6b4f00;
+    }
+
+    body:not(.is-footer-hidden) .pip-footer-gear {
+      bottom: calc(var(--pip-footer-height) + 12px);
+    }
+
+    .pip-footer-button {
+      appearance: none;
+      align-items: center;
+      background: #fffdf7;
+      border: 1px solid rgba(31, 45, 137, 0.18);
+      border-radius: 999px;
+      color: #1f2d89;
+      cursor: pointer;
+      display: inline-flex;
+      font: inherit;
+      font-size: 0.84rem;
+      font-weight: 900;
+      gap: 7px;
+      justify-content: center;
+      min-height: 38px;
+      padding: 7px 12px;
+      white-space: nowrap;
+    }
+
+    .pip-footer-button.is-active {
+      background: #fff3d6;
+      border-color: #f2a600;
+      color: #6b4f00;
+    }
+
+    .pip-footer-button__badge {
+      align-items: center;
+      background: rgba(31, 45, 137, 0.1);
+      border-radius: 999px;
+      display: inline-flex;
+      font-size: 0.72rem;
+      justify-content: center;
+      min-width: 1.5em;
+      padding: 1px 6px;
+    }
+
+    .pip-footer-search {
+      min-width: 0;
+    }
+
+    .pip-footer-search input {
+      background: #fffdf7;
+      border: 1px solid rgba(31, 45, 137, 0.18);
+      border-radius: 999px;
+      color: #343434;
+      font: inherit;
+      font-size: 0.84rem;
+      font-weight: 800;
+      min-height: 38px;
+      padding: 7px 13px;
+      width: 100%;
+    }
+
+    .pip-side-drawer {
+      background: rgba(255, 253, 247, 0.98);
+      border-left: 1px solid rgba(31, 45, 137, 0.16);
+      bottom: var(--pip-footer-height);
+      box-shadow: -20px 0 46px rgba(31, 45, 137, 0.16);
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr);
+      max-width: calc(100vw - 18px);
+      position: fixed;
+      right: 0;
+      top: 0;
+      transform: translateX(100%);
+      transition: transform 160ms ease;
+      width: min(390px, 92vw);
+      z-index: 19;
+    }
+
+    body.is-footer-hidden .pip-side-drawer {
+      bottom: 0;
+    }
+
+    .pip-side-drawer.is-open {
+      transform: translateX(0);
+    }
+
+    .pip-side-drawer[hidden] {
+      display: none;
+    }
+
+    .pip-side-drawer__head {
+      align-items: start;
+      border-bottom: 1px solid rgba(31, 45, 137, 0.12);
+      display: flex;
+      gap: 10px;
+      justify-content: space-between;
+      padding: 14px 14px 10px;
+    }
+
+    .pip-side-drawer__title {
+      color: #1f2d89;
+      font-size: 1rem;
+      font-weight: 900;
+      line-height: 1.25;
+    }
+
+    .pip-side-drawer__meta {
+      color: var(--reader-muted);
+      font-size: 0.75rem;
+      font-weight: 800;
+      margin-top: 2px;
+    }
+
+    .pip-side-drawer__tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      padding: 10px 14px;
+    }
+
+    .pip-side-drawer__list {
+      display: grid;
+      gap: 8px;
+      min-height: 0;
+      overflow: auto;
+      padding: 0 14px 14px;
+    }
+
+    .pip-note-card {
+      background: #fffaf0;
+      border: 1px solid rgba(31, 45, 137, 0.14);
+      border-radius: 10px;
+      display: grid;
+      gap: 5px;
+      padding: 10px;
+    }
+
+    .pip-note-card__term {
+      color: #1f2d89;
+      font-size: 0.92rem;
+      font-weight: 900;
+      line-height: 1.28;
+    }
+
+    .pip-note-card__meta,
+    .pip-note-card__comment {
+      color: var(--reader-muted);
+      font-size: 0.78rem;
+      font-weight: 800;
+      line-height: 1.4;
+    }
+
+    .pip-note-card__comment {
+      color: #343434;
+      font-weight: 760;
+    }
+
+    .pip-note-card__tag {
+      color: #6b4f00;
+      font-size: 0.74rem;
+      font-weight: 900;
+      line-height: 1.25;
+    }
+
+    .pip-drawer-empty {
+      border: 1px dashed rgba(31, 45, 137, 0.2);
+      border-radius: 10px;
+      color: var(--reader-muted);
+      font-size: 0.84rem;
+      font-weight: 850;
+      line-height: 1.45;
+      padding: 14px;
+    }
+
     .pip-vocab-tooltip {
       background: rgba(255, 253, 247, 0.98);
       border: 1px solid rgba(31, 45, 137, 0.2);
       border-radius: 12px;
       box-shadow: 0 18px 42px rgba(31, 45, 137, 0.18);
       color: #343434;
-      display: grid;
+      display: flex;
+      flex-direction: column;
       font-family: Sarabun, -apple-system, BlinkMacSystemFont, "SF Pro Text", ui-sans-serif, sans-serif;
       gap: 8px;
       max-width: min(360px, calc(100vw - 24px));
+      min-height: 0;
+      overflow: hidden;
       padding: 10px;
       position: fixed;
       z-index: 20;
@@ -470,9 +698,213 @@
       line-height: 1.35;
     }
 
+    .pip-vocab-tooltip__body {
+      display: grid;
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow: visible;
+    }
+
     .pip-vocab-tooltip__list {
       display: grid;
       gap: 5px;
+    }
+
+    .pip-vocab-tooltip.is-remark-mode .pip-vocab-tooltip__list,
+    .pip-vocab-tooltip.is-exam-mode .pip-vocab-tooltip__list {
+      display: none;
+    }
+
+    .pip-vocab-tooltip.is-remark-mode,
+    .pip-vocab-tooltip.is-exam-mode {
+      max-width: min(430px, calc(100vw - 24px));
+    }
+
+    .pip-remark-tools {
+      border-top: 1px solid rgba(74, 44, 10, 0.1);
+      display: grid;
+      gap: 6px;
+      min-height: 0;
+      padding-top: 8px;
+    }
+
+    .pip-remark-tools[hidden] {
+      display: none;
+    }
+
+    .pip-exam-tools {
+      border-top: 1px solid rgba(74, 44, 10, 0.1);
+      display: grid;
+      gap: 7px;
+      min-height: 0;
+      padding-top: 8px;
+    }
+
+    .pip-exam-tools[hidden] {
+      display: none;
+    }
+
+    .pip-exam-tools__title {
+      color: var(--reader-muted);
+      font-size: 0.72rem;
+      font-weight: 900;
+      line-height: 1.25;
+    }
+
+    .pip-exam-tools__id {
+      background: rgba(31, 45, 137, 0.07);
+      border: 1px solid rgba(31, 45, 137, 0.16);
+      border-radius: 8px;
+      color: #1f2d89;
+      font-size: 0.72rem;
+      font-weight: 900;
+      line-height: 1.25;
+      padding: 7px 9px;
+    }
+
+    .pip-exam-tools__actions {
+      display: grid;
+      gap: 6px;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .pip-remark-tools__title {
+      color: var(--reader-muted);
+      font-size: 0.72rem;
+      font-weight: 900;
+      line-height: 1.25;
+    }
+
+    .pip-vocab-save-field {
+      align-items: center;
+      background: #fffdf7;
+      border: 1px solid rgba(31, 45, 137, 0.18);
+      border-radius: 999px;
+      display: grid;
+      gap: 6px;
+      grid-template-columns: minmax(0, 1fr) auto;
+      min-height: 38px;
+      padding: 3px 3px 3px 13px;
+    }
+
+    .pip-vocab-save-field:focus-within {
+      border-color: #f2a600;
+      box-shadow: 0 0 0 2px rgba(242, 166, 0, 0.16);
+    }
+
+    .pip-vocab-save-field input {
+      background: transparent;
+      border: 0;
+      color: #343434;
+      font: inherit;
+      font-size: 0.78rem;
+      font-weight: 850;
+      min-width: 0;
+      outline: 0;
+      padding: 4px 0;
+      width: 100%;
+    }
+
+    .pip-vocab-save-field .pip-vocab-tooltip__button {
+      min-height: 30px;
+      padding: 5px 9px;
+    }
+
+    .pip-remark-tools__grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      overflow: visible;
+      padding-bottom: 0;
+    }
+
+    .pip-remark-tool {
+      --remark-tool-bg: #fffdf7;
+      --remark-tool-border: rgba(31, 45, 137, 0.18);
+      --remark-tool-color: #1f2d89;
+      appearance: none;
+      background: var(--remark-tool-bg);
+      border: 1px solid var(--remark-tool-border);
+      border-radius: 999px;
+      color: var(--remark-tool-color);
+      cursor: pointer;
+      font: inherit;
+      font-size: 0.68rem;
+      font-weight: 900;
+      min-height: 28px;
+      padding: 4px 8px;
+    }
+
+    .pip-remark-tool.is-active {
+      background: #fff3d6;
+      border-color: var(--remark-tool-color);
+      color: var(--remark-tool-color);
+    }
+
+    .pip-remark-tool.b-p {
+      --remark-tool-bg: rgba(31, 45, 137, 0.07);
+      --remark-tool-border: rgba(31, 45, 137, 0.24);
+      --remark-tool-color: #1f2d89;
+    }
+
+    .pip-remark-tool.b-v-kit {
+      --remark-tool-bg: rgba(242, 166, 0, 0.12);
+      --remark-tool-border: rgba(242, 166, 0, 0.34);
+      --remark-tool-color: #8a6500;
+    }
+
+    .pip-remark-tool.b-v-akhyat {
+      --remark-tool-bg: rgba(15, 122, 107, 0.1);
+      --remark-tool-border: rgba(15, 122, 107, 0.28);
+      --remark-tool-color: #0f6b62;
+    }
+
+    .pip-remark-tool.b-v1,
+    .pip-remark-tool.b-v2,
+    .pip-remark-tool.b-v3_7,
+    .pip-remark-tool.b-sing,
+    .pip-remark-tool.b-plur,
+    .pip-remark-tool.b-special1,
+    .pip-remark-tool.is-circle,
+    .pip-remark-tool.is-circle-double,
+    .pip-remark-tool.is-brackets {
+      --remark-tool-bg: rgba(31, 45, 137, 0.04);
+      --remark-tool-border: rgba(31, 45, 137, 0.18);
+      --remark-tool-color: #1f2d89;
+    }
+
+    .pip-remark-tool[data-action-tooltip] {
+      position: relative;
+    }
+
+    .pip-remark-tool[data-action-tooltip]::after {
+      background: rgba(31, 45, 137, 0.94);
+      border-radius: 8px;
+      bottom: calc(100% + 8px);
+      box-shadow: 0 10px 24px rgba(31, 45, 137, 0.18);
+      color: #fff;
+      content: attr(data-action-tooltip);
+      font-size: 0.66rem;
+      font-weight: 800;
+      line-height: 1.45;
+      max-width: min(320px, 74vw);
+      opacity: 0;
+      padding: 8px 10px;
+      pointer-events: none;
+      position: absolute;
+      right: 0;
+      text-align: left;
+      transform: translateY(4px);
+      transition: opacity 0.12s ease, transform 0.12s ease;
+      white-space: normal;
+      width: max-content;
+      z-index: 4;
+    }
+
+    .pip-remark-tool[data-action-tooltip]:hover::after,
+    .pip-remark-tool[data-action-tooltip]:focus-visible::after {
+      opacity: 1;
+      transform: translateY(0);
     }
 
     .pip-vocab-tooltip__item {
@@ -499,11 +931,16 @@
     }
 
     .pip-vocab-tooltip__actions {
+      background: rgba(255, 253, 247, 0.98);
       border-top: 1px solid rgba(74, 44, 10, 0.1);
       display: flex;
+      flex: 0 0 auto;
+      flex-wrap: wrap;
       gap: 6px;
       justify-content: flex-end;
       padding-top: 8px;
+      position: relative;
+      z-index: 1;
     }
 
     .pip-vocab-tooltip__button {
@@ -521,6 +958,7 @@
       gap: 5px;
       min-height: 32px;
       padding: 6px 9px;
+      position: relative;
     }
 
     .pip-vocab-tooltip__button.is-report {
@@ -529,14 +967,76 @@
       color: #6b4f00;
     }
 
+    .pip-vocab-tooltip__button[data-action-tooltip]::after {
+      background: rgba(31, 45, 137, 0.94);
+      border-radius: 8px;
+      bottom: calc(100% + 8px);
+      box-shadow: 0 10px 24px rgba(31, 45, 137, 0.18);
+      color: #fff;
+      content: attr(data-action-tooltip);
+      font-size: 0.66rem;
+      font-weight: 800;
+      line-height: 1.45;
+      max-width: min(320px, 74vw);
+      opacity: 0;
+      padding: 8px 10px;
+      pointer-events: none;
+      position: absolute;
+      right: 0;
+      text-align: left;
+      transform: translateY(4px);
+      transition: opacity 0.12s ease, transform 0.12s ease;
+      white-space: normal;
+      width: max-content;
+      z-index: 3;
+    }
+
+    .pip-vocab-tooltip__button[data-action-tooltip]:hover::after,
+    .pip-vocab-tooltip__button[data-action-tooltip]:focus-visible::after {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
     .pip-vocab-tooltip__button.is-memory {
       background: rgba(31, 45, 137, 0.08);
       color: #1f2d89;
     }
 
+    .pip-vocab-tooltip__button.is-exam {
+      background: rgba(242, 166, 0, 0.12);
+      border-color: rgba(242, 166, 0, 0.42);
+      color: #6b4f00;
+    }
+
     .pip-vocab-tooltip__button.is-clear {
       background: #fff;
       color: rgba(52, 52, 52, 0.78);
+    }
+
+    body.is-remark-pencil-mode .pip-reader {
+      cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28' fill='none' stroke='%231f2d89' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 21l4.5-1.1L22 7.4a2.6 2.6 0 0 0-3.7-3.7L5.8 16.2 5 21z'/%3E%3Cpath d='M16.5 5.5l6 6'/%3E%3C/svg%3E") 5 21, text;
+    }
+
+    body.is-highlight-erase-mode .pip-reader {
+      cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28' fill='none' stroke='%231f2d89' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 19l7.5-7.5 5 5L14 19H4z'/%3E%3Cpath d='M11.5 11.5l5.8-5.8a2.4 2.4 0 0 1 3.4 0l1.6 1.6a2.4 2.4 0 0 1 0 3.4L16.5 16.5'/%3E%3Cpath d='M4 23h18'/%3E%3C/svg%3E") 4 21, not-allowed;
+    }
+
+    body.is-highlight-erase-mode .pip-text-mark,
+    body.is-highlight-erase-mode .pip-remark {
+      cursor: pointer;
+      outline-width: 2px;
+    }
+
+    body.is-highlight-erase-mode .pip-vocab-tooltip__button.is-clear {
+      background: rgba(216, 59, 59, 0.08);
+      border-color: rgba(216, 59, 59, 0.34);
+      color: #9c1f1f;
+    }
+
+    body.is-highlight-erase-mode .pip-footer-button[data-footer-erase] {
+      background: rgba(216, 59, 59, 0.08);
+      border-color: rgba(216, 59, 59, 0.34);
+      color: #9c1f1f;
     }
 
     .pip-text-mark {
@@ -559,9 +1059,56 @@
       outline: 1px solid rgba(242, 166, 0, 0.34);
     }
 
-    .pip-text-mark.is-memory .pip-text-mark__info {
-      background: #f2a600;
-      color: #3a2a00;
+    .pip-text-mark.is-memory[data-memory-tooltip] {
+      cursor: help;
+    }
+
+    .pip-text-mark.is-memory[data-memory-tooltip]::after {
+      background: rgba(31, 45, 137, 0.96);
+      border-radius: 8px;
+      bottom: calc(100% + 8px);
+      box-shadow: 0 10px 24px rgba(31, 45, 137, 0.18);
+      color: #fffdf7;
+      content: attr(data-memory-tooltip);
+      font-family: Sarabun, -apple-system, BlinkMacSystemFont, "SF Pro Text", ui-sans-serif, sans-serif;
+      font-size: 0.72rem;
+      font-weight: 900;
+      inline-size: max-content;
+      left: 50%;
+      line-height: 1.25;
+      max-inline-size: min(260px, 72vw);
+      opacity: 0;
+      padding: 7px 9px;
+      pointer-events: none;
+      position: absolute;
+      text-align: center;
+      transform: translate(-50%, 4px);
+      transition: opacity 90ms ease, transform 90ms ease;
+      white-space: normal;
+      z-index: 30;
+    }
+
+    .pip-text-mark.is-memory[data-memory-tooltip]::before {
+      border-color: rgba(31, 45, 137, 0.96) transparent transparent;
+      border-style: solid;
+      border-width: 6px 6px 0;
+      bottom: calc(100% + 2px);
+      content: "";
+      left: 50%;
+      opacity: 0;
+      pointer-events: none;
+      position: absolute;
+      transform: translate(-50%, 4px);
+      transition: opacity 90ms ease, transform 90ms ease;
+      z-index: 30;
+    }
+
+    .pip-text-mark.is-memory[data-memory-tooltip]:hover::after,
+    .pip-text-mark.is-memory[data-memory-tooltip]:hover::before,
+    .pip-text-mark.is-memory[data-memory-tooltip]:focus-visible::after,
+    .pip-text-mark.is-memory[data-memory-tooltip]:focus-visible::before {
+      opacity: 1;
+      transform: translate(-50%, 0);
     }
 
     .pip-text-mark__info {
@@ -580,6 +1127,200 @@
       margin-inline-start: 2px;
       transform: translateY(-0.35em);
       width: 1.1em;
+    }
+
+    .pip-remark {
+      --remark-color: #1f2d89;
+      --remark-line-color: rgba(31, 45, 137, 0.62);
+      align-items: center;
+      box-decoration-break: clone;
+      -webkit-box-decoration-break: clone;
+      color: var(--remark-color);
+      display: inline-flex;
+      flex-direction: column;
+      justify-content: center;
+      line-height: 1.05;
+      margin: 0 1px;
+      padding: 0 2px 0.42em;
+      position: relative;
+      vertical-align: baseline;
+    }
+
+    .pip-remark__text {
+      display: inline-block;
+      text-decoration-line: underline;
+      text-decoration-color: var(--remark-line-color);
+      text-decoration-thickness: 0.06em;
+      text-underline-offset: 0.18em;
+    }
+
+    .pip-remark__tag {
+      font-family: Sarabun, -apple-system, BlinkMacSystemFont, "SF Pro Text", ui-sans-serif, sans-serif;
+      font-size: 0.32em;
+      font-weight: 950;
+      line-height: 1;
+      margin-top: 0.08em;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .pip-remark.b-p {
+      --remark-color: #1f2d89;
+      --remark-line-color: #1f2d89;
+    }
+
+    .pip-remark.b-v-kit {
+      --remark-color: #8a6500;
+      --remark-line-color: #f2a600;
+    }
+
+    .pip-remark.b-v-akhyat {
+      --remark-color: #0f6b62;
+      --remark-line-color: #0f7a6b;
+    }
+
+    .pip-remark.b-v1,
+    .pip-remark.b-v2,
+    .pip-remark.b-v3_7,
+    .pip-remark.b-sing,
+    .pip-remark.b-plur,
+    .pip-remark.b-special1 {
+      --remark-color: #1f2d89;
+      --remark-line-color: rgba(31, 45, 137, 0.62);
+    }
+
+    .pip-remark.b-sing .pip-remark__text,
+    .pip-remark.b-plur .pip-remark__text {
+      text-decoration-style: dotted;
+    }
+
+    .pip-remark.is-circle,
+    .pip-remark.is-circle-double {
+      border: 0.08em solid currentColor;
+      border-radius: 999px;
+      padding: 0 0.22em;
+      text-decoration-line: none;
+    }
+
+    .pip-remark.is-circle .pip-remark__text,
+    .pip-remark.is-circle-double .pip-remark__text {
+      text-decoration-line: none;
+    }
+
+    .pip-remark.is-circle-double {
+      box-shadow: 0 0 0 0.08em #fffdf7, 0 0 0 0.16em currentColor;
+    }
+
+    .pip-remark.is-brackets {
+      color: inherit;
+      display: inline;
+      line-height: inherit;
+      margin: 0 1px;
+      padding: 0;
+    }
+
+    .pip-remark.is-brackets::before,
+    .pip-remark.is-brackets::after {
+      color: #1f2d89;
+      font-weight: 950;
+    }
+
+    .pip-remark.is-brackets::before {
+      content: "(";
+      margin-inline-end: 0.03em;
+    }
+
+    .pip-remark.is-brackets::after {
+      content: ")";
+      margin-inline-start: 0.03em;
+    }
+
+    .pip-remark.is-brackets .pip-remark__text {
+      display: inline;
+      text-decoration-line: none;
+    }
+
+    .pip-remark.is-exam-boundary {
+      color: inherit;
+      display: inline;
+      line-height: inherit;
+      margin: 0 2px;
+      padding: 0;
+    }
+
+    .pip-remark.is-exam-boundary .pip-remark__text {
+      display: inline;
+      text-decoration-line: none;
+    }
+
+    .pip-exam-label {
+      background: #fff3d6;
+      border: 1px solid #f2a600;
+      border-radius: 999px;
+      color: #6b4f00;
+      display: inline-flex;
+      font-family: Sarabun, -apple-system, BlinkMacSystemFont, "SF Pro Text", ui-sans-serif, sans-serif;
+      font-size: 0.44em;
+      font-weight: 950;
+      line-height: 1;
+      padding: 0.16em 0.45em;
+      position: relative;
+      transform: translateY(-0.18em);
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    .pip-exam-label::before,
+    .pip-exam-label::after {
+      content: "";
+      pointer-events: none;
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .pip-exam-label.is-start {
+      border-bottom-right-radius: 0.18em;
+      border-top-right-radius: 0.18em;
+      margin-inline-end: 0.5em;
+      padding-inline-end: 0.36em;
+    }
+
+    .pip-exam-label.is-start::after {
+      border-bottom: 0.54em solid transparent;
+      border-left: 0.46em solid #f2a600;
+      border-top: 0.54em solid transparent;
+      right: -0.46em;
+    }
+
+    .pip-exam-label.is-start::before {
+      border-bottom: 0.44em solid transparent;
+      border-left: 0.38em solid #fff3d6;
+      border-top: 0.44em solid transparent;
+      right: -0.36em;
+      z-index: 1;
+    }
+
+    .pip-exam-label.is-end {
+      border-bottom-left-radius: 0.18em;
+      border-top-left-radius: 0.18em;
+      margin-inline-start: 0.5em;
+      padding-inline-start: 0.36em;
+    }
+
+    .pip-exam-label.is-end::after {
+      border-bottom: 0.54em solid transparent;
+      border-right: 0.46em solid #f2a600;
+      border-top: 0.54em solid transparent;
+      left: -0.46em;
+    }
+
+    .pip-exam-label.is-end::before {
+      border-bottom: 0.44em solid transparent;
+      border-right: 0.38em solid #fff3d6;
+      border-top: 0.44em solid transparent;
+      left: -0.36em;
+      z-index: 1;
     }
 
     .pip-topic-heading {
@@ -850,6 +1591,14 @@
         grid-template-columns: 1fr 1fr auto;
       }
 
+      .pip-footer-bar {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .pip-footer-search {
+        grid-column: 1 / -1;
+      }
+
       .pip-focus-label {
         grid-column: 1 / -1;
         grid-row: 1;
@@ -892,6 +1641,9 @@
     <symbol id="pip-icon-file-text" viewBox="0 0 24 24">
       <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z" /><path d="M14 2v6h6" /><path d="M8 13h8" /><path d="M8 17h6" />
     </symbol>
+    <symbol id="pip-icon-sliders-horizontal" viewBox="0 0 24 24">
+      <path d="M3 6h4" /><path d="M11 6h10" /><path d="M3 12h10" /><path d="M17 12h4" /><path d="M3 18h7" /><path d="M14 18h7" /><circle cx="9" cy="6" r="2" /><circle cx="15" cy="12" r="2" /><circle cx="12" cy="18" r="2" />
+    </symbol>
     <symbol id="pip-icon-layers" viewBox="0 0 24 24">
       <path d="m12 2 9 5-9 5-9-5z" /><path d="m3 12 9 5 9-5" /><path d="m3 17 9 5 9-5" />
     </symbol>
@@ -903,6 +1655,12 @@
     </symbol>
     <symbol id="pip-icon-message-warning" viewBox="0 0 24 24">
       <path d="M21 15a4 4 0 0 1-4 4H7l-4 4V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z" /><path d="M12 7v5" /><path d="M12 16h.01" />
+    </symbol>
+    <symbol id="pip-icon-eraser" viewBox="0 0 24 24">
+      <path d="m7 21-4.3-4.3a2.4 2.4 0 0 1 0-3.4l9.6-9.6a2.4 2.4 0 0 1 3.4 0l5.6 5.6a2.4 2.4 0 0 1 0 3.4L13 21" /><path d="M22 21H7" /><path d="m5 12 7 7" />
+    </symbol>
+    <symbol id="pip-icon-pencil" viewBox="0 0 24 24">
+      <path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
     </symbol>
     <symbol id="pip-icon-minimize" viewBox="0 0 24 24">
       <path d="M8 3v3a2 2 0 0 1-2 2H3" /><path d="M16 3v3a2 2 0 0 0 2 2h3" /><path d="M8 21v-3a2 2 0 0 0-2-2H3" /><path d="M16 21v-3a2 2 0 0 1 2-2h3" />
@@ -1033,18 +1791,81 @@
     </section>
 
     <section class="pip-reader" data-reader aria-live="polite"></section>
+
+    <aside class="pip-side-drawer" data-side-drawer hidden aria-label="รายการศัพท์ ขีดเส้น และรายงาน">
+      <div class="pip-side-drawer__head">
+        <div>
+          <div class="pip-side-drawer__title" data-drawer-title>รายการในตำรา</div>
+          <div class="pip-side-drawer__meta" data-drawer-meta>ศัพท์ ขีดเส้น และรายงานจากการอ่าน</div>
+        </div>
+        <button class="pip-btn" type="button" data-drawer-close aria-label="ปิดแผงด้านข้าง"><svg class="pip-icon" aria-hidden="true"><use href="#pip-icon-x"></use></svg><span>ปิด</span></button>
+      </div>
+      <div class="pip-side-drawer__tabs" role="tablist" aria-label="เลือกประเภทข้อมูล">
+        <button class="pip-footer-button" type="button" data-drawer-tab="memory" role="tab" aria-selected="false">ศัพท์</button>
+        <button class="pip-footer-button" type="button" data-drawer-tab="remarks" role="tab" aria-selected="false">ขีดเส้น</button>
+        <button class="pip-footer-button" type="button" data-drawer-tab="reports" role="tab" aria-selected="true">รายงาน</button>
+        <button class="pip-footer-button" type="button" data-drawer-tab="search" role="tab" aria-selected="false">ค้นหา</button>
+      </div>
+      <div class="pip-side-drawer__list" data-drawer-list></div>
+    </aside>
+
+    <footer class="pip-footer-bar" data-footer-bar>
+      <button class="pip-footer-button" type="button" data-drawer-open="memory"><span>ศัพท์</span><span class="pip-footer-button__badge" data-memory-count>0</span></button>
+      <button class="pip-footer-button" type="button" data-drawer-open="remarks"><span>ขีดเส้น</span><span class="pip-footer-button__badge" data-remark-count>0</span></button>
+      <button class="pip-footer-button" type="button" data-drawer-open="reports"><span>รายงาน</span><span class="pip-footer-button__badge" data-report-count>0</span></button>
+      <button class="pip-footer-button" type="button" data-footer-erase aria-pressed="false"><svg class="pip-icon" aria-hidden="true"><use href="#pip-icon-eraser"></use></svg><span>ลบไฮไลท์</span></button>
+      <label class="pip-footer-search">
+        <input data-footer-search type="search" placeholder="ค้นหาศัพท์ ขีดเส้น หรือรายงาน..." autocomplete="off" />
+      </label>
+    </footer>
+    <button class="pip-footer-gear" type="button" data-footer-toggle aria-label="ซ่อนแถบเครื่องมือด้านล่าง" aria-pressed="false"><svg class="pip-icon" aria-hidden="true"><use href="#pip-icon-sliders-horizontal"></use></svg></button>
+
     <div class="pip-vocab-tooltip" data-vocab-tooltip role="dialog" aria-label="คำศัพท์บาลีเทียบ" hidden>
       <div class="pip-vocab-tooltip__head">
         <div class="pip-vocab-tooltip__term" data-vocab-term>คำที่เลือก</div>
         <div class="pip-vocab-tooltip__meta" data-vocab-meta>Mockup คำศัพท์บาลีเทียบ</div>
       </div>
-      <div class="pip-vocab-tooltip__list" data-vocab-list></div>
+      <div class="pip-vocab-tooltip__body">
+        <div class="pip-vocab-tooltip__list" data-vocab-list></div>
+        <div class="pip-remark-tools" data-remark-panel hidden>
+          <div class="pip-remark-tools__title">ใส่ป้ายคำแล้วกดบันทึก หรือเลือกป้ายไวยากรณ์เพื่อใช้ดินสอขีดเส้นใต้</div>
+          <label class="pip-vocab-save-field">
+            <input data-vocab-memory-label type="text" placeholder="ป้ายจำศัพท์ เช่น รากศัพท์, จำยาก, ออกสอบบ่อย..." autocomplete="off" />
+            <button class="pip-vocab-tooltip__button is-memory" type="button" data-vocab-quick-memory><svg class="pip-icon" aria-hidden="true"><use href="#pip-icon-pencil"></use></svg><span>บันทึกจำศัพท์</span></button>
+          </label>
+          <div class="pip-remark-tools__grid" data-remark-tools></div>
+        </div>
+        <div class="pip-exam-tools" data-exam-panel hidden>
+          <div class="pip-exam-tools__title">เลือกตำแหน่งเริ่มหรือสิ้นสุดข้อสอบจากข้อความที่ไฮไลท์</div>
+          <div class="pip-exam-tools__id" data-exam-active-id>ไอดีข้อสอบถัดไป: EX-YYMMDD-###</div>
+          <div class="pip-exam-tools__actions">
+            <button class="pip-vocab-tooltip__button is-memory" type="button" data-exam-boundary="start"><svg class="pip-icon" aria-hidden="true"><use href="#pip-icon-chevron-left"></use></svg><span>ประโยคที่เริ่ม</span></button>
+            <button class="pip-vocab-tooltip__button is-memory" type="button" data-exam-boundary="end"><svg class="pip-icon" aria-hidden="true"><use href="#pip-icon-chevron-right"></use></svg><span>ประโยคสิ้นสุด</span></button>
+          </div>
+        </div>
+      </div>
       <div class="pip-vocab-tooltip__actions">
         <button class="pip-vocab-tooltip__button" type="button" data-vocab-close>ปิด</button>
-        <button class="pip-vocab-tooltip__button is-clear" type="button" data-vocab-clear>ล้างไฮไลท์</button>
-        <button class="pip-vocab-tooltip__button is-memory" type="button" data-vocab-remember>จำศัพท์</button>
-        <button class="pip-vocab-tooltip__button is-report" type="button" data-vocab-report>
-          <svg class="pip-icon" aria-hidden="true"><use href="#pip-icon-message-warning"></use></svg><span>รายงานคำนี้</span>
+        <button class="pip-vocab-tooltip__button is-clear" type="button" data-vocab-clear><svg class="pip-icon" aria-hidden="true"><use href="#pip-icon-eraser"></use></svg><span>ลบไฮไลท์</span></button>
+        <button class="pip-vocab-tooltip__button is-exam" type="button" data-vocab-exam><svg class="pip-icon" aria-hidden="true"><use href="#pip-icon-file-text"></use></svg><span>ออกข้อสอบ</span></button>
+        <button class="pip-vocab-tooltip__button is-memory" type="button" data-vocab-remember><svg class="pip-icon" aria-hidden="true"><use href="#pip-icon-pencil"></use></svg><span>จัดการศัพท์</span></button>
+        <button
+          class="pip-vocab-tooltip__button is-memory"
+          type="button"
+          data-vocab-brackets
+          data-action-tooltip="เลือกระยะข้อความที่ต้องการใส่วงเล็บและกดปุ่ม &quot;ใส่วงเล็บ ()&quot;"
+          aria-label="ใส่วงเล็บ"
+        >
+          <span>ใส่วงเล็บ ()</span>
+        </button>
+        <button
+          class="pip-vocab-tooltip__button is-report"
+          type="button"
+          data-vocab-report
+          data-action-tooltip="เลือกไฮไลท์คำหรือประโยคที่ต้องการรายงาน หรือ รายงานทั้งหน้าโดยไม่ต้องเลือกข้อความได้"
+          aria-label="รายงานเนื้อหา"
+        >
+          <svg class="pip-icon" aria-hidden="true"><use href="#pip-icon-message-warning"></use></svg><span>รายงานเนื้อหา</span>
         </button>
       </div>
     </div>
@@ -1057,7 +1878,37 @@
     const COLLAPSED_KEY = 'paligo-reference-pip-toolbar-collapsed-v1';
     const LANG_KEY = 'paligo-reference-pip-lang-v1';
     const REVIEW_STORAGE_KEY = 'paligo-corpus-review-notes-v1';
+    const REMARK_STORAGE_KEY = 'paligo-corpus-remarks-v1';
+    const FOOTER_HIDDEN_KEY = 'paligo-reference-pip-footer-hidden-v1';
+    const EXAM_ACTIVE_KEY = 'paligo-reference-pip-active-exam-id-v1';
+    const ALL_STORIES_LOOKUP_KEY = 'story:all';
     const FOOTNOTE_CALLOUT_VISIBILITY_KEY = 'paligo-show-footnote-callouts-v1';
+    const GRAMMAR_TAGS = [
+      { id: 'b-p', label: 'ป.', title: 'ประธาน', className: 'b-p' },
+      { id: 'b-v-kit', label: 'กก.', title: 'กิริยากิตก์', className: 'b-v-kit' },
+      { id: 'b-v-akhyat', label: 'กอ.', title: 'กิริยาอาขยาต', className: 'b-v-akhyat' },
+      { id: 'b-v1', label: 'ป.วิภ.', title: 'ปฐมา วิภัตติ', className: 'b-v1' },
+      { id: 'b-v2', label: 'ทุ.วิภ.', title: 'ทุติยา วิภัตติ', className: 'b-v2' },
+      { id: 'b-v3', label: 'ต.วิภ.', title: 'ตติยา วิภัตติ', className: 'b-v3_7' },
+      { id: 'b-v4', label: 'จต.วิภ.', title: 'จตุตถี วิภัตติ', className: 'b-v3_7' },
+      { id: 'b-v5', label: 'ปญฺ.วิภ.', title: 'ปัญจมี วิภัตติ', className: 'b-v3_7' },
+      { id: 'b-v6', label: 'ฉ.วิภ.', title: 'ฉัฏฐี วิภัตติ', className: 'b-v3_7' },
+      { id: 'b-v7', label: 'สตฺ.วิภ.', title: 'สัตตมี วิภัตติ', className: 'b-v3_7' },
+      { id: 'b-sing', label: 'เอก.', title: 'เอกวจนะ', className: 'b-sing' },
+      { id: 'b-plur', label: 'พหุ.', title: 'พหุวจนะ', className: 'b-plur' },
+      { id: 'b-special1', label: 'หัก ฉ.ทุ.', title: 'หัก ฉ.ทุ.', className: 'b-special1' },
+    ];
+    const REMARK_SHAPES = [
+      { id: 'circle', label: 'วงกลม', title: 'วงกลมธรรมดา', className: 'is-circle' },
+      { id: 'circle-double', label: 'วงกลม ๒ ชั้น', title: 'วงกลมซ้อนทับสองชั้น', className: 'is-circle-double' },
+      {
+        id: 'brackets',
+        label: 'ใส่วงเล็บ ()',
+        title: 'เลือกช่วงข้อความแล้วใส่วงเล็บเปิดและปิด',
+        help: 'เลือกระยะข้อความที่ต้องการใส่วงเล็บและกดปุ่ม "ใส่วงเล็บ ()"',
+        className: 'is-brackets',
+      },
+    ];
     const NAV_LABELS = {
       sentence: { prev: 'บรรทัดที่แล้ว', next: 'บรรทัดถัดไป' },
       kho: { prev: 'ข้อที่แล้ว', next: 'ข้อถัดไป' },
@@ -1088,10 +1939,17 @@
     let languageToggleEnabled = false;
     let selectedId = '';
     let reviewNotes = [];
+    let remarkNotes = [];
     let activeReviewTarget = null;
     let activeVocabSelection = null;
+    let activeRemarkTool = null;
     let activeBreadcrumbLookupKey = '';
     let activeTopicFilterId = '';
+    let drawerMode = 'reports';
+    let drawerSearch = '';
+    let activeExamQuestionId = '';
+    let remarkPencilMode = false;
+    let highlightEraseMode = false;
 
     const titleEl = document.querySelector('[data-title]');
     const statusEl = document.querySelector('[data-status]');
@@ -1120,15 +1978,34 @@
     const reviewComment = document.querySelector('[data-review-comment]');
     const reviewSuggestion = document.querySelector('[data-review-suggestion]');
     const reviewDelete = document.querySelector('[data-review-delete]');
+    const sideDrawer = document.querySelector('[data-side-drawer]');
+    const drawerTitle = document.querySelector('[data-drawer-title]');
+    const drawerMeta = document.querySelector('[data-drawer-meta]');
+    const drawerList = document.querySelector('[data-drawer-list]');
+    const drawerClose = document.querySelector('[data-drawer-close]');
+    const footerSearch = document.querySelector('[data-footer-search]');
+    const footerErase = document.querySelector('[data-footer-erase]');
+    const footerToggle = document.querySelector('[data-footer-toggle]');
+    const memoryCountEl = document.querySelector('[data-memory-count]');
+    const remarkCountEl = document.querySelector('[data-remark-count]');
+    const reportCountEl = document.querySelector('[data-report-count]');
     const langRow = document.querySelector('[data-lang-row]');
     const subjectSelect = document.querySelector('[data-subject-select]');
     const vocabTooltip = document.querySelector('[data-vocab-tooltip]');
     const vocabTerm = document.querySelector('[data-vocab-term]');
     const vocabMeta = document.querySelector('[data-vocab-meta]');
     const vocabList = document.querySelector('[data-vocab-list]');
+    const remarkPanel = document.querySelector('[data-remark-panel]');
+    const remarkTools = document.querySelector('[data-remark-tools]');
+    const examPanel = document.querySelector('[data-exam-panel]');
+    const examActiveId = document.querySelector('[data-exam-active-id]');
     const vocabClose = document.querySelector('[data-vocab-close]');
     const vocabClear = document.querySelector('[data-vocab-clear]');
+    const vocabMemoryLabel = document.querySelector('[data-vocab-memory-label]');
+    const vocabQuickMemory = document.querySelector('[data-vocab-quick-memory]');
     const vocabRemember = document.querySelector('[data-vocab-remember]');
+    const vocabBrackets = document.querySelector('[data-vocab-brackets]');
+    const vocabExam = document.querySelector('[data-vocab-exam]');
     const vocabReport = document.querySelector('[data-vocab-report]');
 
     function queryParam(name) {
@@ -1371,6 +2248,7 @@
               activeStory = {
                 key: breadcrumbKey(storyLabel, 'story'),
                 label: storyLabel,
+                groupKey: active.key,
                 pageId: page.itemId,
                 sourcePage: page.sourcePage,
                 sourcePageLabel: page.sourcePageLabel,
@@ -1400,6 +2278,13 @@
     }
 
     function referenceGroupByKey(key) {
+      if (key === ALL_STORIES_LOOKUP_KEY) {
+        return {
+          key,
+          label: 'ทุกเรื่องในเล่ม',
+          stories: referenceGroups().flatMap((group) => group.stories || []),
+        };
+      }
       return referenceGroups().find((group) => group.key === key) || null;
     }
 
@@ -1439,8 +2324,8 @@
           label,
           kind,
           tone: kind === 'topic' ? 'topic' : kind,
-          lookupKey: kind === 'vagga' || kind === 'story' ? breadcrumbKey(label, kind) : '',
-          filterTopicId: kind === 'topic' ? options.filterTopicId || '' : '',
+          lookupKey: options.lookupKey ?? (kind === 'vagga' ? breadcrumbKey(label, kind) : ''),
+          filterTopicId: options.filterTopicId || '',
         });
       };
       push(`หน้า ${referencePage.sourcePageLabel || referencePage.sourcePage}`, 'page');
@@ -1448,11 +2333,11 @@
       const parentGroup = referenceGroupForPage(referencePage);
       if (parentGroup) push(parentGroup.label, 'vagga');
       const parentStory = referenceStoryForPage(referencePage);
-      if (parentStory) push(parentStory.label, 'story');
+      if (parentStory) push(parentStory.label, 'story', { lookupKey: ALL_STORIES_LOOKUP_KEY });
       (referencePage.children || []).forEach((line) => {
         const text = segmentText(line, preferred);
         if (!isReferenceContextLine(text)) return;
-        push(text, '', { filterTopicId: topicIdForLine(line) });
+        push(text, '', { lookupKey: parentStory?.key || '' });
       });
       return items.slice(0, 6);
     }
@@ -1601,6 +2486,40 @@
 
     function saveReviewNotes() {
       localStorage.setItem(REVIEW_STORAGE_KEY, JSON.stringify(reviewNotes));
+      renderDrawer();
+    }
+
+    function loadRemarkNotes() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(REMARK_STORAGE_KEY) || '[]');
+        remarkNotes = Array.isArray(parsed) ? parsed : [];
+      } catch (_error) {
+        remarkNotes = [];
+      }
+    }
+
+    function loadActiveExamQuestionId() {
+      try {
+        activeExamQuestionId = localStorage.getItem(EXAM_ACTIVE_KEY) || '';
+      } catch (_error) {
+        activeExamQuestionId = '';
+      }
+    }
+
+    function setActiveExamQuestionId(questionId) {
+      activeExamQuestionId = String(questionId || '').trim();
+      try {
+        if (activeExamQuestionId) localStorage.setItem(EXAM_ACTIVE_KEY, activeExamQuestionId);
+        else localStorage.removeItem(EXAM_ACTIVE_KEY);
+      } catch (_error) {
+        // Local files or locked browsers can reject storage; the current session still works.
+      }
+      updateExamPanelState();
+    }
+
+    function saveRemarkNotes() {
+      localStorage.setItem(REMARK_STORAGE_KEY, JSON.stringify(remarkNotes));
+      renderDrawer();
     }
 
     function reviewKey(target) {
@@ -1613,10 +2532,189 @@
       ].join('::');
     }
 
+    function remarkKey(target) {
+      return [
+        target.corpusId || '',
+        target.itemId || '',
+        target.selectionId || '',
+        target.toolId || '',
+      ].join('::');
+    }
+
+    function allRemarkTools() {
+      return [
+        ...GRAMMAR_TAGS.map((tool) => ({ ...tool, toolType: 'grammar' })),
+        ...REMARK_SHAPES.map((tool) => ({ ...tool, toolType: 'shape' })),
+      ];
+    }
+
+    function remarkToolById(toolId) {
+      return allRemarkTools().find((tool) => tool.id === toolId) || null;
+    }
+
     function findReviewNote(target) {
       if (!target) return null;
       const key = reviewKey(target);
       return reviewNotes.find((note) => note.key === key) || null;
+    }
+
+    function currentCorpusKey() {
+      return currentCorpus?.corpusId || currentCorpus?.id || '';
+    }
+
+    function notesForCurrentCorpus() {
+      const corpusId = currentCorpusKey();
+      return reviewNotes.filter((note) => !corpusId || note.corpusId === corpusId);
+    }
+
+    function remarksForCurrentCorpus() {
+      const corpusId = currentCorpusKey();
+      return remarkNotes.filter((note) => !corpusId || note.corpusId === corpusId);
+    }
+
+    function noteMatchesSearch(note) {
+      const query = drawerSearch.trim().toLowerCase();
+      if (!query) return true;
+      return [
+        note.selectedText,
+        note.comment,
+        note.suggestion,
+        note.label,
+        note.title,
+        note.toolId,
+        note.examQuestionId,
+        note.boundaryRole,
+        note.khoLabel,
+        note.itemId,
+        note.sourcePageLabel,
+        note.sourcePage,
+      ].some((value) => String(value || '').toLowerCase().includes(query));
+    }
+
+    function drawerNotes() {
+      const reviewItems = notesForCurrentCorpus().map((note) => ({ ...note, drawerType: 'review' }));
+      const remarkItems = remarksForCurrentCorpus().map((note) => ({ ...note, drawerType: 'remark', category: 'remark' }));
+      return [...reviewItems, ...remarkItems]
+        .filter((note) => {
+          if (drawerMode === 'memory') return note.drawerType === 'review' && note.category === 'memory';
+          if (drawerMode === 'remarks') return note.drawerType === 'remark';
+          if (drawerMode === 'reports') return note.drawerType === 'review' && note.category !== 'memory';
+          return true;
+        })
+        .filter(noteMatchesSearch)
+        .sort((a, b) => String(b.updatedAt || b.createdAt || '').localeCompare(String(a.updatedAt || a.createdAt || '')));
+    }
+
+    function categoryLabel(category) {
+      return {
+        memory: 'จำศัพท์',
+        remark: 'ขีดเส้นใต้',
+        vocabulary: 'คำศัพท์/ไฮไลท์',
+        segmentation: 'การแบ่งข้อ/บรรทัด',
+        footnote: 'เชิงอรรถ/เลขยกลอย',
+        hyphen: 'การตัดคำ/ขีดกลาง',
+        ocr: 'ตัวอักษร/OCR',
+        layout: 'การจัดหน้า',
+        other: 'อื่นๆ',
+      }[category] || category || 'รายงาน';
+    }
+
+    function noteLocationLabel(note) {
+      const parts = [];
+      if (note.khoLabel) parts.push(note.khoLabel);
+      if (note.sourcePageLabel || note.sourcePage) parts.push(`หน้า ${note.sourcePageLabel || note.sourcePage}`);
+      if (note.lineNo) parts.push(`บรรทัด ${note.lineNo}`);
+      return parts.join(' · ') || 'ตำแหน่งในตำรา';
+    }
+
+    function updateDrawerCounts() {
+      const notes = notesForCurrentCorpus();
+      const remarks = remarksForCurrentCorpus();
+      const memoryCount = notes.filter((note) => note.category === 'memory').length;
+      const reportCount = notes.filter((note) => note.category !== 'memory').length;
+      if (memoryCountEl) memoryCountEl.textContent = String(memoryCount);
+      if (remarkCountEl) remarkCountEl.textContent = String(remarks.length);
+      if (reportCountEl) reportCountEl.textContent = String(reportCount);
+      document.querySelectorAll('[data-drawer-open]').forEach((button) => {
+        button.classList.toggle('is-active', sideDrawer?.classList.contains('is-open') && button.dataset.drawerOpen === drawerMode);
+      });
+    }
+
+    function renderDrawer() {
+      if (!drawerList || !sideDrawer) return;
+      updateDrawerCounts();
+      document.querySelectorAll('[data-drawer-tab]').forEach((button) => {
+        const active = button.dataset.drawerTab === drawerMode;
+        button.classList.toggle('is-active', active);
+        button.setAttribute('aria-selected', String(active));
+      });
+      const notes = drawerNotes();
+      const label = drawerMode === 'memory'
+        ? 'ศัพท์ที่จำ'
+        : drawerMode === 'remarks'
+          ? 'รายการขีดเส้นใต้'
+          : drawerMode === 'reports'
+            ? 'รายการรายงาน'
+            : 'ค้นหา';
+      if (drawerTitle) drawerTitle.textContent = label;
+      if (drawerMeta) drawerMeta.textContent = `${notes.length} รายการในตำรานี้`;
+      drawerList.innerHTML = '';
+      if (!notes.length) {
+        const empty = document.createElement('div');
+        empty.className = 'pip-drawer-empty';
+        empty.textContent = drawerSearch
+          ? 'ยังไม่พบรายการที่ตรงกับคำค้นหา'
+          : drawerMode === 'memory'
+            ? 'ยังไม่มีศัพท์ที่จำไว้ในตำรานี้'
+            : drawerMode === 'remarks'
+              ? 'ยังไม่มีรายการขีดเส้นใต้ในตำรานี้'
+              : 'ยังไม่มีรายการรายงานในตำรานี้';
+        drawerList.append(empty);
+        return;
+      }
+      notes.forEach((note) => {
+        const card = document.createElement('article');
+        card.className = 'pip-note-card';
+        const memoryLabel = note.category === 'memory' ? String(note.label || note.comment || '').trim() : '';
+        const tag = document.createElement('div');
+        tag.className = 'pip-note-card__tag';
+        tag.textContent = memoryLabel ? `ป้ายคำ: ${memoryLabel}` : categoryLabel(note.category);
+        const term = document.createElement('div');
+        term.className = 'pip-note-card__term';
+        term.textContent = note.selectedText || note.khoLabel || note.itemId || 'ตำแหน่งที่บันทึกไว้';
+        const meta = document.createElement('div');
+        meta.className = 'pip-note-card__meta';
+        meta.textContent = noteLocationLabel(note);
+        const comment = document.createElement('div');
+        comment.className = 'pip-note-card__comment';
+        comment.textContent = note.category === 'memory'
+          ? (memoryLabel ? 'จำศัพท์ด้วยป้ายกำหนดเอง' : 'จำศัพท์แบบด่วน')
+          : note.drawerType === 'remark'
+          ? (note.toolType === 'exam-boundary'
+            ? `${note.label || note.title || 'ออกข้อสอบ'} · ${note.boundaryRole === 'end' ? 'ประโยคสิ้นสุด' : 'ประโยคที่เริ่ม'}`
+            : `${note.title || note.label || note.toolId || 'ป้ายไวยากรณ์'} · ${note.toolType === 'shape' ? 'รูปทรง' : 'เส้นใต้'}`)
+          : note.comment || note.suggestion || 'ยังไม่มีความคิดเห็นเพิ่มเติม';
+        card.append(tag, term, meta, comment);
+        drawerList.append(card);
+      });
+    }
+
+    function openDrawer(nextMode = drawerMode) {
+      drawerMode = nextMode || 'reports';
+      if (sideDrawer) {
+        sideDrawer.hidden = false;
+        requestAnimationFrame(() => sideDrawer.classList.add('is-open'));
+      }
+      renderDrawer();
+    }
+
+    function closeDrawer() {
+      if (!sideDrawer) return;
+      sideDrawer.classList.remove('is-open');
+      setTimeout(() => {
+        if (!sideDrawer.classList.contains('is-open')) sideDrawer.hidden = true;
+      }, 170);
+      updateDrawerCounts();
     }
 
     function simpleHash(value) {
@@ -1913,6 +3011,133 @@
       };
     }
 
+    function makeRemarkTarget(selection, tool = activeRemarkTool) {
+      const target = makeSelectionReviewTarget(selection);
+      if (!target || !tool) return null;
+      const nextTarget = {
+        ...target,
+        toolId: tool.id,
+        toolType: tool.toolType,
+        label: tool.label,
+        title: tool.title,
+        className: tool.className,
+        updatedAt: new Date().toISOString(),
+      };
+      return {
+        ...nextTarget,
+        key: remarkKey(nextTarget),
+      };
+    }
+
+    function examDateStamp(date = new Date()) {
+      const yy = String(date.getFullYear()).slice(-2);
+      const mm = String(date.getMonth() + 1).padStart(2, '0');
+      const dd = String(date.getDate()).padStart(2, '0');
+      return `${yy}${mm}${dd}`;
+    }
+
+    function nextExamQuestionId() {
+      const prefix = `EX-${examDateStamp()}-`;
+      const maxSequence = remarksForCurrentCorpus().reduce((max, note) => {
+        const value = String(note.examQuestionId || '');
+        if (!value.startsWith(prefix)) return max;
+        const sequence = Number(value.slice(prefix.length));
+        return Number.isFinite(sequence) ? Math.max(max, sequence) : max;
+      }, 0);
+      return `${prefix}${String(maxSequence + 1).padStart(3, '0')}`;
+    }
+
+    function updateExamPanelState() {
+      if (!examActiveId) return;
+      examActiveId.textContent = activeExamQuestionId
+        ? `กำลังออกข้อสอบ: ${activeExamQuestionId}`
+        : `ไอดีข้อสอบถัดไป: ${nextExamQuestionId()}`;
+    }
+
+    function makeExamBoundaryTarget(selection, boundaryRole) {
+      const target = makeSelectionReviewTarget(selection);
+      if (!target) return null;
+      const isEnd = boundaryRole === 'end';
+      const examQuestionId = isEnd && activeExamQuestionId
+        ? activeExamQuestionId
+        : nextExamQuestionId();
+      const label = `${isEnd ? 'สิ้นสุดข้อสอบ' : 'เริ่มข้อสอบ'} ${examQuestionId}`;
+      const nextTarget = {
+        ...target,
+        toolId: `exam-${isEnd ? 'end' : 'start'}`,
+        toolType: 'exam-boundary',
+        boundaryRole: isEnd ? 'end' : 'start',
+        examQuestionId,
+        label,
+        title: label,
+        className: `is-exam-boundary is-exam-${isEnd ? 'end' : 'start'}`,
+        updatedAt: new Date().toISOString(),
+      };
+      return {
+        ...nextTarget,
+        key: remarkKey(nextTarget),
+      };
+    }
+
+    function saveExamBoundary(boundaryRole) {
+      const target = makeExamBoundaryTarget(activeVocabSelection, boundaryRole);
+      if (!target) return false;
+      saveRemarkTarget(target);
+      if (target.boundaryRole === 'start') {
+        setActiveExamQuestionId(target.examQuestionId);
+      } else {
+        setActiveExamQuestionId('');
+      }
+      hideVocabTooltip();
+      window.getSelection()?.removeAllRanges();
+      return true;
+    }
+
+    function saveRemarkTarget(target) {
+      if (!target) return false;
+      const existingIndex = remarkNotes.findIndex((note) => note.key === target.key);
+      if (existingIndex >= 0) {
+        remarkNotes[existingIndex] = {
+          ...remarkNotes[existingIndex],
+          ...target,
+          createdAt: remarkNotes[existingIndex].createdAt || target.updatedAt,
+        };
+      } else {
+        remarkNotes.push({ ...target, createdAt: target.updatedAt });
+      }
+      saveRemarkNotes();
+      render();
+      return true;
+    }
+
+    function saveQuickMemoryTarget(target, label = '') {
+      if (!target) return false;
+      const key = reviewKey(target);
+      const now = new Date().toISOString();
+      const cleanLabel = String(label || '').trim();
+      const nextNote = {
+        ...target,
+        key,
+        category: 'memory',
+        comment: cleanLabel ? cleanLabel : 'จำศัพท์แบบด่วน',
+        label: cleanLabel,
+        suggestion: '',
+        updatedAt: now,
+      };
+      const existingIndex = reviewNotes.findIndex((note) => note.key === key);
+      if (existingIndex >= 0) {
+        reviewNotes[existingIndex] = {
+          ...reviewNotes[existingIndex],
+          ...nextNote,
+          createdAt: reviewNotes[existingIndex].createdAt || now,
+        };
+      } else {
+        reviewNotes.push({ ...nextNote, createdAt: now });
+      }
+      saveReviewNotes();
+      return true;
+    }
+
     function formatReviewTarget(target) {
       const parts = [];
       if (target?.khoLabel) parts.push(target.khoLabel);
@@ -1935,6 +3160,7 @@
       reviewOpen.classList.toggle('has-review', Boolean(existing));
       reviewOpen.setAttribute('aria-pressed', String(!reviewPanel.hidden));
       reviewOpen.title = existing ? 'มีความเห็นรีวิวในตำแหน่งนี้แล้ว' : 'รายงานข้อสังเกตของตำแหน่งนี้';
+      renderDrawer();
     }
 
     function openReviewPanel(targetOverride = null) {
@@ -1952,10 +3178,76 @@
       reviewComment.focus();
     }
 
+    function openReviewPanelFromTooltip(targetOverride = null) {
+      const target = targetOverride || makeSelectionReviewTarget(activeVocabSelection) || makeReviewTarget();
+      if (!target) return;
+      hideVocabTooltip();
+      window.getSelection()?.removeAllRanges();
+      if (toolbarEl.classList.contains('is-collapsed')) {
+        setToolbarCollapsed(false);
+      }
+      closeDrawer();
+      requestAnimationFrame(() => {
+        openReviewPanel(target);
+        reviewPanel?.scrollIntoView?.({ block: 'center', inline: 'nearest', behavior: 'smooth' });
+        reviewComment?.focus();
+      });
+    }
+
     function closeReviewPanel() {
       reviewPanel.hidden = true;
       activeReviewTarget = null;
       updateReviewButton();
+    }
+
+    function setHighlightEraseMode(enabled) {
+      highlightEraseMode = Boolean(enabled);
+      if (highlightEraseMode) setRemarkPencilMode(false);
+      document.body.classList.toggle('is-highlight-erase-mode', highlightEraseMode);
+      vocabClear?.setAttribute('aria-pressed', String(highlightEraseMode));
+      footerErase?.setAttribute('aria-pressed', String(highlightEraseMode));
+      if (highlightEraseMode) {
+        hideVocabTooltip({ resetTools: false });
+        window.getSelection()?.removeAllRanges();
+      }
+    }
+
+    function setFooterHidden(hidden, { persist = true } = {}) {
+      const isHidden = Boolean(hidden);
+      document.body.classList.toggle('is-footer-hidden', isHidden);
+      footerToggle?.setAttribute('aria-pressed', String(isHidden));
+      footerToggle?.setAttribute('aria-label', isHidden ? 'แสดงแถบเครื่องมือด้านล่าง' : 'ซ่อนแถบเครื่องมือด้านล่าง');
+      if (persist) localStorage.setItem(FOOTER_HIDDEN_KEY, isHidden ? '1' : '0');
+      if (isHidden) closeDrawer();
+    }
+
+    function removeReviewNoteByKey(key) {
+      if (!key) return false;
+      const nextNotes = reviewNotes.filter((note) => note.key !== key);
+      if (nextNotes.length === reviewNotes.length) return false;
+      reviewNotes = nextNotes;
+      saveReviewNotes();
+      setHighlightEraseMode(false);
+      render();
+      return true;
+    }
+
+    function removeRemarkNoteByKey(key) {
+      if (!key) return false;
+      const nextNotes = remarkNotes.filter((note) => note.key !== key);
+      if (nextNotes.length === remarkNotes.length) return false;
+      remarkNotes = nextNotes;
+      saveRemarkNotes();
+      setHighlightEraseMode(false);
+      render();
+      return true;
+    }
+
+    function setRemarkPencilMode(enabled) {
+      remarkPencilMode = Boolean(enabled && activeRemarkTool);
+      if (remarkPencilMode) setHighlightEraseMode(false);
+      document.body.classList.toggle('is-remark-pencil-mode', remarkPencilMode);
+      renderRemarkTools();
     }
 
     function updateNav(items = list()) {
@@ -2007,18 +3299,16 @@
       ));
     }
 
-    function appendTextWithMarks(container, text, line) {
-      const source = String(text || '-');
-      const notes = notesForLine(line);
-      if (!notes.length) {
-        container.textContent = source;
-        return;
-      }
+    function remarksForLine(line) {
+      if (!line?.itemId) return [];
+      return remarkNotes.filter((note) => note.itemId === line.itemId && note.selectedText);
+    }
 
-      let cursor = 0;
+    function rangesFromAnnotations(source, annotations, kind) {
       let fallbackSearchFrom = 0;
-      const ranges = notes
-        .map((note) => {
+      return annotations
+        .map((annotation) => {
+          const note = annotation;
           const quote = String(note.selectedText || '').trim();
           if (!quote) return null;
           let start = Number.isFinite(note.selectionStart) ? Number(note.selectionStart) : -1;
@@ -2029,32 +3319,86 @@
           }
           if (start < 0) return null;
           fallbackSearchFrom = Math.max(fallbackSearchFrom, end);
-          return { start, end, note };
+          return { start, end, note, kind };
         })
-        .filter(Boolean)
-        .sort((a, b) => (a.start - b.start) || (a.end - b.end));
+        .filter(Boolean);
+    }
+
+    function createReviewMark(range, text) {
+      const mark = document.createElement('mark');
+      const isMemory = range.note.category === 'memory';
+      mark.className = `pip-text-mark ${isMemory ? 'is-memory' : 'is-report'}`;
+      mark.dataset.reviewKey = range.note.key || reviewKey(range.note);
+      if (isMemory) {
+        const labelText = String(range.note.label || '').trim();
+        mark.dataset.memoryTooltip = labelText || 'จำศัพท์แบบด่วน';
+        mark.setAttribute('aria-label', mark.dataset.memoryTooltip);
+        mark.tabIndex = 0;
+      } else {
+        mark.title = range.note.comment || 'มีรายงานเนื้อหา';
+      }
+      mark.textContent = text;
+      if (isMemory) {
+        return mark;
+      }
+      const info = document.createElement('span');
+      info.className = 'pip-text-mark__info';
+      info.setAttribute('aria-label', 'มีรายงานเนื้อหา');
+      info.textContent = '!';
+      mark.append(info);
+      return mark;
+    }
+
+    function createRemarkMark(range, text) {
+      const mark = document.createElement('span');
+      const tool = remarkToolById(range.note.toolId) || range.note;
+      mark.className = `pip-remark ${range.note.className || tool.className || ''}`;
+      mark.dataset.remarkKey = range.note.key || remarkKey(range.note);
+      mark.title = range.note.title || tool.title || 'เส้นช่วยจำ';
+      const value = document.createElement('span');
+      value.className = 'pip-remark__text';
+      value.textContent = text;
+      if (range.note.toolType === 'exam-boundary' || tool.toolType === 'exam-boundary') {
+        const role = range.note.boundaryRole === 'end' ? 'end' : 'start';
+        const label = document.createElement('span');
+        label.className = `pip-exam-label is-${role}`;
+        label.textContent = range.note.label || `${role === 'end' ? 'สิ้นสุดข้อสอบ' : 'เริ่มข้อสอบ'} ${range.note.examQuestionId || ''}`.trim();
+        if (role === 'start') mark.append(label, value);
+        else mark.append(value, label);
+        return mark;
+      }
+      mark.append(value);
+      if (range.note.toolType === 'grammar' || tool.toolType === 'grammar') {
+        const tag = document.createElement('span');
+        tag.className = 'pip-remark__tag';
+        tag.textContent = range.note.label || tool.label || '';
+        mark.append(tag);
+      }
+      return mark;
+    }
+
+    function appendTextWithMarks(container, text, line) {
+      const source = String(text || '-');
+      const ranges = [
+        ...rangesFromAnnotations(source, notesForLine(line), 'review'),
+        ...rangesFromAnnotations(source, remarksForLine(line), 'remark'),
+      ].sort((a, b) => (a.start - b.start) || (a.end - b.end) || (a.kind === 'review' ? -1 : 1));
 
       if (!ranges.length) {
         container.textContent = source;
         return;
       }
 
-      cursor = 0;
+      let cursor = 0;
       ranges.forEach((range) => {
         if (range.start < cursor) return;
         if (range.start > cursor) {
           container.append(document.createTextNode(source.slice(cursor, range.start)));
         }
-        const mark = document.createElement('mark');
-        mark.className = `pip-text-mark ${range.note.category === 'memory' ? 'is-memory' : 'is-report'}`;
-        mark.title = range.note.comment || 'มีรายงานคำนี้';
-        mark.textContent = source.slice(range.start, range.end);
-        const info = document.createElement('span');
-        info.className = 'pip-text-mark__info';
-        info.setAttribute('aria-label', 'มีรายงานคำนี้');
-        info.textContent = 'i';
-        mark.append(info);
-        container.append(mark);
+        const markedText = source.slice(range.start, range.end);
+        container.append(range.kind === 'remark'
+          ? createRemarkMark(range, markedText)
+          : createReviewMark(range, markedText));
         cursor = range.end;
       });
       if (cursor < source.length) {
@@ -2179,7 +3523,9 @@
           const lookupTitle = document.createElement('div');
           lookupTitle.className = 'pip-breadcrumb-lookup__title';
           lookupTitle.textContent = activeLookupGroup
-            ? `${activeLookupGroup.label} · เลือกเรื่องในวรรคนี้`
+            ? (activeLookupGroup.key === ALL_STORIES_LOOKUP_KEY
+              ? 'ทุกเรื่องในเล่ม · เลือกเรื่อง'
+              : `${activeLookupGroup.label} · เลือกเรื่องในวรรคนี้`)
             : `${activeLookupStory.label} · เลือกประเด็นในเรื่องนี้`;
           const lookupList = document.createElement('div');
           lookupList.className = 'pip-breadcrumb-lookup__list';
@@ -2470,21 +3816,90 @@
       ];
     }
 
-    function hideVocabTooltip() {
+    function renderRemarkTools() {
+      if (!remarkTools) return;
+      remarkTools.replaceChildren();
+      allRemarkTools().forEach((tool) => {
+        if (tool.id === 'brackets') return;
+        const button = document.createElement('button');
+        button.className = 'pip-remark-tool';
+        if (tool.className) button.classList.add(...tool.className.split(/\s+/).filter(Boolean));
+        button.type = 'button';
+        button.dataset.remarkTool = tool.id;
+        button.title = tool.title;
+        if (tool.help) button.dataset.actionTooltip = tool.help;
+        button.textContent = tool.label;
+        const active = activeRemarkTool?.id === tool.id && remarkPencilMode;
+        button.classList.toggle('is-active', active);
+        button.setAttribute('aria-pressed', String(active));
+        remarkTools.append(button);
+      });
+    }
+
+    function setTooltipRemarkMode(enabled) {
+      if (!remarkPanel || !vocabList) return;
+      if (enabled && examPanel) {
+        examPanel.hidden = true;
+        vocabTooltip?.classList.remove('is-exam-mode');
+      }
+      remarkPanel.hidden = !enabled;
+      vocabTooltip?.classList.toggle('is-remark-mode', Boolean(enabled));
+      if (!enabled) {
+        setRemarkPencilMode(false);
+        if (vocabMemoryLabel) vocabMemoryLabel.value = '';
+      }
+    }
+
+    function setTooltipExamMode(enabled) {
+      if (!examPanel || !vocabList) return;
+      if (enabled && remarkPanel) {
+        remarkPanel.hidden = true;
+        vocabTooltip?.classList.remove('is-remark-mode');
+        setRemarkPencilMode(false);
+        if (vocabMemoryLabel) vocabMemoryLabel.value = '';
+      }
+      examPanel.hidden = !enabled;
+      vocabTooltip?.classList.toggle('is-exam-mode', Boolean(enabled));
+      if (enabled) updateExamPanelState();
+    }
+
+    function resetTooltipToolState() {
+      remarkPencilMode = false;
+      highlightEraseMode = false;
+      document.body.classList.remove('is-remark-pencil-mode', 'is-highlight-erase-mode');
+      vocabClear?.setAttribute('aria-pressed', 'false');
+      renderRemarkTools();
+    }
+
+    function hideVocabTooltip({ resetTools = true } = {}) {
       if (!vocabTooltip) return;
       vocabTooltip.hidden = true;
       activeVocabSelection = null;
+      setTooltipRemarkMode(false);
+      setTooltipExamMode(false);
+      if (resetTools) resetTooltipToolState();
     }
 
     function selectionLine(range) {
       const node = range?.commonAncestorContainer || range?.startContainer;
       const element = node?.nodeType === Node.ELEMENT_NODE ? node : node?.parentElement;
-      return element?.closest?.('.pip-line') || null;
+      const directLine = element?.closest?.('.pip-line') || null;
+      if (directLine) return directLine;
+      const selection = window.getSelection?.();
+      const anchorElement = selection?.anchorNode?.nodeType === Node.ELEMENT_NODE
+        ? selection.anchorNode
+        : selection?.anchorNode?.parentElement;
+      const focusElement = selection?.focusNode?.nodeType === Node.ELEMENT_NODE
+        ? selection.focusNode
+        : selection?.focusNode?.parentElement;
+      return anchorElement?.closest?.('.pip-line')
+        || focusElement?.closest?.('.pip-line')
+        || null;
     }
 
     function selectedTextOffset(line, range, selectedText) {
       const plainText = line?.dataset.plainText || line?.textContent || '';
-      const markerLabels = Array.from(line?.querySelectorAll?.('.pip-text-mark__info') || []).map((node) => node.textContent || '');
+      const markerLabels = Array.from(line?.querySelectorAll?.('.pip-text-mark__info, .pip-remark__tag, .pip-exam-label') || []).map((node) => node.textContent || '');
       const visibleText = markerLabels.reduce((value, label) => value.replace(label, ''), line?.textContent || '');
       const beforeRange = document.createRange();
       beforeRange.selectNodeContents(line);
@@ -2499,6 +3914,104 @@
       if (visibleStart >= 0) return visibleStart;
 
       return plainText.indexOf(selectedText);
+    }
+
+    function selectedLinePayload(selection, range, line) {
+      const markerLabels = Array.from(line?.querySelectorAll?.('.pip-text-mark__info, .pip-remark__tag, .pip-exam-label') || []).map((node) => node.textContent || '');
+      const text = markerLabels
+        .reduce((value, label) => value.replace(label, ''), selection.toString())
+        .replace(/\s+/g, ' ')
+        .trim();
+      if (!text || !line) return null;
+      const selectionStart = selectedTextOffset(line, range, text);
+      return {
+        text,
+        lineItemId: line.dataset.itemId || selectedId,
+        sourcePage: line.dataset.sourcePage || currentItem()?.sourcePage || '',
+        sourcePageLabel: line.dataset.sourcePageLabel || currentItem()?.sourcePageLabel || '',
+        lineNo: line.dataset.lineNo || '',
+        selectionStart,
+        selectionEnd: selectionStart >= 0 ? selectionStart + text.length : null,
+      };
+    }
+
+    function applyRemarkToolToSelection(selection, range, line, tool = activeRemarkTool) {
+      if (!tool) return false;
+      const payload = selectedLinePayload(selection, range, line);
+      const target = makeRemarkTarget(payload, tool);
+      if (!target) return false;
+      saveRemarkTarget(target);
+      window.getSelection()?.removeAllRanges();
+      hideVocabTooltip();
+      return true;
+    }
+
+    function removeAnnotationsInSelection(selection, range, line) {
+      const payload = selectedLinePayload(selection, range, line);
+      if (!payload || !Number.isFinite(payload.selectionStart) || !Number.isFinite(payload.selectionEnd)) return false;
+      const overlaps = (note) => (
+        note.itemId === payload.lineItemId
+        && Number.isFinite(note.selectionStart)
+        && Number.isFinite(note.selectionEnd)
+        && note.selectionStart < payload.selectionEnd
+        && note.selectionEnd > payload.selectionStart
+      );
+      const nextReviews = reviewNotes.filter((note) => !overlaps(note));
+      const nextRemarks = remarkNotes.filter((note) => !overlaps(note));
+      const changed = nextReviews.length !== reviewNotes.length || nextRemarks.length !== remarkNotes.length;
+      if (!changed) return false;
+      reviewNotes = nextReviews;
+      remarkNotes = nextRemarks;
+      saveReviewNotes();
+      saveRemarkNotes();
+      setHighlightEraseMode(false);
+      window.getSelection()?.removeAllRanges();
+      render();
+      return true;
+    }
+
+    function safeTooltipBounds() {
+      const margin = 12;
+      const footerRect = document.querySelector('[data-footer-bar]')?.getBoundingClientRect();
+      const footerHidden = document.body.classList.contains('is-footer-hidden');
+      const footerHeight = !footerHidden && footerRect && footerRect.width > 0 && footerRect.height > 0 ? footerRect.height : 0;
+      return {
+        margin,
+        gap: 10,
+        left: margin,
+        right: Math.max(margin, window.innerWidth - margin),
+        top: margin,
+        bottom: Math.max(margin + 140, window.innerHeight - margin - footerHeight),
+      };
+    }
+
+    function clamp(value, min, max) {
+      if (max < min) return min;
+      return Math.min(Math.max(value, min), max);
+    }
+
+    function placeVocabTooltip(anchorRect) {
+      if (!vocabTooltip || !anchorRect) return;
+      const bounds = safeTooltipBounds();
+      const maxWidth = Math.max(180, bounds.right - bounds.left);
+      const isRemarkMode = vocabTooltip.classList.contains('is-remark-mode');
+      const width = Math.min(isRemarkMode ? 430 : 360, maxWidth);
+      vocabTooltip.style.width = `${width}px`;
+      vocabTooltip.style.left = `${clamp(anchorRect.left + anchorRect.width / 2 - width / 2, bounds.left, bounds.right - width)}px`;
+
+      const tooltipRect = vocabTooltip.getBoundingClientRect();
+      const aboveSpace = Math.max(0, anchorRect.top - bounds.top - bounds.gap);
+      const belowSpace = Math.max(0, bounds.bottom - anchorRect.bottom - bounds.gap);
+      const preferAbove = aboveSpace >= tooltipRect.height || aboveSpace > belowSpace;
+      const availableHeight = Math.max(120, preferAbove ? aboveSpace : belowSpace);
+      const maxHeight = Math.min(tooltipRect.height, availableHeight);
+      vocabTooltip.style.maxHeight = isRemarkMode ? 'none' : `${maxHeight}px`;
+
+      const nextRect = vocabTooltip.getBoundingClientRect();
+      const desiredTop = preferAbove
+        ? anchorRect.top - nextRect.height - bounds.gap
+        : anchorRect.bottom + bounds.gap;
+      vocabTooltip.style.top = `${clamp(desiredTop, bounds.top, bounds.bottom - nextRect.height)}px`;
     }
 
     function showVocabTooltip(selection, range, line) {
@@ -2536,20 +4049,18 @@
         row.append(pali, gloss);
         vocabList.append(row);
       });
+      renderRemarkTools();
 
       const rect = range.getBoundingClientRect();
-      const width = Math.min(360, window.innerWidth - 24);
-      const left = Math.min(Math.max(12, rect.left + rect.width / 2 - width / 2), window.innerWidth - width - 12);
-      const top = Math.max(12, rect.top - 12);
-      vocabTooltip.style.left = `${left}px`;
-      vocabTooltip.style.top = `${top}px`;
-      vocabTooltip.style.width = `${width}px`;
+      const bounds = safeTooltipBounds();
+      vocabTooltip.style.maxHeight = `${Math.max(120, bounds.bottom - bounds.top)}px`;
+      vocabTooltip.style.left = `${bounds.left}px`;
+      vocabTooltip.style.top = `${bounds.top}px`;
+      vocabTooltip.style.width = `${Math.min(360, Math.max(180, bounds.right - bounds.left))}px`;
       vocabTooltip.hidden = false;
 
       requestAnimationFrame(() => {
-        const tooltipRect = vocabTooltip.getBoundingClientRect();
-        const nextTop = rect.top - tooltipRect.height - 10;
-        vocabTooltip.style.top = `${nextTop >= 12 ? nextTop : rect.bottom + 10}px`;
+        placeVocabTooltip(rect);
       });
     }
 
@@ -2573,6 +4084,39 @@
     });
     document.querySelectorAll('[data-lang]').forEach((button) => {
       button.addEventListener('click', () => setLanguageVisibility(button.dataset.lang || 'both'));
+    });
+    document.querySelectorAll('[data-drawer-open]').forEach((button) => {
+      button.addEventListener('click', () => openDrawer(button.dataset.drawerOpen || 'reports'));
+    });
+    document.querySelectorAll('[data-drawer-tab]').forEach((button) => {
+      button.addEventListener('click', () => openDrawer(button.dataset.drawerTab || 'reports'));
+    });
+    remarkTools?.addEventListener('click', (event) => {
+      const button = event.target.closest?.('[data-remark-tool]');
+      if (!button) return;
+      const tool = remarkToolById(button.dataset.remarkTool || '');
+      if (!tool) return;
+      activeRemarkTool = tool;
+      setRemarkPencilMode(true);
+      const target = makeRemarkTarget(activeVocabSelection, tool);
+      if (target) {
+        saveRemarkTarget(target);
+        hideVocabTooltip();
+        window.getSelection()?.removeAllRanges();
+      } else {
+        renderRemarkTools();
+      }
+    });
+    drawerClose?.addEventListener('click', closeDrawer);
+    footerSearch?.addEventListener('input', () => {
+      drawerSearch = footerSearch.value || '';
+      openDrawer('search');
+    });
+    footerErase?.addEventListener('click', () => {
+      setHighlightEraseMode(!highlightEraseMode);
+    });
+    footerToggle?.addEventListener('click', () => {
+      setFooterHidden(!document.body.classList.contains('is-footer-hidden'));
     });
     subjectSelect?.addEventListener('change', () => {
       const subject = subjectSelect.value;
@@ -2598,6 +4142,18 @@
       render();
     });
     readerEl.addEventListener('click', (event) => {
+      if (highlightEraseMode) {
+        const mark = event.target.closest?.('[data-review-key], [data-remark-key]');
+        if (mark && readerEl.contains(mark)) {
+          event.preventDefault();
+          event.stopPropagation();
+          if (mark.dataset.reviewKey) removeReviewNoteByKey(mark.dataset.reviewKey || '');
+          if (mark.dataset.remarkKey) removeRemarkNoteByKey(mark.dataset.remarkKey || '');
+        } else {
+          setHighlightEraseMode(false);
+        }
+        return;
+      }
       const filterButton = event.target.closest?.('[data-breadcrumb-filter-topic]');
       if (filterButton) {
         activeTopicFilterId = activeTopicFilterId === filterButton.dataset.breadcrumbFilterTopic
@@ -2660,7 +4216,25 @@
       else closeReviewPanel();
     });
     readerEl.addEventListener('mouseup', () => {
-      setTimeout(handleReaderSelection, 0);
+      setTimeout(() => {
+        const selection = window.getSelection();
+        if (!selection || selection.isCollapsed || selection.rangeCount === 0) {
+          if (!remarkPencilMode && !highlightEraseMode) handleReaderSelection();
+          return;
+        }
+        const range = selection.getRangeAt(0);
+        const line = selectionLine(range);
+        if (!line || !readerEl.contains(range.commonAncestorContainer)) return;
+        if (highlightEraseMode) {
+          removeAnnotationsInSelection(selection, range, line);
+          return;
+        }
+        if (remarkPencilMode && activeRemarkTool) {
+          applyRemarkToolToSelection(selection, range, line);
+          return;
+        }
+        handleReaderSelection();
+      }, 0);
     });
     readerEl.addEventListener('keyup', (event) => {
       if (event.key === 'Escape') {
@@ -2670,57 +4244,77 @@
       handleReaderSelection();
     });
     readerEl.addEventListener('touchend', () => {
-      setTimeout(handleReaderSelection, 120);
+      setTimeout(() => {
+        if (remarkPencilMode || highlightEraseMode) return;
+        handleReaderSelection();
+      }, 120);
     });
     document.addEventListener('mousedown', (event) => {
       if (vocabTooltip?.hidden) return;
       if (vocabTooltip.contains(event.target) || readerEl.contains(event.target)) return;
       hideVocabTooltip();
     });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && highlightEraseMode) {
+        setHighlightEraseMode(false);
+        return;
+      }
+      if (event.key === 'Escape' && remarkPencilMode) {
+        setRemarkPencilMode(false);
+      }
+    });
     vocabClose?.addEventListener('click', hideVocabTooltip);
     vocabClear?.addEventListener('click', () => {
-      const target = makeSelectionReviewTarget(activeVocabSelection);
-      if (!target) return;
-      const key = reviewKey(target);
-      reviewNotes = reviewNotes.filter((note) => note.key !== key);
-      saveReviewNotes();
-      hideVocabTooltip();
-      window.getSelection()?.removeAllRanges();
-      render();
+      setHighlightEraseMode(true);
     });
     vocabRemember?.addEventListener('click', () => {
+      setHighlightEraseMode(false);
+      setTooltipRemarkMode(true);
+      placeVocabTooltip(vocabTooltip.getBoundingClientRect());
+    });
+    function saveActiveVocabMemory() {
       const target = makeSelectionReviewTarget(activeVocabSelection);
-      if (!target) return;
-      const key = reviewKey(target);
-      const now = new Date().toISOString();
-      const nextNote = {
-        ...target,
-        key,
-        category: 'memory',
-        comment: 'จำคำศัพท์จาก tooltip',
-        suggestion: '',
-        updatedAt: now,
-      };
-      const existingIndex = reviewNotes.findIndex((note) => note.key === key);
-      if (existingIndex >= 0) {
-        reviewNotes[existingIndex] = {
-          ...reviewNotes[existingIndex],
-          ...nextNote,
-          createdAt: reviewNotes[existingIndex].createdAt || now,
-        };
-      } else {
-        reviewNotes.push({ ...nextNote, createdAt: now });
-      }
-      saveReviewNotes();
-      hideVocabTooltip();
+      if (!target) return false;
+      saveQuickMemoryTarget(target, vocabMemoryLabel?.value || '');
+      if (vocabMemoryLabel) vocabMemoryLabel.value = '';
       window.getSelection()?.removeAllRanges();
       render();
+      setTooltipRemarkMode(true);
+      placeVocabTooltip(vocabTooltip.getBoundingClientRect());
+      return true;
+    }
+    vocabQuickMemory?.addEventListener('click', () => {
+      saveActiveVocabMemory();
     });
-    vocabReport?.addEventListener('click', () => {
-      const target = makeSelectionReviewTarget(activeVocabSelection);
+    vocabMemoryLabel?.addEventListener('keydown', (event) => {
+      if (event.key !== 'Enter') return;
+      event.preventDefault();
+      saveActiveVocabMemory();
+    });
+    vocabBrackets?.addEventListener('click', () => {
+      const tool = remarkToolById('brackets');
+      const target = makeRemarkTarget(activeVocabSelection, tool);
       if (!target) return;
+      saveRemarkTarget(target);
       hideVocabTooltip();
-      openReviewPanel(target);
+      window.getSelection()?.removeAllRanges();
+    });
+    vocabExam?.addEventListener('click', () => {
+      setHighlightEraseMode(false);
+      setTooltipExamMode(true);
+      placeVocabTooltip(vocabTooltip.getBoundingClientRect());
+    });
+    examPanel?.addEventListener('click', (event) => {
+      const button = event.target.closest?.('[data-exam-boundary]');
+      if (!button) return;
+      event.preventDefault();
+      saveExamBoundary(button.dataset.examBoundary || 'start');
+    });
+    vocabReport?.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const target = makeSelectionReviewTarget(activeVocabSelection) || makeReviewTarget();
+      openReviewPanelFromTooltip(target);
     });
     reviewClose.addEventListener('click', closeReviewPanel);
     reviewDelete.addEventListener('click', () => {
@@ -2760,9 +4354,14 @@
     });
 
     loadReviewNotes();
+    loadRemarkNotes();
+    loadActiveExamQuestionId();
+    updateDrawerCounts();
+    renderRemarkTools();
     bindScale();
     setFoolscapLayout(localStorage.getItem(LAYOUT_KEY) === 'foolscap');
     setToolbarCollapsed(localStorage.getItem(COLLAPSED_KEY) === '1');
+    setFooterHidden(localStorage.getItem(FOOTER_HIDDEN_KEY) === '1', { persist: false });
     loadCorpus(queryParam('corpus') || DEFAULT_CORPUS).catch((error) => {
       statusEl.textContent = error.message;
       focusLabel.textContent = error.message;
