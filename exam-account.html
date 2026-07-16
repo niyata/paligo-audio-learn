@@ -1441,11 +1441,26 @@
         activateTab("register");
       });
 
+      function normalizeSafeReturnPath(rawPath) {
+        if (!rawPath || String(rawPath).includes("://")) return "";
+        try {
+          const candidate = new URL(String(rawPath), window.location.origin);
+          if (candidate.origin !== window.location.origin) return "";
+          const pathParts = candidate.pathname.split("/").filter(Boolean);
+          if (candidate.pathname !== "/" && pathParts.length !== 1) return "";
+          const leaf = pathParts[0] || "index";
+          const pageName = leaf.endsWith(".html") ? leaf : `${leaf}.html`;
+          if (!window.PaligoNavConfig?.pages?.[pageName]) return "";
+          return `${candidate.pathname}${candidate.search}${candidate.hash}`;
+        } catch {
+          return "";
+        }
+      }
+
       function redirectAfterAuth() {
-        if (!returnPath || returnPath.includes("://")) return false;
-        const safe = returnPath.split("?")[0];
-        if (!safe.endsWith(".html")) return false;
-        window.location.href = returnPath;
+        const safeReturnPath = normalizeSafeReturnPath(returnPath);
+        if (!safeReturnPath) return false;
+        window.location.href = safeReturnPath;
         return true;
       }
 
