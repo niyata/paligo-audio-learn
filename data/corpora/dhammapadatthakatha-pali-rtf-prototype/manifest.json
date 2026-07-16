@@ -1,0 +1,21 @@
+{
+  "schema": "paligo.corpus-manifest.v1",
+  "title": "ธัมมปทัฏฐกถา ปฐโม ภาโค (บาลี · RTF Unicode prototype)",
+  "grade": "ป.ธ. ๔",
+  "corpus": "corpus.json",
+  "defaultDisplayMode": "page",
+  "subjectHint": "thai-to-pali",
+  "languageToggle": false,
+  "defaultLanguageVisibility": "pali",
+  "translationCompanions": {
+    "thaiMeaning": {
+      "label": "ไทย (อรรถ)",
+      "manifest": "../dhammapadatthakatha-meaning-thai-prototype/manifest.json"
+    },
+    "thaiLiteral": {
+      "label": "ไทย (พยัญชนะ)",
+      "manifest": "../dhammapadatthakatha-literal-thai-prototype/manifest.json"
+    }
+  },
+  "audioAlignment": ""
+}

@@ -1,0 +1,22 @@
+{
+  "schema": "paligo.pali-rtf-glyph-report.v1",
+  "corpusId": "dhammapadatthakatha-pali-rtf-prototype",
+  "title": "ธัมมปทัฏฐกถา ปฐโม ภาโค (บาลี · RTF Unicode prototype)",
+  "pageCount": 148,
+  "lineCount": 3053,
+  "sourceArtifacts": {
+    "sourceFile": "/Users/iworn/Documents/Claude/Projects/PaliGo/Knowledge-Base/pt4/Dhammapada-sambandha/Raw-Data-PT4/ธัมมปทัฏฐกถา ปฐโม ภาโค.rtf",
+    "encoding": "RTF ANSI CP874",
+    "legacyPuaMap": {
+      "U+F700": "ฐ",
+      "U+F70F": "ญ",
+      "U+F711": "ํ"
+    },
+    "glyphAudit": {
+      "remainingPua": [],
+      "replacementChars": 0,
+      "pinthuCount": 13881,
+      "niggahitaCount": 4258
+    }
+  }
+}

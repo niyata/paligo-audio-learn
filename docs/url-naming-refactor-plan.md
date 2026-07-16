@@ -24,6 +24,29 @@ Use these prefixes by domain:
 | `account-*` / `profile-*` | User identity, login, profile, role setup | Exam-specific settings |
 | `admin-*` | System/admin control surfaces | User-facing learning flows |
 
+## Terminology & Code Abbreviations
+
+Paligo code should prefer domain terms that are readable to engineers who do
+not know Thai classroom shorthand.
+
+| Concept | User-facing Thai | Preferred code term | Avoid in new code |
+| --- | --- | --- | --- |
+| หน่วยข้อ / ตอนย่อยของตำรา | ข้อ | `episode`, `ep` | `kho`, `khoNo`, `khoLabel` |
+
+Rules:
+
+1. Use `episode` for schema fields, function names, data model names, and
+   comments where clarity matters.
+2. Use `ep` only for compact IDs, route/query params, CSS hooks, or generated
+   item ids where brevity is important.
+3. Keep visible UI copy as Thai (`ข้อ`) when that is what the learner expects.
+   The naming rule is for code and data contracts, not user-facing text.
+4. Treat existing `kho*` names as legacy compatibility until a focused
+   migration slice exists. Do not rename persisted localStorage keys or corpus
+   JSON fields without a migration plan.
+5. When touching old code, new aliases should read from both names during the
+   transition, for example `episodeNo ?? khoNo`.
+
 ## URL Direction
 
 Short term static URLs can stay `.html`, but new aliases should be meaningful:

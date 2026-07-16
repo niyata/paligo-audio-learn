@@ -1625,10 +1625,10 @@
           [
             "4:thai-to-pali",
             {
-              corpusId: "dhammapadatthakatha-pt4-book1",
-              title: "ธัมมปทัฏฐกถา ภาค ๑ (เรื่องพระจักขุบาล)",
+              corpusId: "dhammapadatthakatha-pali-rtf-prototype",
+              title: "ธัมมปทัฏฐกถา ปฐโม ภาโค (เรื่องพระจักขุบาล)",
               description: "ป.ธ. ๔ · แปลไทยเป็นมคธ",
-              url: "pali-reference-pip.html?corpus=data/corpora/dhammapadatthakatha-pt4-book1/manifest.json",
+              url: "pali-reference-pip.html?corpus=data/corpora/dhammapadatthakatha-pali-rtf-prototype/manifest.json",
             },
           ],
         ]);
@@ -3260,6 +3260,29 @@
             event.stopPropagation();
           });
         }
+
+        window.addEventListener("message", (event) => {
+          if (event.source !== paliReferenceFrame?.contentWindow) return;
+          const message = event.data;
+          if (!message || message.type !== "paligo:pip-subject-change") return;
+          const nextSubject = String(message.subject || "");
+          const nextGrade = String(message.grade || gradePicker?.dataset.value || currentProfileGrade || "4");
+          const allowed = getAllowedSubjectsForGrade(nextGrade);
+          if (!allowed.some((item) => item.value === nextSubject)) return;
+
+          if (gradePicker && gradePicker.dataset.value !== nextGrade) {
+            selectPickerValue(gradePicker, nextGrade);
+            updatePickerCurrentValue(gradePicker, nextGrade);
+          }
+          rebuildSubjectPickerOptions(nextSubject);
+          if (subjectPicker) {
+            selectPickerValue(subjectPicker, nextSubject);
+            updatePickerCurrentValue(subjectPicker, nextSubject);
+          }
+          syncPrefilledAnswerLine();
+          syncPaliReferenceContext({ reload: !paliReferencePip?.hidden });
+          scheduleAutoSave();
+        });
 
         document.addEventListener("click", (event) => {
           if (!(event.target instanceof Element)) return;

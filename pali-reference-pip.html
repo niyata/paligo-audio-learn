@@ -83,7 +83,23 @@
     .pip-toolbar-head {
       align-items: start;
       display: grid;
+      gap: 8px;
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .pip-toolbar-head__copy {
+      display: grid;
       gap: 3px;
+      min-width: 0;
+    }
+
+    .pip-toolbar-head__actions {
+      align-items: start;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      justify-content: flex-end;
+      min-width: 0;
     }
 
     .pip-control-grid {
@@ -115,6 +131,40 @@
       flex-wrap: wrap;
       gap: 7px;
       min-width: 0;
+    }
+
+    .pip-subject-select-wrap {
+      display: inline-grid;
+      max-width: 100%;
+      position: relative;
+      width: min(100%, 360px);
+    }
+
+    .pip-subject-select-wrap::after {
+      border-bottom: 2px solid #1f2d89;
+      border-right: 2px solid #1f2d89;
+      content: "";
+      height: 7px;
+      pointer-events: none;
+      position: absolute;
+      right: 13px;
+      top: 13px;
+      transform: rotate(45deg);
+      width: 7px;
+    }
+
+    .pip-subject-select {
+      appearance: none;
+      background: #fffaf0;
+      border: 1px solid rgba(31, 45, 137, 0.18);
+      border-radius: 8px;
+      color: #1f2d89;
+      font: inherit;
+      font-size: 0.82rem;
+      font-weight: 900;
+      min-height: 38px;
+      padding: 7px 34px 7px 10px;
+      width: 100%;
     }
 
     .pip-title {
@@ -364,6 +414,161 @@
       justify-content: flex-end;
     }
 
+    .pip-vocab-tooltip {
+      background: rgba(255, 253, 247, 0.98);
+      border: 1px solid rgba(31, 45, 137, 0.2);
+      border-radius: 12px;
+      box-shadow: 0 18px 42px rgba(31, 45, 137, 0.18);
+      color: #343434;
+      display: grid;
+      font-family: Sarabun, -apple-system, BlinkMacSystemFont, "SF Pro Text", ui-sans-serif, sans-serif;
+      gap: 8px;
+      max-width: min(360px, calc(100vw - 24px));
+      padding: 10px;
+      position: fixed;
+      z-index: 20;
+    }
+
+    .pip-vocab-tooltip[hidden] {
+      display: none;
+    }
+
+    .pip-vocab-tooltip__head {
+      display: grid;
+      gap: 2px;
+    }
+
+    .pip-vocab-tooltip__term {
+      color: #1f2d89;
+      font-size: 0.95rem;
+      font-weight: 950;
+      line-height: 1.2;
+    }
+
+    .pip-vocab-tooltip__meta {
+      color: var(--reader-muted);
+      font-size: 0.72rem;
+      font-weight: 800;
+      line-height: 1.35;
+    }
+
+    .pip-vocab-tooltip__list {
+      display: grid;
+      gap: 5px;
+    }
+
+    .pip-vocab-tooltip__item {
+      background: rgba(255, 243, 214, 0.68);
+      border: 1px solid rgba(242, 166, 0, 0.2);
+      border-radius: 8px;
+      display: grid;
+      gap: 1px;
+      padding: 7px 8px;
+    }
+
+    .pip-vocab-tooltip__pali {
+      color: #6b4f00;
+      font-size: 0.86rem;
+      font-weight: 900;
+      line-height: 1.25;
+    }
+
+    .pip-vocab-tooltip__gloss {
+      color: rgba(52, 52, 52, 0.78);
+      font-size: 0.74rem;
+      font-weight: 750;
+      line-height: 1.35;
+    }
+
+    .pip-vocab-tooltip__actions {
+      border-top: 1px solid rgba(74, 44, 10, 0.1);
+      display: flex;
+      gap: 6px;
+      justify-content: flex-end;
+      padding-top: 8px;
+    }
+
+    .pip-vocab-tooltip__button {
+      appearance: none;
+      align-items: center;
+      background: #fffaf0;
+      border: 1px solid rgba(31, 45, 137, 0.18);
+      border-radius: 8px;
+      color: #1f2d89;
+      cursor: pointer;
+      display: inline-flex;
+      font: inherit;
+      font-size: 0.78rem;
+      font-weight: 900;
+      gap: 5px;
+      min-height: 32px;
+      padding: 6px 9px;
+    }
+
+    .pip-vocab-tooltip__button.is-report {
+      background: #fff3d6;
+      border-color: #f2a600;
+      color: #6b4f00;
+    }
+
+    .pip-vocab-tooltip__button.is-memory {
+      background: rgba(31, 45, 137, 0.08);
+      color: #1f2d89;
+    }
+
+    .pip-vocab-tooltip__button.is-clear {
+      background: #fff;
+      color: rgba(52, 52, 52, 0.78);
+    }
+
+    .pip-text-mark {
+      background: rgba(242, 166, 0, 0.24);
+      border-radius: 5px;
+      box-decoration-break: clone;
+      -webkit-box-decoration-break: clone;
+      color: inherit;
+      padding: 0 2px;
+      position: relative;
+    }
+
+    .pip-text-mark.is-report {
+      background: rgba(216, 59, 59, 0.18);
+      outline: 1px solid rgba(216, 59, 59, 0.32);
+    }
+
+    .pip-text-mark.is-memory {
+      background: rgba(242, 166, 0, 0.24);
+      outline: 1px solid rgba(242, 166, 0, 0.34);
+    }
+
+    .pip-text-mark.is-memory .pip-text-mark__info {
+      background: #f2a600;
+      color: #3a2a00;
+    }
+
+    .pip-text-mark__info {
+      align-items: center;
+      background: #d83b3b;
+      border: 1px solid #fff;
+      border-radius: 999px;
+      color: #fff;
+      display: inline-flex;
+      font-family: Sarabun, -apple-system, BlinkMacSystemFont, "SF Pro Text", ui-sans-serif, sans-serif;
+      font-size: 0.55em;
+      font-weight: 950;
+      height: 1.1em;
+      justify-content: center;
+      line-height: 1;
+      margin-inline-start: 2px;
+      transform: translateY(-0.35em);
+      width: 1.1em;
+    }
+
+    .pip-topic-heading {
+      color: #1f2d89;
+      font-weight: 950;
+    }
+
     .pip-reader {
       background: #fff;
       font-family: var(--reader-font);
@@ -429,6 +634,126 @@
       margin-bottom: 8px;
     }
 
+    .pip-breadcrumb {
+      align-items: center;
+      display: flex;
+      flex-wrap: wrap;
+      font-family: Sarabun, -apple-system, BlinkMacSystemFont, "SF Pro Text", ui-sans-serif, sans-serif;
+      gap: 0;
+      margin: 0 0 8px;
+    }
+
+    .pip-breadcrumb__item {
+      appearance: none;
+      align-items: center;
+      background: #eef0ff;
+      border: 0;
+      clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%);
+      color: rgba(31, 45, 137, 0.88);
+      display: inline-flex;
+      font-size: calc(0.74rem * var(--reader-scale));
+      font-weight: 850;
+      gap: 5px;
+      line-height: 1.25;
+      margin-inline-start: -10px;
+      min-height: 30px;
+      padding: 5px 18px 5px 24px;
+    }
+
+    .pip-breadcrumb__item:first-child {
+      border-bottom-left-radius: 8px;
+      border-top-left-radius: 8px;
+      clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%);
+      margin-inline-start: 0;
+      padding-inline-start: 12px;
+    }
+
+    .pip-breadcrumb__item:last-child {
+      border-bottom-right-radius: 8px;
+      border-top-right-radius: 8px;
+    }
+
+    button.pip-breadcrumb__item {
+      cursor: pointer;
+    }
+
+    button.pip-breadcrumb__item:hover,
+    button.pip-breadcrumb__item.is-open {
+      background: #1f2d89;
+      color: #fffaf0;
+    }
+
+    button.pip-breadcrumb__item.is-filtered {
+      background: #f2a600;
+      color: #3a2a00;
+    }
+
+    .pip-breadcrumb__item.is-vagga {
+      background: rgba(31, 45, 137, 0.16);
+      color: #1f2d89;
+    }
+
+    .pip-breadcrumb__item.is-story,
+    .pip-breadcrumb__item.is-topic {
+      background: rgba(242, 166, 0, 0.16);
+      color: #6b4f00;
+    }
+
+    .pip-breadcrumb-lookup {
+      background: #fffdf7;
+      border: 1px solid rgba(31, 45, 137, 0.16);
+      border-radius: 10px;
+      box-shadow: 0 14px 34px rgba(31, 45, 137, 0.12);
+      display: grid;
+      font-family: Sarabun, -apple-system, BlinkMacSystemFont, "SF Pro Text", ui-sans-serif, sans-serif;
+      gap: 6px;
+      margin: -2px 0 12px;
+      max-width: min(620px, 100%);
+      padding: 8px;
+    }
+
+    .pip-breadcrumb-lookup__title {
+      color: #1f2d89;
+      font-size: calc(0.75rem * var(--reader-scale));
+      font-weight: 900;
+      line-height: 1.3;
+      padding: 0 2px;
+    }
+
+    .pip-breadcrumb-lookup__list {
+      display: grid;
+      gap: 5px;
+    }
+
+    .pip-breadcrumb-lookup__item {
+      appearance: none;
+      background: #fffaf0;
+      border: 1px solid rgba(31, 45, 137, 0.12);
+      border-radius: 8px;
+      color: #343434;
+      cursor: pointer;
+      display: flex;
+      font: inherit;
+      font-size: calc(0.76rem * var(--reader-scale));
+      font-weight: 800;
+      justify-content: space-between;
+      line-height: 1.35;
+      padding: 7px 9px;
+      text-align: left;
+    }
+
+    .pip-breadcrumb-lookup__item:hover {
+      border-color: rgba(31, 45, 137, 0.38);
+      color: #1f2d89;
+    }
+
+    .pip-breadcrumb-lookup__page {
+      color: var(--reader-muted);
+      flex: 0 0 auto;
+      font-size: 0.86em;
+      margin-inline-start: 12px;
+    }
+
     .pip-line {
       border-radius: 8px;
       display: block;
@@ -439,6 +764,40 @@
     }
 
     .pip-line.is-active { background: #fff3d6; }
+
+    .pip-bilingual {
+      display: grid;
+      gap: 18px;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+
+    .pip-bilingual__col {
+      min-width: 0;
+    }
+
+    .pip-bilingual__col--pali {
+      border-inline-start: 1px dashed rgba(31, 45, 137, 0.3);
+      padding-inline-start: 18px;
+    }
+
+    .pip-bilingual__label {
+      color: var(--reader-muted);
+      font-family: Sarabun, -apple-system, BlinkMacSystemFont, "SF Pro Text", ui-sans-serif, sans-serif;
+      font-size: calc(0.72rem * var(--reader-scale));
+      font-weight: 850;
+      margin-bottom: 4px;
+    }
+
+    body.lang-thai .pip-bilingual { grid-template-columns: minmax(0, 1fr); }
+    body.lang-thai .pip-bilingual__col--pali { display: none; }
+    body.lang-pali .pip-bilingual { grid-template-columns: minmax(0, 1fr); }
+    body.lang-pali .pip-bilingual__col--thai { display: none; }
+    body.lang-pali .pip-bilingual__col--pali {
+      border-inline-start: 0;
+      padding-inline-start: 0;
+    }
+
+    .pip-lang-row[hidden] { display: none; }
 
     .pip-page-marker {
       align-items: center;
@@ -481,6 +840,18 @@
       .pip-select {
         grid-column: 1 / -1;
         grid-row: 1;
+      }
+
+      .pip-bilingual {
+        gap: 12px;
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .pip-bilingual__col--pali {
+        border-block-start: 1px dashed rgba(31, 45, 137, 0.3);
+        border-inline-start: 0;
+        padding-block-start: 12px;
+        padding-inline-start: 0;
       }
     }
   </style>
@@ -540,8 +911,13 @@
 
       <div class="pip-toolbar-full">
         <div class="pip-toolbar-head">
-          <h1 class="pip-title" data-title>มังคลัตถทีปนีบาลี (ปฐโม ภาโค)</h1>
-          <p class="pip-status" data-status>กำลังโหลดตำรา...</p>
+          <div class="pip-toolbar-head__copy">
+            <h1 class="pip-title" data-title>มังคลัตถทีปนีบาลี (ปฐโม ภาโค)</h1>
+            <p class="pip-status" data-status>กำลังโหลดตำรา...</p>
+          </div>
+          <div class="pip-toolbar-head__actions">
+            <button class="pip-btn" type="button" data-collapse-toggle data-icon="minimize" aria-pressed="false"><svg class="pip-icon" aria-hidden="true"><use href="#pip-icon-minimize"></use></svg><span>ย่อแผง</span></button>
+          </div>
         </div>
 
         <div class="pip-control-grid">
@@ -553,18 +929,30 @@
             </label>
             <div class="pip-tool-row">
               <button class="pip-btn" type="button" data-layout-toggle data-icon="book-open" aria-pressed="false"><svg class="pip-icon" aria-hidden="true"><use href="#pip-icon-book-open"></use></svg><span>หน้ากระดาษ: ดั้งเดิม</span></button>
-              <button class="pip-btn" type="button" data-collapse-toggle data-icon="minimize" aria-pressed="false"><svg class="pip-icon" aria-hidden="true"><use href="#pip-icon-minimize"></use></svg><span>ย่อแผง</span></button>
               <button class="pip-btn pip-review-btn" type="button" data-review-open aria-pressed="false"><svg class="pip-icon" aria-hidden="true"><use href="#pip-icon-message-warning"></use></svg><span>รายงาน</span></button>
             </div>
           </section>
 
           <section class="pip-tool-section" aria-label="เครื่องมือตัวกรองและนำทาง">
             <div class="pip-tool-section__title">เนื้อหา</div>
+            <label class="pip-subject-select-wrap">
+              <select class="pip-subject-select" data-subject-select aria-label="เลือกวิชา">
+                <option value="thai-to-pali">ป.ธ. ๔ · แปลไทยเป็นมคธ</option>
+                <option value="pali-to-thai">ป.ธ. ๔ · แปลมคธเป็นไทย</option>
+              </select>
+            </label>
             <div class="pip-tool-row" aria-label="โหมดแสดงตำรา">
               <button class="pip-btn" type="button" data-mode="kho" aria-pressed="true"><svg class="pip-icon" aria-hidden="true"><use href="#pip-icon-list-checks"></use></svg><span>ทีละข้อ</span></button>
               <button class="pip-btn" type="button" data-mode="page" aria-pressed="false"><svg class="pip-icon" aria-hidden="true"><use href="#pip-icon-file-text"></use></svg><span>ทีละหน้า</span></button>
               <button class="pip-btn" type="button" data-mode="sentence" aria-pressed="false"><svg class="pip-icon" aria-hidden="true"><use href="#pip-icon-align-left"></use></svg><span>ทีละบรรทัด</span></button>
+              <button class="pip-btn" type="button" data-mode="topic" aria-pressed="false" hidden><svg class="pip-icon" aria-hidden="true"><use href="#pip-icon-list-checks"></use></svg><span>ทีละประเด็น</span></button>
               <button class="pip-btn" type="button" data-mode="chapter" aria-pressed="false"><svg class="pip-icon" aria-hidden="true"><use href="#pip-icon-layers"></use></svg><span>ทีละเรื่อง</span></button>
+            </div>
+            <div class="pip-tool-row pip-lang-row" data-lang-row hidden aria-label="แสดงภาษา">
+              <button class="pip-btn" type="button" data-lang="thaiMeaning" aria-pressed="false"><span>ไทย (อรรถ)</span></button>
+              <button class="pip-btn" type="button" data-lang="thaiLiteral" aria-pressed="false"><span>ไทย (พยัญชนะ)</span></button>
+              <button class="pip-btn" type="button" data-lang="pali" aria-pressed="false"><span>บาลี (เฉลย)</span></button>
+              <button class="pip-btn" type="button" data-lang="both" aria-pressed="true"><span>ทั้งคู่</span></button>
             </div>
           </section>
         </div>
@@ -591,6 +979,7 @@
           <label>
             หมวด
             <select data-review-category>
+              <option value="vocabulary">คำศัพท์/ไฮไลท์</option>
               <option value="segmentation">การแบ่งข้อ/บรรทัด</option>
               <option value="footnote">เชิงอรรถ/เลขยกลอย</option>
               <option value="hyphen">การตัดคำ/ขีดกลาง</option>
@@ -616,6 +1005,21 @@
     </section>
 
     <section class="pip-reader" data-reader aria-live="polite"></section>
+    <div class="pip-vocab-tooltip" data-vocab-tooltip role="dialog" aria-label="คำศัพท์บาลีเทียบ" hidden>
+      <div class="pip-vocab-tooltip__head">
+        <div class="pip-vocab-tooltip__term" data-vocab-term>คำที่เลือก</div>
+        <div class="pip-vocab-tooltip__meta" data-vocab-meta>Mockup คำศัพท์บาลีเทียบ</div>
+      </div>
+      <div class="pip-vocab-tooltip__list" data-vocab-list></div>
+      <div class="pip-vocab-tooltip__actions">
+        <button class="pip-vocab-tooltip__button" type="button" data-vocab-close>ปิด</button>
+        <button class="pip-vocab-tooltip__button is-clear" type="button" data-vocab-clear>ล้างไฮไลท์</button>
+        <button class="pip-vocab-tooltip__button is-memory" type="button" data-vocab-remember>จำศัพท์</button>
+        <button class="pip-vocab-tooltip__button is-report" type="button" data-vocab-report>
+          <svg class="pip-icon" aria-hidden="true"><use href="#pip-icon-message-warning"></use></svg><span>รายงานคำนี้</span>
+        </button>
+      </div>
+    </div>
   </main>
 
   <script>
@@ -623,20 +1027,43 @@
     const SCALE_KEY = 'paligo-reference-pip-scale-v1';
     const LAYOUT_KEY = 'paligo-reference-pip-layout-v1';
     const COLLAPSED_KEY = 'paligo-reference-pip-toolbar-collapsed-v1';
+    const LANG_KEY = 'paligo-reference-pip-lang-v1';
     const REVIEW_STORAGE_KEY = 'paligo-corpus-review-notes-v1';
+    const FOOTNOTE_CALLOUT_VISIBILITY_KEY = 'paligo-show-footnote-callouts-v1';
     const NAV_LABELS = {
       sentence: { prev: 'บรรทัดที่แล้ว', next: 'บรรทัดถัดไป' },
       kho: { prev: 'ข้อที่แล้ว', next: 'ข้อถัดไป' },
       page: { prev: 'หน้าที่แล้ว', next: 'หน้าถัดไป' },
+      topic: { prev: 'ประเด็นที่แล้ว', next: 'ประเด็นถัดไป' },
       chapter: { prev: 'เรื่องที่แล้ว', next: 'เรื่องถัดไป' },
+    };
+    const SUBJECT_SOURCES = {
+      'thai-to-pali': {
+        grade: '4',
+        label: 'ป.ธ. ๔ · แปลไทยเป็นมคธ',
+        manifest: 'data/corpora/dhammapadatthakatha-pali-rtf-prototype/manifest.json',
+      },
+      'pali-to-thai': {
+        grade: '4',
+        label: 'ป.ธ. ๔ · แปลมคธเป็นไทย',
+        manifest: 'data/corpora/mangalattha-pali-pathamo/manifest.json',
+      },
     };
 
     let currentCorpus = null;
+    let currentManifest = null;
+    let primaryCorpus = null;
+    let companionCorpora = {};
     let corpusBaseUrl = '';
     let mode = 'kho';
+    let languageVisibility = 'both';
+    let languageToggleEnabled = false;
     let selectedId = '';
     let reviewNotes = [];
     let activeReviewTarget = null;
+    let activeVocabSelection = null;
+    let activeBreadcrumbLookupKey = '';
+    let activeTopicFilterId = '';
 
     const titleEl = document.querySelector('[data-title]');
     const statusEl = document.querySelector('[data-status]');
@@ -649,6 +1076,7 @@
     const scaleLabel = document.querySelector('[data-scale-label]');
     const layoutToggle = document.querySelector('[data-layout-toggle]');
     const sentenceModeButton = document.querySelector('[data-mode="sentence"]');
+    const topicModeButton = document.querySelector('[data-mode="topic"]');
     const layoutNotice = document.querySelector('[data-layout-notice]');
     const layoutNoticeClose = document.querySelector('[data-layout-notice-close]');
     const collapseToggle = document.querySelector('[data-collapse-toggle]');
@@ -664,6 +1092,16 @@
     const reviewComment = document.querySelector('[data-review-comment]');
     const reviewSuggestion = document.querySelector('[data-review-suggestion]');
     const reviewDelete = document.querySelector('[data-review-delete]');
+    const langRow = document.querySelector('[data-lang-row]');
+    const subjectSelect = document.querySelector('[data-subject-select]');
+    const vocabTooltip = document.querySelector('[data-vocab-tooltip]');
+    const vocabTerm = document.querySelector('[data-vocab-term]');
+    const vocabMeta = document.querySelector('[data-vocab-meta]');
+    const vocabList = document.querySelector('[data-vocab-list]');
+    const vocabClose = document.querySelector('[data-vocab-close]');
+    const vocabClear = document.querySelector('[data-vocab-clear]');
+    const vocabRemember = document.querySelector('[data-vocab-remember]');
+    const vocabReport = document.querySelector('[data-vocab-report]');
 
     function queryParam(name) {
       const value = new URLSearchParams(window.location.search).get(name);
@@ -683,14 +1121,119 @@
       return `${base.replace(/\/$/, '')}/${relative.replace(/^\//, '')}`;
     }
 
+    function normalizeManifestPath(path) {
+      try {
+        return new URL(path, window.location.href).pathname.replace(/^\//, '');
+      } catch (_error) {
+        return String(path || '').replace(/^\//, '');
+      }
+    }
+
+    function subjectForManifestPath(manifestPath) {
+      const normalized = normalizeManifestPath(manifestPath);
+      const matched = Object.entries(SUBJECT_SOURCES).find(([, source]) => normalizeManifestPath(source.manifest) === normalized);
+      if (matched) return matched[0];
+      if (/dhammapadatthakatha/i.test(normalized)) return 'thai-to-pali';
+      if (/mangalattha/i.test(normalized)) return 'pali-to-thai';
+      return '';
+    }
+
+    function setSubjectSelectValue(subject, { notifyParent = false } = {}) {
+      const value = SUBJECT_SOURCES[subject] ? subject : 'pali-to-thai';
+      if (subjectSelect) subjectSelect.value = value;
+      if (!notifyParent) return;
+      const source = SUBJECT_SOURCES[value];
+      window.parent?.postMessage({
+        type: 'paligo:pip-subject-change',
+        grade: source.grade,
+        subject: value,
+        subjectLabel: source.label.replace(/^ป\.ธ\. ๔ · /, ''),
+        manifest: source.manifest,
+      }, '*');
+    }
+
     async function fetchJson(url) {
       const response = await fetch(url);
       if (!response.ok) throw new Error(`โหลด ${url} ไม่สำเร็จ (${response.status})`);
       return response.json();
     }
 
+    async function loadTranslationCompanions(manifest) {
+      companionCorpora = {};
+      const companions = manifest?.translationCompanions || {};
+      await Promise.all(Object.entries(companions).map(async ([key, config]) => {
+        if (!config?.manifest) return;
+        const manifestUrl = joinUrl(corpusBaseUrl, config.manifest);
+        const companionManifest = await fetchJson(manifestUrl);
+        const companionBaseUrl = dirname(manifestUrl);
+        const companionCorpus = await fetchJson(joinUrl(companionBaseUrl, companionManifest.corpus || 'corpus.json'));
+        companionCorpora[key] = {
+          label: config.label || companionManifest.title || key,
+          manifest: companionManifest,
+          corpus: companionCorpus,
+          manifestUrl,
+        };
+      }));
+    }
+
     function pages() {
-      return (currentCorpus?.items || []).filter((item) => item.itemType === 'page');
+      return pagesFrom(currentCorpus);
+    }
+
+    function pagesFrom(corpus) {
+      return (corpus?.items || []).filter((item) => item.itemType === 'page');
+    }
+
+    function corpusHasReferenceBreadcrumbs(corpus) {
+      return ['pdf-meaning-thai', 'pdf-literal-thai'].includes(corpus?.sourceType);
+    }
+
+    function referenceCorpus() {
+      if (corpusHasReferenceBreadcrumbs(currentCorpus)) return currentCorpus;
+      return companionCorpora.thaiMeaning?.corpus
+        || companionCorpora.thaiLiteral?.corpus
+        || currentCorpus;
+    }
+
+    function referencePages() {
+      return pagesFrom(referenceCorpus());
+    }
+
+    function pageBySource(corpus, pageOrSourcePage) {
+      const sourcePage = typeof pageOrSourcePage === 'object'
+        ? pageOrSourcePage?.sourcePage
+        : pageOrSourcePage;
+      if (!sourcePage) return null;
+      return pagesFrom(corpus).find((page) => String(page.sourcePage) === String(sourcePage)) || null;
+    }
+
+    function referencePageFor(page) {
+      return pageBySource(referenceCorpus(), page) || page;
+    }
+
+    function primaryPageFor(page) {
+      return pageBySource(primaryCorpus || currentCorpus, page) || page;
+    }
+
+    function referencePreferredLanguage() {
+      if (companionCorpora.thaiMeaning?.corpus) return 'thaiMeaning';
+      if (companionCorpora.thaiLiteral?.corpus) return 'thaiLiteral';
+      if (corpusHasReferenceBreadcrumbs(currentCorpus)) {
+        return currentCorpus?.sourceType === 'pdf-literal-thai' ? 'thaiLiteral' : 'thaiMeaning';
+      }
+      return preferredLanguage();
+    }
+
+    function paliLineForReferenceLine(line) {
+      if (!line || line.pali) return line || null;
+      const sourcePage = line.sourcePage || currentItem()?.sourcePage;
+      const page = primaryPageFor({ sourcePage });
+      const children = page?.children || [];
+      if (!children.length) return null;
+      const byItemNo = children.find((child) => String(child.itemNo) === String(line.itemNo));
+      if (byItemNo) return byItemNo;
+      const index = Math.max(0, Number(line.itemNo || 1) - 1);
+      return children[index] || null;
     }
 
     function khos() {
@@ -698,7 +1241,247 @@
     }
 
     function lines() {
-      return pages().flatMap((page) => page.children || []);
+      const preferred = preferredLanguage();
+      return pages().flatMap((page) => (page.children || [])
+        .filter((line) => {
+          const text = segmentText(line, preferred);
+          return text && !isReferenceContextLine(text);
+        }));
+    }
+
+    function isTopicHeading(text) {
+      return /^\[[^\]]{2,}\]$/.test(String(text || '').trim());
+    }
+
+    function corpusUsesReferenceBreadcrumbs() {
+      return corpusHasReferenceBreadcrumbs(referenceCorpus());
+    }
+
+    function isReferenceContextLine(text) {
+      const value = String(text || '').trim();
+      if (!value || !corpusUsesReferenceBreadcrumbs()) return false;
+      if (isTopicHeading(value)) return true;
+      if (/^พระธัมมปทัฏฐกถา.*หน้า\s*[๐-๙0-9]+$/u.test(value)) return true;
+      if (isVaggaHeading(value)) return true;
+      if (isStoryHeading(value)) return true;
+      return false;
+    }
+
+    function isBookPageHeading(text) {
+      return /^พระธัมมปทัฏฐกถา.*หน้า\s*[๐-๙0-9]+$/u.test(String(text || '').trim());
+    }
+
+    function isVaggaHeading(text) {
+      const value = String(text || '').trim();
+      return /^[๐-๙0-9]+\.\s+.+วรรค\s+วรรณนา$/u.test(value)
+        || /^[๐-๙0-9]+\.\s+.+วคฺค.*วณฺณนา$/u.test(value);
+    }
+
+    function isStoryHeading(text) {
+      const value = String(text || '').trim();
+      return /^[๐-๙0-9]+\.\s+เรื่อง/u.test(value)
+        || /^[๐-๙0-9]+\.\s+.+ตฺเถรวตฺถุ/u.test(value);
+    }
+
+    function breadcrumbKind(text, fallback = '') {
+      const value = String(text || '').trim();
+      if (isTopicHeading(value)) return 'topic';
+      if (isVaggaHeading(value)) return 'vagga';
+      if (isStoryHeading(value)) return 'story';
+      if (isBookPageHeading(value)) return 'book';
+      return fallback;
+    }
+
+    function normalizeBreadcrumbText(text) {
+      let value = String(text || '')
+        .replace(/^พระธัมมปทัฏฐกถาแปล\s*/u, 'ธัมมปทัฏฐกถาแปล ')
+        .trim();
+      if (isTopicHeading(value)) value = value.replace(/^\[|\]$/g, '');
+      return value.replace(/\s*\[\s*[๐-๙0-9]+\s*\]$/u, '').trim();
+    }
+
+    function breadcrumbKey(label, kind = '') {
+      return `${kind || 'crumb'}:${simpleHash(label)}`;
+    }
+
+    function topicIdForLine(line) {
+      return line?.itemId ? `topic-${line.itemId}` : '';
+    }
+
+    function referenceGroups() {
+      if (!corpusUsesReferenceBreadcrumbs()) return [];
+      const preferred = referencePreferredLanguage();
+      const groups = [];
+      let active = null;
+      let activeStory = null;
+      referencePages().forEach((page) => {
+        (page.children || []).forEach((line) => {
+          const text = segmentText(line, preferred);
+          if (!text) return;
+          const label = normalizeBreadcrumbText(text);
+          if (isVaggaHeading(text)) {
+            active = {
+              key: breadcrumbKey(label, 'vagga'),
+              label,
+              sourcePage: page.sourcePage,
+              sourcePageLabel: page.sourcePageLabel,
+              stories: [],
+            };
+            activeStory = null;
+            groups.push(active);
+            return;
+          }
+          if (active && isStoryHeading(text)) {
+            const storyLabel = normalizeBreadcrumbText(text);
+            activeStory = active.stories.find((story) => story.label === storyLabel) || null;
+            if (!activeStory) {
+              activeStory = {
+                key: breadcrumbKey(storyLabel, 'story'),
+                label: storyLabel,
+                pageId: page.itemId,
+                sourcePage: page.sourcePage,
+                sourcePageLabel: page.sourcePageLabel,
+                topics: [],
+              };
+              active.stories.push(activeStory);
+            }
+            return;
+          }
+          if (activeStory && isTopicHeading(text)) {
+            const topicLabel = normalizeBreadcrumbText(text);
+            if (!activeStory.topics.some((topic) => topic.label === topicLabel)) {
+              activeStory.topics.push({
+                key: breadcrumbKey(topicLabel, 'topic'),
+                label: topicLabel,
+                topicId: topicIdForLine(line),
+                pageId: page.itemId,
+                sourcePage: page.sourcePage,
+                sourcePageLabel: page.sourcePageLabel,
+                lineNo: line.itemNo,
+              });
+            }
+          }
+        });
+      });
+      return groups;
+    }
+
+    function referenceGroupByKey(key) {
+      return referenceGroups().find((group) => group.key === key) || null;
+    }
+
+    function referenceStoryByKey(key) {
+      return referenceGroups().flatMap((group) => group.stories || []).find((story) => story.key === key) || null;
+    }
+
+    function referenceGroupForPage(page) {
+      const pageNo = Number(page?.sourcePage || 0);
+      if (!pageNo) return null;
+      return referenceGroups()
+        .filter((group) => Number(group.sourcePage || 0) <= pageNo)
+        .sort((a, b) => Number(b.sourcePage || 0) - Number(a.sourcePage || 0))[0] || null;
+    }
+
+    function referenceStoryForPage(page) {
+      const pageNo = Number(page?.sourcePage || 0);
+      if (!pageNo) return null;
+      return referenceGroups()
+        .flatMap((group) => group.stories || [])
+        .filter((story) => Number(story.sourcePage || 0) <= pageNo)
+        .sort((a, b) => Number(b.sourcePage || 0) - Number(a.sourcePage || 0))[0] || null;
+    }
+
+    function breadcrumbItemsForPage(page) {
+      if (!corpusUsesReferenceBreadcrumbs()) return [];
+      const referencePage = referencePageFor(page);
+      const preferred = referencePreferredLanguage();
+      const seen = new Set();
+      const items = [];
+      const push = (text, tone = '', options = {}) => {
+        const label = normalizeBreadcrumbText(text);
+        if (!label || seen.has(label)) return;
+        seen.add(label);
+        const kind = breadcrumbKind(text, tone);
+        items.push({
+          label,
+          kind,
+          tone: kind === 'topic' ? 'topic' : kind,
+          lookupKey: kind === 'vagga' || kind === 'story' ? breadcrumbKey(label, kind) : '',
+          filterTopicId: kind === 'topic' ? options.filterTopicId || '' : '',
+        });
+      };
+      push(`หน้า ${referencePage.sourcePageLabel || referencePage.sourcePage}`, 'page');
+      if (referencePage.title && !/^หน้า\s+/u.test(referencePage.title)) push(referencePage.title, 'book');
+      const parentGroup = referenceGroupForPage(referencePage);
+      if (parentGroup) push(parentGroup.label, 'vagga');
+      const parentStory = referenceStoryForPage(referencePage);
+      if (parentStory) push(parentStory.label, 'story');
+      (referencePage.children || []).forEach((line) => {
+        const text = segmentText(line, preferred);
+        if (!isReferenceContextLine(text)) return;
+        push(text, '', { filterTopicId: topicIdForLine(line) });
+      });
+      return items.slice(0, 6);
+    }
+
+    function pageDisplayTitle(page) {
+      if (!page?.title) return '';
+      return isReferenceContextLine(page.title) ? '' : page.title;
+    }
+
+    function topicById(topicId) {
+      if (!topicId) return null;
+      return topics().find((topic) => topic.itemId === topicId) || null;
+    }
+
+    function activeTopicFilter() {
+      return topicById(activeTopicFilterId);
+    }
+
+    function topicLinesForRender(topic) {
+      return (topic?.lines || []).filter((line) => !isReferenceContextLine(line.text));
+    }
+
+    function topics() {
+      const result = [];
+      let active = null;
+      const preferred = referencePreferredLanguage();
+      referencePages().forEach((page) => {
+        (page.children || []).forEach((line) => {
+          const text = segmentText(line, preferred);
+          if (!text) return;
+          if (isTopicHeading(text)) {
+            active = {
+              itemId: `topic-${line.itemId}`,
+              itemType: 'topic',
+              title: text.replace(/^\[|\]$/g, ''),
+              sourcePage: line.sourcePage || page.sourcePage,
+              sourcePageLabel: line.sourcePageLabel || page.sourcePageLabel,
+              lineNo: line.itemNo,
+              anchorItemId: line.itemId,
+              anchorId: `anchor-${line.itemId}`,
+              lines: [],
+            };
+            result.push(active);
+          }
+          if (active) {
+            active.lines.push({
+              itemId: line.itemId,
+              anchorId: line.itemId === active.anchorItemId ? active.anchorId : '',
+              sourcePage: line.sourcePage || page.sourcePage,
+              sourcePageLabel: line.sourcePageLabel || page.sourcePageLabel,
+              itemNo: line.itemNo,
+              text,
+              thai: line.thai || line.thaiLiteral || line.thaiMeaning || '',
+              thaiLiteral: line.thaiLiteral || '',
+              thaiMeaning: line.thaiMeaning || '',
+              pali: line.pali || '',
+              className: line.itemId === active.anchorItemId ? 'pip-topic-heading' : '',
+            });
+          }
+        });
+      });
+      return result;
     }
 
     function chapters() {
@@ -709,6 +1492,7 @@
       if (!currentCorpus) return [];
       if (mode === 'kho') return khos();
       if (mode === 'sentence') return lines();
+      if (mode === 'topic') return topics();
       if (mode === 'chapter') return chapters();
       return pages();
     }
@@ -718,6 +1502,7 @@
       if (item.itemType === 'kho') return `${item.khoLabel || `ข้อ ${item.itemNo}`} · หน้า ${item.sourcePageLabel || item.sourcePage}`;
       if (item.itemType === 'page') return `หน้า ${item.sourcePageLabel || item.sourcePage}`;
       if (item.itemType === 'sentence') return `หน้า ${item.sourcePageLabel || item.sourcePage} · บรรทัด ${item.itemNo}`;
+      if (item.itemType === 'topic') return `${item.title} · หน้า ${item.sourcePageLabel || item.sourcePage}`;
       if (item.itemType === 'chapter') return item.title || item.chapterId;
       return item.title || item.itemId;
     }
@@ -758,6 +1543,7 @@
         target.itemId || '',
         target.sourcePage || '',
         target.khoNo || '',
+        target.selectionId || '',
       ].join('::');
     }
 
@@ -767,6 +1553,15 @@
       return reviewNotes.find((note) => note.key === key) || null;
     }
 
+    function simpleHash(value) {
+      let hash = 0;
+      const text = String(value || '');
+      for (let index = 0; index < text.length; index += 1) {
+        hash = ((hash << 5) - hash + text.charCodeAt(index)) | 0;
+      }
+      return Math.abs(hash).toString(36);
+    }
+
     function currentItem() {
       return list().find((item) => item.itemId === selectedId) || null;
     }
@@ -774,10 +1569,238 @@
     function itemTextPreview(item) {
       if (!item) return '';
       if (item.itemType === 'kho') return (item.lines || []).map((line) => line.text).join(' ');
-      if (item.itemType === 'page') return (item.children || []).map((line) => line.pali).join(' ');
-      if (item.itemType === 'sentence') return item.pali || '';
+      if (item.itemType === 'page') {
+        if (languageVisibility === 'thai') {
+          return normalizeThaiPdfDisplay(item.thai || (item.children || []).map((line) => line.thai || line.pali).join(' '));
+        }
+        if (languageVisibility === 'pali') return item.pali || (item.children || []).map((line) => line.pali).join(' ');
+        return (item.children || []).map((line) => [normalizeThaiPdfDisplay(line.thai), line.pali].filter(Boolean).join(' / ')).join(' ');
+      }
+      if (item.itemType === 'sentence') {
+        if (languageVisibility === 'thai') return normalizeThaiPdfDisplay(item.thai || item.pali || '');
+        if (languageVisibility === 'pali') return item.pali || '';
+        return [normalizeThaiPdfDisplay(item.thai), item.pali].filter(Boolean).join(' / ');
+      }
       if (item.itemType === 'chapter') return item.title || '';
       return item.title || '';
+    }
+
+    const THAI_PDF_TEXT_FIXES = [
+      [/ซึ่ึง/g, 'ซึ่ง'],
+      [/ซึง/g, 'ซึ่ง'],
+      [/เคร่อง/g, 'เครื่อง'],
+      [/เร่อง/g, 'เรื่อง'],
+      [/เน่อ/g, 'เนื้อ'],
+      [/อันเป็นค่/g, 'อันเป็นคู่'],
+      [/กำาห่นด/g, 'กำหนด'],
+      [/กำห่นด/g, 'กำหนด'],
+      [/แล่้ว/g, 'แล้ว'],
+      [/เม่อง/g, 'เมือง'],
+      [/เพ่อ/g, 'เพื่อ'],
+      [/เม่อ/g, 'เมื่อ'],
+      [/ถ่อ/g, 'ถือ'],
+      [/ห่น/g, 'หน'],
+      [/ห่รือ/g, 'หรือ'],
+      [/ห่ร่อ/g, 'หรือ'],
+      [/กำา/g, 'กำ'],
+      [/สำา/g, 'สำ'],
+      [/จ้ำา/g, 'จำ'],
+      [/ล้ำา/g, 'ลำ'],
+      [/แล้ว่/g, 'แล้ว'],
+      [/ว่า่/g, 'ว่า'],
+      [/อย์้่/g, 'อยู่'],
+      [/อย่(?=\s|$|[ฯ,])/g, 'อยู่'],
+      [/ป็ระ/g, 'ประ'],
+      [/บุคุคล/g, 'บุคคล'],
+      [/ทกุ่ข์/g, 'ทุกข์'],
+      [/ลอ้/g, 'ล้อ'],
+      [/หมนุ/g, 'หมุน'],
+      [/เทา้/g, 'เท้า'],
+      [/ตวั/g, 'ตัว'],
+      [/ดงั/g, 'ดัง'],
+      [/ไห่น/g, 'ไหน'],
+      [/ไห่ว่้/g, 'ไหว้'],
+      [/ติรัส/g, 'ตรัส'],
+      [/ติรสั/g, 'ตรัส'],
+      [/พระธรรมเทศนา\s*นี\s*ว่า/g, 'พระธรรมเทศนานี้ว่า'],
+      [/ดังนี(?!้)/g, 'ดังนี้'],
+      [/ในที\)/g, 'ในที่)'],
+      [/ทีส\s*ดุ/g, 'ที่สุด'],
+      [/อนั/g, 'อัน'],
+      [/แกุ้/g, 'แก้'],
+      [/แกุ่/g, 'แก่'],
+      [/กุับ/g, 'กับ'],
+      [/ด้ว่ย์/g, 'ด้วย'],
+      [/ผู้เจ้ริญ/g, 'ผู้เจริญ'],
+      [/เจ้ริญ/g, 'เจริญ'],
+      [/ข้าแติ่/g, 'ข้าแต่'],
+      [/ย์่อม/g, 'ย่อม'],
+      [/กุล่าว/g, 'กล่าว'],
+      [/กล้าว/g, 'กล่าว'],
+      [/กุล้่าว่/g, 'กล่าว'],
+      [/ห่ล้ีกุ/g, 'หลีก'],
+      [/ข้อง/g, 'ของ'],
+      [/บุติร/g, 'บุตร'],
+      [/ติ้น/g, 'ต้น'],
+      [/เทว่ดา/g, 'เทวดา'],
+      [/ศักุดิ/g, 'ศักดิ์'],
+      [/กุระทำา/g, 'กระทำ'],
+      [/กุระ/g, 'กระ'],
+      [/ข้าพเจ้า\s*จ้ะกล่าว/g, 'ข้าพเจ้าจะกล่าว'],
+      [/จ้ักขุ้บาล่/g, 'จักขุบาล'],
+      [/จ้ักุ/g, 'จัก'],
+      [/จ้ัก/g, 'จัก'],
+      [/ขุ้/g, 'ขุ'],
+      [/บาล่/g, 'บาล'],
+      [/จ้ะ/g, 'จะ'],
+      [/ชื่าย์/g, 'ชาย'],
+      [/ชื่ัย์/g, 'ชัย'],
+      [/ชื่ำา/g, 'ชำ'],
+    ];
+
+    function normalizeThaiPdfDisplay(value) {
+      let text = String(value || '').normalize('NFC');
+      if (!text) return '';
+      THAI_PDF_TEXT_FIXES.forEach(([pattern, replacement]) => {
+        text = text.replace(pattern, replacement);
+      });
+      if (currentCorpus?.sourceType === 'pdf-bilingual-columns') {
+        text = text.replace(/([\u0e01-\u0e3a\u0e40-\u0e4e])\s+([\u0e01-\u0e3a\u0e40-\u0e4e])/g, '$1$2');
+      }
+      text = text.replace(/\s+([ฯ,;:!?])/g, '$1');
+      text = text.replace(/([([])\s+/g, '$1');
+      return text.replace(/[ \t]{2,}/g, ' ').trim();
+    }
+
+    function shouldHideFootnoteCallouts() {
+      try {
+        return localStorage.getItem(FOOTNOTE_CALLOUT_VISIBILITY_KEY) !== '1';
+      } catch (error) {
+        return true;
+      }
+    }
+
+    function corpusUsesFootnoteCallouts() {
+      return ['pdf-meaning-thai', 'pdf-literal-thai'].includes(currentCorpus?.sourceType)
+        || ['pdf-meaning-thai', 'pdf-literal-thai'].includes(referenceCorpus()?.sourceType);
+    }
+
+    function stripFootnoteCallouts(text) {
+      let next = String(text || '').trim();
+      if (!shouldHideFootnoteCallouts() || !corpusUsesFootnoteCallouts()) return next;
+      if (/^[๐-๙0-9]{1,2}$/.test(next)) return '';
+      next = next.replace(/([\u0e01-\u0e3a\u0e40-\u0e4e])\s*[๐-๙0-9]{1,2}(?=[\sฯ,;:!?"”')\]]|$)/gu, '$1');
+      next = next.replace(/([)"”')\]])\s*[๐-๙0-9]{1,2}(?=[ฯ,;:!?]|$)/gu, '$1');
+      next = next.replace(/([ฯ.!?"”')\]])\s*[๐-๙0-9]{1,2}$/u, '$1');
+      return next.trim();
+    }
+
+    function segmentText(line, preferred) {
+      if (!line) return '';
+      if (preferred === 'thaiMeaning') return stripFootnoteCallouts(normalizeThaiPdfDisplay(line.thaiMeaning || line.thai || line.text || ''));
+      if (preferred === 'thaiLiteral') return stripFootnoteCallouts(normalizeThaiPdfDisplay(line.thaiLiteral || line.thai || line.text || ''));
+      if (preferred === 'thai') return stripFootnoteCallouts(normalizeThaiPdfDisplay(line.thai || line.thaiLiteral || line.thaiMeaning || line.pali || line.text || ''));
+      if (preferred === 'pali') return line.pali || line.text || '';
+      return line.pali || line.thai || line.text || '';
+    }
+
+    function preferredLanguage() {
+      if (languageVisibility === 'thaiMeaning' || languageVisibility === 'thaiLiteral') return languageVisibility;
+      if (languageVisibility === 'thai') {
+        return companionCorpora.thaiMeaning ? 'thaiMeaning' : (companionCorpora.thaiLiteral ? 'thaiLiteral' : 'thai');
+      }
+      return languageVisibility === 'pali' ? 'pali' : 'pali';
+    }
+
+    function corpusHasField(field) {
+      const source = primaryCorpus || currentCorpus;
+      const sourcePages = (source?.items || []).filter((item) => item.itemType === 'page');
+      return sourcePages.some((page) => page[field] || (page.children || []).some((child) => child[field]));
+    }
+
+    function corpusSupportsLanguageToggle() {
+      if (currentManifest?.languageToggle) return true;
+      if (Object.keys(currentManifest?.translationCompanions || {}).length) return true;
+      const source = primaryCorpus || currentCorpus;
+      const sourcePages = (source?.items || []).filter((item) => item.itemType === 'page');
+      return sourcePages.some((page) => page.thai || page.pali || (page.children || []).some((child) => child.thai));
+    }
+
+    function activateCorpusForLanguage(nextLanguage) {
+      const previous = currentItem();
+      const previousPage = previous?.sourcePage || null;
+      const companion = companionCorpora[nextLanguage];
+      if (companion) {
+        currentCorpus = companion.corpus;
+        titleEl.textContent = companion.manifest.title || companion.corpus.title || companion.label;
+      } else if (nextLanguage === 'both' && (companionCorpora.thaiMeaning || companionCorpora.thaiLiteral)) {
+        const referenceCompanion = companionCorpora.thaiMeaning || companionCorpora.thaiLiteral;
+        currentCorpus = referenceCompanion.corpus;
+        titleEl.textContent = currentManifest?.title || primaryCorpus?.title || referenceCompanion.label || 'ตำรา';
+      } else {
+        currentCorpus = primaryCorpus || currentCorpus;
+        titleEl.textContent = currentManifest?.title || currentCorpus?.title || 'ตำรา';
+      }
+      if (!list().some((item) => item.itemId === selectedId)) {
+        selectedId = list().find((item) => previousPage && item.sourcePage === previousPage)?.itemId || list()[0]?.itemId || '';
+      }
+      if (selectEl) selectEl.value = selectedId;
+    }
+
+    function updateLanguageButtons() {
+      const hasCompanions = Object.keys(companionCorpora).length > 0;
+      document.querySelectorAll('[data-lang]').forEach((button) => {
+        const key = button.dataset.lang;
+        if (key === 'thaiMeaning') {
+          button.hidden = !companionCorpora.thaiMeaning && !corpusHasField('thaiMeaning') && !corpusHasField('thai');
+        } else if (key === 'thaiLiteral') {
+          button.hidden = !companionCorpora.thaiLiteral && !corpusHasField('thaiLiteral');
+        } else if (key === 'both') {
+          button.hidden = !hasCompanions && (!corpusHasField('thai') && !corpusHasField('thaiLiteral') && !corpusHasField('thaiMeaning'));
+        } else {
+          button.hidden = false;
+        }
+      });
+    }
+
+    function setLanguageVisibility(next, { persist = true } = {}) {
+      const allowed = new Set(['thai', 'thaiMeaning', 'thaiLiteral', 'pali', 'both']);
+      let normalized = allowed.has(next) ? next : 'pali';
+      if (normalized === 'thai') normalized = companionCorpora.thaiMeaning ? 'thaiMeaning' : 'thai';
+      if (normalized === 'both' && document.querySelector('[data-lang="both"]')?.hidden) normalized = 'pali';
+      if (normalized === 'thaiMeaning' && document.querySelector('[data-lang="thaiMeaning"]')?.hidden) normalized = 'pali';
+      if (normalized === 'thaiLiteral' && document.querySelector('[data-lang="thaiLiteral"]')?.hidden) normalized = 'pali';
+      languageVisibility = normalized;
+      activateCorpusForLanguage(languageVisibility);
+      document.body.classList.toggle('lang-thai', languageVisibility === 'thai');
+      document.body.classList.toggle('lang-thai-meaning', languageVisibility === 'thaiMeaning');
+      document.body.classList.toggle('lang-thai-literal', languageVisibility === 'thaiLiteral');
+      document.body.classList.toggle('lang-pali', languageVisibility === 'pali');
+      document.body.classList.toggle('lang-both', languageVisibility === 'both');
+      document.querySelectorAll('[data-lang]').forEach((button) => {
+        const active = button.dataset.lang === languageVisibility;
+        button.classList.toggle('is-active', active);
+        button.setAttribute('aria-pressed', String(active));
+      });
+      if (persist && languageToggleEnabled) {
+        localStorage.setItem(LANG_KEY, languageVisibility);
+      }
+      populateSelect();
+      updateNav();
+      render();
+    }
+
+    function updateLanguageControls() {
+      languageToggleEnabled = corpusSupportsLanguageToggle();
+      if (langRow) langRow.hidden = !languageToggleEnabled;
+      updateLanguageButtons();
+      if (!languageToggleEnabled) {
+        setLanguageVisibility('both', { persist: false });
+        return;
+      }
+      const fromManifest = currentManifest?.defaultLanguageVisibility;
+      const stored = localStorage.getItem(LANG_KEY);
+      setLanguageVisibility(stored || fromManifest || 'pali', { persist: false });
     }
 
     function makeReviewTarget(item = currentItem()) {
@@ -796,10 +1819,39 @@
       };
     }
 
+    function makeSelectionReviewTarget(selection) {
+      if (!selection?.lineItemId || !selection.text) return null;
+      const item = lines().find((entry) => entry.itemId === selection.lineItemId)
+        || pages().flatMap((page) => page.children || []).find((entry) => entry.itemId === selection.lineItemId)
+        || currentItem();
+      const sourcePage = selection.sourcePage || item?.sourcePage || currentItem()?.sourcePage || '';
+      const sourcePageLabel = selection.sourcePageLabel || item?.sourcePageLabel || currentItem()?.sourcePageLabel || '';
+      const lineNo = selection.lineNo || item?.itemNo || '';
+      return {
+        corpusId: currentCorpus?.corpusId || currentCorpus?.id || '',
+        itemId: selection.lineItemId,
+        parentItemId: item?.parentItemId || '',
+        chapterId: item?.chapterId || currentItem()?.chapterId || '',
+        sourcePage,
+        sourcePageLabel,
+        khoNo: item?.khoNo || currentItem()?.khoNo || '',
+        khoLabel: item?.khoLabel || currentItem()?.khoLabel || '',
+        lineNo,
+        selectedText: selection.text,
+        selectionStart: Number.isFinite(selection.selectionStart) ? selection.selectionStart : null,
+        selectionEnd: Number.isFinite(selection.selectionEnd) ? selection.selectionEnd : null,
+        selectionId: simpleHash(`${selection.lineItemId}:${selection.selectionStart ?? ''}:${selection.selectionEnd ?? ''}:${selection.text}`),
+        displayMode: mode,
+        reportScope: 'selection',
+      };
+    }
+
     function formatReviewTarget(target) {
       const parts = [];
       if (target?.khoLabel) parts.push(target.khoLabel);
       if (target?.sourcePageLabel || target?.sourcePage) parts.push(`หน้า ${target.sourcePageLabel || target.sourcePage}`);
+      if (target?.lineNo) parts.push(`บรรทัด ${target.lineNo}`);
+      if (target?.selectedText && target?.reportScope === 'selection') parts.push(`"${target.selectedText}"`);
       if (target?.itemId) parts.push(target.itemId);
       return parts.join(' · ') || 'ตำแหน่งที่กำลังเปิด';
     }
@@ -818,13 +1870,13 @@
       reviewOpen.title = existing ? 'มีความเห็นรีวิวในตำแหน่งนี้แล้ว' : 'รายงานข้อสังเกตของตำแหน่งนี้';
     }
 
-    function openReviewPanel() {
-      const target = makeReviewTarget();
+    function openReviewPanel(targetOverride = null) {
+      const target = targetOverride || makeReviewTarget();
       if (!target) return;
       activeReviewTarget = target;
       const existing = findReviewNote(target);
       reviewTarget.textContent = formatReviewTarget(target);
-      reviewCategory.value = existing?.category || 'ocr';
+      reviewCategory.value = existing?.category || (target.reportScope === 'selection' ? 'vocabulary' : 'ocr');
       reviewComment.value = existing?.comment || '';
       reviewSuggestion.value = existing?.suggestion || '';
       reviewDelete.hidden = !existing;
@@ -853,7 +1905,16 @@
       focusLabel.textContent = currentPositionLabel();
     }
 
+    function updateModeAvailability() {
+      const topicCount = topics().length;
+      if (topicModeButton) topicModeButton.hidden = topicCount === 0;
+      if (mode === 'topic' && topicCount === 0) {
+        mode = pages().length ? 'page' : 'chapter';
+      }
+    }
+
     function populateSelect() {
+      updateModeAvailability();
       const items = list();
       selectEl.innerHTML = '';
       items.forEach((item) => {
@@ -870,17 +1931,130 @@
       updateReviewButton();
     }
 
-    function makeLine(text, className = '') {
+    function notesForLine(line) {
+      if (!line?.itemId) return [];
+      return reviewNotes.filter((note) => (
+        note.reportScope === 'selection'
+        && note.itemId === line.itemId
+        && note.selectedText
+      ));
+    }
+
+    function appendTextWithMarks(container, text, line) {
+      const source = String(text || '-');
+      const notes = notesForLine(line);
+      if (!notes.length) {
+        container.textContent = source;
+        return;
+      }
+
+      let cursor = 0;
+      let fallbackSearchFrom = 0;
+      const ranges = notes
+        .map((note) => {
+          const quote = String(note.selectedText || '').trim();
+          if (!quote) return null;
+          let start = Number.isFinite(note.selectionStart) ? Number(note.selectionStart) : -1;
+          let end = Number.isFinite(note.selectionEnd) ? Number(note.selectionEnd) : -1;
+          if (start < 0 || end <= start || source.slice(start, end) !== quote) {
+            start = source.indexOf(quote, fallbackSearchFrom);
+            end = start + quote.length;
+          }
+          if (start < 0) return null;
+          fallbackSearchFrom = Math.max(fallbackSearchFrom, end);
+          return { start, end, note };
+        })
+        .filter(Boolean)
+        .sort((a, b) => (a.start - b.start) || (a.end - b.end));
+
+      if (!ranges.length) {
+        container.textContent = source;
+        return;
+      }
+
+      cursor = 0;
+      ranges.forEach((range) => {
+        if (range.start < cursor) return;
+        if (range.start > cursor) {
+          container.append(document.createTextNode(source.slice(cursor, range.start)));
+        }
+        const mark = document.createElement('mark');
+        mark.className = `pip-text-mark ${range.note.category === 'memory' ? 'is-memory' : 'is-report'}`;
+        mark.title = range.note.comment || 'มีรายงานคำนี้';
+        mark.textContent = source.slice(range.start, range.end);
+        const info = document.createElement('span');
+        info.className = 'pip-text-mark__info';
+        info.setAttribute('aria-label', 'มีรายงานคำนี้');
+        info.textContent = 'i';
+        mark.append(info);
+        container.append(mark);
+        cursor = range.end;
+      });
+      if (cursor < source.length) {
+        container.append(document.createTextNode(source.slice(cursor)));
+      }
+    }
+
+    function makeLine(text, className = '', lineData = null) {
       const line = document.createElement('span');
       line.className = `pip-line${className ? ` ${className}` : ''}`;
-      line.textContent = text || '-';
+      line.dataset.plainText = String(text || '-');
+      if (lineData?.anchorId) line.id = lineData.anchorId;
+      if (lineData?.itemId) line.dataset.itemId = lineData.itemId;
+      if (lineData?.sourcePage) line.dataset.sourcePage = lineData.sourcePage;
+      if (lineData?.sourcePageLabel) line.dataset.sourcePageLabel = lineData.sourcePageLabel;
+      if (lineData?.itemNo) line.dataset.lineNo = lineData.itemNo;
+      appendTextWithMarks(line, text, lineData);
       return line;
     }
 
-    function renderUnit({ title, meta, unitLines, activeItemId }) {
+    function appendBilingualLines(section, unitLines, activeItemId) {
+      if (!languageToggleEnabled || languageVisibility !== 'both') {
+        unitLines.forEach((line) => {
+          const preferred = preferredLanguage();
+          const renderLine = languageVisibility === 'pali'
+            ? (paliLineForReferenceLine(line) || line)
+            : line;
+          const text = renderLine.thai != null || renderLine.pali != null || renderLine.thaiMeaning != null || renderLine.thaiLiteral != null
+            ? segmentText(renderLine, preferred)
+            : renderLine.text;
+          const active = line.itemId === activeItemId || renderLine.itemId === activeItemId ? ' is-active' : '';
+          section.append(makeLine(text, `${line.className || ''}${active}`.trim(), renderLine));
+        });
+        return;
+      }
+
+      const grid = document.createElement('div');
+      grid.className = 'pip-bilingual';
+      const thaiCol = document.createElement('div');
+      thaiCol.className = 'pip-bilingual__col pip-bilingual__col--thai';
+      const paliCol = document.createElement('div');
+      paliCol.className = 'pip-bilingual__col pip-bilingual__col--pali';
+      const thaiLabel = document.createElement('div');
+      thaiLabel.className = 'pip-bilingual__label';
+      thaiLabel.textContent = 'ไทย';
+      const paliLabel = document.createElement('div');
+      paliLabel.className = 'pip-bilingual__label';
+      paliLabel.textContent = 'บาลี';
+      thaiCol.append(thaiLabel);
+      paliCol.append(paliLabel);
+      unitLines.forEach((line) => {
+        const active = line.itemId === activeItemId ? ' is-active' : '';
+        const paliLine = paliLineForReferenceLine(line) || line;
+        const thaiText = segmentText(line, referencePreferredLanguage()) || normalizeThaiPdfDisplay(line.thai || line.text || '-');
+        const paliText = segmentText(paliLine, 'pali') || '-';
+        thaiCol.append(makeLine(thaiText, `${line.className || ''}${active}`.trim(), line));
+        paliCol.append(makeLine(paliText, `${line.className || ''}${active}`.trim(), paliLine));
+      });
+      grid.append(thaiCol, paliCol);
+      section.append(grid);
+    }
+
+    function renderUnit({ title, meta, unitLines, activeItemId, breadcrumbs = [] }) {
       const section = document.createElement('section');
       section.className = 'pip-unit';
-      if (meta) {
+      const hasPageBreadcrumb = breadcrumbs.some((item) => item.kind === 'page');
+      if (meta && !(hasPageBreadcrumb && /^หน้า\s/u.test(meta))) {
         const metaEl = document.createElement('div');
         metaEl.className = 'pip-unit__meta';
         metaEl.textContent = meta;
@@ -892,9 +2066,75 @@
         titleEl.textContent = title;
         section.append(titleEl);
       }
-      unitLines.forEach((line) => {
-        section.append(makeLine(line.text, `${line.className || ''}${line.itemId === activeItemId ? ' is-active' : ''}`.trim()));
-      });
+      if (breadcrumbs.length) {
+        const breadcrumbEl = document.createElement('nav');
+        breadcrumbEl.className = 'pip-breadcrumb';
+        breadcrumbEl.setAttribute('aria-label', 'พิกัดเนื้อหา');
+        breadcrumbs.forEach((item) => {
+          const isButton = Boolean(item.lookupKey || item.filterTopicId);
+          const isOpen = item.lookupKey && activeBreadcrumbLookupKey === item.lookupKey;
+          const isFiltered = item.filterTopicId && activeTopicFilterId === item.filterTopicId;
+          const crumb = document.createElement(isButton ? 'button' : 'span');
+          crumb.className = `pip-breadcrumb__item${item.tone ? ` is-${item.tone}` : ''}${isOpen ? ' is-open' : ''}${isFiltered ? ' is-filtered' : ''}`;
+          crumb.textContent = item.label;
+          if (item.lookupKey) {
+            crumb.type = 'button';
+            crumb.dataset.breadcrumbLookup = item.lookupKey;
+            crumb.setAttribute('aria-expanded', String(activeBreadcrumbLookupKey === item.lookupKey));
+          }
+          if (item.filterTopicId) {
+            crumb.type = 'button';
+            crumb.dataset.breadcrumbFilterTopic = item.filterTopicId;
+            crumb.setAttribute('aria-pressed', String(activeTopicFilterId === item.filterTopicId));
+          }
+          breadcrumbEl.append(crumb);
+        });
+        section.append(breadcrumbEl);
+        const activeLookupInThisTrail = breadcrumbs.some((item) => item.lookupKey && item.lookupKey === activeBreadcrumbLookupKey);
+        const activeLookupGroup = activeLookupInThisTrail ? referenceGroupByKey(activeBreadcrumbLookupKey) : null;
+        const activeLookupStory = activeLookupInThisTrail ? referenceStoryByKey(activeBreadcrumbLookupKey) : null;
+        const lookupItems = activeLookupGroup?.stories?.map((story) => ({
+          label: story.label,
+          pageLabel: story.sourcePageLabel || story.sourcePage,
+          targetPage: story.pageId,
+          targetTopic: '',
+        })) || activeLookupStory?.topics?.map((topic) => ({
+          label: topic.label,
+          pageLabel: topic.sourcePageLabel || topic.sourcePage,
+          targetPage: topic.pageId,
+          targetTopic: topic.topicId,
+        })) || [];
+        if (lookupItems.length) {
+          const lookup = document.createElement('section');
+          lookup.className = 'pip-breadcrumb-lookup';
+          const lookupLabel = activeLookupGroup?.label || activeLookupStory?.label || '';
+          lookup.setAttribute('aria-label', `รายการใน${lookupLabel}`);
+          const lookupTitle = document.createElement('div');
+          lookupTitle.className = 'pip-breadcrumb-lookup__title';
+          lookupTitle.textContent = activeLookupGroup
+            ? `${activeLookupGroup.label} · เลือกเรื่องในวรรคนี้`
+            : `${activeLookupStory.label} · เลือกประเด็นในเรื่องนี้`;
+          const lookupList = document.createElement('div');
+          lookupList.className = 'pip-breadcrumb-lookup__list';
+          lookupItems.forEach((item) => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'pip-breadcrumb-lookup__item';
+            button.dataset.breadcrumbTargetPage = item.targetPage;
+            if (item.targetTopic) button.dataset.breadcrumbTargetTopic = item.targetTopic;
+            const storyLabel = document.createElement('span');
+            storyLabel.textContent = item.label;
+            const storyPage = document.createElement('span');
+            storyPage.className = 'pip-breadcrumb-lookup__page';
+            storyPage.textContent = `หน้า ${item.pageLabel}`;
+            button.append(storyLabel, storyPage);
+            lookupList.append(button);
+          });
+          lookup.append(lookupTitle, lookupList);
+          section.append(lookup);
+        }
+      }
+      appendBilingualLines(section, unitLines, activeItemId);
       return section;
     }
 
@@ -910,13 +2150,38 @@
           });
           lastPage = line.sourcePage;
         }
-        result.push({ itemId: `${item.itemId}-line-${index + 1}`, text: line.text });
+        result.push({
+          itemId: `${item.itemId}-line-${index + 1}`,
+          text: line.text,
+          sourcePage: line.sourcePage || item.sourcePage,
+          sourcePageLabel: line.sourcePageLabel || item.sourcePageLabel,
+          itemNo: index + 1,
+        });
       });
       return result;
     }
 
     function pageLines(page) {
-      return (page.children || []).map((line) => ({ itemId: line.itemId, text: line.pali }));
+      const preferred = preferredLanguage();
+      return (page.children || [])
+        .map((line) => ({
+          itemId: line.itemId,
+          sourcePage: line.sourcePage || page.sourcePage,
+          sourcePageLabel: line.sourcePageLabel || page.sourcePageLabel,
+          itemNo: line.itemNo,
+          text: segmentText(line, preferred),
+          thai: line.thai || line.thaiLiteral || line.thaiMeaning || '',
+          thaiLiteral: line.thaiLiteral || '',
+          thaiMeaning: line.thaiMeaning || '',
+          pali: line.pali || '',
+        }))
+        .filter((line) => line.text && !isReferenceContextLine(line.text));
+    }
+
+    function pageLinesForRender(page) {
+      const filterTopic = activeTopicFilter();
+      if (filterTopic) return topicLinesForRender(filterTopic);
+      return pageLines(page);
     }
 
     function render() {
@@ -939,10 +2204,18 @@
       if (mode === 'sentence') {
         const item = lines().find((entry) => entry.itemId === selectedId);
         if (!item) return;
+        const preferred = preferredLanguage();
         readerEl.append(renderUnit({
           title: '',
           meta: `หน้า ${item.sourcePageLabel || item.sourcePage}`,
-          unitLines: [{ itemId: item.itemId, text: item.pali }],
+          unitLines: [{
+            itemId: item.itemId,
+            text: segmentText(item, preferred),
+            thai: item.thai || item.thaiLiteral || item.thaiMeaning || '',
+            thaiLiteral: item.thaiLiteral || '',
+            thaiMeaning: item.thaiMeaning || '',
+            pali: item.pali || '',
+          }],
           activeItemId: item.itemId,
         }));
         statusEl.textContent = `บรรทัด ${item.itemNo} · หน้า ${item.sourcePageLabel || item.sourcePage}`;
@@ -950,17 +2223,50 @@
         return;
       }
 
+      if (mode === 'topic') {
+        const item = topics().find((entry) => entry.itemId === selectedId);
+        if (!item) return;
+        const topicPage = pages().find((page) => String(page.sourcePage) === String(item.sourcePage)) || null;
+        const topicBreadcrumbs = topicPage ? breadcrumbItemsForPage(topicPage) : [
+          { label: `หน้า ${item.sourcePageLabel || item.sourcePage}`, kind: 'page', tone: 'page' },
+        ];
+        if (!topicBreadcrumbs.some((crumb) => crumb.kind === 'topic' && crumb.label === item.title)) {
+          topicBreadcrumbs.push({ label: item.title, kind: 'topic', tone: 'topic' });
+        }
+        readerEl.append(renderUnit({
+          title: item.title,
+          meta: `หน้า ${item.sourcePageLabel || item.sourcePage} · บรรทัด ${item.lineNo || '-'}`,
+          breadcrumbs: topicBreadcrumbs,
+          unitLines: item.lines.filter((line) => !isReferenceContextLine(line.text)),
+          activeItemId: item.anchorItemId,
+        }));
+        statusEl.textContent = `${item.title} · ${item.lines.length} บรรทัด`;
+        updateReviewButton();
+        requestAnimationFrame(() => {
+          document.getElementById(item.anchorId)?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+        });
+        return;
+      }
+
       if (mode === 'chapter') {
         const chapter = chapters().find((entry) => entry.itemId === selectedId);
         if (!chapter) return;
-        pages().filter((page) => page.chapterId === chapter.chapterId).forEach((page) => {
+        const filterTopic = activeTopicFilter();
+        const chapterPages = pages().filter((page) => page.chapterId === chapter.chapterId);
+        const pagesToRender = filterTopic
+          ? chapterPages.filter((page) => String(page.sourcePage) === String(filterTopic.sourcePage))
+          : chapterPages;
+        pagesToRender.forEach((page) => {
           readerEl.append(renderUnit({
-            title: page.title,
+            title: pageDisplayTitle(page),
             meta: `หน้า ${page.sourcePageLabel || page.sourcePage}`,
-            unitLines: pageLines(page),
+            breadcrumbs: breadcrumbItemsForPage(page),
+            unitLines: pageLinesForRender(page),
           }));
         });
-        statusEl.textContent = `${chapter.title} · ${pages().length} หน้า`;
+        statusEl.textContent = filterTopic
+          ? `${chapter.title} · กรองประเด็น ${filterTopic.title}`
+          : `${chapter.title} · ${chapterPages.length} หน้า`;
         updateReviewButton();
         return;
       }
@@ -968,23 +2274,29 @@
       const page = pages().find((entry) => entry.itemId === selectedId);
       if (!page) return;
       readerEl.append(renderUnit({
-        title: page.title,
+        title: pageDisplayTitle(page),
         meta: `หน้า ${page.sourcePageLabel || page.sourcePage}`,
-        unitLines: pageLines(page),
+        breadcrumbs: breadcrumbItemsForPage(page),
+        unitLines: pageLinesForRender(page),
       }));
-      statusEl.textContent = `หน้า ${page.sourcePageLabel || page.sourcePage} · ${page.children?.length || 0} บรรทัด`;
+      const filterTopic = activeTopicFilter();
+      statusEl.textContent = filterTopic
+        ? `หน้า ${page.sourcePageLabel || page.sourcePage} · กรองประเด็น ${filterTopic.title}`
+        : `หน้า ${page.sourcePageLabel || page.sourcePage} · ${page.children?.length || 0} บรรทัด`;
       updateReviewButton();
     }
 
     function setMode(nextMode) {
       mode = nextMode;
+      activeBreadcrumbLookupKey = '';
+      activeTopicFilterId = '';
       if (!reviewPanel.hidden) closeReviewPanel();
+      populateSelect();
       document.querySelectorAll('[data-mode]').forEach((button) => {
         const active = button.dataset.mode === mode;
         button.classList.toggle('is-active', active);
         button.setAttribute('aria-pressed', String(active));
       });
-      populateSelect();
       render();
     }
 
@@ -993,6 +2305,8 @@
       const index = items.findIndex((item) => item.itemId === selectedId);
       const nextIndex = Math.min(items.length - 1, Math.max(0, index + direction));
       selectedId = items[nextIndex]?.itemId || '';
+      activeBreadcrumbLookupKey = '';
+      activeTopicFilterId = '';
       selectEl.value = selectedId;
       if (!reviewPanel.hidden) closeReviewPanel();
       updateNav(items);
@@ -1001,11 +2315,16 @@
 
     async function loadCorpus(manifestPath) {
       const manifest = await fetchJson(manifestPath);
+      currentManifest = manifest;
       corpusBaseUrl = dirname(manifestPath);
-      currentCorpus = await fetchJson(joinUrl(corpusBaseUrl, manifest.corpus || 'corpus.json'));
+      primaryCorpus = await fetchJson(joinUrl(corpusBaseUrl, manifest.corpus || 'corpus.json'));
+      currentCorpus = primaryCorpus;
+      await loadTranslationCompanions(manifest);
       titleEl.textContent = manifest.title || currentCorpus.title || 'ตำรา';
       mode = manifest.defaultDisplayMode || 'kho';
       selectedId = '';
+      setSubjectSelectValue(queryParam('subject') || subjectForManifestPath(manifestPath));
+      updateLanguageControls();
       setMode(mode);
     }
 
@@ -1056,14 +2375,195 @@
       updateNav();
     }
 
+    function mockVocabItems(text) {
+      const cleaned = String(text || '').trim();
+      if (!cleaned) return [];
+      return [
+        {
+          pali: cleaned,
+          gloss: 'ศัพท์บาลีเทียบจากคำที่เลือก (mockup)',
+        },
+        {
+          pali: `${cleaned} · ปทานุกรม`,
+          gloss: 'ใช้เป็น placeholder ก่อนเชื่อม dictionary/corpus จริง',
+        },
+        {
+          pali: 'ตำแหน่งอ้างอิง',
+          gloss: activeVocabSelection
+            ? `หน้า ${activeVocabSelection.sourcePageLabel || activeVocabSelection.sourcePage || '-'} · บรรทัด ${activeVocabSelection.lineNo || '-'}`
+            : 'เลือกคำในบรรทัดเพื่อดูตำแหน่ง',
+        },
+      ];
+    }
+
+    function hideVocabTooltip() {
+      if (!vocabTooltip) return;
+      vocabTooltip.hidden = true;
+      activeVocabSelection = null;
+    }
+
+    function selectionLine(range) {
+      const node = range?.commonAncestorContainer || range?.startContainer;
+      const element = node?.nodeType === Node.ELEMENT_NODE ? node : node?.parentElement;
+      return element?.closest?.('.pip-line') || null;
+    }
+
+    function selectedTextOffset(line, range, selectedText) {
+      const plainText = line?.dataset.plainText || line?.textContent || '';
+      const markerLabels = Array.from(line?.querySelectorAll?.('.pip-text-mark__info') || []).map((node) => node.textContent || '');
+      const visibleText = markerLabels.reduce((value, label) => value.replace(label, ''), line?.textContent || '');
+      const beforeRange = document.createRange();
+      beforeRange.selectNodeContents(line);
+      beforeRange.setEnd(range.startContainer, range.startOffset);
+      const beforeText = markerLabels.reduce((value, label) => value.replace(label, ''), beforeRange.toString());
+      beforeRange.detach();
+
+      const directStart = plainText.indexOf(selectedText, beforeText.length);
+      if (directStart >= 0) return directStart;
+
+      const visibleStart = visibleText.indexOf(selectedText, beforeText.length);
+      if (visibleStart >= 0) return visibleStart;
+
+      return plainText.indexOf(selectedText);
+    }
+
+    function showVocabTooltip(selection, range, line) {
+      if (!vocabTooltip || !vocabTerm || !vocabMeta || !vocabList || !line) return;
+      const text = selection.toString().replace(/\s+/g, ' ').trim();
+      if (!text) {
+        hideVocabTooltip();
+        return;
+      }
+
+      const selectionStart = selectedTextOffset(line, range, text);
+      const selectionEnd = selectionStart >= 0 ? selectionStart + text.length : null;
+      activeVocabSelection = {
+        text,
+        lineItemId: line.dataset.itemId || selectedId,
+        sourcePage: line.dataset.sourcePage || currentItem()?.sourcePage || '',
+        sourcePageLabel: line.dataset.sourcePageLabel || currentItem()?.sourcePageLabel || '',
+        lineNo: line.dataset.lineNo || '',
+        selectionStart,
+        selectionEnd,
+      };
+
+      vocabTerm.textContent = `「${text}」`;
+      vocabMeta.textContent = `Mockup คำศัพท์บาลีเทียบ · หน้า ${activeVocabSelection.sourcePageLabel || activeVocabSelection.sourcePage || '-'} · บรรทัด ${activeVocabSelection.lineNo || '-'}`;
+      vocabList.replaceChildren();
+      mockVocabItems(text).forEach((item) => {
+        const row = document.createElement('div');
+        row.className = 'pip-vocab-tooltip__item';
+        const pali = document.createElement('div');
+        pali.className = 'pip-vocab-tooltip__pali';
+        pali.textContent = item.pali;
+        const gloss = document.createElement('div');
+        gloss.className = 'pip-vocab-tooltip__gloss';
+        gloss.textContent = item.gloss;
+        row.append(pali, gloss);
+        vocabList.append(row);
+      });
+
+      const rect = range.getBoundingClientRect();
+      const width = Math.min(360, window.innerWidth - 24);
+      const left = Math.min(Math.max(12, rect.left + rect.width / 2 - width / 2), window.innerWidth - width - 12);
+      const top = Math.max(12, rect.top - 12);
+      vocabTooltip.style.left = `${left}px`;
+      vocabTooltip.style.top = `${top}px`;
+      vocabTooltip.style.width = `${width}px`;
+      vocabTooltip.hidden = false;
+
+      requestAnimationFrame(() => {
+        const tooltipRect = vocabTooltip.getBoundingClientRect();
+        const nextTop = rect.top - tooltipRect.height - 10;
+        vocabTooltip.style.top = `${nextTop >= 12 ? nextTop : rect.bottom + 10}px`;
+      });
+    }
+
+    function handleReaderSelection() {
+      const selection = window.getSelection();
+      if (!selection || selection.isCollapsed || selection.rangeCount === 0) {
+        hideVocabTooltip();
+        return;
+      }
+      const range = selection.getRangeAt(0);
+      if (!readerEl.contains(range.commonAncestorContainer)) {
+        hideVocabTooltip();
+        return;
+      }
+      const line = selectionLine(range);
+      showVocabTooltip(selection, range, line);
+    }
+
     document.querySelectorAll('[data-mode]').forEach((button) => {
       button.addEventListener('click', () => setMode(button.dataset.mode));
     });
+    document.querySelectorAll('[data-lang]').forEach((button) => {
+      button.addEventListener('click', () => setLanguageVisibility(button.dataset.lang || 'both'));
+    });
+    subjectSelect?.addEventListener('change', () => {
+      const subject = subjectSelect.value;
+      const source = SUBJECT_SOURCES[subject];
+      if (!source) return;
+      setSubjectSelectValue(subject, { notifyParent: true });
+      const currentSubject = subjectForManifestPath(queryParam('corpus') || DEFAULT_CORPUS);
+      if (currentSubject !== subject) {
+        const nextLocation = `pali-reference-pip.html?corpus=${encodeURIComponent(source.manifest)}&subject=${encodeURIComponent(subject)}`;
+        window.history.replaceState(null, '', nextLocation);
+      }
+      loadCorpus(source.manifest).catch((error) => {
+        console.error(error);
+        statusEl.textContent = error.message;
+      });
+    });
     selectEl.addEventListener('change', () => {
       selectedId = selectEl.value;
+      activeBreadcrumbLookupKey = '';
+      activeTopicFilterId = '';
       if (!reviewPanel.hidden) closeReviewPanel();
       updateNav();
       render();
+    });
+    readerEl.addEventListener('click', (event) => {
+      const filterButton = event.target.closest?.('[data-breadcrumb-filter-topic]');
+      if (filterButton) {
+        activeTopicFilterId = activeTopicFilterId === filterButton.dataset.breadcrumbFilterTopic
+          ? ''
+          : filterButton.dataset.breadcrumbFilterTopic;
+        activeBreadcrumbLookupKey = '';
+        render();
+        return;
+      }
+      const lookupButton = event.target.closest?.('[data-breadcrumb-lookup]');
+      if (lookupButton) {
+        activeBreadcrumbLookupKey = activeBreadcrumbLookupKey === lookupButton.dataset.breadcrumbLookup
+          ? ''
+          : lookupButton.dataset.breadcrumbLookup;
+        render();
+        return;
+      }
+      const targetButton = event.target.closest?.('[data-breadcrumb-target-page]');
+      if (targetButton) {
+        const targetTopic = targetButton.dataset.breadcrumbTargetTopic || '';
+        const nextMode = targetTopic && (mode === 'page' || mode === 'chapter') ? mode : (targetTopic ? 'topic' : 'page');
+        mode = nextMode;
+        if (targetTopic && nextMode === 'topic') {
+          selectedId = targetTopic;
+          activeTopicFilterId = '';
+        } else {
+          selectedId = nextMode === 'chapter' ? selectedId : targetButton.dataset.breadcrumbTargetPage;
+          activeTopicFilterId = targetTopic;
+        }
+        activeBreadcrumbLookupKey = '';
+        populateSelect();
+        document.querySelectorAll('[data-mode]').forEach((button) => {
+          const active = button.dataset.mode === mode;
+          button.classList.toggle('is-active', active);
+          button.setAttribute('aria-pressed', String(active));
+        });
+        if (!reviewPanel.hidden) closeReviewPanel();
+        updateNav();
+        render();
+      }
     });
     prevEl.addEventListener('click', () => move(-1));
     nextEl.addEventListener('click', () => move(1));
@@ -1085,6 +2585,69 @@
       if (reviewPanel.hidden) openReviewPanel();
       else closeReviewPanel();
     });
+    readerEl.addEventListener('mouseup', () => {
+      setTimeout(handleReaderSelection, 0);
+    });
+    readerEl.addEventListener('keyup', (event) => {
+      if (event.key === 'Escape') {
+        hideVocabTooltip();
+        return;
+      }
+      handleReaderSelection();
+    });
+    readerEl.addEventListener('touchend', () => {
+      setTimeout(handleReaderSelection, 120);
+    });
+    document.addEventListener('mousedown', (event) => {
+      if (vocabTooltip?.hidden) return;
+      if (vocabTooltip.contains(event.target) || readerEl.contains(event.target)) return;
+      hideVocabTooltip();
+    });
+    vocabClose?.addEventListener('click', hideVocabTooltip);
+    vocabClear?.addEventListener('click', () => {
+      const target = makeSelectionReviewTarget(activeVocabSelection);
+      if (!target) return;
+      const key = reviewKey(target);
+      reviewNotes = reviewNotes.filter((note) => note.key !== key);
+      saveReviewNotes();
+      hideVocabTooltip();
+      window.getSelection()?.removeAllRanges();
+      render();
+    });
+    vocabRemember?.addEventListener('click', () => {
+      const target = makeSelectionReviewTarget(activeVocabSelection);
+      if (!target) return;
+      const key = reviewKey(target);
+      const now = new Date().toISOString();
+      const nextNote = {
+        ...target,
+        key,
+        category: 'memory',
+        comment: 'จำคำศัพท์จาก tooltip',
+        suggestion: '',
+        updatedAt: now,
+      };
+      const existingIndex = reviewNotes.findIndex((note) => note.key === key);
+      if (existingIndex >= 0) {
+        reviewNotes[existingIndex] = {
+          ...reviewNotes[existingIndex],
+          ...nextNote,
+          createdAt: reviewNotes[existingIndex].createdAt || now,
+        };
+      } else {
+        reviewNotes.push({ ...nextNote, createdAt: now });
+      }
+      saveReviewNotes();
+      hideVocabTooltip();
+      window.getSelection()?.removeAllRanges();
+      render();
+    });
+    vocabReport?.addEventListener('click', () => {
+      const target = makeSelectionReviewTarget(activeVocabSelection);
+      if (!target) return;
+      hideVocabTooltip();
+      openReviewPanel(target);
+    });
     reviewClose.addEventListener('click', closeReviewPanel);
     reviewDelete.addEventListener('click', () => {
       if (!activeReviewTarget) return;
@@ -1104,6 +2667,7 @@
         category: reviewCategory.value,
         comment: reviewComment.value.trim(),
         suggestion: reviewSuggestion.value.trim(),
+        reportScope: activeReviewTarget.reportScope || 'position',
         updatedAt: new Date().toISOString(),
       };
       const existingIndex = reviewNotes.findIndex((note) => note.key === key);

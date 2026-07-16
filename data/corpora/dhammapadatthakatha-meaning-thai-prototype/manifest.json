@@ -1,0 +1,11 @@
+{
+  "schema": "paligo.corpus-manifest.v1",
+  "title": "พระธัมมปทัฏฐกถาแปล ภาค ๑ (แปลโดยอรรถ · prototype)",
+  "grade": "ป.ธ. ๔",
+  "corpus": "corpus.json",
+  "defaultDisplayMode": "page",
+  "subjectHint": "pali-to-thai",
+  "languageToggle": true,
+  "defaultLanguageVisibility": "thaiMeaning",
+  "audioAlignment": ""
+}

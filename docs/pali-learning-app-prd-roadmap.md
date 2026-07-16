@@ -61,6 +61,17 @@
 
 > ดู [`docs/pali-ai/CURRICULUM-OFFICIAL.md`](pali-ai/CURRICULUM-OFFICIAL.md) สำหรับตัวย่อ มท/ทม/สพ/บว
 
+### Terminology สำหรับโค้ดและ schema
+
+ใน UI ภาษาไทยยังใช้คำว่า **ข้อ** ได้ตามบริบทผู้เรียน แต่ในโค้ดใหม่ให้ใช้
+`episode` หรือ `ep` แทน `kho` เพื่อลดความสับสนทางภาษาโปรแกรม:
+
+- ชื่อ field/function/schema ที่ต้องอ่านชัด: ใช้ `episode`
+- compact id, query param, generated item id: ใช้ `ep`
+- `kho*` ที่มีอยู่แล้วถือเป็น legacy compatibility จนกว่าจะมี migration slice
+
+ดู policy เต็ม: [`docs/url-naming-refactor-plan.md`](url-naming-refactor-plan.md)
+
 ---
 
 ## หลักการตรวจและสอน (Domain Logic — บังคับสำหรับ AI Examiner)

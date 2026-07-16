@@ -1,0 +1,11 @@
+{
+  "schema": "paligo.corpus-manifest.v1",
+  "title": "พระธัมมปทัฏฐกถาแปลโดยพยัญชนะ ภาค ๑ (Thai literal prototype)",
+  "grade": "ป.ธ. ๔",
+  "corpus": "corpus.json",
+  "defaultDisplayMode": "page",
+  "subjectHint": "thai-to-pali",
+  "languageToggle": true,
+  "defaultLanguageVisibility": "thai",
+  "audioAlignment": ""
+}
