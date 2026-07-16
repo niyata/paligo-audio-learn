@@ -1353,7 +1353,7 @@
         aria-label="หน้าต่างตำราบาลี"
       >
         <div class="pali-reference-pip__bar" data-pali-reference-drag>
-          <div class="pali-reference-pip__title">มังคลัตถทีปนีบาลี (ปฐโม ภาโค) · ดูโจทย์ควบคู่กับสมุด</div>
+          <div class="pali-reference-pip__title" data-pali-reference-title>มังคลัตถทีปนีบาลี (ปฐโม ภาโค) · ดูโจทย์ควบคู่กับสมุด</div>
           <div class="pali-reference-pip__actions">
             <a
               class="pali-reference-pip__action"
@@ -1611,7 +1611,27 @@
         const activeBookStorageKey = KEYS.activeBook;
         const ownerStorageKey = KEYS.owner;
         const paliReferencePipStorageKey = "paligo-pali-reference-pip-v1";
-        const paliReferenceUrl = "pali-reference-pip.html?corpus=data/corpora/mangalattha-pali-pathamo/manifest.json";
+        const paliReferenceDefault = {
+          corpusId: "mangalattha-pali-pathamo",
+          title: "มังคลัตถทีปนีบาลี (ปฐโม ภาโค)",
+          description: "ป.ธ. ๔ · แปลมคธเป็นไทย",
+          url: "pali-reference-pip.html?corpus=data/corpora/mangalattha-pali-pathamo/manifest.json",
+        };
+        const paliReferenceByExam = new Map([
+          [
+            "4:pali-to-thai",
+            paliReferenceDefault,
+          ],
+          [
+            "4:thai-to-pali",
+            {
+              corpusId: "dhammapadatthakatha-pt4-book1",
+              title: "ธัมมปทัฏฐกถา ภาค ๑ (เรื่องพระจักขุบาล)",
+              description: "ป.ธ. ๔ · แปลไทยเป็นมคธ",
+              url: "pali-reference-pip.html?corpus=data/corpora/dhammapadatthakatha-pt4-book1/manifest.json",
+            },
+          ],
+        ]);
         const numberedLinePattern = /^\s*([0-9๐-๙]+)(?:[.)])?\s*(.*)$/;
         const digitKeyPattern = /^[0-9๐-๙]$/;
         const combiningMarkPattern = /[\u0300-\u036f\u0e31\u0e34-\u0e3a\u0e47-\u0e4e]/u;
@@ -1747,6 +1767,7 @@
         const closePaliReferenceButton = document.querySelector("[data-pali-reference-close]");
         const minimizePaliReferenceButton = document.querySelector("[data-pali-reference-minimize]");
         const paliReferenceDragHandle = document.querySelector("[data-pali-reference-drag]");
+        const paliReferenceTitle = document.querySelector("[data-pali-reference-title]");
         const paliReferenceFrame = document.querySelector("[data-pali-reference-frame]");
         const paliReferenceFullLink = document.querySelector("[data-pali-reference-full]");
         const thaiDigits = new Map([
@@ -2081,10 +2102,40 @@
           }
         };
 
+        const getCurrentPaliReferenceSource = () => {
+          const grade = String(gradePicker?.dataset.value || currentProfileGrade || "4");
+          const subject = String(subjectPicker?.dataset.value || "pali-to-thai");
+          return paliReferenceByExam.get(`${grade}:${subject}`) || paliReferenceDefault;
+        };
+
+        const syncPaliReferenceContext = ({ reload = false } = {}) => {
+          const source = getCurrentPaliReferenceSource();
+          const title = `${source.title} · ดูโจทย์ควบคู่กับสมุด`;
+
+          if (paliReferenceTitle) paliReferenceTitle.textContent = title;
+          if (paliReferenceFullLink) {
+            paliReferenceFullLink.href = source.url;
+            paliReferenceFullLink.setAttribute("aria-label", `เปิด ${source.title} เต็มหน้า`);
+          }
+          if (paliReferenceFrame) {
+            paliReferenceFrame.title = source.title;
+            if (reload && paliReferenceFrame.getAttribute("src") !== source.url) {
+              paliReferenceFrame.src = source.url;
+            }
+          }
+          if (openPaliReferenceButton) {
+            openPaliReferenceButton.title = source.description;
+            openPaliReferenceButton.setAttribute("aria-label", `เปิดตำรา ${source.title}`);
+          }
+
+          return source;
+        };
+
         const ensurePaliReferenceFrame = () => {
           if (!paliReferenceFrame) return;
-          if (paliReferenceFrame.getAttribute("src") !== paliReferenceUrl) {
-            paliReferenceFrame.src = paliReferenceUrl;
+          const source = syncPaliReferenceContext();
+          if (paliReferenceFrame.getAttribute("src") !== source.url) {
+            paliReferenceFrame.src = source.url;
           }
         };
 
@@ -3124,6 +3175,7 @@
           selectPickerValue(subjectPicker, value);
           updatePickerCurrentValue(subjectPicker, value);
           syncPrefilledAnswerLine();
+          syncPaliReferenceContext({ reload: !paliReferencePip?.hidden });
         };
 
         examPickers.forEach((picker) => {
@@ -4295,9 +4347,7 @@
           applyLineHeight(Number(control.value));
         });
 
-        if (paliReferenceFullLink) {
-          paliReferenceFullLink.href = paliReferenceUrl;
-        }
+        syncPaliReferenceContext();
 
         openPaliReferenceButton?.addEventListener("click", () => {
           if (paliReferencePip?.hidden) {

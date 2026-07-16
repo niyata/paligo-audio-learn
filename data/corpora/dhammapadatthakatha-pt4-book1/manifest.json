@@ -1,0 +1,8 @@
+{
+  "schema": "paligo.corpus-manifest.v1",
+  "title": "ธัมมปทัฏฐกถา ภาค ๑ (เรื่องพระจักขุบาล)",
+  "grade": "ป.ธ. ๔",
+  "corpus": "corpus.json",
+  "defaultDisplayMode": "sentence",
+  "audioAlignment": "../../../chakkhupala.mp3"
+}

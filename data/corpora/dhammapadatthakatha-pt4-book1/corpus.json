@@ -1,0 +1,60 @@
+{
+  "schema": "paligo.corpus.v1",
+  "corpusId": "dhammapadatthakatha-pt4-book1",
+  "title": "ธัมมปทัฏฐกถา ภาค ๑ (เรื่องพระจักขุบาล)",
+  "grade": "ป.ธ. ๔",
+  "sourceType": "seed-audio-alignment",
+  "itemConventions": {
+    "itemId": "id หลักของหน่วยเรียน ใช้ในระบบทุกที่",
+    "chapterId": "id ของกลุ่ม/บท/ข้อใหญ่ที่ item นั้นสังกัด",
+    "itemType": "ชนิดของ item เช่น chapter, kho, sentence, page"
+  },
+  "chapters": [
+    {
+      "chapterId": "dhammapadatthakatha-pt4-book1-chakkhupala",
+      "itemId": "dhammapadatthakatha-pt4-book1-chakkhupala",
+      "itemType": "chapter",
+      "title": "เรื่องพระจักขุบาลเถระ",
+      "sourcePages": [
+        1
+      ]
+    }
+  ],
+  "items": [
+    {
+      "itemId": "dhammapadatthakatha-pt4-book1-p0001",
+      "chapterId": "dhammapadatthakatha-pt4-book1-chakkhupala",
+      "itemType": "page",
+      "itemNo": 1,
+      "sourcePage": 1,
+      "sourcePageLabel": "๑",
+      "title": "ธัมมปทัฏฐกถา ภาค ๑ หน้า ๑",
+      "rawText": "จกฺขุปาลเถรวตฺถุ\nตตฺร อยํ อนุปุพฺพิกถา โหติ ฯ",
+      "text": "จกฺขุปาลเถรวตฺถุ\nตตฺร อยํ อนุปุพฺพิกถา โหติ ฯ",
+      "children": [
+        {
+          "itemId": "dhammapadatthakatha-pt4-book1-p0001-s001",
+          "chapterId": "dhammapadatthakatha-pt4-book1-chakkhupala",
+          "parentItemId": "dhammapadatthakatha-pt4-book1-p0001",
+          "itemType": "sentence",
+          "itemNo": 1,
+          "sourcePage": 1,
+          "sourcePageLabel": "๑",
+          "pali": "จกฺขุปาลเถรวตฺถุ",
+          "thai": "เรื่องพระจักขุบาลเถระ"
+        },
+        {
+          "itemId": "dhammapadatthakatha-pt4-book1-p0001-s002",
+          "chapterId": "dhammapadatthakatha-pt4-book1-chakkhupala",
+          "parentItemId": "dhammapadatthakatha-pt4-book1-p0001",
+          "itemType": "sentence",
+          "itemNo": 2,
+          "sourcePage": 1,
+          "sourcePageLabel": "๑",
+          "pali": "ตตฺร อยํ อนุปุพฺพิกถา โหติ ฯ",
+          "thai": "ในเรื่องนั้น เรื่องโดยลำดับนี้ย่อมมี"
+        }
+      ]
+    }
+  ]
+}
