@@ -10,6 +10,11 @@ Optional (background images, closer to printed page):
 
 Example:
   python3 scripts/pdf_to_book_html.py input.pdf output/book-html --from-page 1 --to-page 5
+
+Bilingual Thai–Pali (left/right columns):
+  python3 scripts/pdf_to_book_html.py book.pdf output/dhamma \\
+    --bilingual-columns --content-from-page 10 --book-page-offset 7 \\
+    --from-page 10 --to-page 12 --with-background
 """
 
 from __future__ import annotations
@@ -27,6 +32,11 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(SCRIPT_DIR))
 
 from audio_practice_lib import export_practice_packs, flatten_words  # noqa: E402
+from bilingual_pdf_lib import (  # noqa: E402
+    extract_bilingual_page,
+    group_words_into_lines,
+    normalize_thai_pdf_text,
+)
 from book_fonts import DEFAULT_FONT_STACK, build_font_face_css, copy_font_assets  # noqa: E402
 from book_verification_lib import (  # noqa: E402
     build_footnote_html,
@@ -48,6 +58,35 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--book-id", default="", help="Book identifier for manifest")
     parser.add_argument("--title", default="", help="Book title for manifest")
     parser.add_argument("--with-background", action="store_true", help="Render PNG background via pdftoppm")
+    parser.add_argument(
+        "--bilingual-columns",
+        action="store_true",
+        help="Tag Thai (left) / Pali (right) tokens for language hide/show",
+    )
+    parser.add_argument(
+        "--content-from-page",
+        type=int,
+        default=0,
+        help="If set with --from-page default, clamp start to this PDF page",
+    )
+    parser.add_argument(
+        "--book-page-offset",
+        type=int,
+        default=0,
+        help="bookPage = pdfPage - offset (e.g. 7 when PDF 10 = book page 3)",
+    )
+    parser.add_argument(
+        "--lang-split",
+        choices=("auto", "midpoint"),
+        default="auto",
+        help="How to classify bilingual tokens (auto uses CordiaBalee vs CordiaNew)",
+    )
+    parser.add_argument(
+        "--default-lang-visibility",
+        choices=("both", "thai", "pali"),
+        default="both",
+        help="Initial hide class on bilingual pages",
+    )
     return parser.parse_args()
 
 
@@ -143,32 +182,6 @@ def render_backgrounds(pdf_path: Path, pages_dir: Path, page_numbers: list[int])
     return {}
 
 
-def group_words_into_lines(words: list[dict], line_tolerance: float = 3.0) -> list[list[dict]]:
-    if not words:
-        return []
-
-    sorted_words = sorted(words, key=lambda item: (round(item["top"], 1), item["x0"]))
-    lines: list[list[dict]] = []
-    current_line: list[dict] = []
-    current_top: float | None = None
-
-    for word in sorted_words:
-        top = float(word["top"])
-        if current_top is None or abs(top - current_top) <= line_tolerance:
-            current_line.append(word)
-            current_top = top if current_top is None else (current_top + top) / 2
-            continue
-
-        lines.append(current_line)
-        current_line = [word]
-        current_top = top
-
-    if current_line:
-        lines.append(current_line)
-
-    return lines
-
-
 def build_page_html(
     page_no: int,
     page_width: float,
@@ -177,12 +190,16 @@ def build_page_html(
     background_path: str | None,
     book_id: str,
     token_count: int,
+    *,
+    bilingual: bool = False,
+    default_lang_visibility: str = "both",
+    book_page: int | None = None,
 ) -> str:
     spans: list[str] = []
 
     for line in lines:
         for word in line:
-            raw_text = str(word.get("text") or "").strip()
+            raw_text = normalize_thai_pdf_text(str(word.get("text") or ""))
             if not raw_text:
                 continue
 
@@ -193,9 +210,11 @@ def build_page_html(
             width = pct(float(word["x1"]) - float(word["x0"]), page_width)
             height = pct(float(word["bottom"]) - float(word["top"]), page_height)
             font_size = max(8, round(float(word.get("height") or 12) * 0.92, 2))
+            lang = str(word.get("lang") or "").strip()
+            lang_attr = f' data-lang="{html.escape(lang)}"' if bilingual and lang else ""
 
             spans.append(
-                f'<span class="book-token" style="left:{left}%;top:{top}%;width:{width}%;'
+                f'<span class="book-token"{lang_attr} style="left:{left}%;top:{top}%;width:{width}%;'
                 f'height:{height}%;font-size:{font_size}px">{text}</span>'
             )
 
@@ -204,26 +223,46 @@ def build_page_html(
         if background_path
         else ""
     )
-    body_html = f"""{background}
-  <div class="book-page-text" aria-label="หน้า {page_no}">
+    masks = ""
+    if bilingual and background_path:
+        masks = """
+  <div class="book-lang-mask book-lang-mask--thai" aria-hidden="true"></div>
+  <div class="book-lang-mask book-lang-mask--pali" aria-hidden="true"></div>"""
+
+    label_page = book_page if book_page is not None else page_no
+    hide_class = ""
+    if bilingual and default_lang_visibility == "thai":
+        hide_class = " hide-pali"
+    elif bilingual and default_lang_visibility == "pali":
+        hide_class = " hide-thai"
+
+    body_html = f"""{background}{masks}
+  <div class="book-page-text" aria-label="หน้า {to_thai_digits(label_page)}">
     {"".join(spans)}
   </div>"""
-    footnote_html = build_footnote_html(page_no, token_count, book_id, "pending")
-
-    return build_page_shell(page_no, page_width, page_height, body_html, footnote_html)
+    footnote_html = build_footnote_html(label_page, token_count, book_id, "pending")
+    shell = build_page_shell(label_page, page_width, page_height, body_html, footnote_html)
+    if bilingual or hide_class:
+        # Inject bilingual classes onto the root .book-page element.
+        shell = shell.replace(
+            'class="book-page',
+            f'class="book-page{" bilingual" if bilingual else ""}{hide_class}',
+            1,
+        )
+    return shell
 
 
 def extract_source_text(lines: list[list[dict]]) -> str:
     words: list[str] = []
     for line in lines:
         for word in line:
-            text = str(word.get("text") or "").strip()
+            text = normalize_thai_pdf_text(str(word.get("text") or ""))
             if text:
                 words.append(to_thai_digits(text))
     return " ".join(words)
 
 
-def write_assets(output_dir: Path) -> None:
+def write_assets(output_dir: Path, *, bilingual: bool = False) -> None:
     repo_root = Path(__file__).resolve().parent.parent
     copy_font_assets(repo_root, output_dir)
     font_face = build_font_face_css(output_dir)
@@ -284,10 +323,95 @@ def write_assets(output_dir: Path) -> None:
   outline: none;
   z-index: 2;
 }}
+
+.book-lang-mask {{
+  background: #fffaf0;
+  bottom: 7%;
+  display: none;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  z-index: 1;
+}}
+
+.book-lang-mask--thai {{
+  left: 0;
+  right: 50%;
+}}
+
+.book-lang-mask--pali {{
+  left: 50%;
+  right: 0;
+}}
+
+.book-page.hide-thai .book-token[data-lang="thai"],
+.book-page.hide-pali .book-token[data-lang="pali"] {{
+  visibility: hidden;
+}}
+
+.book-page.has-background.hide-thai .book-lang-mask--thai,
+.book-page.has-background.hide-pali .book-lang-mask--pali {{
+  display: block;
+}}
+
+.book-page.bilingual:not(.has-background) .book-token[data-lang="thai"] {{
+  color: #1f2d89;
+}}
+
+.book-page.bilingual:not(.has-background) .book-token[data-lang="pali"] {{
+  color: #6b3a12;
+}}
 """
     css = "/* Generated book page layout */\n" + css
     css += footnote_css()
+    if bilingual:
+        css += """
+.book-lang-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin: 12px auto 0;
+  max-width: min(100%, 760px);
+}
+.book-lang-toolbar button {
+  background: #fffaf0;
+  border: 1px solid rgba(74, 44, 10, 0.22);
+  border-radius: 8px;
+  color: #1f2d89;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  min-height: 36px;
+  padding: 6px 12px;
+}
+.book-lang-toolbar button.is-active {
+  background: #fff3d6;
+  border-color: #f2a600;
+}
+"""
     (output_dir / "book.css").write_text(css, encoding="utf-8")
+    if bilingual:
+        (output_dir / "book-lang-toggle.js").write_text(
+            """(() => {
+  const apply = (mode) => {
+    document.querySelectorAll('.book-page.bilingual').forEach((page) => {
+      page.classList.toggle('hide-thai', mode === 'pali');
+      page.classList.toggle('hide-pali', mode === 'thai');
+    });
+    document.querySelectorAll('[data-book-lang]').forEach((button) => {
+      button.classList.toggle('is-active', button.dataset.bookLang === mode);
+    });
+  };
+  document.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-book-lang]');
+    if (!button) return;
+    apply(button.dataset.bookLang || 'both');
+  });
+})();
+""",
+            encoding="utf-8",
+        )
 
 
 def main() -> int:
@@ -311,6 +435,8 @@ def main() -> int:
     with pdfplumber.open(args.pdf_path) as pdf:
         last_page = args.to_page or len(pdf.pages)
         first_page = max(1, args.from_page)
+        if args.content_from_page:
+            first_page = max(first_page, args.content_from_page)
         last_page = min(last_page, len(pdf.pages))
         page_numbers = list(range(first_page, last_page + 1))
 
@@ -318,30 +444,55 @@ def main() -> int:
 
         for page_no in page_numbers:
             page = pdf.pages[page_no - 1]
-            words = page.extract_words(use_text_flow=True, keep_blank_chars=False) or []
-            lines = group_words_into_lines(words)
+            book_page = page_no - args.book_page_offset if args.book_page_offset else page_no
+            if args.bilingual_columns:
+                bilingual = extract_bilingual_page(page, lang_split=args.lang_split)
+                words = bilingual["words"]
+                lines = group_words_into_lines(words)
+                thai_text = bilingual["thai"]
+                pali_text = bilingual["pali"]
+            else:
+                words = page.extract_words(use_text_flow=True, keep_blank_chars=False) or []
+                lines = group_words_into_lines(words)
+                thai_text = ""
+                pali_text = ""
             page_words[page_no] = flatten_words(lines)
             background_path = backgrounds.get(page_no)
             token_count = sum(len(line) for line in lines)
             page_html = build_page_html(
-                page_no, page.width, page.height, lines, background_path, book_id, token_count
+                page_no,
+                page.width,
+                page.height,
+                lines,
+                background_path,
+                book_id,
+                token_count,
+                bilingual=args.bilingual_columns,
+                default_lang_visibility=args.default_lang_visibility,
+                book_page=book_page,
             )
+            if background_path and 'class="book-page' in page_html and "has-background" not in page_html:
+                page_html = page_html.replace('class="book-page', 'class="book-page has-background', 1)
             page_file = pages_dir / f"page-{page_no:04d}.html"
             page_file.write_text(page_html, encoding="utf-8")
 
-            manifest_pages.append(
-                {
-                    "page": page_no,
-                    "html": f"pages/page-{page_no:04d}.html",
-                    "background": background_path,
-                    "width": round(page.width, 2),
-                    "height": round(page.height, 2),
-                    "tokenCount": token_count,
-                    "sourceText": extract_source_text(lines),
-                }
-            )
+            entry = {
+                "page": page_no,
+                "bookPage": book_page,
+                "html": f"pages/page-{page_no:04d}.html",
+                "background": background_path,
+                "width": round(page.width, 2),
+                "height": round(page.height, 2),
+                "tokenCount": token_count,
+                "sourceText": extract_source_text(lines),
+            }
+            if args.bilingual_columns:
+                entry["thai"] = thai_text
+                entry["pali"] = pali_text
+                entry["bilingual"] = True
+            manifest_pages.append(entry)
 
-    write_assets(output_dir)
+    write_assets(output_dir, bilingual=args.bilingual_columns)
 
     try:
         source_pdf_relative = os.path.relpath(args.pdf_path.resolve(), output_dir.resolve())
@@ -365,9 +516,42 @@ def main() -> int:
         "pageCount": len(manifest_pages),
         "practiceIndex": "practice/index.json",
         "pages": manifest_pages,
+        "bilingualColumns": args.bilingual_columns,
+        "bookPageOffset": args.book_page_offset,
+        "defaultLanguageVisibility": args.default_lang_visibility if args.bilingual_columns else "both",
     }
     (output_dir / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
 
+    if args.bilingual_columns:
+        bodies = []
+        for entry in manifest_pages:
+            body = (pages_dir / Path(entry["html"]).name).read_text(encoding="utf-8")
+            body = body.replace('src="page-', 'src="pages/page-')
+            bodies.append(body)
+        index_html = f"""<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{html.escape(title)}</title>
+  <link rel="stylesheet" href="book.css" />
+  <style>body{{background:#f8f0e3;margin:0;padding:16px;}} .book-page{{margin-bottom:22px;}}</style>
+</head>
+<body>
+  <div class="book-lang-toolbar" role="group" aria-label="แสดงภาษา">
+    <button type="button" data-book-lang="thai">ไทย (โจทย์)</button>
+    <button type="button" data-book-lang="pali">บาลี (เฉลย)</button>
+    <button type="button" data-book-lang="both" class="is-active">ทั้งคู่</button>
+  </div>
+  {"".join(bodies)}
+  <script src="book-lang-toggle.js"></script>
+  <script>
+    document.querySelector('[data-book-lang="{args.default_lang_visibility}"]')?.click();
+  </script>
+</body>
+</html>
+"""
+        (output_dir / "index.html").write_text(index_html, encoding="utf-8")
     verification = default_verification(book_id, page_numbers)
     write_verification(output_dir / "verification.json", verification)
 
@@ -376,6 +560,8 @@ def main() -> int:
 
     print(f"Wrote {len(manifest_pages)} pages to {output_dir}")
     print(f"Wrote {len(practice_index.get('packs', []))} audio practice packs to {output_dir / 'practice'}")
+    if args.bilingual_columns:
+        print(f"Open {output_dir / 'index.html'} for bilingual hide/show.")
     print("Open pali-audio-hightlight.html?manifest=output/BOOK-ID/manifest.json for audio practice.")
     print("Open book-page-qa.html for PDF/HTML comparison and verification.")
     return 0
