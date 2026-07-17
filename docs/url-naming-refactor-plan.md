@@ -125,6 +125,19 @@ Status 2026-07-12: first compatibility slice started.
   - `paligo-book-cover.js` wraps current `paligo-exam-book-cover.js`
 - Migrate call sites only after compatibility is verified.
 
+Status 2026-07-17: facade files added (Issue #90).
+
+- Added `paligo-workbook-shared.js`, `paligo-workbook-submit.js`,
+  `paligo-book-cover.js` as pure alias wrappers (`window.PaligoWorkbookShared
+  = window.PaligoExamShared`, etc.) — no logic duplicated or changed.
+- Not wired into any HTML page yet — no `<script>` tag added anywhere, so no
+  existing page load order or behavior changes. This is intentionally
+  additive-only; call-site migration is a separate, later slice.
+- `paligo-exam-shared.js`, `paligo-exam-submit.js`, `paligo-exam-book-cover.js`,
+  `paligo-exam-paper.js` untouched.
+- PO decision recorded: schema/localStorage names remain `paligo.exam.*`
+  until a later major migration; these facades alias module/global names only.
+
 ### Slice 5 — Storage/Data Migration
 
 - Decide whether storage keys should remain legacy forever or move to
