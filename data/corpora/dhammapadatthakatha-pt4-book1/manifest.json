@@ -1,8 +1,11 @@
 {
   "schema": "paligo.corpus-manifest.v1",
-  "title": "ธัมมปทัฏฐกถา ภาค ๑ (เรื่องพระจักขุบาล)",
+  "title": "ธัมมปทัฏฐกถา ภาค ๑ (สองภาษา · แปลโดยพยัญชนะ)",
   "grade": "ป.ธ. ๔",
   "corpus": "corpus.json",
-  "defaultDisplayMode": "sentence",
-  "audioAlignment": "../../../chakkhupala.mp3"
+  "defaultDisplayMode": "page",
+  "subjectHint": "thai-to-pali",
+  "languageToggle": true,
+  "defaultLanguageVisibility": "thai",
+  "audioAlignment": ""
 }

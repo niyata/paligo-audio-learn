@@ -1,0 +1,3760 @@
+{
+  "schema": "paligo.literal-thai-pdf-quality-report.v1",
+  "corpusId": "dhammapadatthakatha-literal-thai-prototype",
+  "title": "พระธัมมปทัฏฐกถาแปลโดยพยัญชนะ ภาค ๑ (Thai literal prototype)",
+  "pageCount": 233,
+  "sourceArtifacts": {
+    "sourceFile": "/Users/iworn/Documents/Claude/Projects/PaliGo/Knowledge-Base/pt4/Dhammapada-sambandha/2_19 พระธัมมปทัฏฐกถาแปลโดยพยัญชนะ ภาค ๑.pdf",
+    "contentPdfPages": [
+      10,
+      242
+    ],
+    "bookPageOffset": 9,
+    "legacyPuaMap": {
+      "U+F700": "ฐ",
+      "U+F701": "ฐิ",
+      "U+F70A": "่",
+      "U+F70B": "้",
+      "U+F70E": "์",
+      "U+F70F": "ญ",
+      "U+F711": "ํ"
+    }
+  },
+  "totals": {
+    "mainLineCount": 5318,
+    "footnoteLineCount": 1209,
+    "replacementChars": 0,
+    "remainingPuaCount": 0,
+    "suspiciousInternalSpaces": 23697
+  },
+  "pages": [
+    {
+      "pdfPage": 10,
+      "sourcePage": 1,
+      "sourcePageLabel": "๑",
+      "mainLineCount": 14,
+      "footnoteLineCount": 13,
+      "skipped": {
+        "headers": 0,
+        "decorations": 2,
+        "blank": 4
+      },
+      "lineCount": 27,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 79
+    },
+    {
+      "pdfPage": 11,
+      "sourcePage": 2,
+      "sourcePageLabel": "๒",
+      "mainLineCount": 15,
+      "footnoteLineCount": 20,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 35,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 145
+    },
+    {
+      "pdfPage": 12,
+      "sourcePage": 3,
+      "sourcePageLabel": "๓",
+      "mainLineCount": 19,
+      "footnoteLineCount": 16,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 35,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 106
+    },
+    {
+      "pdfPage": 13,
+      "sourcePage": 4,
+      "sourcePageLabel": "๔",
+      "mainLineCount": 22,
+      "footnoteLineCount": 10,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 32,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 94
+    },
+    {
+      "pdfPage": 14,
+      "sourcePage": 5,
+      "sourcePageLabel": "๕",
+      "mainLineCount": 19,
+      "footnoteLineCount": 14,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 33,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 140
+    },
+    {
+      "pdfPage": 15,
+      "sourcePage": 6,
+      "sourcePageLabel": "๖",
+      "mainLineCount": 21,
+      "footnoteLineCount": 6,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 5
+      },
+      "lineCount": 27,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 132
+    },
+    {
+      "pdfPage": 16,
+      "sourcePage": 7,
+      "sourcePageLabel": "๗",
+      "mainLineCount": 19,
+      "footnoteLineCount": 15,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 34,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 109
+    },
+    {
+      "pdfPage": 17,
+      "sourcePage": 8,
+      "sourcePageLabel": "๘",
+      "mainLineCount": 20,
+      "footnoteLineCount": 15,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 35,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 128
+    },
+    {
+      "pdfPage": 18,
+      "sourcePage": 9,
+      "sourcePageLabel": "๙",
+      "mainLineCount": 21,
+      "footnoteLineCount": 8,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 4
+      },
+      "lineCount": 29,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 127
+    },
+    {
+      "pdfPage": 19,
+      "sourcePage": 10,
+      "sourcePageLabel": "๑๐",
+      "mainLineCount": 21,
+      "footnoteLineCount": 11,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 4
+      },
+      "lineCount": 32,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 118
+    },
+    {
+      "pdfPage": 20,
+      "sourcePage": 11,
+      "sourcePageLabel": "๑๑",
+      "mainLineCount": 22,
+      "footnoteLineCount": 12,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 34,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 144
+    },
+    {
+      "pdfPage": 21,
+      "sourcePage": 12,
+      "sourcePageLabel": "๑๒",
+      "mainLineCount": 12,
+      "footnoteLineCount": 22,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 4
+      },
+      "lineCount": 34,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 154
+    },
+    {
+      "pdfPage": 22,
+      "sourcePage": 13,
+      "sourcePageLabel": "๑๓",
+      "mainLineCount": 31,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 31,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 162
+    },
+    {
+      "pdfPage": 23,
+      "sourcePage": 14,
+      "sourcePageLabel": "๑๔",
+      "mainLineCount": 24,
+      "footnoteLineCount": 6,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 30,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 96
+    },
+    {
+      "pdfPage": 24,
+      "sourcePage": 15,
+      "sourcePageLabel": "๑๕",
+      "mainLineCount": 10,
+      "footnoteLineCount": 29,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 39,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 190
+    },
+    {
+      "pdfPage": 25,
+      "sourcePage": 16,
+      "sourcePageLabel": "๑๖",
+      "mainLineCount": 29,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 29,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 67
+    },
+    {
+      "pdfPage": 26,
+      "sourcePage": 17,
+      "sourcePageLabel": "๑๗",
+      "mainLineCount": 20,
+      "footnoteLineCount": 11,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 5
+      },
+      "lineCount": 31,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 102
+    },
+    {
+      "pdfPage": 27,
+      "sourcePage": 18,
+      "sourcePageLabel": "๑๘",
+      "mainLineCount": 19,
+      "footnoteLineCount": 15,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 34,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 100
+    },
+    {
+      "pdfPage": 28,
+      "sourcePage": 19,
+      "sourcePageLabel": "๑๙",
+      "mainLineCount": 22,
+      "footnoteLineCount": 11,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 33,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 119
+    },
+    {
+      "pdfPage": 29,
+      "sourcePage": 20,
+      "sourcePageLabel": "๒๐",
+      "mainLineCount": 24,
+      "footnoteLineCount": 5,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 29,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 134
+    },
+    {
+      "pdfPage": 30,
+      "sourcePage": 21,
+      "sourcePageLabel": "๒๑",
+      "mainLineCount": 23,
+      "footnoteLineCount": 4,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 5
+      },
+      "lineCount": 27,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 107
+    },
+    {
+      "pdfPage": 31,
+      "sourcePage": 22,
+      "sourcePageLabel": "๒๒",
+      "mainLineCount": 25,
+      "footnoteLineCount": 4,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 29,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 126
+    },
+    {
+      "pdfPage": 32,
+      "sourcePage": 23,
+      "sourcePageLabel": "๒๓",
+      "mainLineCount": 23,
+      "footnoteLineCount": 7,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 4
+      },
+      "lineCount": 30,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 135
+    },
+    {
+      "pdfPage": 33,
+      "sourcePage": 24,
+      "sourcePageLabel": "๒๔",
+      "mainLineCount": 23,
+      "footnoteLineCount": 7,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 30,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 107
+    },
+    {
+      "pdfPage": 34,
+      "sourcePage": 25,
+      "sourcePageLabel": "๒๕",
+      "mainLineCount": 14,
+      "footnoteLineCount": 22,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 36,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 117
+    },
+    {
+      "pdfPage": 35,
+      "sourcePage": 26,
+      "sourcePageLabel": "๒๖",
+      "mainLineCount": 24,
+      "footnoteLineCount": 5,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 29,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 79
+    },
+    {
+      "pdfPage": 36,
+      "sourcePage": 27,
+      "sourcePageLabel": "๒๗",
+      "mainLineCount": 26,
+      "footnoteLineCount": 2,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 28,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 106
+    },
+    {
+      "pdfPage": 37,
+      "sourcePage": 28,
+      "sourcePageLabel": "๒๘",
+      "mainLineCount": 26,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 26,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 92
+    },
+    {
+      "pdfPage": 38,
+      "sourcePage": 29,
+      "sourcePageLabel": "๒๙",
+      "mainLineCount": 28,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 28,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 107
+    },
+    {
+      "pdfPage": 39,
+      "sourcePage": 30,
+      "sourcePageLabel": "๓๐",
+      "mainLineCount": 20,
+      "footnoteLineCount": 11,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 31,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 102
+    },
+    {
+      "pdfPage": 40,
+      "sourcePage": 31,
+      "sourcePageLabel": "๓๑",
+      "mainLineCount": 23,
+      "footnoteLineCount": 7,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 30,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 121
+    },
+    {
+      "pdfPage": 41,
+      "sourcePage": 32,
+      "sourcePageLabel": "๓๒",
+      "mainLineCount": 17,
+      "footnoteLineCount": 2,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 7
+      },
+      "lineCount": 19,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 54
+    },
+    {
+      "pdfPage": 42,
+      "sourcePage": 33,
+      "sourcePageLabel": "๓๓",
+      "mainLineCount": 20,
+      "footnoteLineCount": 9,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 5
+      },
+      "lineCount": 29,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 97
+    },
+    {
+      "pdfPage": 43,
+      "sourcePage": 34,
+      "sourcePageLabel": "๓๔",
+      "mainLineCount": 25,
+      "footnoteLineCount": 3,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 28,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 101
+    },
+    {
+      "pdfPage": 44,
+      "sourcePage": 35,
+      "sourcePageLabel": "๓๕",
+      "mainLineCount": 28,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 28,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 82
+    },
+    {
+      "pdfPage": 45,
+      "sourcePage": 36,
+      "sourcePageLabel": "๓๖",
+      "mainLineCount": 28,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 28,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 95
+    },
+    {
+      "pdfPage": 46,
+      "sourcePage": 37,
+      "sourcePageLabel": "๓๗",
+      "mainLineCount": 13,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 2,
+        "blank": 3
+      },
+      "lineCount": 13,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 46
+    },
+    {
+      "pdfPage": 47,
+      "sourcePage": 38,
+      "sourcePageLabel": "๓๘",
+      "mainLineCount": 18,
+      "footnoteLineCount": 12,
+      "skipped": {
+        "headers": 0,
+        "decorations": 1,
+        "blank": 2
+      },
+      "lineCount": 30,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 125
+    },
+    {
+      "pdfPage": 48,
+      "sourcePage": 39,
+      "sourcePageLabel": "๓๙",
+      "mainLineCount": 27,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 27,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 92
+    },
+    {
+      "pdfPage": 49,
+      "sourcePage": 40,
+      "sourcePageLabel": "๔๐",
+      "mainLineCount": 17,
+      "footnoteLineCount": 17,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 34,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 136
+    },
+    {
+      "pdfPage": 50,
+      "sourcePage": 41,
+      "sourcePageLabel": "๔๑",
+      "mainLineCount": 26,
+      "footnoteLineCount": 3,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 29,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 99
+    },
+    {
+      "pdfPage": 51,
+      "sourcePage": 42,
+      "sourcePageLabel": "๔๒",
+      "mainLineCount": 22,
+      "footnoteLineCount": 11,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 33,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 139
+    },
+    {
+      "pdfPage": 52,
+      "sourcePage": 43,
+      "sourcePageLabel": "๔๓",
+      "mainLineCount": 27,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 27,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 65
+    },
+    {
+      "pdfPage": 53,
+      "sourcePage": 44,
+      "sourcePageLabel": "๔๔",
+      "mainLineCount": 28,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 28,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 72
+    },
+    {
+      "pdfPage": 54,
+      "sourcePage": 45,
+      "sourcePageLabel": "๔๕",
+      "mainLineCount": 21,
+      "footnoteLineCount": 8,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 4
+      },
+      "lineCount": 29,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 100
+    },
+    {
+      "pdfPage": 55,
+      "sourcePage": 46,
+      "sourcePageLabel": "๔๖",
+      "mainLineCount": 20,
+      "footnoteLineCount": 14,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 34,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 135
+    },
+    {
+      "pdfPage": 56,
+      "sourcePage": 47,
+      "sourcePageLabel": "๔๗",
+      "mainLineCount": 29,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 29,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 68
+    },
+    {
+      "pdfPage": 57,
+      "sourcePage": 48,
+      "sourcePageLabel": "๔๘",
+      "mainLineCount": 29,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 29,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 59
+    },
+    {
+      "pdfPage": 58,
+      "sourcePage": 49,
+      "sourcePageLabel": "๔๙",
+      "mainLineCount": 28,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 28,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 113
+    },
+    {
+      "pdfPage": 59,
+      "sourcePage": 50,
+      "sourcePageLabel": "๕๐",
+      "mainLineCount": 25,
+      "footnoteLineCount": 5,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 30,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 111
+    },
+    {
+      "pdfPage": 60,
+      "sourcePage": 51,
+      "sourcePageLabel": "๕๑",
+      "mainLineCount": 21,
+      "footnoteLineCount": 8,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 5
+      },
+      "lineCount": 29,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 100
+    },
+    {
+      "pdfPage": 61,
+      "sourcePage": 52,
+      "sourcePageLabel": "๕๒",
+      "mainLineCount": 19,
+      "footnoteLineCount": 8,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 6
+      },
+      "lineCount": 27,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 76
+    },
+    {
+      "pdfPage": 62,
+      "sourcePage": 53,
+      "sourcePageLabel": "๕๓",
+      "mainLineCount": 30,
+      "footnoteLineCount": 2,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 32,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 99
+    },
+    {
+      "pdfPage": 63,
+      "sourcePage": 54,
+      "sourcePageLabel": "๕๔",
+      "mainLineCount": 29,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 29,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 87
+    },
+    {
+      "pdfPage": 64,
+      "sourcePage": 55,
+      "sourcePageLabel": "๕๕",
+      "mainLineCount": 28,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 28,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 72
+    },
+    {
+      "pdfPage": 65,
+      "sourcePage": 56,
+      "sourcePageLabel": "๕๖",
+      "mainLineCount": 7,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 2,
+        "blank": 3
+      },
+      "lineCount": 7,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 18
+    },
+    {
+      "pdfPage": 66,
+      "sourcePage": 57,
+      "sourcePageLabel": "๕๗",
+      "mainLineCount": 21,
+      "footnoteLineCount": 6,
+      "skipped": {
+        "headers": 0,
+        "decorations": 1,
+        "blank": 2
+      },
+      "lineCount": 27,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 83
+    },
+    {
+      "pdfPage": 67,
+      "sourcePage": 58,
+      "sourcePageLabel": "๕๘",
+      "mainLineCount": 25,
+      "footnoteLineCount": 2,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 4
+      },
+      "lineCount": 27,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 103
+    },
+    {
+      "pdfPage": 68,
+      "sourcePage": 59,
+      "sourcePageLabel": "๕๙",
+      "mainLineCount": 25,
+      "footnoteLineCount": 4,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 29,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 94
+    },
+    {
+      "pdfPage": 69,
+      "sourcePage": 60,
+      "sourcePageLabel": "๖๐",
+      "mainLineCount": 22,
+      "footnoteLineCount": 7,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 29,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 105
+    },
+    {
+      "pdfPage": 70,
+      "sourcePage": 61,
+      "sourcePageLabel": "๖๑",
+      "mainLineCount": 26,
+      "footnoteLineCount": 2,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 4
+      },
+      "lineCount": 28,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 88
+    },
+    {
+      "pdfPage": 71,
+      "sourcePage": 62,
+      "sourcePageLabel": "๖๒",
+      "mainLineCount": 20,
+      "footnoteLineCount": 12,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 32,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 105
+    },
+    {
+      "pdfPage": 72,
+      "sourcePage": 63,
+      "sourcePageLabel": "๖๓",
+      "mainLineCount": 24,
+      "footnoteLineCount": 4,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 28,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 99
+    },
+    {
+      "pdfPage": 73,
+      "sourcePage": 64,
+      "sourcePageLabel": "๖๔",
+      "mainLineCount": 28,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 28,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 98
+    },
+    {
+      "pdfPage": 74,
+      "sourcePage": 65,
+      "sourcePageLabel": "๖๕",
+      "mainLineCount": 26,
+      "footnoteLineCount": 2,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 28,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 83
+    },
+    {
+      "pdfPage": 75,
+      "sourcePage": 66,
+      "sourcePageLabel": "๖๖",
+      "mainLineCount": 21,
+      "footnoteLineCount": 10,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 31,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 155
+    },
+    {
+      "pdfPage": 76,
+      "sourcePage": 67,
+      "sourcePageLabel": "๖๗",
+      "mainLineCount": 27,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 27,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 93
+    },
+    {
+      "pdfPage": 77,
+      "sourcePage": 68,
+      "sourcePageLabel": "๖๘",
+      "mainLineCount": 10,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 2,
+        "blank": 4
+      },
+      "lineCount": 10,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 28
+    },
+    {
+      "pdfPage": 78,
+      "sourcePage": 69,
+      "sourcePageLabel": "๖๙",
+      "mainLineCount": 25,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 0,
+        "decorations": 1,
+        "blank": 1
+      },
+      "lineCount": 25,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 89
+    },
+    {
+      "pdfPage": 79,
+      "sourcePage": 70,
+      "sourcePageLabel": "๗๐",
+      "mainLineCount": 23,
+      "footnoteLineCount": 7,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 4
+      },
+      "lineCount": 30,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 122
+    },
+    {
+      "pdfPage": 80,
+      "sourcePage": 71,
+      "sourcePageLabel": "๗๑",
+      "mainLineCount": 22,
+      "footnoteLineCount": 8,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 30,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 125
+    },
+    {
+      "pdfPage": 81,
+      "sourcePage": 72,
+      "sourcePageLabel": "๗๒",
+      "mainLineCount": 26,
+      "footnoteLineCount": 2,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 28,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 114
+    },
+    {
+      "pdfPage": 82,
+      "sourcePage": 73,
+      "sourcePageLabel": "๗๓",
+      "mainLineCount": 23,
+      "footnoteLineCount": 8,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 31,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 130
+    },
+    {
+      "pdfPage": 83,
+      "sourcePage": 74,
+      "sourcePageLabel": "๗๔",
+      "mainLineCount": 23,
+      "footnoteLineCount": 6,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 4
+      },
+      "lineCount": 29,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 98
+    },
+    {
+      "pdfPage": 84,
+      "sourcePage": 75,
+      "sourcePageLabel": "๗๕",
+      "mainLineCount": 20,
+      "footnoteLineCount": 2,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 6
+      },
+      "lineCount": 22,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 74
+    },
+    {
+      "pdfPage": 85,
+      "sourcePage": 76,
+      "sourcePageLabel": "๗๖",
+      "mainLineCount": 23,
+      "footnoteLineCount": 4,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 4
+      },
+      "lineCount": 27,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 98
+    },
+    {
+      "pdfPage": 86,
+      "sourcePage": 77,
+      "sourcePageLabel": "๗๗",
+      "mainLineCount": 25,
+      "footnoteLineCount": 4,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 29,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 110
+    },
+    {
+      "pdfPage": 87,
+      "sourcePage": 78,
+      "sourcePageLabel": "๗๘",
+      "mainLineCount": 25,
+      "footnoteLineCount": 3,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 28,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 108
+    },
+    {
+      "pdfPage": 88,
+      "sourcePage": 79,
+      "sourcePageLabel": "๗๙",
+      "mainLineCount": 13,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 2,
+        "blank": 3
+      },
+      "lineCount": 13,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 37
+    },
+    {
+      "pdfPage": 89,
+      "sourcePage": 80,
+      "sourcePageLabel": "๘๐",
+      "mainLineCount": 13,
+      "footnoteLineCount": 18,
+      "skipped": {
+        "headers": 0,
+        "decorations": 1,
+        "blank": 2
+      },
+      "lineCount": 31,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 106
+    },
+    {
+      "pdfPage": 90,
+      "sourcePage": 81,
+      "sourcePageLabel": "๘๑",
+      "mainLineCount": 24,
+      "footnoteLineCount": 7,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 31,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 127
+    },
+    {
+      "pdfPage": 91,
+      "sourcePage": 82,
+      "sourcePageLabel": "๘๒",
+      "mainLineCount": 20,
+      "footnoteLineCount": 11,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 4
+      },
+      "lineCount": 31,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 114
+    },
+    {
+      "pdfPage": 92,
+      "sourcePage": 83,
+      "sourcePageLabel": "๘๓",
+      "mainLineCount": 14,
+      "footnoteLineCount": 20,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 5
+      },
+      "lineCount": 34,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 138
+    },
+    {
+      "pdfPage": 93,
+      "sourcePage": 84,
+      "sourcePageLabel": "๘๔",
+      "mainLineCount": 22,
+      "footnoteLineCount": 9,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 4
+      },
+      "lineCount": 31,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 112
+    },
+    {
+      "pdfPage": 94,
+      "sourcePage": 85,
+      "sourcePageLabel": "๘๕",
+      "mainLineCount": 13,
+      "footnoteLineCount": 21,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 34,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 200
+    },
+    {
+      "pdfPage": 95,
+      "sourcePage": 86,
+      "sourcePageLabel": "๘๖",
+      "mainLineCount": 27,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 27,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 96
+    },
+    {
+      "pdfPage": 96,
+      "sourcePage": 87,
+      "sourcePageLabel": "๘๗",
+      "mainLineCount": 24,
+      "footnoteLineCount": 5,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 29,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 99
+    },
+    {
+      "pdfPage": 97,
+      "sourcePage": 88,
+      "sourcePageLabel": "๘๘",
+      "mainLineCount": 27,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 27,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 82
+    },
+    {
+      "pdfPage": 98,
+      "sourcePage": 89,
+      "sourcePageLabel": "๘๙",
+      "mainLineCount": 28,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 28,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 115
+    },
+    {
+      "pdfPage": 99,
+      "sourcePage": 90,
+      "sourcePageLabel": "๙๐",
+      "mainLineCount": 27,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 27,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 106
+    },
+    {
+      "pdfPage": 100,
+      "sourcePage": 91,
+      "sourcePageLabel": "๙๑",
+      "mainLineCount": 27,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 27,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 93
+    },
+    {
+      "pdfPage": 101,
+      "sourcePage": 92,
+      "sourcePageLabel": "๙๒",
+      "mainLineCount": 27,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 27,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 77
+    },
+    {
+      "pdfPage": 102,
+      "sourcePage": 93,
+      "sourcePageLabel": "๙๓",
+      "mainLineCount": 25,
+      "footnoteLineCount": 4,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 29,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 142
+    },
+    {
+      "pdfPage": 103,
+      "sourcePage": 94,
+      "sourcePageLabel": "๙๔",
+      "mainLineCount": 23,
+      "footnoteLineCount": 8,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 4
+      },
+      "lineCount": 31,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 104
+    },
+    {
+      "pdfPage": 104,
+      "sourcePage": 95,
+      "sourcePageLabel": "๙๕",
+      "mainLineCount": 26,
+      "footnoteLineCount": 2,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 28,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 100
+    },
+    {
+      "pdfPage": 105,
+      "sourcePage": 96,
+      "sourcePageLabel": "๙๖",
+      "mainLineCount": 13,
+      "footnoteLineCount": 20,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 33,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 114
+    },
+    {
+      "pdfPage": 106,
+      "sourcePage": 97,
+      "sourcePageLabel": "๙๗",
+      "mainLineCount": 22,
+      "footnoteLineCount": 3,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 6
+      },
+      "lineCount": 25,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 108
+    },
+    {
+      "pdfPage": 107,
+      "sourcePage": 98,
+      "sourcePageLabel": "๙๘",
+      "mainLineCount": 13,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 2,
+        "blank": 4
+      },
+      "lineCount": 13,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 50
+    },
+    {
+      "pdfPage": 108,
+      "sourcePage": 99,
+      "sourcePageLabel": "๙๙",
+      "mainLineCount": 25,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 0,
+        "decorations": 1,
+        "blank": 1
+      },
+      "lineCount": 25,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 97
+    },
+    {
+      "pdfPage": 109,
+      "sourcePage": 100,
+      "sourcePageLabel": "๑๐๐",
+      "mainLineCount": 26,
+      "footnoteLineCount": 2,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 28,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 99
+    },
+    {
+      "pdfPage": 110,
+      "sourcePage": 101,
+      "sourcePageLabel": "๑๐๑",
+      "mainLineCount": 20,
+      "footnoteLineCount": 11,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 4
+      },
+      "lineCount": 31,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 121
+    },
+    {
+      "pdfPage": 111,
+      "sourcePage": 102,
+      "sourcePageLabel": "๑๐๒",
+      "mainLineCount": 22,
+      "footnoteLineCount": 10,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 32,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 111
+    },
+    {
+      "pdfPage": 112,
+      "sourcePage": 103,
+      "sourcePageLabel": "๑๐๓",
+      "mainLineCount": 17,
+      "footnoteLineCount": 16,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 5
+      },
+      "lineCount": 33,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 146
+    },
+    {
+      "pdfPage": 113,
+      "sourcePage": 104,
+      "sourcePageLabel": "๑๐๔",
+      "mainLineCount": 22,
+      "footnoteLineCount": 8,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 30,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 156
+    },
+    {
+      "pdfPage": 114,
+      "sourcePage": 105,
+      "sourcePageLabel": "๑๐๕",
+      "mainLineCount": 24,
+      "footnoteLineCount": 5,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 29,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 109
+    },
+    {
+      "pdfPage": 115,
+      "sourcePage": 106,
+      "sourcePageLabel": "๑๐๖",
+      "mainLineCount": 23,
+      "footnoteLineCount": 4,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 5
+      },
+      "lineCount": 27,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 98
+    },
+    {
+      "pdfPage": 116,
+      "sourcePage": 107,
+      "sourcePageLabel": "๑๐๗",
+      "mainLineCount": 28,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 28,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 124
+    },
+    {
+      "pdfPage": 117,
+      "sourcePage": 108,
+      "sourcePageLabel": "๑๐๘",
+      "mainLineCount": 27,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 27,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 84
+    },
+    {
+      "pdfPage": 118,
+      "sourcePage": 109,
+      "sourcePageLabel": "๑๐๙",
+      "mainLineCount": 26,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 4
+      },
+      "lineCount": 26,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 72
+    },
+    {
+      "pdfPage": 119,
+      "sourcePage": 110,
+      "sourcePageLabel": "๑๑๐",
+      "mainLineCount": 26,
+      "footnoteLineCount": 2,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 28,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 97
+    },
+    {
+      "pdfPage": 120,
+      "sourcePage": 111,
+      "sourcePageLabel": "๑๑๑",
+      "mainLineCount": 29,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 29,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 88
+    },
+    {
+      "pdfPage": 121,
+      "sourcePage": 112,
+      "sourcePageLabel": "๑๑๒",
+      "mainLineCount": 24,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 2,
+        "blank": 4
+      },
+      "lineCount": 24,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 85
+    },
+    {
+      "pdfPage": 122,
+      "sourcePage": 113,
+      "sourcePageLabel": "๑๑๓",
+      "mainLineCount": 25,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 0,
+        "decorations": 1,
+        "blank": 1
+      },
+      "lineCount": 25,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 76
+    },
+    {
+      "pdfPage": 123,
+      "sourcePage": 114,
+      "sourcePageLabel": "๑๑๔",
+      "mainLineCount": 24,
+      "footnoteLineCount": 6,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 30,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 101
+    },
+    {
+      "pdfPage": 124,
+      "sourcePage": 115,
+      "sourcePageLabel": "๑๑๕",
+      "mainLineCount": 23,
+      "footnoteLineCount": 6,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 29,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 88
+    },
+    {
+      "pdfPage": 125,
+      "sourcePage": 116,
+      "sourcePageLabel": "๑๑๖",
+      "mainLineCount": 24,
+      "footnoteLineCount": 5,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 29,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 119
+    },
+    {
+      "pdfPage": 126,
+      "sourcePage": 117,
+      "sourcePageLabel": "๑๑๗",
+      "mainLineCount": 20,
+      "footnoteLineCount": 11,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 31,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 129
+    },
+    {
+      "pdfPage": 127,
+      "sourcePage": 118,
+      "sourcePageLabel": "๑๑๘",
+      "mainLineCount": 27,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 27,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 106
+    },
+    {
+      "pdfPage": 128,
+      "sourcePage": 119,
+      "sourcePageLabel": "๑๑๙",
+      "mainLineCount": 28,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 28,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 76
+    },
+    {
+      "pdfPage": 129,
+      "sourcePage": 120,
+      "sourcePageLabel": "๑๒๐",
+      "mainLineCount": 25,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 25,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 75
+    },
+    {
+      "pdfPage": 130,
+      "sourcePage": 121,
+      "sourcePageLabel": "๑๒๑",
+      "mainLineCount": 5,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 2,
+        "blank": 3
+      },
+      "lineCount": 5,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 15
+    },
+    {
+      "pdfPage": 131,
+      "sourcePage": 122,
+      "sourcePageLabel": "๑๒๒",
+      "mainLineCount": 16,
+      "footnoteLineCount": 13,
+      "skipped": {
+        "headers": 0,
+        "decorations": 1,
+        "blank": 2
+      },
+      "lineCount": 29,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 123
+    },
+    {
+      "pdfPage": 132,
+      "sourcePage": 123,
+      "sourcePageLabel": "๑๒๓",
+      "mainLineCount": 27,
+      "footnoteLineCount": 2,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 29,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 104
+    },
+    {
+      "pdfPage": 133,
+      "sourcePage": 124,
+      "sourcePageLabel": "๑๒๔",
+      "mainLineCount": 17,
+      "footnoteLineCount": 16,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 33,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 111
+    },
+    {
+      "pdfPage": 134,
+      "sourcePage": 125,
+      "sourcePageLabel": "๑๒๕",
+      "mainLineCount": 28,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 28,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 89
+    },
+    {
+      "pdfPage": 135,
+      "sourcePage": 126,
+      "sourcePageLabel": "๑๒๖",
+      "mainLineCount": 22,
+      "footnoteLineCount": 9,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 31,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 146
+    },
+    {
+      "pdfPage": 136,
+      "sourcePage": 127,
+      "sourcePageLabel": "๑๒๗",
+      "mainLineCount": 25,
+      "footnoteLineCount": 4,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 29,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 109
+    },
+    {
+      "pdfPage": 137,
+      "sourcePage": 128,
+      "sourcePageLabel": "๑๒๘",
+      "mainLineCount": 29,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 29,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 100
+    },
+    {
+      "pdfPage": 138,
+      "sourcePage": 129,
+      "sourcePageLabel": "๑๒๙",
+      "mainLineCount": 28,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 28,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 105
+    },
+    {
+      "pdfPage": 139,
+      "sourcePage": 130,
+      "sourcePageLabel": "๑๓๐",
+      "mainLineCount": 25,
+      "footnoteLineCount": 2,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 4
+      },
+      "lineCount": 27,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 103
+    },
+    {
+      "pdfPage": 140,
+      "sourcePage": 131,
+      "sourcePageLabel": "๑๓๑",
+      "mainLineCount": 17,
+      "footnoteLineCount": 17,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 34,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 133
+    },
+    {
+      "pdfPage": 141,
+      "sourcePage": 132,
+      "sourcePageLabel": "๑๓๒",
+      "mainLineCount": 25,
+      "footnoteLineCount": 3,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 28,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 100
+    },
+    {
+      "pdfPage": 142,
+      "sourcePage": 133,
+      "sourcePageLabel": "๑๓๓",
+      "mainLineCount": 27,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 27,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 111
+    },
+    {
+      "pdfPage": 143,
+      "sourcePage": 134,
+      "sourcePageLabel": "๑๓๔",
+      "mainLineCount": 25,
+      "footnoteLineCount": 6,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 31,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 93
+    },
+    {
+      "pdfPage": 144,
+      "sourcePage": 135,
+      "sourcePageLabel": "๑๓๕",
+      "mainLineCount": 25,
+      "footnoteLineCount": 3,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 28,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 99
+    },
+    {
+      "pdfPage": 145,
+      "sourcePage": 136,
+      "sourcePageLabel": "๑๓๖",
+      "mainLineCount": 27,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 27,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 110
+    },
+    {
+      "pdfPage": 146,
+      "sourcePage": 137,
+      "sourcePageLabel": "๑๓๗",
+      "mainLineCount": 26,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 26,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 102
+    },
+    {
+      "pdfPage": 147,
+      "sourcePage": 138,
+      "sourcePageLabel": "๑๓๘",
+      "mainLineCount": 26,
+      "footnoteLineCount": 2,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 28,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 125
+    },
+    {
+      "pdfPage": 148,
+      "sourcePage": 139,
+      "sourcePageLabel": "๑๓๙",
+      "mainLineCount": 27,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 27,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 82
+    },
+    {
+      "pdfPage": 149,
+      "sourcePage": 140,
+      "sourcePageLabel": "๑๔๐",
+      "mainLineCount": 25,
+      "footnoteLineCount": 5,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 30,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 91
+    },
+    {
+      "pdfPage": 150,
+      "sourcePage": 141,
+      "sourcePageLabel": "๑๔๑",
+      "mainLineCount": 20,
+      "footnoteLineCount": 10,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 30,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 119
+    },
+    {
+      "pdfPage": 151,
+      "sourcePage": 142,
+      "sourcePageLabel": "๑๔๒",
+      "mainLineCount": 21,
+      "footnoteLineCount": 11,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 32,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 116
+    },
+    {
+      "pdfPage": 152,
+      "sourcePage": 143,
+      "sourcePageLabel": "๑๔๓",
+      "mainLineCount": 27,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 27,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 87
+    },
+    {
+      "pdfPage": 153,
+      "sourcePage": 144,
+      "sourcePageLabel": "๑๔๔",
+      "mainLineCount": 28,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 28,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 137
+    },
+    {
+      "pdfPage": 154,
+      "sourcePage": 145,
+      "sourcePageLabel": "๑๔๕",
+      "mainLineCount": 24,
+      "footnoteLineCount": 3,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 4
+      },
+      "lineCount": 27,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 83
+    },
+    {
+      "pdfPage": 155,
+      "sourcePage": 146,
+      "sourcePageLabel": "๑๔๖",
+      "mainLineCount": 27,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 27,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 106
+    },
+    {
+      "pdfPage": 156,
+      "sourcePage": 147,
+      "sourcePageLabel": "๑๔๗",
+      "mainLineCount": 23,
+      "footnoteLineCount": 7,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 30,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 137
+    },
+    {
+      "pdfPage": 157,
+      "sourcePage": 148,
+      "sourcePageLabel": "๑๔๘",
+      "mainLineCount": 24,
+      "footnoteLineCount": 4,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 28,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 114
+    },
+    {
+      "pdfPage": 158,
+      "sourcePage": 149,
+      "sourcePageLabel": "๑๔๙",
+      "mainLineCount": 25,
+      "footnoteLineCount": 5,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 30,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 86
+    },
+    {
+      "pdfPage": 159,
+      "sourcePage": 150,
+      "sourcePageLabel": "๑๕๐",
+      "mainLineCount": 27,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 27,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 95
+    },
+    {
+      "pdfPage": 160,
+      "sourcePage": 151,
+      "sourcePageLabel": "๑๕๑",
+      "mainLineCount": 27,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 27,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 102
+    },
+    {
+      "pdfPage": 161,
+      "sourcePage": 152,
+      "sourcePageLabel": "๑๕๒",
+      "mainLineCount": 27,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 27,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 105
+    },
+    {
+      "pdfPage": 162,
+      "sourcePage": 153,
+      "sourcePageLabel": "๑๕๓",
+      "mainLineCount": 24,
+      "footnoteLineCount": 4,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 4
+      },
+      "lineCount": 28,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 96
+    },
+    {
+      "pdfPage": 163,
+      "sourcePage": 154,
+      "sourcePageLabel": "๑๕๔",
+      "mainLineCount": 29,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 29,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 127
+    },
+    {
+      "pdfPage": 164,
+      "sourcePage": 155,
+      "sourcePageLabel": "๑๕๕",
+      "mainLineCount": 21,
+      "footnoteLineCount": 10,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 31,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 104
+    },
+    {
+      "pdfPage": 165,
+      "sourcePage": 156,
+      "sourcePageLabel": "๑๕๖",
+      "mainLineCount": 12,
+      "footnoteLineCount": 16,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 4
+      },
+      "lineCount": 28,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 87
+    },
+    {
+      "pdfPage": 166,
+      "sourcePage": 157,
+      "sourcePageLabel": "๑๕๗",
+      "mainLineCount": 22,
+      "footnoteLineCount": 7,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 4
+      },
+      "lineCount": 29,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 108
+    },
+    {
+      "pdfPage": 167,
+      "sourcePage": 158,
+      "sourcePageLabel": "๑๕๘",
+      "mainLineCount": 25,
+      "footnoteLineCount": 5,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 30,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 109
+    },
+    {
+      "pdfPage": 168,
+      "sourcePage": 159,
+      "sourcePageLabel": "๑๕๙",
+      "mainLineCount": 28,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 28,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 105
+    },
+    {
+      "pdfPage": 169,
+      "sourcePage": 160,
+      "sourcePageLabel": "๑๖๐",
+      "mainLineCount": 23,
+      "footnoteLineCount": 6,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 4
+      },
+      "lineCount": 29,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 113
+    },
+    {
+      "pdfPage": 170,
+      "sourcePage": 161,
+      "sourcePageLabel": "๑๖๑",
+      "mainLineCount": 26,
+      "footnoteLineCount": 2,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 28,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 104
+    },
+    {
+      "pdfPage": 171,
+      "sourcePage": 162,
+      "sourcePageLabel": "๑๖๒",
+      "mainLineCount": 28,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 28,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 101
+    },
+    {
+      "pdfPage": 172,
+      "sourcePage": 163,
+      "sourcePageLabel": "๑๖๓",
+      "mainLineCount": 24,
+      "footnoteLineCount": 2,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 5
+      },
+      "lineCount": 26,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 48
+    },
+    {
+      "pdfPage": 173,
+      "sourcePage": 164,
+      "sourcePageLabel": "๑๖๔",
+      "mainLineCount": 26,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 2,
+        "blank": 2
+      },
+      "lineCount": 26,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 75
+    },
+    {
+      "pdfPage": 174,
+      "sourcePage": 165,
+      "sourcePageLabel": "๑๖๕",
+      "mainLineCount": 14,
+      "footnoteLineCount": 16,
+      "skipped": {
+        "headers": 0,
+        "decorations": 1,
+        "blank": 1
+      },
+      "lineCount": 30,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 96
+    },
+    {
+      "pdfPage": 175,
+      "sourcePage": 166,
+      "sourcePageLabel": "๑๖๖",
+      "mainLineCount": 25,
+      "footnoteLineCount": 4,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 29,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 83
+    },
+    {
+      "pdfPage": 176,
+      "sourcePage": 167,
+      "sourcePageLabel": "๑๖๗",
+      "mainLineCount": 23,
+      "footnoteLineCount": 6,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 29,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 110
+    },
+    {
+      "pdfPage": 177,
+      "sourcePage": 168,
+      "sourcePageLabel": "๑๖๘",
+      "mainLineCount": 22,
+      "footnoteLineCount": 8,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 30,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 114
+    },
+    {
+      "pdfPage": 178,
+      "sourcePage": 169,
+      "sourcePageLabel": "๑๖๙",
+      "mainLineCount": 25,
+      "footnoteLineCount": 4,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 29,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 102
+    },
+    {
+      "pdfPage": 179,
+      "sourcePage": 170,
+      "sourcePageLabel": "๑๗๐",
+      "mainLineCount": 27,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 27,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 102
+    },
+    {
+      "pdfPage": 180,
+      "sourcePage": 171,
+      "sourcePageLabel": "๑๗๑",
+      "mainLineCount": 23,
+      "footnoteLineCount": 5,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 4
+      },
+      "lineCount": 28,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 92
+    },
+    {
+      "pdfPage": 181,
+      "sourcePage": 172,
+      "sourcePageLabel": "๑๗๒",
+      "mainLineCount": 17,
+      "footnoteLineCount": 15,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 32,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 160
+    },
+    {
+      "pdfPage": 182,
+      "sourcePage": 173,
+      "sourcePageLabel": "๑๗๓",
+      "mainLineCount": 23,
+      "footnoteLineCount": 6,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 4
+      },
+      "lineCount": 29,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 127
+    },
+    {
+      "pdfPage": 183,
+      "sourcePage": 174,
+      "sourcePageLabel": "๑๗๔",
+      "mainLineCount": 25,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 25,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 108
+    },
+    {
+      "pdfPage": 184,
+      "sourcePage": 175,
+      "sourcePageLabel": "๑๗๕",
+      "mainLineCount": 24,
+      "footnoteLineCount": 3,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 4
+      },
+      "lineCount": 27,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 105
+    },
+    {
+      "pdfPage": 185,
+      "sourcePage": 176,
+      "sourcePageLabel": "๑๗๖",
+      "mainLineCount": 26,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 4
+      },
+      "lineCount": 26,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 92
+    },
+    {
+      "pdfPage": 186,
+      "sourcePage": 177,
+      "sourcePageLabel": "๑๗๗",
+      "mainLineCount": 24,
+      "footnoteLineCount": 7,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 31,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 107
+    },
+    {
+      "pdfPage": 187,
+      "sourcePage": 178,
+      "sourcePageLabel": "๑๗๘",
+      "mainLineCount": 28,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 28,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 91
+    },
+    {
+      "pdfPage": 188,
+      "sourcePage": 179,
+      "sourcePageLabel": "๑๗๙",
+      "mainLineCount": 28,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 28,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 91
+    },
+    {
+      "pdfPage": 189,
+      "sourcePage": 180,
+      "sourcePageLabel": "๑๘๐",
+      "mainLineCount": 13,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 2,
+        "blank": 4
+      },
+      "lineCount": 13,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 44
+    },
+    {
+      "pdfPage": 190,
+      "sourcePage": 181,
+      "sourcePageLabel": "๑๘๑",
+      "mainLineCount": 20,
+      "footnoteLineCount": 8,
+      "skipped": {
+        "headers": 0,
+        "decorations": 1,
+        "blank": 0
+      },
+      "lineCount": 28,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 125
+    },
+    {
+      "pdfPage": 191,
+      "sourcePage": 182,
+      "sourcePageLabel": "๑๘๒",
+      "mainLineCount": 24,
+      "footnoteLineCount": 9,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 33,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 116
+    },
+    {
+      "pdfPage": 192,
+      "sourcePage": 183,
+      "sourcePageLabel": "๑๘๓",
+      "mainLineCount": 26,
+      "footnoteLineCount": 3,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 29,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 115
+    },
+    {
+      "pdfPage": 193,
+      "sourcePage": 184,
+      "sourcePageLabel": "๑๘๔",
+      "mainLineCount": 22,
+      "footnoteLineCount": 9,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 31,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 133
+    },
+    {
+      "pdfPage": 194,
+      "sourcePage": 185,
+      "sourcePageLabel": "๑๘๕",
+      "mainLineCount": 22,
+      "footnoteLineCount": 3,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 6
+      },
+      "lineCount": 25,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 75
+    },
+    {
+      "pdfPage": 195,
+      "sourcePage": 186,
+      "sourcePageLabel": "๑๘๖",
+      "mainLineCount": 4,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 2,
+        "blank": 3
+      },
+      "lineCount": 4,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 8
+    },
+    {
+      "pdfPage": 196,
+      "sourcePage": 187,
+      "sourcePageLabel": "๑๘๗",
+      "mainLineCount": 23,
+      "footnoteLineCount": 3,
+      "skipped": {
+        "headers": 0,
+        "decorations": 1,
+        "blank": 1
+      },
+      "lineCount": 26,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 99
+    },
+    {
+      "pdfPage": 197,
+      "sourcePage": 188,
+      "sourcePageLabel": "๑๘๘",
+      "mainLineCount": 25,
+      "footnoteLineCount": 2,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 4
+      },
+      "lineCount": 27,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 94
+    },
+    {
+      "pdfPage": 198,
+      "sourcePage": 189,
+      "sourcePageLabel": "๑๘๙",
+      "mainLineCount": 28,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 28,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 120
+    },
+    {
+      "pdfPage": 199,
+      "sourcePage": 190,
+      "sourcePageLabel": "๑๙๐",
+      "mainLineCount": 27,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 27,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 106
+    },
+    {
+      "pdfPage": 200,
+      "sourcePage": 191,
+      "sourcePageLabel": "๑๙๑",
+      "mainLineCount": 25,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 5
+      },
+      "lineCount": 25,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 83
+    },
+    {
+      "pdfPage": 201,
+      "sourcePage": 192,
+      "sourcePageLabel": "๑๙๒",
+      "mainLineCount": 7,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 2,
+        "blank": 4
+      },
+      "lineCount": 7,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 21
+    },
+    {
+      "pdfPage": 202,
+      "sourcePage": 193,
+      "sourcePageLabel": "๑๙๓",
+      "mainLineCount": 16,
+      "footnoteLineCount": 11,
+      "skipped": {
+        "headers": 0,
+        "decorations": 1,
+        "blank": 3
+      },
+      "lineCount": 27,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 91
+    },
+    {
+      "pdfPage": 203,
+      "sourcePage": 194,
+      "sourcePageLabel": "๑๙๔",
+      "mainLineCount": 28,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 28,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 109
+    },
+    {
+      "pdfPage": 204,
+      "sourcePage": 195,
+      "sourcePageLabel": "๑๙๕",
+      "mainLineCount": 27,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 27,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 102
+    },
+    {
+      "pdfPage": 205,
+      "sourcePage": 196,
+      "sourcePageLabel": "๑๙๖",
+      "mainLineCount": 27,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 27,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 87
+    },
+    {
+      "pdfPage": 206,
+      "sourcePage": 197,
+      "sourcePageLabel": "๑๙๗",
+      "mainLineCount": 25,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 25,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 101
+    },
+    {
+      "pdfPage": 207,
+      "sourcePage": 198,
+      "sourcePageLabel": "๑๙๘",
+      "mainLineCount": 25,
+      "footnoteLineCount": 4,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 29,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 113
+    },
+    {
+      "pdfPage": 208,
+      "sourcePage": 199,
+      "sourcePageLabel": "๑๙๙",
+      "mainLineCount": 22,
+      "footnoteLineCount": 7,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 29,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 127
+    },
+    {
+      "pdfPage": 209,
+      "sourcePage": 200,
+      "sourcePageLabel": "๒๐๐",
+      "mainLineCount": 21,
+      "footnoteLineCount": 9,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 30,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 103
+    },
+    {
+      "pdfPage": 210,
+      "sourcePage": 201,
+      "sourcePageLabel": "๒๐๑",
+      "mainLineCount": 26,
+      "footnoteLineCount": 4,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 30,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 92
+    },
+    {
+      "pdfPage": 211,
+      "sourcePage": 202,
+      "sourcePageLabel": "๒๐๒",
+      "mainLineCount": 23,
+      "footnoteLineCount": 6,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 4
+      },
+      "lineCount": 29,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 119
+    },
+    {
+      "pdfPage": 212,
+      "sourcePage": 203,
+      "sourcePageLabel": "๒๐๓",
+      "mainLineCount": 26,
+      "footnoteLineCount": 2,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 28,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 99
+    },
+    {
+      "pdfPage": 213,
+      "sourcePage": 204,
+      "sourcePageLabel": "๒๐๔",
+      "mainLineCount": 22,
+      "footnoteLineCount": 7,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 29,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 99
+    },
+    {
+      "pdfPage": 214,
+      "sourcePage": 205,
+      "sourcePageLabel": "๒๐๕",
+      "mainLineCount": 15,
+      "footnoteLineCount": 24,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 39,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 177
+    },
+    {
+      "pdfPage": 215,
+      "sourcePage": 206,
+      "sourcePageLabel": "๒๐๖",
+      "mainLineCount": 21,
+      "footnoteLineCount": 8,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 5
+      },
+      "lineCount": 29,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 114
+    },
+    {
+      "pdfPage": 216,
+      "sourcePage": 207,
+      "sourcePageLabel": "๒๐๗",
+      "mainLineCount": 22,
+      "footnoteLineCount": 11,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 33,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 105
+    },
+    {
+      "pdfPage": 217,
+      "sourcePage": 208,
+      "sourcePageLabel": "๒๐๘",
+      "mainLineCount": 21,
+      "footnoteLineCount": 9,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 4
+      },
+      "lineCount": 30,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 94
+    },
+    {
+      "pdfPage": 218,
+      "sourcePage": 209,
+      "sourcePageLabel": "๒๐๙",
+      "mainLineCount": 22,
+      "footnoteLineCount": 6,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 4
+      },
+      "lineCount": 28,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 116
+    },
+    {
+      "pdfPage": 219,
+      "sourcePage": 210,
+      "sourcePageLabel": "๒๑๐",
+      "mainLineCount": 21,
+      "footnoteLineCount": 8,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 4
+      },
+      "lineCount": 29,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 93
+    },
+    {
+      "pdfPage": 220,
+      "sourcePage": 211,
+      "sourcePageLabel": "๒๑๑",
+      "mainLineCount": 22,
+      "footnoteLineCount": 8,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 30,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 88
+    },
+    {
+      "pdfPage": 221,
+      "sourcePage": 212,
+      "sourcePageLabel": "๒๑๒",
+      "mainLineCount": 25,
+      "footnoteLineCount": 3,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 28,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 89
+    },
+    {
+      "pdfPage": 222,
+      "sourcePage": 213,
+      "sourcePageLabel": "๒๑๓",
+      "mainLineCount": 25,
+      "footnoteLineCount": 6,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 31,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 108
+    },
+    {
+      "pdfPage": 223,
+      "sourcePage": 214,
+      "sourcePageLabel": "๒๑๔",
+      "mainLineCount": 24,
+      "footnoteLineCount": 3,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 4
+      },
+      "lineCount": 27,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 93
+    },
+    {
+      "pdfPage": 224,
+      "sourcePage": 215,
+      "sourcePageLabel": "๒๑๕",
+      "mainLineCount": 23,
+      "footnoteLineCount": 5,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 4
+      },
+      "lineCount": 28,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 111
+    },
+    {
+      "pdfPage": 225,
+      "sourcePage": 216,
+      "sourcePageLabel": "๒๑๖",
+      "mainLineCount": 26,
+      "footnoteLineCount": 3,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 29,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 112
+    },
+    {
+      "pdfPage": 226,
+      "sourcePage": 217,
+      "sourcePageLabel": "๒๑๗",
+      "mainLineCount": 20,
+      "footnoteLineCount": 15,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 35,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 99
+    },
+    {
+      "pdfPage": 227,
+      "sourcePage": 218,
+      "sourcePageLabel": "๒๑๘",
+      "mainLineCount": 24,
+      "footnoteLineCount": 4,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 28,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 81
+    },
+    {
+      "pdfPage": 228,
+      "sourcePage": 219,
+      "sourcePageLabel": "๒๑๙",
+      "mainLineCount": 19,
+      "footnoteLineCount": 10,
+      "skipped": {
+        "headers": 1,
+        "decorations": 2,
+        "blank": 3
+      },
+      "lineCount": 29,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 97
+    },
+    {
+      "pdfPage": 229,
+      "sourcePage": 220,
+      "sourcePageLabel": "๒๒๐",
+      "mainLineCount": 25,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 0,
+        "decorations": 1,
+        "blank": 1
+      },
+      "lineCount": 25,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 95
+    },
+    {
+      "pdfPage": 230,
+      "sourcePage": 221,
+      "sourcePageLabel": "๒๒๑",
+      "mainLineCount": 24,
+      "footnoteLineCount": 4,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 28,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 114
+    },
+    {
+      "pdfPage": 231,
+      "sourcePage": 222,
+      "sourcePageLabel": "๒๒๒",
+      "mainLineCount": 24,
+      "footnoteLineCount": 6,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 30,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 89
+    },
+    {
+      "pdfPage": 232,
+      "sourcePage": 223,
+      "sourcePageLabel": "๒๒๓",
+      "mainLineCount": 25,
+      "footnoteLineCount": 2,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 4
+      },
+      "lineCount": 27,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 84
+    },
+    {
+      "pdfPage": 233,
+      "sourcePage": 224,
+      "sourcePageLabel": "๒๒๔",
+      "mainLineCount": 24,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 5
+      },
+      "lineCount": 24,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 73
+    },
+    {
+      "pdfPage": 234,
+      "sourcePage": 225,
+      "sourcePageLabel": "๒๒๕",
+      "mainLineCount": 8,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 2,
+        "blank": 4
+      },
+      "lineCount": 8,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 26
+    },
+    {
+      "pdfPage": 235,
+      "sourcePage": 226,
+      "sourcePageLabel": "๒๒๖",
+      "mainLineCount": 23,
+      "footnoteLineCount": 2,
+      "skipped": {
+        "headers": 0,
+        "decorations": 1,
+        "blank": 2
+      },
+      "lineCount": 25,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 102
+    },
+    {
+      "pdfPage": 236,
+      "sourcePage": 227,
+      "sourcePageLabel": "๒๒๗",
+      "mainLineCount": 28,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 28,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 104
+    },
+    {
+      "pdfPage": 237,
+      "sourcePage": 228,
+      "sourcePageLabel": "๒๒๘",
+      "mainLineCount": 26,
+      "footnoteLineCount": 3,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 29,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 102
+    },
+    {
+      "pdfPage": 238,
+      "sourcePage": 229,
+      "sourcePageLabel": "๒๒๙",
+      "mainLineCount": 20,
+      "footnoteLineCount": 8,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 6
+      },
+      "lineCount": 28,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 127
+    },
+    {
+      "pdfPage": 239,
+      "sourcePage": 230,
+      "sourcePageLabel": "๒๓๐",
+      "mainLineCount": 21,
+      "footnoteLineCount": 5,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 6
+      },
+      "lineCount": 26,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 84
+    },
+    {
+      "pdfPage": 240,
+      "sourcePage": 231,
+      "sourcePageLabel": "๒๓๑",
+      "mainLineCount": 25,
+      "footnoteLineCount": 4,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 3
+      },
+      "lineCount": 29,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 90
+    },
+    {
+      "pdfPage": 241,
+      "sourcePage": 232,
+      "sourcePageLabel": "๒๓๒",
+      "mainLineCount": 26,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 0,
+        "blank": 2
+      },
+      "lineCount": 26,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 76
+    },
+    {
+      "pdfPage": 242,
+      "sourcePage": 233,
+      "sourcePageLabel": "๒๓๓",
+      "mainLineCount": 7,
+      "footnoteLineCount": 0,
+      "skipped": {
+        "headers": 1,
+        "decorations": 3,
+        "blank": 3
+      },
+      "lineCount": 7,
+      "replacementChars": 0,
+      "remainingPua": [],
+      "suspiciousInternalSpaces": 13
+    }
+  ]
+}
