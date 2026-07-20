@@ -31,3 +31,6 @@ output/
 tmp/
 *.pdf
 ตัวอย่างการดึงเนื้อหามาฝึกแปล/
+
+# Local / external media (not shipped via git or Pages; use CDN later)
+*.mp3
