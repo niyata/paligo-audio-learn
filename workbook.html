@@ -610,6 +610,7 @@
         justify-content: center;
         min-height: 34px;
         padding: 6px 10px;
+        position: relative;
         white-space: nowrap;
       }
 
@@ -626,6 +627,70 @@
       .plai-whisper-toggle:disabled {
         cursor: not-allowed;
         opacity: 0.45;
+      }
+
+      /* Tooltip วิธีใช้พลายกระซิบ — ชุดเดียวกับปุ่มตีเส้น */
+      .plai-whisper-toggle::after {
+        background: #fff0a8;
+        border: 1px solid #e5c400;
+        border-radius: 6px;
+        bottom: calc(100% + 9px);
+        box-shadow: 0 10px 24px rgba(74, 44, 10, 0.16);
+        color: #3a3a3a;
+        content: "พลายกระซิบ แนะนำคำถัดไปจากเฉลย\A กดเพื่อเปิดหรือปิด";
+        font-size: 0.74rem;
+        font-weight: 700;
+        left: 50%;
+        line-height: 1.5;
+        opacity: 0;
+        padding: 7px 11px;
+        pointer-events: none;
+        position: absolute;
+        text-align: center;
+        transform: translateX(-50%) translateY(4px);
+        transition: opacity 140ms ease, transform 140ms ease;
+        white-space: pre;
+        z-index: 300;
+      }
+
+      .plai-whisper-toggle::before {
+        border: 6px solid transparent;
+        border-top-color: #e5c400;
+        bottom: calc(100% + 3px);
+        content: "";
+        left: 50%;
+        opacity: 0;
+        pointer-events: none;
+        position: absolute;
+        transform: translateX(-50%);
+        transition: opacity 140ms ease;
+        z-index: 301;
+      }
+
+      .plai-whisper-toggle:hover:not(:disabled)::after,
+      .plai-whisper-toggle:focus-visible:not(:disabled)::after {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+
+      .plai-whisper-toggle:hover:not(:disabled)::before,
+      .plai-whisper-toggle:focus-visible:not(:disabled)::before {
+        opacity: 1;
+      }
+
+      .plai-whisper-toggle:disabled::after {
+        content: "พลายกระซิบใช้ได้เมื่อวิชาแปล\A มคธเป็นไทย หรือไทยเป็นมคธ";
+      }
+
+      .plai-whisper-toggle:disabled:hover::after,
+      .plai-whisper-toggle:disabled:focus-visible::after {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+
+      .plai-whisper-toggle:disabled:hover::before,
+      .plai-whisper-toggle:disabled:focus-visible::before {
+        opacity: 1;
       }
 
       .annotation-toggle-button:hover:not(.is-active) {
@@ -1422,7 +1487,7 @@
               type="button"
               data-plai-whisper-toggle
               aria-pressed="true"
-              title="พลายกระซิบเปิดอยู่ — กดเพื่อปิดคำแนะนำจากเฉลย"
+              aria-label="พลายกระซิบ แนะนำคำถัดไปจากเฉลย กดเพื่อเปิดหรือปิด"
             >
               <svg class="exam-icon" viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M4 10v4" />
@@ -3080,13 +3145,12 @@
           plaiWhisperToggle.classList.toggle("is-active", plaiWhisperEnabled);
           plaiWhisperToggle.setAttribute("aria-pressed", String(plaiWhisperEnabled));
           plaiWhisperToggle.disabled = !subjectOk;
-          if (!subjectOk) {
-            plaiWhisperToggle.title = "พลายกระซิบใช้ได้เมื่อวิชาแปลมคธเป็นไทย หรือแปลไทยเป็นมคธ";
-          } else if (plaiWhisperEnabled) {
-            plaiWhisperToggle.title = "พลายกระซิบเปิดอยู่ — กดเพื่อปิดคำแนะนำจากเฉลย";
-          } else {
-            plaiWhisperToggle.title = "พลายกระซิบปิดอยู่ — กดเพื่อเปิดคำแนะนำจากเฉลย";
-          }
+          plaiWhisperToggle.setAttribute(
+            "aria-label",
+            subjectOk
+              ? "พลายกระซิบ แนะนำคำถัดไปจากเฉลย กดเพื่อเปิดหรือปิด"
+              : "พลายกระซิบใช้ได้เมื่อวิชาแปลมคธเป็นไทย หรือไทยเป็นมคธ"
+          );
         };
 
         const setPlaiWhisperEnabled = (enabled) => {
