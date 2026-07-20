@@ -1108,6 +1108,45 @@
           font-size: 0.82rem;
         }
       }
+
+      .ghost-suggest-menu {
+        background: #fffdf8;
+        border: 1px solid rgba(74, 44, 10, 0.22);
+        border-radius: 8px;
+        box-shadow: 0 12px 28px rgba(40, 28, 12, 0.18);
+        display: none;
+        max-height: 220px;
+        min-width: 12rem;
+        overflow: auto;
+        padding: 4px;
+        position: fixed;
+        z-index: 80;
+      }
+
+      .ghost-suggest-menu.is-open {
+        display: block;
+      }
+
+      .ghost-suggest-option {
+        background: transparent;
+        border: 0;
+        border-radius: 6px;
+        color: #3a3a3a;
+        cursor: pointer;
+        display: block;
+        font-family: inherit;
+        font-size: 0.95rem;
+        line-height: 1.35;
+        padding: 0.45rem 0.65rem;
+        text-align: left;
+        width: 100%;
+      }
+
+      .ghost-suggest-option.is-active,
+      .ghost-suggest-option:hover {
+        background: rgba(31, 45, 137, 0.1);
+        color: #1f2d89;
+      }
     </style>
   </head>
   <body>
@@ -1585,6 +1624,13 @@
     <div class="number-area-tooltip" role="tooltip" data-number-area-tooltip hidden>
       กด Tab หรือ เริ่มพิมพ์อักขระ สร้างย่อหน้าอัตโนมัติ
     </div>
+    <div
+      class="ghost-suggest-menu"
+      data-ghost-suggest-menu
+      role="listbox"
+      aria-label="คำแนะนำจากเฉลย"
+      hidden
+    ></div>
     <script src="paligo-config.js"></script>
     <script src="paligo-inbox-client.js"></script>
     <script src="paligo-exam-shared.js"></script>
@@ -1592,6 +1638,7 @@
     <script src="paligo-exam-book-cover.js"></script>
     <script src="paligo-inbox-chat.js"></script>
     <script src="paligo-exam-paper.js"></script>
+    <script src="paligo-ghost-suggestion.js"></script>
     <script src="paligo-nav-config.js"></script>
     <script src="sidebar-nav.js"></script>
     <script>
@@ -2047,6 +2094,15 @@
         let isApplyingSpill = false;
         let toastTimer;
         let activePaliReferenceDrag = null;
+        let activeReferenceContext = null;
+        let ghostAnswerTokens = [];
+        let ghostSuggestions = [];
+        let ghostActiveIndex = 0;
+        let ghostTargetEditor = null;
+        const ghostCorpusCache = window.PaligoGhostSuggestion
+          ? new window.PaligoGhostSuggestion.AnswerCorpusCache()
+          : null;
+        const ghostSuggestMenu = document.querySelector("[data-ghost-suggest-menu]");
 
         const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
@@ -2934,6 +2990,213 @@
           return "คำตอบถูกล็อกในสถานะนี้";
         };
 
+        const isGhostSuggestionEnabled = () =>
+          Boolean(window.PaligoGhostSuggestion) &&
+          String(subjectPicker?.dataset.value || "") === "thai-to-pali" &&
+          Boolean(activeReferenceContext?.sourcePage);
+
+        const closeGhostSuggestions = () => {
+          ghostSuggestions = [];
+          ghostActiveIndex = 0;
+          ghostTargetEditor = null;
+          if (!ghostSuggestMenu) return;
+          ghostSuggestMenu.hidden = true;
+          ghostSuggestMenu.classList.remove("is-open");
+          ghostSuggestMenu.innerHTML = "";
+        };
+
+        const paintGhostActiveOption = () => {
+          if (!ghostSuggestMenu) return;
+          ghostSuggestMenu.querySelectorAll(".ghost-suggest-option").forEach((button, index) => {
+            button.classList.toggle("is-active", index === ghostActiveIndex);
+            if (index === ghostActiveIndex) button.setAttribute("aria-selected", "true");
+            else button.removeAttribute("aria-selected");
+          });
+        };
+
+        const getCaretViewportPoint = (editor) => {
+          const pos = editor.selectionStart;
+          const value = editor.value;
+          const mirror = document.createElement("div");
+          const styles = getComputedStyle(editor);
+          const properties = [
+            "boxSizing",
+            "width",
+            "height",
+            "overflowX",
+            "overflowY",
+            "borderTopWidth",
+            "borderRightWidth",
+            "borderBottomWidth",
+            "borderLeftWidth",
+            "paddingTop",
+            "paddingRight",
+            "paddingBottom",
+            "paddingLeft",
+            "fontStyle",
+            "fontVariant",
+            "fontWeight",
+            "fontStretch",
+            "fontSize",
+            "fontFamily",
+            "lineHeight",
+            "letterSpacing",
+            "textAlign",
+            "textTransform",
+            "textIndent",
+            "whiteSpace",
+            "wordWrap",
+            "wordBreak",
+          ];
+          mirror.style.position = "absolute";
+          mirror.style.visibility = "hidden";
+          mirror.style.top = "0";
+          mirror.style.left = "-9999px";
+          properties.forEach((name) => {
+            mirror.style[name] = styles[name];
+          });
+          mirror.style.whiteSpace = "pre-wrap";
+          mirror.style.overflow = "hidden";
+          mirror.textContent = value.slice(0, pos);
+          const marker = document.createElement("span");
+          marker.textContent = value.slice(pos, pos + 1) || ".";
+          mirror.append(marker);
+          document.body.append(mirror);
+          const editorRect = editor.getBoundingClientRect();
+          const markerRect = marker.getBoundingClientRect();
+          const mirrorRect = mirror.getBoundingClientRect();
+          const top = editorRect.top - editor.scrollTop + (markerRect.top - mirrorRect.top) + markerRect.height;
+          const left = editorRect.left - editor.scrollLeft + (markerRect.left - mirrorRect.left);
+          mirror.remove();
+          return { top, left };
+        };
+
+        const ensureGhostAnswerTokens = async () => {
+          const ghostApi = window.PaligoGhostSuggestion;
+          if (!ghostApi || !ghostCorpusCache || !activeReferenceContext?.sourcePage) {
+            ghostAnswerTokens = [];
+            return [];
+          }
+          const corpusId =
+            activeReferenceContext.answerCorpusId ||
+            activeReferenceContext.corpusId ||
+            "dhammapadatthakatha-pali-rtf-prototype";
+          const url = ghostApi.defaultAnswerCorpusUrl(corpusId);
+          const corpus = await ghostCorpusCache.loadCorpusJson(url);
+          ghostAnswerTokens = ghostApi.pageTokensFromCorpus(corpus, activeReferenceContext.sourcePage);
+          return ghostAnswerTokens;
+        };
+
+        const openGhostSuggestions = (editor, items) => {
+          if (!ghostSuggestMenu || !items.length) {
+            closeGhostSuggestions();
+            return;
+          }
+          ghostSuggestions = items;
+          ghostActiveIndex = 0;
+          ghostTargetEditor = editor;
+          ghostSuggestMenu.innerHTML = "";
+          items.forEach((token, index) => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "ghost-suggest-option";
+            button.role = "option";
+            button.textContent = token;
+            if (index === 0) button.classList.add("is-active");
+            button.addEventListener("mousedown", (event) => {
+              event.preventDefault();
+              acceptGhostSuggestion(editor, token);
+            });
+            ghostSuggestMenu.append(button);
+          });
+          const point = getCaretViewportPoint(editor);
+          const left = Math.min(window.innerWidth - 220, Math.max(8, point.left));
+          const top = Math.min(window.innerHeight - 80, Math.max(8, point.top + 4));
+          ghostSuggestMenu.style.left = `${left}px`;
+          ghostSuggestMenu.style.top = `${top}px`;
+          ghostSuggestMenu.hidden = false;
+          ghostSuggestMenu.classList.add("is-open");
+          paintGhostActiveOption();
+        };
+
+        const acceptGhostSuggestion = (editor, token) => {
+          const ghostApi = window.PaligoGhostSuggestion;
+          if (!editor || !token || !ghostApi) return;
+          const start = editor.selectionStart;
+          const end = editor.selectionEnd;
+          const before = editor.value.slice(0, start);
+          const after = editor.value.slice(end);
+          const { typedPrefix } = ghostApi.parseCaretTokenState(before);
+          const replaceFrom = Math.max(0, start - typedPrefix.length);
+          const insert = `${token}${after.startsWith(" ") || after.startsWith("\n") ? "" : " "}`;
+          editor.value = `${editor.value.slice(0, replaceFrom)}${insert}${after}`;
+          const caret = replaceFrom + insert.length;
+          editor.setSelectionRange(caret, caret);
+          closeGhostSuggestions();
+          editor.dispatchEvent(new Event("input", { bubbles: true }));
+        };
+
+        const refreshGhostSuggestions = async (editor) => {
+          const ghostApi = window.PaligoGhostSuggestion;
+          if (!ghostApi || !isGhostSuggestionEnabled() || !editor || editor.readOnly) {
+            closeGhostSuggestions();
+            return;
+          }
+          if (isCaretInNumberArea(editor)) {
+            closeGhostSuggestions();
+            return;
+          }
+          try {
+            await ensureGhostAnswerTokens();
+          } catch {
+            closeGhostSuggestions();
+            return;
+          }
+          const before = editor.value.slice(0, editor.selectionStart);
+          const { completedTokens, typedPrefix } = ghostApi.parseCaretTokenState(before);
+          if (!typedPrefix && !completedTokens.length) {
+            closeGhostSuggestions();
+            return;
+          }
+          const items = ghostApi.suggestNextTokens({
+            typedPrefix,
+            answerTokens: ghostAnswerTokens,
+            completedTokens,
+          });
+          if (!items.length) {
+            closeGhostSuggestions();
+            return;
+          }
+          openGhostSuggestions(editor, items);
+        };
+
+        const handleGhostSuggestionKeydown = (editor, event) => {
+          if (!ghostSuggestMenu?.classList.contains("is-open") || !ghostSuggestions.length) return false;
+          if (event.key === "ArrowDown") {
+            event.preventDefault();
+            ghostActiveIndex = (ghostActiveIndex + 1) % ghostSuggestions.length;
+            paintGhostActiveOption();
+            return true;
+          }
+          if (event.key === "ArrowUp") {
+            event.preventDefault();
+            ghostActiveIndex = (ghostActiveIndex - 1 + ghostSuggestions.length) % ghostSuggestions.length;
+            paintGhostActiveOption();
+            return true;
+          }
+          if (event.key === "Escape") {
+            event.preventDefault();
+            closeGhostSuggestions();
+            return true;
+          }
+          if (event.key === "Tab" || event.key === "Enter") {
+            event.preventDefault();
+            acceptGhostSuggestion(editor, ghostSuggestions[ghostActiveIndex]);
+            return true;
+          }
+          return false;
+        };
+
         const bindEditor = (editor) => {
           if (editor.dataset.editorBound === "true") return;
           editor.dataset.editorBound = "true";
@@ -2943,6 +3206,8 @@
           });
 
           editor.addEventListener("keydown", (event) => {
+            if (handleGhostSuggestionKeydown(editor, event)) return;
+
             if (editor.readOnly) {
               if (event.key === "Tab" || event.key === " " || event.key === "Spacebar") {
                 event.preventDefault();
@@ -3031,11 +3296,26 @@
               result.editor.setSelectionRange(result.selectionStart, result.selectionEnd);
               maybePrepareNextPage(result.editor);
               syncNumberAreaTooltip(result.editor);
+              refreshGhostSuggestions(result.editor);
             } finally {
               isApplyingSpill = false;
             }
 
             scheduleAutoSave();
+          });
+
+          editor.addEventListener("blur", () => {
+            window.setTimeout(() => {
+              if (document.activeElement !== ghostSuggestMenu && !ghostSuggestMenu?.contains(document.activeElement)) {
+                if (ghostTargetEditor === editor) closeGhostSuggestions();
+              }
+            }, 120);
+          });
+
+          editor.addEventListener("keyup", (event) => {
+            if (["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) {
+              refreshGhostSuggestions(editor);
+            }
           });
         };
 
@@ -3167,6 +3447,7 @@
             option.addEventListener("click", (event) => {
               event.stopPropagation();
               selectPickerValue(subjectPicker, optionValue);
+              if (optionValue !== "thai-to-pali") closeGhostSuggestions();
               scheduleAutoSave();
             });
             options.append(option);
@@ -3275,6 +3556,20 @@
             }
             return;
           }
+          if (message.type === "paligo:pip-reference-context") {
+            activeReferenceContext = {
+              sourcePage: message.sourcePage ?? "",
+              sourcePageLabel: message.sourcePageLabel || "",
+              itemId: message.itemId || "",
+              languageVisibility: message.languageVisibility || "",
+              mode: message.mode || "",
+              corpusId: message.corpusId || "",
+              answerCorpusId: message.answerCorpusId || "",
+              subject: message.subject || "",
+            };
+            ghostAnswerTokens = [];
+            return;
+          }
           if (message.type !== "paligo:pip-subject-change") return;
           const nextSubject = String(message.subject || "");
           const nextGrade = String(message.grade || gradePicker?.dataset.value || currentProfileGrade || "4");
@@ -3290,9 +3585,19 @@
             selectPickerValue(subjectPicker, nextSubject);
             updatePickerCurrentValue(subjectPicker, nextSubject);
           }
+          if (nextSubject !== "thai-to-pali") closeGhostSuggestions();
           syncPrefilledAnswerLine();
           syncPaliReferenceContext({ reload: !paliReferencePip?.hidden });
           scheduleAutoSave();
+        });
+
+        document.addEventListener("mousedown", (event) => {
+          if (!ghostSuggestMenu?.classList.contains("is-open")) return;
+          if (ghostSuggestMenu.contains(event.target)) return;
+          if (ghostTargetEditor && (event.target === ghostTargetEditor || ghostTargetEditor.contains?.(event.target))) {
+            return;
+          }
+          closeGhostSuggestions();
         });
 
         document.addEventListener("click", (event) => {

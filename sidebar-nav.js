@@ -113,6 +113,16 @@
     return trimmed.charAt(0).toUpperCase();
   }
 
+  function profileAvatarHtml(user, className) {
+    const profileJson = user?.profileJson || {};
+    const avatarUrl = String(profileJson.avatarUrl || "").trim();
+    const name = user?.displayName || "";
+    if (avatarUrl) {
+      return `<img class="${className}" src="${avatarUrl}" alt="" aria-hidden="true" />`;
+    }
+    return `<span class="${className}" aria-hidden="true">${profileInitial(name)}</span>`;
+  }
+
   function buildAdminSidebarLink(activeRef) {
     const session =
       typeof window !== "undefined" ? window.PaligoInboxClient?.getSession?.() : null;
@@ -239,7 +249,6 @@
       <aside class="paligo-sidebar" id="paligoSidebar" aria-label="เมนูหลัก">
         <div class="paligo-sidebar__header">
           ${buildBrandBlock(brand)}
-          ${buildProfileBlock()}
         </div>
         <div class="paligo-sidebar__scroll">
           <nav aria-label="เมนูแอป">
@@ -247,7 +256,6 @@
           </nav>
         </div>
         <div class="paligo-sidebar__footer">
-          ${buildAdminSidebarLink(activeRef)}
           <button
             class="paligo-sidebar__toggle"
             id="paligoSidebarToggle"
@@ -266,7 +274,7 @@
       <div class="paligo-sidebar-backdrop" id="paligoSidebarBackdrop" hidden></div>`;
   }
 
-  function buildInboxTopbarBlock(activeRef) {
+  function buildAccountTopbarBlock(activeRef) {
     const session =
       typeof window !== "undefined" ? window.PaligoInboxClient?.getSession?.() : null;
     const user = session?.user;
@@ -274,6 +282,7 @@
     const roleLabels = { student: "นักเรียน", reviewer: "ครู/ผู้ตรวจ", guest: "ยังไม่ได้เข้าสู่ระบบ" };
     const items =
       window.PaligoNavConfig?.inboxMenuForRole?.(role) ||
+      window.PaligoNavConfig?.profileMenu?.guest ||
       window.PaligoNavConfig?.inboxMenu?.guest ||
       [];
 
@@ -289,35 +298,44 @@
           ? `<span class="paligo-topbar__inbox-link-desc">${item.description}</span>`
           : "";
         const inboxAttr = item.requiresInbox ? ' data-paligo-inbox-feature' : "";
-        return `<a class="paligo-topbar__inbox-link${active}" href="${item.href}"${inboxAttr}><span class="paligo-topbar__inbox-link-label">${item.label}</span>${description}</a>`;
+        return `<a class="paligo-topbar__profile-link${active}" href="${item.href}"${inboxAttr}><span class="paligo-topbar__profile-link-label">${item.label}</span>${description}</a>`;
       })
       .join("");
 
     const adminInboxLink = isSuperAdminUser(user)
-      ? `<a class="paligo-topbar__inbox-link paligo-topbar__inbox-link--admin${normalizeHref("exam-super-admin.html") === activeRef ? " is-active" : ""}" href="exam-super-admin.html"><span class="paligo-topbar__inbox-link-label">ตั้งค่าระบบ</span><span class="paligo-topbar__inbox-link-desc">Super Admin · สวิตช์ฟีเจอร์</span></a>`
+      ? `<a class="paligo-topbar__profile-link paligo-topbar__profile-link--admin${normalizeHref("exam-super-admin.html") === activeRef ? " is-active" : ""}" href="exam-super-admin.html"><span class="paligo-topbar__profile-link-label">ตั้งค่าระบบ</span><span class="paligo-topbar__profile-link-desc">Super Admin · สวิตช์ฟีเจอร์</span></a>`
       : "";
 
     return `
-      <div class="paligo-topbar__inbox" data-paligo-inbox-menu>
+      <a
+        class="paligo-topbar__inbox-direct${normalizeHref("inbox.html") === activeRef || normalizeHref("exam-inbox.html") === activeRef ? " is-active" : ""}"
+        href="inbox.html"
+        data-paligo-inbox-feature
+        aria-label="เปิดกล่องข้อความ"
+        title="เปิดกล่องข้อความ"
+      >
+        <span class="paligo-topbar__inbox-icon" aria-hidden="true">${icon("inbox")}</span>
+        <span class="paligo-topbar__inbox-badge" data-paligo-inbox-badge${user ? "" : " hidden"} aria-hidden="true"></span>
+      </a>
+      <div class="paligo-topbar__profile-menu" data-paligo-inbox-menu>
         <button
-          class="paligo-topbar__inbox-trigger"
+          class="paligo-topbar__profile-trigger"
           id="paligoInboxMenuTrigger"
           type="button"
           aria-expanded="false"
           aria-controls="paligoInboxMenuPanel"
           aria-haspopup="menu"
-          aria-label="เมนู Inbox"
-          title="Inbox"
+          aria-label="เมนูโปรไฟล์และบัญชี"
+          title="โปรไฟล์และบัญชี"
         >
-          <span class="paligo-topbar__inbox-icon" aria-hidden="true">${icon("inbox")}</span>
-          <span class="paligo-topbar__inbox-badge" data-paligo-inbox-badge${user ? "" : " hidden"} aria-hidden="true"></span>
+          ${profileAvatarHtml(user, "paligo-topbar__profile-avatar")}
         </button>
-        <div class="paligo-topbar__inbox-panel" id="paligoInboxMenuPanel" role="menu" aria-label="เมนู Inbox" hidden>
-          <div class="paligo-topbar__inbox-head">
-            <span class="paligo-topbar__inbox-head-title">Inbox</span>
-            <span class="paligo-topbar__inbox-head-meta">${headMeta}</span>
+        <div class="paligo-topbar__profile-panel" id="paligoInboxMenuPanel" role="menu" aria-label="เมนูโปรไฟล์และบัญชี" hidden>
+          <div class="paligo-topbar__profile-head">
+            <span class="paligo-topbar__profile-head-title">${user ? user.displayName || "โปรไฟล์" : "บัญชี Paligo"}</span>
+            <span class="paligo-topbar__profile-head-meta">${headMeta}</span>
           </div>
-          <div class="paligo-topbar__inbox-links">
+          <div class="paligo-topbar__profile-links">
             ${adminInboxLink}
             ${links}
           </div>
@@ -341,8 +359,7 @@
         <h1 class="paligo-topbar__title">${pageTitle}</h1>
         <div class="paligo-topbar__actions">
           <span class="paligo-topbar__hint">⌘B / Ctrl+B พับเมนู</span>
-          ${buildAdminTopbarLink(activeRef)}
-          ${buildInboxTopbarBlock(activeRef)}
+          ${buildAccountTopbarBlock(activeRef)}
         </div>
       </header>`;
   }
@@ -566,7 +583,7 @@
     });
 
     this.inboxMenuPanel?.addEventListener("click", (event) => {
-      if (event.target.closest(".paligo-topbar__inbox-link")) {
+      if (event.target.closest(".paligo-topbar__profile-link, .paligo-topbar__inbox-link")) {
         self.closeInboxMenu();
       }
     });

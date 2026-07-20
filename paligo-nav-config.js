@@ -48,27 +48,6 @@
           href: "workbook.html?resume=1",
           description: "เปิดสมุดที่ค้างไว้",
         },
-        {
-          label: "กล่องข้อความ",
-          href: "inbox.html",
-          description: "ส่งสมุดให้ครูในแชท",
-          requiresInbox: true,
-        },
-        {
-          label: "ผลตรวจของฉัน",
-          href: "exam-review-results.html",
-          description: "นำเข้าไฟล์ผลตรวจจากครู",
-        },
-        {
-          label: "โปรไฟล์",
-          href: "exam-profile.html",
-          description: "ตั้งค่าชื่อบนปก · จับคู่ · บัญชี",
-        },
-        {
-          label: "บัญชี Inbox",
-          href: "exam-account.html",
-          description: "เข้าสู่ระบบ · สำรองข้อมูล",
-        },
       ],
     },
     {
@@ -78,30 +57,9 @@
       priority: 3,
       children: [
         {
-          label: "Inbox แชท",
-          href: "inbox.html",
-          description: "รับสมุดจากนักเรียนในรูปแบบแชท",
-          requiresInbox: true,
-        },
-        {
-          label: "โปรไฟล์",
-          href: "exam-profile.html",
-          description: "ตั้งค่าชื่อ · รหัสเชิญ · บัญชี",
-        },
-        {
-          label: "Inbox งานส่งตรวจ",
-          href: "exam-reviewer-console.html",
-          description: "รับงานที่นักเรียนส่งเข้ามา",
-        },
-        {
           label: "ตรวจข้อสอบ",
           href: "exam-reviewer-console.html",
           description: "นำเข้า submission และ stamp คะแนน",
-        },
-        {
-          label: "ตารางคะแนน",
-          href: "exam-leaderboard.html",
-          description: "ดูผลคะแนนจากการตรวจ",
         },
       ],
     },
@@ -211,14 +169,8 @@
     .filter(([, meta]) => meta.focusMode)
     .map(([name]) => name);
 
-  const INBOX_MENU = {
+  const PROFILE_MENU = {
     guest: [
-      {
-        label: "กล่องข้อความ",
-        href: "inbox.html",
-        description: "ส่งสมุดให้ครู · แชท Inbox",
-        requiresInbox: true,
-      },
       {
         label: "โปรไฟล์",
         href: "exam-profile.html",
@@ -231,12 +183,6 @@
       },
     ],
     student: [
-      {
-        label: "กล่องข้อความ",
-        href: "inbox.html",
-        description: "แชทส่งสมุดให้ครู",
-        requiresInbox: true,
-      },
       {
         label: "โปรไฟล์",
         href: "exam-profile.html",
@@ -265,12 +211,6 @@
         description: "ตั้งค่าชื่อ · รหัสเชิญ",
       },
       {
-        label: "Inbox แชท",
-        href: "inbox.html",
-        description: "รับสมุดจากนักเรียน",
-        requiresInbox: true,
-      },
-      {
         label: "งานส่งตรวจ",
         href: "exam-reviewer-console.html",
         description: "รับงานเข้าคลังตรวจ",
@@ -289,9 +229,9 @@
   };
 
   function inboxMenuForRole(role) {
-    if (role === "reviewer") return INBOX_MENU.reviewer;
-    if (role === "student") return INBOX_MENU.student;
-    return INBOX_MENU.guest;
+    if (role === "reviewer") return PROFILE_MENU.reviewer;
+    if (role === "student") return PROFILE_MENU.student;
+    return PROFILE_MENU.guest;
   }
 
   function pageMeta(href) {
@@ -313,7 +253,8 @@
     menu: MENU,
     pages: PAGES,
     studyPageNames: STUDY_PAGE_NAMES,
-    inboxMenu: INBOX_MENU,
+    inboxMenu: PROFILE_MENU,
+    profileMenu: PROFILE_MENU,
     inboxMenuForRole,
     pageMeta,
     pageTitle,
