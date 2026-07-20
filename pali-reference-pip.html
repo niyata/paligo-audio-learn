@@ -2355,6 +2355,31 @@
         type: 'paligo:pip-title-change',
         title,
       }, '*');
+      notifyParentReferenceContext({ page });
+    }
+
+    function notifyParentReferenceContext({ page = null } = {}) {
+      const item = currentItem();
+      const contextPage = page
+        || (item?.itemType === 'page' ? item : null)
+        || pages().find((entry) => String(entry.sourcePage) === String(item?.sourcePage))
+        || null;
+      const answerCorpusId = primaryCorpus?.corpusId
+        || currentManifest?.corpusId
+        || subjectForManifestPath(queryParam('corpus') || '')
+        || '';
+      const displayCorpusId = currentCorpus?.corpusId || answerCorpusId;
+      window.parent?.postMessage({
+        type: 'paligo:pip-reference-context',
+        sourcePage: contextPage?.sourcePage ?? item?.sourcePage ?? '',
+        sourcePageLabel: contextPage?.sourcePageLabel || item?.sourcePageLabel || '',
+        itemId: item?.itemId || contextPage?.itemId || '',
+        languageVisibility,
+        mode,
+        corpusId: displayCorpusId,
+        answerCorpusId,
+        subject: subjectSelect?.value || subjectForManifestPath(queryParam('corpus') || '') || '',
+      }, '*');
     }
 
     function topicById(topicId) {
