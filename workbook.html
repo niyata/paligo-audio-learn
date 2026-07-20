@@ -583,6 +583,49 @@
         min-height: 34px;
         padding: 5px 9px;
         position: relative;
+        width: auto;
+      }
+
+      .control-tool-pair {
+        align-items: center;
+        display: inline-flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-self: start;
+      }
+
+      .plai-whisper-toggle {
+        appearance: none;
+        align-items: center;
+        background: var(--paper-bg);
+        border: 1px solid var(--paper-border);
+        border-radius: 6px;
+        color: var(--exam-blue);
+        cursor: pointer;
+        display: inline-flex;
+        font: inherit;
+        font-size: 0.82rem;
+        font-weight: 700;
+        gap: 6px;
+        justify-content: center;
+        min-height: 34px;
+        padding: 6px 10px;
+        white-space: nowrap;
+      }
+
+      .plai-whisper-toggle:hover:not(.is-active) {
+        background: rgba(31, 45, 137, 0.06);
+      }
+
+      .plai-whisper-toggle.is-active {
+        background: rgba(31, 45, 137, 0.88);
+        border-color: rgba(31, 45, 137, 0.88);
+        color: #fff;
+      }
+
+      .plai-whisper-toggle:disabled {
+        cursor: not-allowed;
+        opacity: 0.45;
       }
 
       .annotation-toggle-button:hover:not(.is-active) {
@@ -1363,16 +1406,33 @@
               </svg>
             </span>
           </button>
-          <button class="annotation-toggle-button" type="button" data-annotation-toggle aria-label="ตีเส้นบรรทัด แตะเพื่อตีเส้น แตะซ้ำ เอาเส้นออก">
-            <svg width="18" height="16" viewBox="0 0 18 16" fill="none" aria-hidden="true">
-              <rect x="0.75" y="3" width="16.5" height="7" rx="1.5" stroke="currentColor" stroke-width="1.25"/>
-              <line x1="4" y1="5.2" x2="4" y2="7.6" stroke="currentColor" stroke-width="1"/>
-              <line x1="7" y1="5.2" x2="7" y2="8.5" stroke="currentColor" stroke-width="1"/>
-              <line x1="10" y1="5.2" x2="10" y2="7.6" stroke="currentColor" stroke-width="1"/>
-              <line x1="13" y1="5.2" x2="13" y2="8.5" stroke="currentColor" stroke-width="1"/>
-              <line x1="1" y1="13.5" x2="17" y2="13.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-            </svg>
-          </button>
+          <div class="control-tool-pair">
+            <button class="annotation-toggle-button" type="button" data-annotation-toggle aria-label="ตีเส้นบรรทัด แตะเพื่อตีเส้น แตะซ้ำ เอาเส้นออก">
+              <svg width="18" height="16" viewBox="0 0 18 16" fill="none" aria-hidden="true">
+                <rect x="0.75" y="3" width="16.5" height="7" rx="1.5" stroke="currentColor" stroke-width="1.25"/>
+                <line x1="4" y1="5.2" x2="4" y2="7.6" stroke="currentColor" stroke-width="1"/>
+                <line x1="7" y1="5.2" x2="7" y2="8.5" stroke="currentColor" stroke-width="1"/>
+                <line x1="10" y1="5.2" x2="10" y2="7.6" stroke="currentColor" stroke-width="1"/>
+                <line x1="13" y1="5.2" x2="13" y2="8.5" stroke="currentColor" stroke-width="1"/>
+                <line x1="1" y1="13.5" x2="17" y2="13.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+              </svg>
+            </button>
+            <button
+              class="plai-whisper-toggle is-active"
+              type="button"
+              data-plai-whisper-toggle
+              aria-pressed="true"
+              title="พลายกระซิบเปิดอยู่ — กดเพื่อปิดคำแนะนำจากเฉลย"
+            >
+              <svg class="exam-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 10v4" />
+                <path d="M7 8v8" />
+                <path d="M11 5a7 7 0 0 1 0 14" />
+                <path d="M15 8a4 4 0 0 1 0 8" />
+              </svg>
+              <span>พลายกระซิบ</span>
+            </button>
+          </div>
           <button class="clear-line-button" type="button" data-clear-bottom-line><svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-eraser"></use></svg><span>ล้างบรรทัดล่าง</span></button>
           <button class="save-button pali-reference-button" type="button" data-open-pali-reference aria-controls="paliReferencePip" aria-expanded="false">
             <svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-book-open"></use></svg><span>เปิดตำรา</span>
@@ -1628,7 +1688,7 @@
       class="ghost-suggest-menu"
       data-ghost-suggest-menu
       role="listbox"
-      aria-label="คำแนะนำจากเฉลย"
+      aria-label="พลายกระซิบ — คำแนะนำจากเฉลย"
       hidden
     ></div>
     <script src="paligo-config.js"></script>
@@ -1658,6 +1718,7 @@
         const activeBookStorageKey = KEYS.activeBook;
         const ownerStorageKey = KEYS.owner;
         const paliReferencePipStorageKey = "paligo-pali-reference-pip-v1";
+        const plaiWhisperStorageKey = "paligo-plai-whisper-v1";
         const paliReferenceDefault = {
           corpusId: "mangalattha-pali-pathamo",
           title: "มังคลัตถทีปนีบาลี (ปฐโม ภาโค)",
@@ -2099,10 +2160,20 @@
         let ghostSuggestions = [];
         let ghostActiveIndex = 0;
         let ghostTargetEditor = null;
+        let plaiWhisperEnabled = (() => {
+          try {
+            const raw = localStorage.getItem(plaiWhisperStorageKey);
+            if (raw === null) return true;
+            return raw === "1" || raw === "true";
+          } catch {
+            return true;
+          }
+        })();
         const ghostCorpusCache = window.PaligoGhostSuggestion
           ? new window.PaligoGhostSuggestion.AnswerCorpusCache()
           : null;
         const ghostSuggestMenu = document.querySelector("[data-ghost-suggest-menu]");
+        const plaiWhisperToggle = document.querySelector("[data-plai-whisper-toggle]");
 
         const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
@@ -2990,10 +3061,66 @@
           return "คำตอบถูกล็อกในสถานะนี้";
         };
 
+        const PLAI_WHISPER_SUBJECTS = new Set(["thai-to-pali", "pali-to-thai"]);
+        const DEFAULT_ANSWER_CORPUS_BY_SUBJECT = {
+          "thai-to-pali": "dhammapadatthakatha-pali-rtf-prototype",
+          "pali-to-thai": "mangalattha-thai-meaning-vol1",
+        };
+
         const isGhostSuggestionEnabled = () =>
+          plaiWhisperEnabled &&
           Boolean(window.PaligoGhostSuggestion) &&
-          String(subjectPicker?.dataset.value || "") === "thai-to-pali" &&
+          PLAI_WHISPER_SUBJECTS.has(String(subjectPicker?.dataset.value || "")) &&
           Boolean(activeReferenceContext?.sourcePage);
+
+        const syncPlaiWhisperToggle = () => {
+          if (!plaiWhisperToggle) return;
+          const subject = String(subjectPicker?.dataset.value || "");
+          const subjectOk = PLAI_WHISPER_SUBJECTS.has(subject);
+          plaiWhisperToggle.classList.toggle("is-active", plaiWhisperEnabled);
+          plaiWhisperToggle.setAttribute("aria-pressed", String(plaiWhisperEnabled));
+          plaiWhisperToggle.disabled = !subjectOk;
+          if (!subjectOk) {
+            plaiWhisperToggle.title = "พลายกระซิบใช้ได้เมื่อวิชาแปลมคธเป็นไทย หรือแปลไทยเป็นมคธ";
+          } else if (plaiWhisperEnabled) {
+            plaiWhisperToggle.title = "พลายกระซิบเปิดอยู่ — กดเพื่อปิดคำแนะนำจากเฉลย";
+          } else {
+            plaiWhisperToggle.title = "พลายกระซิบปิดอยู่ — กดเพื่อเปิดคำแนะนำจากเฉลย";
+          }
+        };
+
+        const setPlaiWhisperEnabled = (enabled) => {
+          plaiWhisperEnabled = Boolean(enabled);
+          try {
+            localStorage.setItem(plaiWhisperStorageKey, plaiWhisperEnabled ? "1" : "0");
+          } catch {
+            /* ignore */
+          }
+          syncPlaiWhisperToggle();
+          if (!plaiWhisperEnabled) closeGhostSuggestions();
+        };
+
+        const ghostAnswerPreferForSubject = (subject) =>
+          subject === "pali-to-thai" ? "thai" : "pali";
+
+        const resolveGhostAnswerCorpusId = () => {
+          const subject = String(subjectPicker?.dataset.value || "");
+          if (subject === "pali-to-thai") {
+            // Prefer dedicated Thai answer corpus; do not whisper from Pali-only pathamo.
+            return (
+              (activeReferenceContext?.answerCorpusId &&
+              !/pali-pathamo|pali-rtf/i.test(String(activeReferenceContext.answerCorpusId))
+                ? activeReferenceContext.answerCorpusId
+                : null) ||
+              DEFAULT_ANSWER_CORPUS_BY_SUBJECT["pali-to-thai"]
+            );
+          }
+          return (
+            activeReferenceContext?.answerCorpusId ||
+            activeReferenceContext?.corpusId ||
+            DEFAULT_ANSWER_CORPUS_BY_SUBJECT["thai-to-pali"]
+          );
+        };
 
         const closeGhostSuggestions = () => {
           ghostSuggestions = [];
@@ -3077,13 +3204,17 @@
             ghostAnswerTokens = [];
             return [];
           }
-          const corpusId =
-            activeReferenceContext.answerCorpusId ||
-            activeReferenceContext.corpusId ||
-            "dhammapadatthakatha-pali-rtf-prototype";
+          const subject = String(subjectPicker?.dataset.value || "");
+          const corpusId = resolveGhostAnswerCorpusId();
           const url = ghostApi.defaultAnswerCorpusUrl(corpusId);
-          const corpus = await ghostCorpusCache.loadCorpusJson(url);
-          ghostAnswerTokens = ghostApi.pageTokensFromCorpus(corpus, activeReferenceContext.sourcePage);
+          try {
+            const corpus = await ghostCorpusCache.loadCorpusJson(url);
+            ghostAnswerTokens = ghostApi.pageTokensFromCorpus(corpus, activeReferenceContext.sourcePage, {
+              prefer: ghostAnswerPreferForSubject(subject),
+            });
+          } catch {
+            ghostAnswerTokens = [];
+          }
           return ghostAnswerTokens;
         };
 
@@ -3447,7 +3578,8 @@
             option.addEventListener("click", (event) => {
               event.stopPropagation();
               selectPickerValue(subjectPicker, optionValue);
-              if (optionValue !== "thai-to-pali") closeGhostSuggestions();
+              if (!PLAI_WHISPER_SUBJECTS.has(optionValue)) closeGhostSuggestions();
+              syncPlaiWhisperToggle();
               scheduleAutoSave();
             });
             options.append(option);
@@ -3457,6 +3589,7 @@
           updatePickerCurrentValue(subjectPicker, value);
           syncPrefilledAnswerLine();
           syncPaliReferenceContext({ reload: !paliReferencePip?.hidden });
+          syncPlaiWhisperToggle();
         };
 
         examPickers.forEach((picker) => {
@@ -3585,7 +3718,8 @@
             selectPickerValue(subjectPicker, nextSubject);
             updatePickerCurrentValue(subjectPicker, nextSubject);
           }
-          if (nextSubject !== "thai-to-pali") closeGhostSuggestions();
+          if (!PLAI_WHISPER_SUBJECTS.has(nextSubject)) closeGhostSuggestions();
+          syncPlaiWhisperToggle();
           syncPrefilledAnswerLine();
           syncPaliReferenceContext({ reload: !paliReferencePip?.hidden });
           scheduleAutoSave();
@@ -4256,6 +4390,17 @@
           answerCard?.classList.toggle("is-annotating", isAnnotating);
           annotationToggle.classList.toggle("is-active", isAnnotating);
         });
+
+        plaiWhisperToggle?.addEventListener("click", () => {
+          setPlaiWhisperEnabled(!plaiWhisperEnabled);
+          if (plaiWhisperEnabled) {
+            const activeEditor = document.activeElement?.classList?.contains("ruled-editor")
+              ? document.activeElement
+              : editors[currentPageIndex];
+            if (activeEditor) refreshGhostSuggestions(activeEditor);
+          }
+        });
+        syncPlaiWhisperToggle();
 
         const viewAllButton = document.querySelector("[data-view-all]");
         viewAllButton?.addEventListener("click", () => {
