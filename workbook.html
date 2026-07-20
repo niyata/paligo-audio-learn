@@ -3273,7 +3273,7 @@
           const url = ghostApi.defaultAnswerCorpusUrl(corpusId);
           try {
             const corpus = await ghostCorpusCache.loadCorpusJson(url);
-            ghostAnswerTokens = ghostApi.pageTokensFromCorpus(corpus, activeReferenceContext.sourcePage, {
+            ghostAnswerTokens = await ghostCorpusCache.tokensForPage(corpus, activeReferenceContext.sourcePage, {
               prefer: ghostAnswerPreferForSubject(subject),
             });
           } catch {

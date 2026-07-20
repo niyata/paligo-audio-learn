@@ -1886,6 +1886,7 @@
     const EXAM_ACTIVE_KEY = PAT.storageKeys.examActiveLegacy;
     const ALL_STORIES_LOOKUP_KEY = 'story:all';
     const FOOTNOTE_CALLOUT_VISIBILITY_KEY = 'paligo-show-footnote-callouts-v1';
+    const REFERENCE_WORKER_URL = 'paligo-reference-worker.js';
     const NAV_LABELS = {
       sentence: { prev: 'บรรทัดที่แล้ว', next: 'บรรทัดถัดไป' },
       kho: { prev: 'ข้อที่แล้ว', next: 'ข้อถัดไป' },
@@ -1927,6 +1928,18 @@
     let activeExamQuestionId = '';
     let remarkPencilMode = false;
     let highlightEraseMode = false;
+    let corpusSearchResults = [];
+    let corpusSearchController = null;
+    let activeLoadController = null;
+    let renderPassController = null;
+    let referenceWorker = null;
+    let referenceWorkerSeq = 0;
+    let corpusWorkerSeq = 0;
+    const referenceWorkerPending = new Map();
+    const corpusWorkerKeys = new WeakMap();
+    const pageStoreCache = new WeakMap();
+    const referenceGroupsCache = new WeakMap();
+    const pageTokenCache = new WeakMap();
 
     const titleEl = document.querySelector('[data-title]');
     const statusEl = document.querySelector('[data-status]');
@@ -2039,21 +2052,211 @@
       return '';
     }
 
-    async function fetchJson(url) {
-      const response = await fetch(url);
+    function debounce(fn, wait = 80) {
+      let timer = null;
+      return (...args) => {
+        window.clearTimeout(timer);
+        timer = window.setTimeout(() => fn(...args), wait);
+      };
+    }
+
+    function animationFrameDebounce(fn) {
+      let frame = 0;
+      return (...args) => {
+        if (frame) window.cancelAnimationFrame(frame);
+        frame = window.requestAnimationFrame(() => {
+          frame = 0;
+          fn(...args);
+        });
+      };
+    }
+
+    function isAbortError(error) {
+      return error?.name === 'AbortError' || /aborted/i.test(String(error?.message || error || ''));
+    }
+
+    function isWorkerUnavailableError(error) {
+      return /reference worker unavailable/i.test(String(error?.message || error || ''));
+    }
+
+    function beginRenderPass() {
+      renderPassController?.abort();
+      renderPassController = new AbortController();
+      return renderPassController.signal;
+    }
+
+    function signalAborted(signal) {
+      return Boolean(signal?.aborted);
+    }
+
+    function pageStoreFor(corpus) {
+      if (!corpus) return { pages: [], bySourcePage: new Map(), byItemId: new Map() };
+      if (pageStoreCache.has(corpus)) return pageStoreCache.get(corpus);
+      const pageItems = (corpus.items || []).filter((item) => item.itemType === 'page');
+      const bySourcePage = new Map();
+      const byItemId = new Map();
+      pageItems.forEach((page) => {
+        if (page.itemId) byItemId.set(String(page.itemId), page);
+        if (page.sourcePage != null) bySourcePage.set(String(page.sourcePage), page);
+      });
+      const store = { pages: pageItems, bySourcePage, byItemId };
+      pageStoreCache.set(corpus, store);
+      return store;
+    }
+
+    function pageChunkAround(corpus, pageOrSourcePage, { radius = 1 } = {}) {
+      const store = pageStoreFor(corpus);
+      const sourcePage = typeof pageOrSourcePage === 'object'
+        ? pageOrSourcePage?.sourcePage
+        : pageOrSourcePage;
+      const index = store.pages.findIndex((page) => String(page.sourcePage) === String(sourcePage) || String(page.itemId) === String(sourcePage));
+      if (index < 0) return [];
+      return store.pages.slice(Math.max(0, index - radius), Math.min(store.pages.length, index + radius + 1));
+    }
+
+    function workerKeyForCorpus(corpus) {
+      if (!corpus) return '';
+      if (!corpusWorkerKeys.has(corpus)) {
+        corpusWorkerKeys.set(corpus, `corpus-${++corpusWorkerSeq}`);
+      }
+      return corpusWorkerKeys.get(corpus);
+    }
+
+    function getReferenceWorker() {
+      if (referenceWorker !== null) return referenceWorker;
+      if (!('Worker' in window)) {
+        referenceWorker = false;
+        return null;
+      }
+      try {
+        referenceWorker = new Worker(REFERENCE_WORKER_URL);
+        referenceWorker.addEventListener('message', (event) => {
+          const { id, ok, result, error } = event.data || {};
+          const pending = referenceWorkerPending.get(id);
+          if (!pending) return;
+          referenceWorkerPending.delete(id);
+          if (ok) pending.resolve(result);
+          else pending.reject(new Error(error || 'reference worker failed'));
+        });
+        referenceWorker.addEventListener('error', (event) => {
+          console.warn('[Paligo PiP] reference worker disabled', event.message || event);
+          referenceWorkerPending.forEach((pending) => pending.reject(new Error('reference worker disabled')));
+          referenceWorkerPending.clear();
+          referenceWorker?.terminate?.();
+          referenceWorker = false;
+        });
+      } catch (error) {
+        console.warn('[Paligo PiP] reference worker unavailable', error);
+        referenceWorker = false;
+      }
+      return referenceWorker || null;
+    }
+
+    function referenceWorkerRequest(type, payload = {}, { signal } = {}) {
+      const worker = getReferenceWorker();
+      if (!worker) return Promise.reject(new Error('reference worker unavailable'));
+      if (signal?.aborted) return Promise.reject(new DOMException('Aborted', 'AbortError'));
+      const id = `ref-${++referenceWorkerSeq}`;
+      const promise = new Promise((resolve, reject) => {
+        const abort = () => {
+          referenceWorkerPending.delete(id);
+          reject(new DOMException('Aborted', 'AbortError'));
+        };
+        referenceWorkerPending.set(id, { resolve, reject, abort });
+        signal?.addEventListener('abort', abort, { once: true });
+      });
+      worker.postMessage({ id, type, payload });
+      return promise;
+    }
+
+    async function registerCorpusWithWorker(corpus, { preferredLanguage = 'auto', signal } = {}) {
+      if (!corpus) return null;
+      const corpusKey = workerKeyForCorpus(corpus);
+      try {
+        return await referenceWorkerRequest('register-corpus', { corpusKey, corpus, preferredLanguage }, { signal });
+      } catch (error) {
+        if (!isAbortError(error) && !isWorkerUnavailableError(error)) console.debug('[Paligo PiP] corpus worker registration skipped', error.message || error);
+        return null;
+      }
+    }
+
+    async function warmReferenceGroups(corpus, preferredLanguage, { signal } = {}) {
+      if (!corpus || !corpusHasReferenceBreadcrumbs(corpus)) return;
+      const corpusKey = workerKeyForCorpus(corpus);
+      try {
+        const groups = await referenceWorkerRequest('reference-groups', { corpusKey, preferredLanguage }, { signal });
+        if (signalAborted(signal)) return;
+        referenceGroupsCache.set(corpus, { preferredLanguage, groups });
+        render();
+      } catch (error) {
+        if (!isAbortError(error) && !isWorkerUnavailableError(error)) console.debug('[Paligo PiP] reference group worker fallback', error.message || error);
+      }
+    }
+
+    function tokenCacheForCorpus(corpus) {
+      if (!corpus) return new Map();
+      if (!pageTokenCache.has(corpus)) pageTokenCache.set(corpus, new Map());
+      return pageTokenCache.get(corpus);
+    }
+
+    function warmPageChunkFor(page, { signal } = {}) {
+      const corpus = primaryCorpus || currentCorpus;
+      if (!corpus || !page) return;
+      const corpusKey = workerKeyForCorpus(corpus);
+      const cache = tokenCacheForCorpus(corpus);
+      pageChunkAround(corpus, page, { radius: 1 }).forEach((chunkPage) => {
+        const key = `${preferredLanguage()}:${chunkPage.sourcePage || chunkPage.itemId}`;
+        if (cache.has(key)) return;
+        referenceWorkerRequest('page-tokens', {
+          corpusKey,
+          sourcePage: chunkPage.sourcePage || chunkPage.itemId,
+          preferredLanguage: preferredLanguage(),
+        }, { signal })
+          .then((result) => {
+            if (!signalAborted(signal)) cache.set(key, result.tokens || []);
+          })
+          .catch((error) => {
+            if (!isAbortError(error) && !isWorkerUnavailableError(error)) console.debug('[Paligo PiP] page chunk warmup skipped', error.message || error);
+          });
+      });
+    }
+
+    function startPerformanceWatchdog() {
+      if (!window.performance || !window.setInterval) return;
+      const intervalMs = 500;
+      let last = performance.now();
+      window.setInterval(() => {
+        const now = performance.now();
+        const lag = now - last - intervalMs;
+        if (lag > 200) {
+          console.warn('[Paligo PiP] main thread freeze detected', {
+            lagMs: Math.round(lag),
+            mode,
+            selectedId,
+            languageVisibility,
+            corpusId: currentCorpus?.corpusId || currentCorpus?.id || '',
+          });
+        }
+        last = now;
+      }, intervalMs);
+    }
+
+    async function fetchJson(url, { signal } = {}) {
+      const response = await fetch(url, { signal });
       if (!response.ok) throw new Error(`โหลด ${url} ไม่สำเร็จ (${response.status})`);
       return response.json();
     }
 
-    async function loadTranslationCompanions(manifest) {
+    async function loadTranslationCompanions(manifest, { signal } = {}) {
       companionCorpora = {};
       const companions = manifest?.translationCompanions || {};
       await Promise.all(Object.entries(companions).map(async ([key, config]) => {
         if (!config?.manifest) return;
         const manifestUrl = joinUrl(corpusBaseUrl, config.manifest);
-        const companionManifest = await fetchJson(manifestUrl);
+        const companionManifest = await fetchJson(manifestUrl, { signal });
         const companionBaseUrl = dirname(manifestUrl);
-        const companionCorpus = await fetchJson(joinUrl(companionBaseUrl, companionManifest.corpus || 'corpus.json'));
+        const companionCorpus = await fetchJson(joinUrl(companionBaseUrl, companionManifest.corpus || 'corpus.json'), { signal });
+        await registerCorpusWithWorker(companionCorpus, { signal });
         companionCorpora[key] = {
           label: config.label || companionManifest.title || key,
           manifest: companionManifest,
@@ -2068,7 +2271,7 @@
     }
 
     function pagesFrom(corpus) {
-      return (corpus?.items || []).filter((item) => item.itemType === 'page');
+      return pageStoreFor(corpus).pages;
     }
 
     function corpusHasReferenceBreadcrumbs(corpus) {
@@ -2091,7 +2294,8 @@
         ? pageOrSourcePage?.sourcePage
         : pageOrSourcePage;
       if (!sourcePage) return null;
-      return pagesFrom(corpus).find((page) => String(page.sourcePage) === String(sourcePage)) || null;
+      const store = pageStoreFor(corpus);
+      return store.bySourcePage.get(String(sourcePage)) || store.byItemId.get(String(sourcePage)) || null;
     }
 
     function referencePageFor(page) {
@@ -2197,7 +2401,10 @@
 
     function referenceGroups() {
       if (!corpusUsesReferenceBreadcrumbs()) return [];
+      const source = referenceCorpus();
       const preferred = referencePreferredLanguage();
+      const cached = referenceGroupsCache.get(source);
+      if (cached?.preferredLanguage === preferred) return cached.groups || [];
       const groups = [];
       let active = null;
       let activeStory = null;
@@ -2569,10 +2776,20 @@
       ].some((value) => String(value || '').toLowerCase().includes(query));
     }
 
+    function corpusSearchNotes() {
+      if (drawerMode !== 'search') return [];
+      return corpusSearchResults.map((hit) => ({
+        ...hit,
+        drawerType: 'corpus-search',
+        category: 'corpus-search',
+        selectedText: hit.text,
+      }));
+    }
+
     function drawerNotes() {
       const reviewItems = notesForCurrentCorpus().map((note) => ({ ...note, drawerType: 'review' }));
       const remarkItems = remarksForCurrentCorpus().map((note) => ({ ...note, drawerType: 'remark', category: 'remark' }));
-      return [...reviewItems, ...remarkItems]
+      return [...reviewItems, ...remarkItems, ...corpusSearchNotes()]
         .filter((note) => {
           if (drawerMode === 'memory') return note.drawerType === 'review' && note.category === 'memory';
           if (drawerMode === 'remarks') return note.drawerType === 'remark';
@@ -2591,6 +2808,7 @@
         segmentation: 'การแบ่งข้อ/บรรทัด',
         footnote: 'เชิงอรรถ/เลขยกลอย',
         hyphen: 'การตัดคำ/ขีดกลาง',
+        'corpus-search': 'ผลค้นหาในตำรา',
         ocr: 'ตัวอักษร/OCR',
         layout: 'การจัดหน้า',
         other: 'อื่นๆ',
@@ -2616,6 +2834,32 @@
       document.querySelectorAll('[data-drawer-open]').forEach((button) => {
         button.classList.toggle('is-active', sideDrawer?.classList.contains('is-open') && button.dataset.drawerOpen === drawerMode);
       });
+    }
+
+    function runCorpusSearch(query) {
+      corpusSearchController?.abort();
+      corpusSearchResults = [];
+      const cleanQuery = String(query || '').trim();
+      if (!cleanQuery || !currentCorpus) {
+        renderDrawer();
+        return;
+      }
+      corpusSearchController = new AbortController();
+      const controller = corpusSearchController;
+      referenceWorkerRequest('search', {
+        corpusKey: workerKeyForCorpus(currentCorpus),
+        query: cleanQuery,
+        preferredLanguage: preferredLanguage(),
+        limit: 40,
+      }, { signal: controller.signal })
+        .then((hits) => {
+          if (controller.signal.aborted) return;
+          corpusSearchResults = Array.isArray(hits) ? hits : [];
+          renderDrawer();
+        })
+        .catch((error) => {
+          if (!isAbortError(error) && !isWorkerUnavailableError(error)) console.debug('[Paligo PiP] corpus search worker fallback', error.message || error);
+        });
     }
 
     function renderDrawer() {
@@ -2667,6 +2911,8 @@
         comment.className = 'pip-note-card__comment';
         comment.textContent = note.category === 'memory'
           ? (memoryLabel ? 'จำศัพท์ด้วยป้ายกำหนดเอง' : 'จำศัพท์แบบด่วน')
+          : note.drawerType === 'corpus-search'
+          ? 'พบข้อความใน corpus'
           : note.drawerType === 'remark'
           ? (note.toolType === 'exam-boundary'
             ? `${note.label || note.title || 'ออกข้อสอบ'} · ${note.boundaryRole === 'end' ? 'ประโยคสิ้นสุด' : 'ประโยคที่เริ่ม'}`
@@ -2925,6 +3171,7 @@
       populateSelect();
       updateNav();
       render();
+      warmReferenceGroups(referenceCorpus(), referencePreferredLanguage());
     }
 
     function updateLanguageControls() {
@@ -3561,8 +3808,9 @@
     }
 
     function render() {
+      const renderSignal = beginRenderPass();
       readerEl.innerHTML = '';
-      if (!currentCorpus) return;
+      if (!currentCorpus || signalAborted(renderSignal)) return;
 
       if (mode === 'kho') {
         const item = khos().find((entry) => entry.itemId === selectedId);
@@ -3576,6 +3824,7 @@
         statusEl.textContent = `${item.khoLabel || item.title} · ${item.lines?.length || 0} บรรทัด`;
         updateWindowTitleForContext({ page: itemPage, fallbackTitle: item.title });
         updateReviewButton();
+        warmPageChunkFor(itemPage, { signal: renderSignal });
         return;
       }
 
@@ -3600,6 +3849,7 @@
         statusEl.textContent = `บรรทัด ${item.itemNo} · หน้า ${item.sourcePageLabel || item.sourcePage}`;
         updateWindowTitleForContext({ page: itemPage });
         updateReviewButton();
+        warmPageChunkFor(itemPage, { signal: renderSignal });
         return;
       }
 
@@ -3623,7 +3873,9 @@
         statusEl.textContent = `${item.title} · ${item.lines.length} บรรทัด`;
         updateWindowTitleForContext({ page: topicPage, fallbackTitle: item.title });
         updateReviewButton();
+        warmPageChunkFor(topicPage, { signal: renderSignal });
         requestAnimationFrame(() => {
+          if (signalAborted(renderSignal)) return;
           document.getElementById(item.anchorId)?.scrollIntoView({ block: 'start', behavior: 'smooth' });
         });
         return;
@@ -3650,6 +3902,7 @@
           : `${chapter.title} · ${chapterPages.length} หน้า`;
         updateWindowTitleForContext({ page: pagesToRender[0] || null, fallbackTitle: chapter.title });
         updateReviewButton();
+        warmPageChunkFor(pagesToRender[0] || null, { signal: renderSignal });
         return;
       }
 
@@ -3667,6 +3920,7 @@
         : `หน้า ${page.sourcePageLabel || page.sourcePage} · ${page.children?.length || 0} บรรทัด`;
       updateWindowTitleForContext({ page });
       updateReviewButton();
+      warmPageChunkFor(page, { signal: renderSignal });
     }
 
     function setMode(nextMode) {
@@ -3696,19 +3950,41 @@
       render();
     }
 
-    async function loadCorpus(manifestPath) {
-      const manifest = await fetchJson(manifestPath);
+    async function loadCorpus(manifestPath, { signal } = {}) {
+      const manifest = await fetchJson(manifestPath, { signal });
+      if (signalAborted(signal)) return;
       currentManifest = manifest;
       corpusBaseUrl = dirname(manifestPath);
-      primaryCorpus = await fetchJson(joinUrl(corpusBaseUrl, manifest.corpus || 'corpus.json'));
+      primaryCorpus = await fetchJson(joinUrl(corpusBaseUrl, manifest.corpus || 'corpus.json'), { signal });
+      if (signalAborted(signal)) return;
       currentCorpus = primaryCorpus;
-      await loadTranslationCompanions(manifest);
+      corpusSearchResults = [];
+      await registerCorpusWithWorker(primaryCorpus, { signal });
+      await loadTranslationCompanions(manifest, { signal });
+      if (signalAborted(signal)) return;
       titleEl.textContent = manifest.title || currentCorpus.title || 'ตำรา';
       mode = manifest.defaultDisplayMode || 'kho';
       selectedId = '';
       setSubjectSelectValue(queryParam('subject') || subjectForManifestPath(manifestPath));
       updateLanguageControls();
+      const refCorpus = referenceCorpus();
+      warmReferenceGroups(refCorpus, referencePreferredLanguage(), { signal });
       setMode(mode);
+    }
+
+    function startLoadCorpus(manifestPath) {
+      activeLoadController?.abort();
+      activeLoadController = new AbortController();
+      const controller = activeLoadController;
+      statusEl.textContent = 'กำลังโหลดตำรา...';
+      return loadCorpus(manifestPath, { signal: controller.signal })
+        .catch((error) => {
+          if (isAbortError(error)) return;
+          throw error;
+        })
+        .finally(() => {
+          if (activeLoadController === controller) activeLoadController = null;
+        });
     }
 
     function bindScale() {
@@ -3721,7 +3997,8 @@
         document.documentElement.style.setProperty('--reader-scale', String(next / 100));
         localStorage.setItem(SCALE_KEY, String(next));
       };
-      scaleInput.addEventListener('input', () => apply(scaleInput.value));
+      const scheduleScaleApply = animationFrameDebounce(() => apply(scaleInput.value));
+      scaleInput.addEventListener('input', scheduleScaleApply);
       apply(stored);
     }
 
@@ -4042,6 +4319,41 @@
       showVocabTooltip(selection, range, line);
     }
 
+    function handleReaderPointerSelection() {
+      const selection = window.getSelection();
+      if (!selection || selection.isCollapsed || selection.rangeCount === 0) {
+        if (!remarkPencilMode && !highlightEraseMode) handleReaderSelection();
+        return;
+      }
+      const range = selection.getRangeAt(0);
+      const line = selectionLine(range);
+      if (!line || !readerEl.contains(range.commonAncestorContainer)) return;
+      if (highlightEraseMode) {
+        removeAnnotationsInSelection(selection, range, line);
+        return;
+      }
+      if (remarkPencilMode && activeRemarkTool) {
+        applyRemarkToolToSelection(selection, range, line);
+        return;
+      }
+      handleReaderSelection();
+    }
+
+    const scheduleReaderSelection = debounce(handleReaderSelection, 80);
+    const scheduleReaderPointerSelection = debounce(handleReaderPointerSelection, 50);
+    const scheduleTouchSelection = debounce(handleReaderSelection, 140);
+    const scheduleDrawerSearch = debounce(() => {
+      drawerSearch = footerSearch?.value || '';
+      openDrawer('search');
+      runCorpusSearch(drawerSearch);
+    }, 120);
+    const scheduleTooltipReposition = animationFrameDebounce(() => {
+      if (vocabTooltip?.hidden) return;
+      const selection = window.getSelection();
+      if (!selection || selection.isCollapsed || selection.rangeCount === 0) return;
+      placeVocabTooltip(selection.getRangeAt(0).getBoundingClientRect());
+    });
+
     document.querySelectorAll('[data-mode]').forEach((button) => {
       button.addEventListener('click', () => setMode(button.dataset.mode));
     });
@@ -4071,10 +4383,7 @@
       }
     });
     drawerClose?.addEventListener('click', closeDrawer);
-    footerSearch?.addEventListener('input', () => {
-      drawerSearch = footerSearch.value || '';
-      openDrawer('search');
-    });
+    footerSearch?.addEventListener('input', scheduleDrawerSearch);
     footerErase?.addEventListener('click', () => {
       setHighlightEraseMode(!highlightEraseMode);
     });
@@ -4091,7 +4400,7 @@
         const nextLocation = `pali-reference-pip.html?corpus=${encodeURIComponent(source.manifest)}&subject=${encodeURIComponent(subject)}`;
         window.history.replaceState(null, '', nextLocation);
       }
-      loadCorpus(source.manifest).catch((error) => {
+      startLoadCorpus(source.manifest).catch((error) => {
         console.error(error);
         statusEl.textContent = error.message;
       });
@@ -4179,39 +4488,24 @@
       else closeReviewPanel();
     });
     readerEl.addEventListener('mouseup', () => {
-      setTimeout(() => {
-        const selection = window.getSelection();
-        if (!selection || selection.isCollapsed || selection.rangeCount === 0) {
-          if (!remarkPencilMode && !highlightEraseMode) handleReaderSelection();
-          return;
-        }
-        const range = selection.getRangeAt(0);
-        const line = selectionLine(range);
-        if (!line || !readerEl.contains(range.commonAncestorContainer)) return;
-        if (highlightEraseMode) {
-          removeAnnotationsInSelection(selection, range, line);
-          return;
-        }
-        if (remarkPencilMode && activeRemarkTool) {
-          applyRemarkToolToSelection(selection, range, line);
-          return;
-        }
-        handleReaderSelection();
-      }, 0);
+      if (remarkPencilMode || highlightEraseMode) {
+        handleReaderPointerSelection();
+      } else {
+        scheduleReaderPointerSelection();
+      }
     });
     readerEl.addEventListener('keyup', (event) => {
       if (event.key === 'Escape') {
         hideVocabTooltip();
         return;
       }
-      handleReaderSelection();
+      scheduleReaderSelection();
     });
     readerEl.addEventListener('touchend', () => {
-      setTimeout(() => {
-        if (remarkPencilMode || highlightEraseMode) return;
-        handleReaderSelection();
-      }, 120);
+      if (remarkPencilMode || highlightEraseMode) return;
+      scheduleTouchSelection();
     });
+    window.addEventListener('resize', scheduleTooltipReposition);
     document.addEventListener('mousedown', (event) => {
       if (vocabTooltip?.hidden) return;
       if (vocabTooltip.contains(event.target) || readerEl.contains(event.target)) return;
@@ -4319,13 +4613,14 @@
     loadReviewNotes();
     loadRemarkNotes();
     loadActiveExamQuestionId();
+    startPerformanceWatchdog();
     updateDrawerCounts();
     renderRemarkTools();
     bindScale();
     setFoolscapLayout(localStorage.getItem(LAYOUT_KEY) === 'foolscap');
     setToolbarCollapsed(localStorage.getItem(COLLAPSED_KEY) === '1');
     setFooterHidden(localStorage.getItem(FOOTER_HIDDEN_KEY) === '1', { persist: false });
-    loadCorpus(queryParam('corpus') || DEFAULT_CORPUS).catch((error) => {
+    startLoadCorpus(queryParam('corpus') || DEFAULT_CORPUS).catch((error) => {
       statusEl.textContent = error.message;
       focusLabel.textContent = error.message;
     });
