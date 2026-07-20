@@ -29,8 +29,20 @@
       .map((token) => token.trim())
       .filter(Boolean);
 
-  const extractPageAnswerText = (page) => {
+  const extractPageAnswerText = (page, { prefer = "auto" } = {}) => {
     if (!page) return "";
+    const preferThai = prefer === "thai" || prefer === "thaiMeaning" || prefer === "thaiLiteral";
+    if (preferThai) {
+      if (page.thaiMeaning) return String(page.thaiMeaning);
+      if (page.thai) return String(page.thai);
+      if (page.thaiLiteral) return String(page.thaiLiteral);
+      if (page.text && !page.pali) return String(page.text);
+      const children = page.children || [];
+      const thaiLines = children
+        .map((line) => line.thaiMeaning || line.thai || line.thaiLiteral || "")
+        .filter(Boolean);
+      if (thaiLines.length) return thaiLines.join("\n");
+    }
     if (page.pali) return String(page.pali);
     if (page.rawText) return String(page.rawText);
     if (page.text) return String(page.text);
@@ -41,13 +53,13 @@
       .join("\n");
   };
 
-  const pageTokensFromCorpus = (corpus, sourcePage) => {
+  const pageTokensFromCorpus = (corpus, sourcePage, options = {}) => {
     const pages = (corpus?.items || []).filter((item) => item.itemType === "page");
     const page =
       pages.find((item) => String(item.sourcePage) === String(sourcePage)) ||
       pages.find((item) => String(item.itemId) === String(sourcePage)) ||
       null;
-    return tokenizeAnswerText(extractPageAnswerText(page));
+    return tokenizeAnswerText(extractPageAnswerText(page, options));
   };
 
   const findNextTokenIndex = (completedTokens, answerTokens) => {
