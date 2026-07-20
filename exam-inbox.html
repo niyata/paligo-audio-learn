@@ -708,10 +708,11 @@
                 peerUserId: studentId,
                 threadId: resolvePeerThreadId(studentId),
                 name: student.studentDisplayName || "นักเรียน",
-                meta: "นักเรียนที่จับคู่",
-                avatarUrl: "",
+                meta: student.isVirtual ? "นักเรียนเสมือน · ทดลอง workflow รับงาน" : "นักเรียนที่จับคู่",
+                avatarUrl: student.studentAvatarUrl || "",
                 pendingCount: 0,
                 updatedAt: student.createdAt,
+                isVirtual: Boolean(student.isVirtual),
               });
             });
           }
@@ -1757,10 +1758,14 @@
               peerName.textContent = students.length === 1 ? students[0].studentDisplayName : "นักเรียนที่จับคู่";
             }
             if (peerMeta) {
-              peerMeta.textContent =
-                students.length > 1
-                  ? `กล่องข้อความรวม ${students.length} คน`
-                  : "รับสมุดที่ส่งเข้ามา · กดรับเข้าคลังบนการ์ด";
+              if (students.length === 1 && students[0].isVirtual) {
+                peerMeta.textContent = "นักเรียนเสมือน · ใช้ทดลอง workflow รับสมุดก่อนมีศิษย์จริง";
+              } else {
+                peerMeta.textContent =
+                  students.length > 1
+                    ? `กล่องข้อความรวม ${students.length} คน`
+                    : "รับสมุดที่ส่งเข้ามา · กดรับเข้าคลังบนการ์ด";
+              }
             }
             if (composer) composer.querySelector("[data-open-book-menu]")?.setAttribute("hidden", "");
           }

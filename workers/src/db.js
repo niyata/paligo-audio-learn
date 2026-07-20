@@ -6,6 +6,20 @@ import { createId } from "./crypto.js";
 import { publicReviewerProfileFields } from "./reviewer-profile.js";
 
 const SESSION_DAYS = 30;
+const VIRTUAL_STUDENT_ID = "virtual-student:onboarding";
+
+function buildVirtualStudentContext(user) {
+  return {
+    pairingId: "virtual-pairing:onboarding-student",
+    studentUserId: VIRTUAL_STUDENT_ID,
+    studentDisplayName: "สามเณรทดลอง",
+    studentRoleLabel: "นักเรียนเสมือน",
+    studentAvatarUrl: "",
+    status: "virtual",
+    isVirtual: true,
+    createdAt: user.createdAt,
+  };
+}
 
 export async function createSession(db, userId) {
   const sessionId = createId();
@@ -148,17 +162,20 @@ export async function getPairingContext(db, user) {
       )
       .bind(user.id)
       .all();
+    const realStudents = (students.results || []).map((row) => ({
+      pairingId: row.id,
+      studentUserId: row.student_user_id,
+      studentDisplayName: row.student_display_name,
+      status: row.status,
+      isVirtual: false,
+      createdAt: row.created_at,
+    }));
+
     return {
       invite: invite
         ? { inviteCode: invite.invite_code, createdAt: invite.created_at }
         : null,
-      students: (students.results || []).map((row) => ({
-        pairingId: row.id,
-        studentUserId: row.student_user_id,
-        studentDisplayName: row.student_display_name,
-        status: row.status,
-        createdAt: row.created_at,
-      })),
+      students: realStudents.length ? realStudents : [buildVirtualStudentContext(user)],
     };
   }
 

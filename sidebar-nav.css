@@ -583,18 +583,23 @@
   }
 }
 
+.paligo-topbar__profile-link--admin,
 .paligo-topbar__inbox-link--admin {
   background: rgba(122, 31, 45, 0.06);
 }
 
+.paligo-topbar__profile-link--admin .paligo-topbar__profile-link-label,
 .paligo-topbar__inbox-link--admin .paligo-topbar__inbox-link-label {
   color: #7a1f2d;
 }
 
+.paligo-topbar__profile-menu,
 .paligo-topbar__inbox {
   position: relative;
 }
 
+.paligo-topbar__inbox-direct,
+.paligo-topbar__profile-trigger,
 .paligo-topbar__inbox-trigger {
   align-items: center;
   background: var(--paligo-paper-bg);
@@ -609,12 +614,22 @@
   width: 38px;
 }
 
+.paligo-topbar__inbox-direct {
+  text-decoration: none;
+}
+
+.paligo-topbar__inbox-direct:hover,
+.paligo-topbar__inbox-direct:focus-visible,
+.paligo-topbar__profile-trigger:hover,
+.paligo-topbar__profile-trigger:focus-visible,
 .paligo-topbar__inbox-trigger:hover,
 .paligo-topbar__inbox-trigger:focus-visible {
   background: var(--sidebar-bg-hover);
   outline: none;
 }
 
+.paligo-topbar__inbox-direct.is-active,
+.paligo-topbar__profile-trigger[aria-expanded="true"],
 .paligo-topbar__inbox-trigger[aria-expanded="true"] {
   background: var(--sidebar-bg-active);
   border-color: rgba(31, 45, 137, 0.28);
@@ -647,6 +662,21 @@
   display: none !important;
 }
 
+.paligo-topbar__profile-avatar {
+  align-items: center;
+  background: var(--paligo-exam-blue);
+  border-radius: 50%;
+  color: #fff;
+  display: inline-flex;
+  font-size: 0.78rem;
+  font-weight: 900;
+  height: 28px;
+  justify-content: center;
+  object-fit: cover;
+  width: 28px;
+}
+
+.paligo-topbar__profile-panel,
 .paligo-topbar__inbox-panel {
   background: var(--paligo-paper-bg);
   border: 1px solid var(--paligo-paper-border);
@@ -663,6 +693,7 @@
   z-index: 160;
 }
 
+.paligo-topbar__profile-panel.is-open,
 .paligo-topbar__inbox-panel.is-open {
   display: grid;
   gap: 0;
@@ -670,10 +701,12 @@
   transform: translateY(0);
 }
 
+.paligo-topbar__profile-panel[hidden],
 .paligo-topbar__inbox-panel[hidden] {
   display: none !important;
 }
 
+.paligo-topbar__profile-head,
 .paligo-topbar__inbox-head {
   border-bottom: 1px solid rgba(31, 45, 137, 0.1);
   display: grid;
@@ -681,24 +714,28 @@
   padding: 12px 14px 10px;
 }
 
+.paligo-topbar__profile-head-title,
 .paligo-topbar__inbox-head-title {
   color: var(--paligo-exam-blue);
   font-size: 0.92rem;
   font-weight: 800;
 }
 
+.paligo-topbar__profile-head-meta,
 .paligo-topbar__inbox-head-meta {
   color: var(--paligo-muted);
   font-size: 0.76rem;
   font-weight: 600;
 }
 
+.paligo-topbar__profile-links,
 .paligo-topbar__inbox-links {
   display: grid;
   gap: 0;
   padding: 6px;
 }
 
+.paligo-topbar__profile-link,
 .paligo-topbar__inbox-link {
   border-radius: 8px;
   color: inherit;
@@ -708,22 +745,27 @@
   text-decoration: none;
 }
 
+.paligo-topbar__profile-link:hover,
+.paligo-topbar__profile-link:focus-visible,
 .paligo-topbar__inbox-link:hover,
 .paligo-topbar__inbox-link:focus-visible {
   background: var(--sidebar-bg-hover);
   outline: none;
 }
 
+.paligo-topbar__profile-link.is-active,
 .paligo-topbar__inbox-link.is-active {
   background: var(--sidebar-bg-active);
 }
 
+.paligo-topbar__profile-link-label,
 .paligo-topbar__inbox-link-label {
   color: var(--paligo-exam-blue);
   font-size: 0.88rem;
   font-weight: 800;
 }
 
+.paligo-topbar__profile-link-desc,
 .paligo-topbar__inbox-link-desc {
   color: var(--paligo-muted);
   font-size: 0.74rem;

@@ -1483,7 +1483,9 @@
           }
           students.forEach((student) => {
             const item = document.createElement("li");
-            item.textContent = `${student.studentDisplayName || "นักเรียน"} · ${profile.formatThaiDate(student.createdAt)}`;
+            item.textContent = student.isVirtual
+              ? `${student.studentDisplayName || "นักเรียนเสมือน"} · นักเรียนเสมือนสำหรับทดลองรับงาน`
+              : `${student.studentDisplayName || "นักเรียน"} · ${profile.formatThaiDate(student.createdAt)}`;
             list.append(item);
           });
         };
@@ -1542,8 +1544,9 @@
           }
         });
 
-        document.querySelector("[data-save-profile]")?.addEventListener("click", async () => {
+        document.querySelector("[data-save-profile]")?.addEventListener("click", async (event) => {
           const statusEl = document.querySelector("[data-profile-status]");
+          const saveButton = event.currentTarget;
           const user = meContext.user;
           const displayName = document.querySelector("[data-field-display-name]").value.trim();
           if (displayName.length < 2) {
@@ -1576,20 +1579,21 @@
             }
           }
 
-          // บันทึกในเครื่องก่อนเสมอเมื่อ validation ผ่าน — ไม่ต้องพึ่ง Workers API
-          try {
-            const saved = profile.saveLocalProfile(user.role, local);
-            if (saved) localProfile = { ...localProfile, ...saved };
-          } catch (error) {
-            showStatus(statusEl, error.message || "บันทึกในเครื่องไม่สำเร็จ", "error");
-            return;
-          }
-
+          saveButton.disabled = true;
+          showStatus(statusEl, "กำลังบันทึกโปรไฟล์ขึ้นเซิร์ฟเวอร์…", "");
           try {
             await profile.syncToServer({
               displayName,
               profileJson: local,
             });
+            const saved = profile.saveLocalProfile(user.role, {
+              ...local,
+              _serverSync: {
+                status: "synced",
+                syncedAt: new Date().toISOString(),
+              },
+            });
+            if (saved) localProfile = { ...localProfile, ...saved };
             await refreshMe();
             showStatus(
               statusEl,
@@ -1597,12 +1601,32 @@
               clampMessage ? "warning" : "success"
             );
           } catch (error) {
-            // local สำเร็จแล้ว — รูป/ข้อมูลยังอยู่ แม้ sync server ไม่ได้
-            showStatus(
-              statusEl,
-              "บันทึกในเครื่องแล้ว — ยัง sync ขึ้นเซิร์ฟเวอร์ไม่สำเร็จ (จะลองใหม่เมื่อออนไลน์)",
-              "warning"
-            );
+            const reason = error?.message || "sync ขึ้นเซิร์ฟเวอร์ไม่สำเร็จ";
+            try {
+              const pendingLocal = {
+                ...local,
+                _serverSync: {
+                  status: "pending",
+                  failedAt: new Date().toISOString(),
+                  reason,
+                },
+              };
+              const saved = profile.saveLocalProfile(user.role, pendingLocal);
+              if (saved) localProfile = { ...localProfile, ...saved };
+              showStatus(
+                statusEl,
+                `ยังบันทึกขึ้นเซิร์ฟเวอร์ไม่สำเร็จ: ${reason} — เก็บเป็นฉบับร่างในเครื่องแล้ว`,
+                "warning"
+              );
+            } catch (localError) {
+              showStatus(
+                statusEl,
+                `บันทึกไม่สำเร็จ: ${reason} · สำรองในเครื่องก็ไม่สำเร็จ (${localError?.message || "localStorage error"})`,
+                "error"
+              );
+            }
+          } finally {
+            saveButton.disabled = false;
           }
         });
 
