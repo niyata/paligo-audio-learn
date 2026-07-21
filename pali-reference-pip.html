@@ -720,6 +720,14 @@
       max-width: min(430px, calc(100vw - 24px));
     }
 
+    .pip-vocab-tooltip.is-click-lookup .pip-vocab-tooltip__actions .pip-vocab-tooltip__button:not([data-vocab-close]) {
+      display: none;
+    }
+
+    .pip-vocab-tooltip.is-click-lookup .pip-vocab-tooltip__actions {
+      justify-content: end;
+    }
+
     .pip-remark-tools {
       border-top: 1px solid rgba(74, 44, 10, 0.1);
       display: grid;
@@ -1928,6 +1936,7 @@
     let activeExamQuestionId = '';
     let remarkPencilMode = false;
     let highlightEraseMode = false;
+    let readerPointerStart = null;
     let corpusSearchResults = [];
     let corpusSearchController = null;
     let activeLoadController = null;
@@ -4058,13 +4067,17 @@
       updateNav();
     }
 
-    function mockVocabItems(text) {
+    function mockVocabItems(text, lookupMode = 'selection') {
       const cleaned = String(text || '').trim();
       if (!cleaned) return [];
+      const hasThai = /[\u0e01-\u0e4e]/u.test(cleaned);
+      const primaryGloss = lookupMode === 'click'
+        ? (hasThai ? 'คลิกคำไทย · เสนอคำบาลีเทียบ (mockup)' : 'คลิกคำบาลี · เสนอคำแปลไทยเทียบ (mockup)')
+        : 'ศัพท์บาลีเทียบจากคำที่เลือก (mockup)';
       return [
         {
           pali: cleaned,
-          gloss: 'ศัพท์บาลีเทียบจากคำที่เลือก (mockup)',
+          gloss: primaryGloss,
         },
         {
           pali: `${cleaned} · ปทานุกรม`,
@@ -4137,6 +4150,7 @@
     function hideVocabTooltip({ resetTools = true } = {}) {
       if (!vocabTooltip) return;
       vocabTooltip.hidden = true;
+      vocabTooltip.classList.remove('is-click-lookup');
       activeVocabSelection = null;
       setTooltipRemarkMode(false);
       setTooltipExamMode(false);
@@ -4221,6 +4235,107 @@
         selectionStart: payload.selectionStart,
         selectionEnd: payload.selectionEnd,
       };
+    }
+
+    function markerLabelsForLine(line) {
+      return Array.from(line?.querySelectorAll?.('.pip-text-mark__info, .pip-remark__tag, .pip-exam-label') || [])
+        .map((node) => node.textContent || '')
+        .filter(Boolean);
+    }
+
+    function textWithoutMarkerLabels(text, line) {
+      return markerLabelsForLine(line).reduce((value, label) => value.replace(label, ''), String(text || ''));
+    }
+
+    function rangeFromPoint(x, y) {
+      if (document.caretRangeFromPoint) {
+        return document.caretRangeFromPoint(x, y);
+      }
+      if (document.caretPositionFromPoint) {
+        const position = document.caretPositionFromPoint(x, y);
+        if (!position) return null;
+        const range = document.createRange();
+        range.setStart(position.offsetNode, position.offset);
+        range.collapse(true);
+        return range;
+      }
+      return null;
+    }
+
+    function lineOffsetFromPoint(line, x, y) {
+      const pointRange = rangeFromPoint(x, y);
+      if (!pointRange || !line?.contains(pointRange.startContainer)) return -1;
+      const beforeRange = document.createRange();
+      beforeRange.selectNodeContents(line);
+      beforeRange.setEnd(pointRange.startContainer, pointRange.startOffset);
+      const beforeText = textWithoutMarkerLabels(beforeRange.toString(), line);
+      beforeRange.detach();
+      pointRange.detach?.();
+      const plainText = normalizePaliDisplay(line.dataset.plainText || line.textContent || '');
+      return clamp(beforeText.length, 0, plainText.length);
+    }
+
+    function isWordDelimiter(char) {
+      return !char || /[\s,;:!?()[\]{}"'“”‘’<>|/\\]/u.test(char);
+    }
+
+    function wordPayloadFromPoint(line, event) {
+      if (!line || !event) return null;
+      const plainText = normalizePaliDisplay(line.dataset.plainText || line.textContent || '');
+      if (!plainText.trim()) return null;
+      let offset = lineOffsetFromPoint(line, event.clientX, event.clientY);
+      if (offset < 0) return null;
+      if (offset >= plainText.length && plainText.length > 0) offset = plainText.length - 1;
+      if (isWordDelimiter(plainText.charAt(offset)) && offset > 0 && !isWordDelimiter(plainText.charAt(offset - 1))) {
+        offset -= 1;
+      }
+      if (isWordDelimiter(plainText.charAt(offset))) return null;
+
+      let start = offset;
+      let end = offset + 1;
+      while (start > 0 && !isWordDelimiter(plainText.charAt(start - 1))) start -= 1;
+      while (end < plainText.length && !isWordDelimiter(plainText.charAt(end))) end += 1;
+      const text = plainText.slice(start, end).trim();
+      if (!text) return null;
+      return {
+        text,
+        selectionStart: start,
+        selectionEnd: end,
+      };
+    }
+
+    function rangeRectForLineOffsets(line, start, end) {
+      const source = normalizePaliDisplay(line?.dataset.plainText || line?.textContent || '');
+      if (!line || !Number.isFinite(start) || !Number.isFinite(end) || end <= start) return null;
+      const walker = document.createTreeWalker(line, NodeFilter.SHOW_TEXT);
+      let cursor = 0;
+      let startNode = null;
+      let startOffset = 0;
+      let endNode = null;
+      let endOffset = 0;
+      while (walker.nextNode()) {
+        const node = walker.currentNode;
+        const nodeText = normalizePaliDisplay(node.nodeValue || '');
+        if (!nodeText || markerLabelsForLine(line).includes(nodeText)) continue;
+        const nextCursor = cursor + nodeText.length;
+        if (!startNode && start >= cursor && start <= nextCursor) {
+          startNode = node;
+          startOffset = clamp(start - cursor, 0, node.nodeValue.length);
+        }
+        if (!endNode && end >= cursor && end <= nextCursor) {
+          endNode = node;
+          endOffset = clamp(end - cursor, 0, node.nodeValue.length);
+          break;
+        }
+        cursor = nextCursor;
+      }
+      if (!startNode || !endNode || end > source.length) return null;
+      const range = document.createRange();
+      range.setStart(startNode, startOffset);
+      range.setEnd(endNode, endOffset);
+      const rect = range.getBoundingClientRect();
+      range.detach();
+      return rect && rect.width >= 0 ? rect : null;
     }
 
     function applyRemarkToolToSelection(selection, range, line, tool = activeRemarkTool) {
@@ -4320,6 +4435,7 @@
         selectionEnd: payload.selectionEnd,
       };
 
+      vocabTooltip.classList.remove('is-click-lookup');
       vocabTerm.textContent = `「${payload.text}」`;
       vocabMeta.textContent = `Mockup คำศัพท์บาลีเทียบ · หน้า ${activeVocabSelection.sourcePageLabel || activeVocabSelection.sourcePage || '-'} · บรรทัด ${activeVocabSelection.lineNo || '-'}`;
       vocabList.replaceChildren();
@@ -4348,6 +4464,51 @@
       requestAnimationFrame(() => {
         placeVocabTooltip(rect);
       });
+    }
+
+    function showClickLookupTooltip(event) {
+      if (!vocabTooltip || !vocabTerm || !vocabMeta || !vocabList) return false;
+      if (remarkPencilMode || highlightEraseMode) return false;
+      const selection = window.getSelection?.();
+      if (selection && !selection.isCollapsed) return false;
+      const line = event.target.closest?.('.pip-line');
+      if (!line || !readerEl.contains(line)) return false;
+      const payload = wordPayloadFromPoint(line, event);
+      if (!payload?.text) return false;
+      const anchorRect = rangeRectForLineOffsets(line, payload.selectionStart, payload.selectionEnd)
+        || { left: event.clientX, right: event.clientX, top: event.clientY, bottom: event.clientY, width: 0, height: 0 };
+
+      hideVocabTooltip({ resetTools: false });
+      activeVocabSelection = {
+        text: payload.text,
+        lineItemId: line.dataset.itemId || selectedId,
+        sourcePage: line.dataset.sourcePage || currentItem()?.sourcePage || '',
+        sourcePageLabel: line.dataset.sourcePageLabel || currentItem()?.sourcePageLabel || '',
+        lineNo: line.dataset.lineNo || '',
+        selectionStart: payload.selectionStart,
+        selectionEnd: payload.selectionEnd,
+        interaction: 'click',
+      };
+      vocabTooltip.classList.add('is-click-lookup');
+      vocabTerm.textContent = `「${payload.text}」`;
+      const direction = /[\u0e01-\u0e4e]/u.test(payload.text) ? 'คำไทย → บาลี' : 'คำบาลี → ไทย';
+      vocabMeta.textContent = `${direction} · หน้า ${activeVocabSelection.sourcePageLabel || activeVocabSelection.sourcePage || '-'} · บรรทัด ${activeVocabSelection.lineNo || '-'}`;
+      vocabList.replaceChildren();
+      mockVocabItems(payload.text, 'click').forEach((item) => {
+        const row = document.createElement('div');
+        row.className = 'pip-vocab-tooltip__item';
+        const pali = document.createElement('div');
+        pali.className = 'pip-vocab-tooltip__pali';
+        pali.textContent = item.pali;
+        const gloss = document.createElement('div');
+        gloss.className = 'pip-vocab-tooltip__gloss';
+        gloss.textContent = item.gloss;
+        row.append(pali, gloss);
+        vocabList.append(row);
+      });
+      vocabTooltip.hidden = false;
+      requestAnimationFrame(() => placeVocabTooltip(anchorRect));
+      return true;
     }
 
     function handleReaderSelection() {
@@ -4383,6 +4544,16 @@
         return;
       }
       handleReaderSelection();
+    }
+
+    function hasActiveReaderSelection() {
+      const selection = window.getSelection?.();
+      return Boolean(selection && !selection.isCollapsed && selection.rangeCount > 0);
+    }
+
+    function readerPointerMoved(event) {
+      if (!readerPointerStart || !event) return false;
+      return Math.hypot(event.clientX - readerPointerStart.x, event.clientY - readerPointerStart.y) > 5;
     }
 
     const scheduleReaderSelection = debounce(handleReaderSelection, 80);
@@ -4511,7 +4682,9 @@
         if (!reviewPanel.hidden) closeReviewPanel();
         updateNav();
         render();
+        return;
       }
+      showClickLookupTooltip(event);
     });
     prevEl.addEventListener('click', () => move(-1));
     nextEl.addEventListener('click', () => move(1));
@@ -4533,7 +4706,13 @@
       if (reviewPanel.hidden) openReviewPanel();
       else closeReviewPanel();
     });
-    readerEl.addEventListener('mouseup', () => {
+    readerEl.addEventListener('mousedown', (event) => {
+      readerPointerStart = { x: event.clientX, y: event.clientY };
+    });
+    readerEl.addEventListener('mouseup', (event) => {
+      const shouldHandleSelection = readerPointerMoved(event) || hasActiveReaderSelection();
+      readerPointerStart = null;
+      if (!shouldHandleSelection && !remarkPencilMode && !highlightEraseMode) return;
       if (remarkPencilMode || highlightEraseMode) {
         handleReaderPointerSelection();
       } else {

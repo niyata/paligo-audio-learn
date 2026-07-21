@@ -28,17 +28,30 @@ Use this before pushing or deploying a production candidate branch for
    node --check <file.js>
    ```
 
-4. Critical visual smoke:
+4. Backend and app-state contract checks:
+
+   ```bash
+   node scripts/test-production-contracts.mjs
+   ```
+
+5. Critical visual smoke:
 
    ```bash
    python3 -m http.server 8765
    node scripts/audit-production-critical-pages.mjs
    ```
 
-5. Pre-launch privacy gate:
+6. Pre-launch privacy gate:
 
    ```bash
    node scripts/check-deploy-discipline.mjs
+   ```
+
+7. PR automation:
+
+   ```bash
+   # Runs automatically on pull requests that touch production-critical files.
+   .github/workflows/production-hardening.yml
    ```
 
 ## Privacy Rule

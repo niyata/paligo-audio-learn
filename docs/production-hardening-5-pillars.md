@@ -1,6 +1,6 @@
 # Paligo Production Hardening — 5 Pillars
 
-Status: pre-production hardening
+Status: current hardening slice complete
 
 Last updated: 2026-07-21
 
@@ -11,13 +11,13 @@ Paligo from late prototype toward production grade.
 
 | Pillar | Status | Current evidence | Next closure work |
 | --- | --- | --- | --- |
-| 1. Auth / Session / Pairing State | In Progress | `workers/src/auth.js` returns `/v1/me`; `paligo-inbox-client.js` stores sessions; UI still has page-specific gates | Add shared `appState`/`capabilities` contract in backend and client; update inbox/account/books gates to read it |
-| 2. First-Run Onboarding Fallbacks | In Progress | Reviewer virtual trial student exists and is labeled; account/inbox gates now show pairing or trial CTAs from `appState` | Extend visual smoke to assert these first-run states and add equivalent copy to any remaining entry pages |
-| 3. Visual Smoke Regression | In Progress | `scripts/audit-production-critical-pages.mjs` passes locally against 6 critical pages; generated artifacts are gitignored | Add CI/PR usage notes and extend assertions beyond selectors for avatars, inbox create group, PiP tooltip, and footer tools |
-| 4. Backend Contract And Error Codes | In Progress | `errorResponse(...)` now returns canonical `code` plus legacy `error`; client errors expose normalized `error.code` | Migrate UI branching from status/text to canonical code and add endpoint-level contract tests |
-| 5. Deployment Discipline | In Progress | `docs/deploy-production-checklist.md` and `scripts/check-deploy-discipline.mjs` define repeatable pre-deploy checks; visual audit artifacts are ignored | Wire the checklist into PR/deploy automation when CI exists |
+| 1. Auth / Session / Pairing State | Complete (current slice) | `GET /v1/me` exposes `appState`/`capabilities`; inbox/account/books gates now consume the shared state instead of forcing page-specific login loops | Add authenticated E2E against `api.paligo.jp` after production credentials are finalized |
+| 2. First-Run Onboarding Fallbacks | Complete (current slice) | Student no-pairing and reviewer virtual-trial states have explicit CTAs; visual smoke now covers the no-pairing account path | Replace remaining mock/virtual onboarding copy with D1-backed invite telemetry |
+| 3. Visual Smoke Regression | Complete (current slice) | `scripts/audit-production-critical-pages.mjs` now asserts first-run CTA behavior plus PiP click lookup vs selection annotation behavior | Run full visual smoke before each production-candidate deploy and add mobile viewport coverage |
+| 4. Backend Contract And Error Codes | Complete (current slice) | `scripts/test-production-contracts.mjs` verifies canonical app states and error-code payloads | Expand contract tests to every mutating Workers endpoint when inbox D1 schema stabilizes |
+| 5. Deployment Discipline | Complete (current slice) | `docs/deploy-production-checklist.md`, `scripts/check-deploy-discipline.mjs`, and `.github/workflows/production-hardening.yml` cover pre-launch gates | Add real Cloudflare Pages deployment status checks once branch mapping is finalized |
 
-Rule for this hardening pass:
+Rule for every hardening pass:
 
 - Work one pillar at a time.
 - Update this matrix whenever a pillar changes status.

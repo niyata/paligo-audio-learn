@@ -17,11 +17,67 @@ const BASE_URL = process.env.PALIGO_AUDIT_BASE_URL || "http://127.0.0.1:8765";
 const USER_ID = "audit-production-student";
 const NOW = new Date().toISOString();
 
+const auditStudent = {
+  id: USER_ID,
+  role: "student",
+  displayName: "นักเรียน Audit",
+  email: "audit.std@paligo.jp",
+  createdAt: NOW,
+  profileJson: { firstName: "นักเรียน", lastName: "Audit", grade: "4" },
+};
+
+const auditPairing = {
+  pairingId: "pairing-audit-production",
+  reviewerUserId: "reviewer-audit-production",
+  reviewerDisplayName: "ครู Audit",
+  reviewerRoleLabel: "ครูผู้ตรวจ",
+  status: "active",
+  createdAt: NOW,
+};
+
+const auditReadyContract = {
+  user: auditStudent,
+  pairing: auditPairing,
+  appState: "ready_student",
+  capabilities: {
+    canUseInbox: true,
+    canOpenInbox: true,
+    canCreateInvite: false,
+    canJoinPairing: true,
+    needsPairing: false,
+    hasVirtualStudent: false,
+    hasRealStudents: false,
+    isSuperAdmin: false,
+  },
+};
+
+const auditNeedsPairingContract = {
+  user: auditStudent,
+  pairing: null,
+  appState: "logged_in_no_pairing",
+  capabilities: {
+    canUseInbox: true,
+    canOpenInbox: false,
+    canCreateInvite: false,
+    canJoinPairing: true,
+    needsPairing: true,
+    hasVirtualStudent: false,
+    hasRealStudents: false,
+    isSuperAdmin: false,
+  },
+};
+
 const routes = [
   {
     name: "exam-books",
     path: "/exam-books.html?apiPort=9999",
     required: ["#paligoSidebar", ".paligo-topbar", "[data-book-grid]", "[data-paligo-inbox-feature]"],
+    assert: async (page) => {
+      const inboxLabel = await page.locator(".button[data-paligo-inbox-feature]").innerText();
+      if (!/กล่องข้อความ|ทดลอง Inbox/.test(inboxLabel)) {
+        throw new Error(`exam-books inbox CTA must reflect ready app state, got: ${inboxLabel}`);
+      }
+    },
   },
   {
     name: "workbook",
@@ -42,6 +98,19 @@ const routes = [
     required: ["#paligoSidebar", ".paligo-topbar", "[data-tab='pairing']", "[data-panel='pairing']"],
   },
   {
+    name: "exam-account-no-pairing",
+    path: "/exam-account.html?apiPort=9999",
+    mockMe: auditNeedsPairingContract,
+    required: ["#paligoSidebar", ".paligo-topbar", "[data-account-primary-link]"],
+    assert: async (page) => {
+      const primary = await page.locator("[data-account-primary-link]").innerText();
+      const href = await page.locator("[data-account-primary-link]").getAttribute("href");
+      if (!/จับคู่ครู/.test(primary) || !/tab=pairing/.test(href || "")) {
+        throw new Error(`first-run no-pairing CTA must point to pairing, got: ${primary} ${href}`);
+      }
+    },
+  },
+  {
     name: "exam-profile",
     path: "/exam-profile.html?apiPort=9999",
     required: ["#paligoSidebar", ".paligo-topbar", "[data-profile-tab='profile']", "[data-profile-tab='connections']"],
@@ -50,6 +119,41 @@ const routes = [
     name: "pali-reference-pip",
     path: "/pali-reference-pip.html?corpus=data%2Fcorpora%2Fdhammapadatthakatha-pali-rtf-prototype%2Fmanifest.json&subject=thai-to-pali",
     required: [".pip-toolbar, [data-reference-toolbar]", "[data-reader]"],
+    assert: async (page) => {
+      await page.waitForSelector(".pip-line", { timeout: 10000 });
+      const point = await page.evaluate(() => {
+        const line = Array.from(document.querySelectorAll(".pip-line"))
+          .find((node) => (node.dataset.plainText || node.textContent || "").trim().length > 12);
+        if (!line) return null;
+        const rect = line.getBoundingClientRect();
+        return { x: rect.left + 40, y: rect.top + rect.height / 2, dragX: rect.left + 240 };
+      });
+      if (!point) throw new Error("PiP audit could not find a selectable line");
+      await page.mouse.click(point.x, point.y);
+      await page.waitForTimeout(180);
+      const clickState = await page.evaluate(() => ({
+        hidden: document.querySelector("[data-vocab-tooltip]")?.hidden,
+        clickMode: document.querySelector("[data-vocab-tooltip]")?.classList.contains("is-click-lookup"),
+        manageVisible: getComputedStyle(document.querySelector("[data-vocab-remember]")).display !== "none",
+      }));
+      if (clickState.hidden || !clickState.clickMode || clickState.manageVisible) {
+        throw new Error(`PiP click-to-lookup failed: ${JSON.stringify(clickState)}`);
+      }
+      await page.keyboard.press("Escape");
+      await page.mouse.move(point.x, point.y);
+      await page.mouse.down();
+      await page.mouse.move(point.dragX, point.y, { steps: 10 });
+      await page.mouse.up();
+      await page.waitForTimeout(220);
+      const dragState = await page.evaluate(() => ({
+        hidden: document.querySelector("[data-vocab-tooltip]")?.hidden,
+        clickMode: document.querySelector("[data-vocab-tooltip]")?.classList.contains("is-click-lookup"),
+        manageVisible: getComputedStyle(document.querySelector("[data-vocab-remember]")).display !== "none",
+      }));
+      if (dragState.hidden || dragState.clickMode || !dragState.manageVisible) {
+        throw new Error(`PiP selection-to-annotate failed: ${JSON.stringify(dragState)}`);
+      }
+    },
   },
 ];
 
@@ -90,6 +194,13 @@ async function main() {
   await mkdir(OUT_DIR, { recursive: true });
   const browser = await chromium.launch({ channel: "chrome" });
   const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  let activeMockMe = auditReadyContract;
+  await context.route("http://localhost:9999/v1/health", async (route) => {
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true }) });
+  });
+  await context.route("http://localhost:9999/v1/me", async (route) => {
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(activeMockMe) });
+  });
   const page = context.pages()[0] || (await context.newPage());
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
@@ -114,6 +225,17 @@ async function main() {
             email: "audit.std@paligo.jp",
             createdAt: now,
             profileJson: { firstName: "นักเรียน", lastName: "Audit", grade: "4" },
+          },
+          appState: "ready_student",
+          capabilities: {
+            canUseInbox: true,
+            canOpenInbox: true,
+            canCreateInvite: false,
+            canJoinPairing: true,
+            needsPairing: false,
+            hasVirtualStudent: false,
+            hasRealStudents: false,
+            isSuperAdmin: false,
           },
         })
       );
@@ -148,10 +270,14 @@ async function main() {
   };
 
   for (const route of routes) {
+    activeMockMe = route.mockMe || auditReadyContract;
     const url = `${BASE_URL}${route.path}`;
     await page.goto(url, { waitUntil: "networkidle", timeout: 25000 });
     if (typeof route.prepare === "function") {
       await route.prepare(page);
+    }
+    if (typeof route.assert === "function") {
+      await route.assert(page);
     }
     const checks = await page.evaluate((selectors) => {
       return selectors.map((selector) => {

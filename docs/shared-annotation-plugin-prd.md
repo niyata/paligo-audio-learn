@@ -4,6 +4,10 @@
 สถานะ: Draft / near-term feature source of truth
 เกี่ยวข้อง: `pali-reference-pip.html`, `workbook.html`, reader/PiP surfaces, future annotation plugin/config
 
+ฟีเจอร์เฉพาะที่แตกออกจาก PRD นี้:
+
+- [`docs/bidirectional-lexical-tooltip-prd.md`](bidirectional-lexical-tooltip-prd.md) — Bidirectional Lexical Tooltip + PAT Selection Tooltip
+
 ---
 
 ## 1. เป้าหมาย

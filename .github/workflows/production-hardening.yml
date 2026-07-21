@@ -1,0 +1,59 @@
+name: Production hardening checks
+
+on:
+  pull_request:
+    paths:
+      - "_headers"
+      - "robots.txt"
+      - ".gitignore"
+      - "exam-*.html"
+      - "workbook.html"
+      - "pali-reference-pip.html"
+      - "paligo-*.js"
+      - "workers/src/**"
+      - "scripts/**"
+      - "docs/production-hardening-5-pillars.md"
+      - "docs/deploy-production-checklist.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  production-hardening:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Whitespace guard
+        run: |
+          if [ -n "${GITHUB_BASE_REF:-}" ]; then
+            git diff --check "origin/${GITHUB_BASE_REF}...HEAD"
+          else
+            git diff --check
+          fi
+
+      - name: Syntax check critical scripts
+        run: |
+          node --check paligo-inbox-client.js
+          node --check scripts/audit-production-critical-pages.mjs
+          node --check scripts/check-deploy-discipline.mjs
+          node --check scripts/test-production-contracts.mjs
+          node --check workers/src/auth.js
+          node --check workers/src/db.js
+          node --check workers/src/http.js
+          node --check workers/src/inbox.js
+
+      - name: Backend and app-state contracts
+        run: node scripts/test-production-contracts.mjs
+
+      - name: Pre-launch deploy discipline
+        run: node scripts/check-deploy-discipline.mjs

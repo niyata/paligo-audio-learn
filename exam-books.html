@@ -805,6 +805,7 @@
         const bookAlertTitle = document.querySelector("[data-book-alert-title]");
         const bookAlertMessage = document.querySelector("[data-book-alert-message]");
         const bookAlertSecondary = document.querySelector("[data-book-alert-secondary]");
+        const inboxFeatureLink = document.querySelector("[data-paligo-inbox-feature]");
         const viewTabsBar = document.querySelector("[data-books-view-tabs]");
         const viewTabButtons = document.querySelectorAll("[data-books-view]");
         const selectionToolbar = document.querySelector("[data-books-selection-toolbar]");
@@ -1005,6 +1006,34 @@
             closeBtn.textContent = "ตกลง";
             closeBtn.onclick = () => closeBookAlert();
           }
+        };
+
+        const updateBooksAppState = async () => {
+          if (!window.PaligoInboxClient || !inboxFeatureLink) return;
+          let contract = null;
+          try {
+            contract = await PaligoInboxClient.getAppState?.({ refresh: false });
+          } catch {
+            contract = PaligoInboxClient.buildAppState?.({
+              session: PaligoInboxClient.getSession?.(),
+              inboxEnabled: PaligoInboxClient.isInboxFeatureEnabled?.(),
+            });
+          }
+          const state = contract?.appState || "guest";
+          const capabilities = contract?.capabilities || {};
+          inboxFeatureLink.dataset.appState = state;
+          if (state === "feature_disabled") {
+            inboxFeatureLink.hidden = true;
+            return;
+          }
+          inboxFeatureLink.hidden = false;
+          if (capabilities.needsPairing) {
+            inboxFeatureLink.textContent = "จับคู่ครู";
+            inboxFeatureLink.href = "exam-account.html?tab=pairing&return=/exam-books";
+            return;
+          }
+          inboxFeatureLink.textContent = capabilities.hasVirtualStudent ? "ทดลอง Inbox" : "กล่องข้อความ";
+          inboxFeatureLink.href = "exam-inbox.html";
         };
 
         const closeBookAlert = () => {
@@ -1731,7 +1760,10 @@
         }
 
         window.addEventListener("pageshow", renderBooks);
-        PaligoInboxClient.ensureAuthenticatedSession?.().catch(() => {});
+        PaligoInboxClient.ensureAuthenticatedSession?.()
+          .catch(() => null)
+          .finally(updateBooksAppState);
+        updateBooksAppState();
         renderBooks();
       })();
       PaligoSidebar.autoInit();
