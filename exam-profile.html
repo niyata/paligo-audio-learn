@@ -858,11 +858,6 @@
                   </div>
                   <span class="profile-field__hint">ค้นหาจากรายชื่อครูในระบบ หรือพิมพ์เอง</span>
                 </div>
-                <div class="profile-field profile-field--full">
-                  <label class="profile-field__label" for="deliverySelect">ช่องทางส่งตรวจ</label>
-                  <select class="profile-select profile-field__control" id="deliverySelect" name="deliveryMethod" data-field-delivery></select>
-                  <span class="profile-field__hint is-empty" aria-hidden="true"></span>
-                </div>
               </div>
             </section>
           </div>
@@ -1368,11 +1363,6 @@
               localProfile.grade || "4"
             );
             document.querySelector("[data-field-teacher-name]").value = localProfile.teacherName || "";
-            fillSelect(
-              document.querySelector("[data-field-delivery]"),
-              profile.DELIVERY_OPTIONS,
-              localProfile.deliveryMethod || "line"
-            );
           }
 
           if (user.role === "reviewer") {
@@ -1425,7 +1415,7 @@
               teacherUserId: localProfile?.teacherUserId || "",
               teacherDisplayName: localProfile?.teacherDisplayName || "",
               teacherInstitution: localProfile?.teacherInstitution || "",
-              deliveryMethod: document.querySelector("[data-field-delivery]").value,
+              deliveryMethod: profile.normalizeDeliveryMethod?.(localProfile?.deliveryMethod) || "inbox",
               displayAlias: document.querySelector("[data-field-display-alias]").value.trim(),
               avatarUrl,
             };

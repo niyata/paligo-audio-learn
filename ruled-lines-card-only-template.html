@@ -1245,14 +1245,6 @@
               <option value="reviewer">ผู้ตรวจ</option>
             </select>
           </label>
-          <label class="profile-field">
-            <span class="profile-label">ช่องทางส่งตรวจ</span>
-            <select class="profile-select" name="deliveryMethod" required>
-              <option value="line" selected>LINE Flex Message</option>
-              <option value="email">อีเมล</option>
-              <option value="facebook">Facebook inbox</option>
-            </select>
-          </label>
         </div>
         <div class="profile-wizard-actions">
           <button class="profile-skip-button" type="button" data-profile-dismiss>ตั้งค่าภายหลัง</button>
@@ -1809,14 +1801,30 @@
         const loadStudentProfile = () => {
           try {
             const raw = readRaw(profileStorageKey);
-            return raw ? JSON.parse(raw) : null;
+            const profile = raw ? JSON.parse(raw) : null;
+            if (!profile || typeof profile !== "object") return null;
+            return {
+              ...profile,
+              deliveryMethod:
+                typeof PaligoExamShared?.normalizeDeliveryMethod === "function"
+                  ? PaligoExamShared.normalizeDeliveryMethod(profile.deliveryMethod)
+                  : "inbox",
+            };
           } catch {
             return null;
           }
         };
 
         const saveStudentProfile = (profile) => {
-          writeRaw(profileStorageKey, JSON.stringify(profile));
+          const next = {
+            ...profile,
+            deliveryMethod:
+              typeof PaligoExamShared?.normalizeDeliveryMethod === "function"
+                ? PaligoExamShared.normalizeDeliveryMethod(profile?.deliveryMethod)
+                : "inbox",
+          };
+          writeRaw(profileStorageKey, JSON.stringify(next));
+          return next;
         };
 
         const loadProfileDraft = () => {
@@ -1841,7 +1849,10 @@
             grade: String(formData.get("grade") || "4"),
             teacherName: String(formData.get("teacherName") || "").trim(),
             teacherRole: String(formData.get("teacherRole") || "teacher-reviewer"),
-            deliveryMethod: String(formData.get("deliveryMethod") || "line"),
+            deliveryMethod:
+              typeof PaligoExamShared?.normalizeDeliveryMethod === "function"
+                ? PaligoExamShared.normalizeDeliveryMethod(formData.get("deliveryMethod"))
+                : "inbox",
           };
         };
 
@@ -1870,7 +1881,6 @@
           prefix: "กรุณาเลือกคำนำหน้า",
           firstName: "กรุณากรอกชื่อ",
           grade: "กรุณาเลือกชั้นประโยค ป.ธ.",
-          deliveryMethod: "กรุณาเลือกช่องทางส่งตรวจ",
         };
 
         const isProfileRadioGroup = (field) => Boolean(field?.length && field[0]?.type === "radio");
@@ -1975,7 +1985,7 @@
           if (prefix) prefix.checked = true;
           const userRole = profileForm.querySelector(`[name="userRole"][value="${profile.userRole || "student"}"]`);
           if (userRole) userRole.checked = true;
-          ["firstName", "lastName", "monasticName", "teacherName", "teacherRole", "grade", "deliveryMethod"].forEach((name) => {
+          ["firstName", "lastName", "monasticName", "teacherName", "teacherRole", "grade"].forEach((name) => {
             if (profile[name] != null && profileForm.elements[name]) profileForm.elements[name].value = profile[name];
           });
         };
@@ -3511,7 +3521,10 @@
           lineHeight: lineHeightControls[0]?.value || "30",
           page: currentPageIndex,
           profile: studentProfile ? { ...studentProfile } : null,
-          deliveryMethod: studentProfile?.deliveryMethod || "line",
+          deliveryMethod:
+              typeof PaligoExamShared?.normalizeDeliveryMethod === "function"
+                ? PaligoExamShared.normalizeDeliveryMethod(studentProfile?.deliveryMethod)
+                : "inbox",
           pickers: Array.from(examPickers).map((picker) => ({
             type: picker.dataset.examPicker,
             value: picker.dataset.value || "",
@@ -3536,7 +3549,10 @@
             grade: gradePicker?.dataset.value || studentProfile?.grade || "4",
             subject: subjectValue,
             subjectLabel,
-            deliveryMethod: studentProfile?.deliveryMethod || "line",
+            deliveryMethod:
+              typeof PaligoExamShared?.normalizeDeliveryMethod === "function"
+                ? PaligoExamShared.normalizeDeliveryMethod(studentProfile?.deliveryMethod)
+                : "inbox",
             status: existing?.status || BOOK_STATUS.draft,
             revision: nextRevision,
             createdAt: existing?.createdAt || draft.savedAt,
@@ -3611,7 +3627,10 @@
             studentRole: "student",
             teacherRole: studentProfile?.teacherRole || "teacher-reviewer",
             teacherName: studentProfile?.teacherName || "",
-            deliveryMethod: studentProfile?.deliveryMethod || "line",
+            deliveryMethod:
+              typeof PaligoExamShared?.normalizeDeliveryMethod === "function"
+                ? PaligoExamShared.normalizeDeliveryMethod(studentProfile?.deliveryMethod)
+                : "inbox",
             profile: studentProfile ? { ...studentProfile } : null,
             grade: gradePicker?.dataset.value || studentProfile?.grade || "4",
             pickers: draft.pickers,

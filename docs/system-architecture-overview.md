@@ -62,7 +62,7 @@ paligo-exam-local-owner-id-v1
 - ชื่อ/นามสกุล/ฉายา
 - ชั้น ป.ธ.
 - อาจารย์ผู้สอน/ผู้ตรวจ
-- ช่องทางส่งตรวจ
+- ส่งตรวจผ่าน Inbox (ไม่มีตัวเลือกช่องทางอื่นใน UI)
 
 Storage:
 
@@ -204,14 +204,13 @@ paligo-exam-results-v1
 
 ระยะปัจจุบัน:
 
-- export/import JSON
-- LINE Flex Message เป็นช่องทางหลักใน UI
+- **Inbox API** เป็นช่องทางส่งตรวจหลัก (ไม่มีตัวเลือกอีเมล / Facebook / LINE ใน UI)
+- export/import JSON เป็นทางสำรองออฟไลน์
 
-ระยะต่อไป:
+ระยะต่อไป (adapter เสริม — ไม่ใช่ตัวเลือกโปรไฟล์):
 
-- LIFF `shareTargetPicker` เป็นกลไกเสริมสำหรับส่ง Flex Message
-- email
-- Facebook inbox
+- LIFF `shareTargetPicker` / LINE Flex เป็นการแจ้งเตือนเสริมได้
+- ไม่ใช้ email / Facebook inbox เป็นช่องส่งสมุด
 
 ## Target Architecture
 
