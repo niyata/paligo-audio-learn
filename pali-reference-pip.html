@@ -2973,16 +2973,22 @@
       '\uF701': 'ิ',
       '\uF702': 'ี',
       '\uF703': 'ึ',
+      '\uF704': 'ื',
+      '\uF709': '์',
       '\uF70B': '้',
       '\uF70E': '์',
       '\uF70F': 'ญ',
+      '\uF710': 'ั',
       '\uF711': 'ํ',
+      '\uF712': '็',
       '\uF718': 'ุ',
       '\uF71A': 'ฺ',
     };
+    const LEGACY_PALI_GLYPH_REGEX = /[\uF700\uF701-\uF704\uF709\uF70B\uF70E-\uF712\uF718\uF71A]/g;
+    const THAI_COMBINING_MARK_REGEX = /[\u0E31\u0E34-\u0E3A\u0E47-\u0E4E]/u;
 
     function normalizePaliDisplay(value) {
-      return String(value || '').replace(/[\uF700\uF701-\uF703\uF70B\uF70E\uF70F\uF711\uF718\uF71A]/g, (char) => LEGACY_PALI_GLYPH_MAP[char] || char);
+      return String(value || '').replace(LEGACY_PALI_GLYPH_REGEX, (char) => LEGACY_PALI_GLYPH_MAP[char] || char);
     }
 
     const THAI_PDF_TEXT_FIXES = [
@@ -4173,22 +4179,47 @@
       return plainText.indexOf(selectedText);
     }
 
-    function selectedLinePayload(selection, range, line) {
-      const markerLabels = Array.from(line?.querySelectorAll?.('.pip-text-mark__info, .pip-remark__tag, .pip-exam-label') || []).map((node) => node.textContent || '');
-      const text = markerLabels
-        .reduce((value, label) => value.replace(label, ''), selection.toString())
+    function selectedTextPayload(line, range, selectedText) {
+      const initialText = normalizePaliDisplay(String(selectedText || ''))
         .replace(/\s+/g, ' ')
         .trim();
-      if (!text || !line) return null;
-      const selectionStart = selectedTextOffset(line, range, text);
+      if (!initialText || !line) return null;
+
+      const plainText = normalizePaliDisplay(line.dataset.plainText || line.textContent || '');
+      let selectionStart = selectedTextOffset(line, range, initialText);
+      if (selectionStart < 0) {
+        selectionStart = plainText.indexOf(initialText);
+      }
+      if (selectionStart < 0) {
+        return { text: initialText, selectionStart, selectionEnd: null };
+      }
+
+      let selectionEnd = selectionStart + initialText.length;
+      while (selectionEnd < plainText.length && THAI_COMBINING_MARK_REGEX.test(plainText.charAt(selectionEnd))) {
+        selectionEnd += 1;
+      }
+
       return {
-        text,
+        text: plainText.slice(selectionStart, selectionEnd),
+        selectionStart,
+        selectionEnd,
+      };
+    }
+
+    function selectedLinePayload(selection, range, line) {
+      const markerLabels = Array.from(line?.querySelectorAll?.('.pip-text-mark__info, .pip-remark__tag, .pip-exam-label') || []).map((node) => node.textContent || '');
+      const selectedText = markerLabels
+        .reduce((value, label) => value.replace(label, ''), selection.toString())
+      const payload = selectedTextPayload(line, range, selectedText);
+      if (!payload?.text || !line) return null;
+      return {
+        text: payload.text,
         lineItemId: line.dataset.itemId || selectedId,
         sourcePage: line.dataset.sourcePage || currentItem()?.sourcePage || '',
         sourcePageLabel: line.dataset.sourcePageLabel || currentItem()?.sourcePageLabel || '',
         lineNo: line.dataset.lineNo || '',
-        selectionStart,
-        selectionEnd: selectionStart >= 0 ? selectionStart + text.length : null,
+        selectionStart: payload.selectionStart,
+        selectionEnd: payload.selectionEnd,
       };
     }
 
@@ -4273,28 +4304,26 @@
 
     function showVocabTooltip(selection, range, line) {
       if (!vocabTooltip || !vocabTerm || !vocabMeta || !vocabList || !line) return;
-      const text = selection.toString().replace(/\s+/g, ' ').trim();
-      if (!text) {
+      const payload = selectedTextPayload(line, range, selection.toString());
+      if (!payload?.text) {
         hideVocabTooltip();
         return;
       }
 
-      const selectionStart = selectedTextOffset(line, range, text);
-      const selectionEnd = selectionStart >= 0 ? selectionStart + text.length : null;
       activeVocabSelection = {
-        text,
+        text: payload.text,
         lineItemId: line.dataset.itemId || selectedId,
         sourcePage: line.dataset.sourcePage || currentItem()?.sourcePage || '',
         sourcePageLabel: line.dataset.sourcePageLabel || currentItem()?.sourcePageLabel || '',
         lineNo: line.dataset.lineNo || '',
-        selectionStart,
-        selectionEnd,
+        selectionStart: payload.selectionStart,
+        selectionEnd: payload.selectionEnd,
       };
 
-      vocabTerm.textContent = `「${text}」`;
+      vocabTerm.textContent = `「${payload.text}」`;
       vocabMeta.textContent = `Mockup คำศัพท์บาลีเทียบ · หน้า ${activeVocabSelection.sourcePageLabel || activeVocabSelection.sourcePage || '-'} · บรรทัด ${activeVocabSelection.lineNo || '-'}`;
       vocabList.replaceChildren();
-      mockVocabItems(text).forEach((item) => {
+      mockVocabItems(payload.text).forEach((item) => {
         const row = document.createElement('div');
         row.className = 'pip-vocab-tooltip__item';
         const pali = document.createElement('div');
