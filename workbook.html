@@ -66,8 +66,48 @@
       }
 
       .template-shell {
+        --reference-side-size: min(42vw, 680px);
+        --reference-stack-size: 44vh;
         margin: 0 auto;
         max-width: calc(var(--paper-width) + 46px);
+      }
+
+      .template-shell.is-reference-docked {
+        display: grid;
+        gap: 14px;
+        max-width: min(1800px, calc(100vw - 32px));
+      }
+
+      .template-shell.is-reference-docked > * {
+        grid-column: 1 / -1;
+      }
+
+      .template-shell.is-reference-side {
+        grid-template-columns: minmax(340px, var(--reference-side-size)) 10px minmax(0, 1fr);
+      }
+
+      .template-shell.is-reference-side .pali-reference-pip {
+        grid-column: 1;
+      }
+
+      .template-shell.is-reference-side .pali-reference-splitter {
+        grid-column: 2;
+      }
+
+      .template-shell.is-reference-side .answer-card {
+        grid-column: 3;
+      }
+
+      .template-shell.is-reference-stack {
+        grid-template-rows: auto 10px auto;
+      }
+
+      .template-shell.is-reference-stack .pali-reference-pip {
+        grid-row: auto;
+      }
+
+      .template-shell.is-reference-stack .pali-reference-splitter {
+        grid-row: auto;
       }
 
       .template-controls,
@@ -376,6 +416,24 @@
         z-index: 120;
       }
 
+      .template-shell.is-reference-docked .pali-reference-pip {
+        height: min(78vh, 720px);
+        inset: auto;
+        min-height: 360px;
+        position: sticky;
+        resize: none;
+        top: 12px;
+        width: auto;
+        z-index: 4;
+      }
+
+      .template-shell.is-reference-stack .pali-reference-pip {
+        height: var(--reference-stack-size);
+        min-height: 320px;
+        position: relative;
+        top: 0;
+      }
+
       .pali-reference-pip[hidden] {
         display: none;
       }
@@ -384,6 +442,11 @@
         height: auto !important;
         min-height: 0;
         resize: none;
+      }
+
+      .template-shell.is-reference-docked .pali-reference-pip.is-minimized {
+        position: relative;
+        top: 0;
       }
 
       .pali-reference-pip__bar {
@@ -413,8 +476,36 @@
       }
 
       .pali-reference-pip__actions {
+        align-items: center;
         display: flex;
         gap: 6px;
+      }
+
+      .pali-reference-mode {
+        border: 1px solid rgba(31, 45, 137, 0.18);
+        border-radius: 7px;
+        display: inline-flex;
+        gap: 2px;
+        padding: 2px;
+      }
+
+      .pali-reference-mode__button {
+        appearance: none;
+        background: transparent;
+        border: 0;
+        border-radius: 5px;
+        color: var(--exam-blue);
+        cursor: pointer;
+        font: inherit;
+        font-size: 0.74rem;
+        font-weight: 900;
+        min-height: 26px;
+        padding: 3px 7px;
+      }
+
+      .pali-reference-mode__button[aria-pressed="true"] {
+        background: rgba(31, 45, 137, 0.12);
+        color: #1f2d89;
       }
 
       .pali-reference-pip__action {
@@ -449,6 +540,43 @@
         display: block;
         height: 100%;
         width: 100%;
+      }
+
+      .pali-reference-splitter {
+        align-self: stretch;
+        appearance: none;
+        background: rgba(31, 45, 137, 0.08);
+        border: 1px solid rgba(31, 45, 137, 0.12);
+        border-radius: 999px;
+        cursor: col-resize;
+        display: none;
+        min-height: 48px;
+        padding: 0;
+        touch-action: none;
+      }
+
+      .template-shell.is-reference-docked .pali-reference-splitter {
+        display: block;
+      }
+
+      .template-shell.is-reference-stack .pali-reference-splitter {
+        cursor: row-resize;
+        min-height: 10px;
+      }
+
+      .pali-reference-splitter::before {
+        background: rgba(31, 45, 137, 0.36);
+        border-radius: 999px;
+        content: "";
+        display: block;
+        height: 46px;
+        margin: auto;
+        width: 3px;
+      }
+
+      .template-shell.is-reference-stack .pali-reference-splitter::before {
+        height: 3px;
+        width: 64px;
       }
 
       a.save-button {
@@ -1212,8 +1340,28 @@
           min-width: 0;
         }
 
+        .template-shell.is-reference-docked {
+          display: block;
+          max-width: calc(var(--paper-width) + 46px);
+        }
+
+        .template-shell.is-reference-docked .pali-reference-pip {
+          height: min(58vh, 520px);
+          margin-bottom: 12px;
+          position: relative;
+          top: 0;
+        }
+
+        .template-shell.is-reference-docked .pali-reference-splitter {
+          display: none;
+        }
+
         .pali-reference-pip__title {
           font-size: 0.82rem;
+        }
+
+        .pali-reference-mode {
+          display: none;
         }
       }
 
@@ -1511,6 +1659,11 @@
         <div class="pali-reference-pip__bar" data-pali-reference-drag>
           <div class="pali-reference-pip__title" data-pali-reference-title>มังคลัตถทีปนีบาลี (ปฐโม ภาโค) · ดูโจทย์ควบคู่กับสมุด</div>
           <div class="pali-reference-pip__actions">
+            <div class="pali-reference-mode" role="group" aria-label="โหมดเปิดตำรา">
+              <button class="pali-reference-mode__button" type="button" data-pali-reference-mode="float" aria-pressed="true">ลอย</button>
+              <button class="pali-reference-mode__button" type="button" data-pali-reference-mode="side" aria-pressed="false">ซ้ายขวา</button>
+              <button class="pali-reference-mode__button" type="button" data-pali-reference-mode="stack" aria-pressed="false">บนล่าง</button>
+            </div>
             <a
               class="pali-reference-pip__action"
               data-pali-reference-full
@@ -1532,6 +1685,13 @@
           ></iframe>
         </div>
       </aside>
+      <button
+        class="pali-reference-splitter"
+        type="button"
+        data-pali-reference-resize
+        aria-label="ลากเพื่อปรับขนาดแผงตำรา"
+        hidden
+      ></button>
 
       <section class="answer-card" aria-label="การ์ดพื้นที่เขียนคำตอบ">
         <div class="exam-page-stack">
@@ -1922,6 +2082,7 @@
         const clearBottomLineButton = document.querySelector("[data-clear-bottom-line]");
         const saveStatus = document.querySelector("[data-save-status]");
         const toastNotice = document.querySelector("[data-toast-notice]");
+        const templateShell = document.querySelector(".template-shell");
         const answerCard = document.querySelector(".answer-card");
         const annotationToggle = document.querySelector("[data-annotation-toggle]");
         const profileForm = document.querySelector("[data-profile-form]");
@@ -1935,6 +2096,8 @@
         const paliReferenceTitle = document.querySelector("[data-pali-reference-title]");
         const paliReferenceFrame = document.querySelector("[data-pali-reference-frame]");
         const paliReferenceFullLink = document.querySelector("[data-pali-reference-full]");
+        const paliReferenceModeButtons = document.querySelectorAll("[data-pali-reference-mode]");
+        const paliReferenceResizeHandle = document.querySelector("[data-pali-reference-resize]");
         const thaiDigits = new Map([
           ["0", "๐"],
           ["1", "๑"],
@@ -2230,6 +2393,7 @@
         let isApplyingSpill = false;
         let toastTimer;
         let activePaliReferenceDrag = null;
+        let activePaliReferenceResize = null;
         let activeReferenceContext = null;
         let ghostAnswerTokens = [];
         let ghostSuggestions = [];
@@ -2251,6 +2415,9 @@
         const plaiWhisperToggle = document.querySelector("[data-plai-whisper-toggle]");
 
         const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+        const referenceWorkspaceModes = new Set(["float", "side", "stack"]);
+        const normalizeReferenceWorkspaceMode = (mode) =>
+          referenceWorkspaceModes.has(mode) ? mode : "float";
 
         const loadPaliReferenceState = () => {
           try {
@@ -2261,17 +2428,55 @@
           }
         };
 
+        const getReferenceWorkspaceMode = () => {
+          const state = loadPaliReferenceState();
+          const mode = normalizeReferenceWorkspaceMode(state?.mode);
+          if (mode === "side" && window.innerWidth < 860) return "stack";
+          return mode;
+        };
+
+        const setReferenceModeButtonState = (mode) => {
+          paliReferenceModeButtons.forEach((button) => {
+            const pressed = button.dataset.paliReferenceMode === mode;
+            button.setAttribute("aria-pressed", pressed ? "true" : "false");
+          });
+        };
+
+        const applyReferenceWorkspaceMode = (mode) => {
+          if (!templateShell || !paliReferencePip) return;
+          const normalizedMode = normalizeReferenceWorkspaceMode(mode);
+          templateShell.classList.toggle("is-reference-docked", normalizedMode !== "float");
+          templateShell.classList.toggle("is-reference-side", normalizedMode === "side");
+          templateShell.classList.toggle("is-reference-stack", normalizedMode === "stack");
+          paliReferencePip.dataset.referenceMode = normalizedMode;
+          if (paliReferenceResizeHandle) {
+            paliReferenceResizeHandle.hidden = normalizedMode === "float" || paliReferencePip.hidden;
+          }
+          setReferenceModeButtonState(normalizedMode);
+        };
+
+        const clearReferenceWorkspaceLayout = () => {
+          templateShell?.classList.remove("is-reference-docked", "is-reference-side", "is-reference-stack");
+          if (paliReferenceResizeHandle) paliReferenceResizeHandle.hidden = true;
+        };
+
         const savePaliReferenceState = () => {
           if (!paliReferencePip || paliReferencePip.hidden) return;
           const rect = paliReferencePip.getBoundingClientRect();
+          const existingState = loadPaliReferenceState() || {};
+          const mode = normalizeReferenceWorkspaceMode(paliReferencePip.dataset.referenceMode || existingState.mode);
           try {
             localStorage.setItem(
               paliReferencePipStorageKey,
               JSON.stringify({
-                left: Math.round(rect.left),
-                top: Math.round(rect.top),
-                width: Math.round(rect.width),
-                height: Math.round(rect.height),
+                ...existingState,
+                mode,
+                left: mode === "float" ? Math.round(rect.left) : existingState.left,
+                top: mode === "float" ? Math.round(rect.top) : existingState.top,
+                width: mode === "float" ? Math.round(rect.width) : existingState.width,
+                height: mode === "float" ? Math.round(rect.height) : existingState.height,
+                sideSize: parseFloat(templateShell?.style.getPropertyValue("--reference-side-size")) || existingState.sideSize || 42,
+                stackSize: parseFloat(templateShell?.style.getPropertyValue("--reference-stack-size")) || existingState.stackSize || 44,
                 minimized: paliReferencePip.classList.contains("is-minimized"),
               })
             );
@@ -2283,8 +2488,29 @@
         const applyPaliReferenceState = () => {
           if (!paliReferencePip) return;
           const state = loadPaliReferenceState();
+          const mode = getReferenceWorkspaceMode();
+          const sideSize = clamp(Number(state?.sideSize) || 42, 24, 68);
+          const stackSize = clamp(Number(state?.stackSize) || 44, 28, 72);
+          templateShell?.style.setProperty("--reference-side-size", `${sideSize}%`);
+          templateShell?.style.setProperty("--reference-stack-size", `${stackSize}vh`);
+          applyReferenceWorkspaceMode(mode);
+
           const viewportWidth = window.innerWidth;
           const viewportHeight = window.innerHeight;
+          paliReferencePip.classList.toggle("is-minimized", Boolean(state?.minimized));
+          if (mode !== "float") {
+            paliReferencePip.style.left = "";
+            paliReferencePip.style.top = "";
+            paliReferencePip.style.right = "";
+            paliReferencePip.style.bottom = "";
+            paliReferencePip.style.width = "";
+            paliReferencePip.style.height = "";
+            if (minimizePaliReferenceButton) {
+              setExamButtonLabel(minimizePaliReferenceButton, state?.minimized ? "+" : "", state?.minimized ? "expand" : "minus");
+              minimizePaliReferenceButton.setAttribute("aria-label", state?.minimized ? "ขยายหน้าต่าง" : "ย่อหน้าต่าง");
+            }
+            return;
+          }
           const width = clamp(state?.width || Math.min(620, Math.round(viewportWidth * 0.46)), 320, viewportWidth - 24);
           const height = clamp(state?.height || Math.min(620, Math.round(viewportHeight * 0.72)), 260, viewportHeight - 24);
           const left = clamp(state?.left ?? viewportWidth - width - 24, 12, Math.max(12, viewportWidth - width - 12));
@@ -2297,7 +2523,6 @@
           paliReferencePip.style.bottom = "auto";
           paliReferencePip.style.width = `${width}px`;
           if (!state?.minimized) paliReferencePip.style.height = `${height}px`;
-          paliReferencePip.classList.toggle("is-minimized", Boolean(state?.minimized));
           if (minimizePaliReferenceButton) {
             setExamButtonLabel(minimizePaliReferenceButton, state?.minimized ? "+" : "", state?.minimized ? "expand" : "minus");
             minimizePaliReferenceButton.setAttribute("aria-label", state?.minimized ? "ขยายหน้าต่าง" : "ย่อหน้าต่าง");
@@ -2354,6 +2579,7 @@
           if (!paliReferencePip) return;
           savePaliReferenceState();
           paliReferencePip.hidden = true;
+          clearReferenceWorkspaceLayout();
           openPaliReferenceButton?.setAttribute("aria-expanded", "false");
           openPaliReferenceButton?.classList.remove("is-active");
           focusWritingEditorIfReady();
@@ -2372,6 +2598,7 @@
 
         const movePaliReferencePip = (clientX, clientY) => {
           if (!paliReferencePip || !activePaliReferenceDrag) return;
+          if (normalizeReferenceWorkspaceMode(paliReferencePip.dataset.referenceMode) !== "float") return;
           const rect = paliReferencePip.getBoundingClientRect();
           const left = clamp(clientX - activePaliReferenceDrag.offsetX, 8, Math.max(8, window.innerWidth - rect.width - 8));
           const maxTop = paliReferencePip.classList.contains("is-minimized")
@@ -2382,6 +2609,43 @@
           paliReferencePip.style.top = `${top}px`;
           paliReferencePip.style.right = "auto";
           paliReferencePip.style.bottom = "auto";
+        };
+
+        const setReferenceWorkspaceMode = (mode) => {
+          if (!paliReferencePip) return;
+          const nextMode = normalizeReferenceWorkspaceMode(mode);
+          const previousState = loadPaliReferenceState() || {};
+          const rect = paliReferencePip.getBoundingClientRect();
+          try {
+            localStorage.setItem(
+              paliReferencePipStorageKey,
+              JSON.stringify({
+                ...previousState,
+                mode: nextMode,
+                left: Math.round(rect.left),
+                top: Math.round(rect.top),
+                width: Math.round(rect.width),
+                height: Math.round(rect.height),
+                minimized: false,
+              })
+            );
+          } catch {
+            /* ignore quota / privacy mode */
+          }
+          paliReferencePip.classList.remove("is-minimized");
+          applyPaliReferenceState();
+        };
+
+        const resizeReferenceWorkspace = (clientX, clientY) => {
+          if (!activePaliReferenceResize || !templateShell) return;
+          const shellRect = templateShell.getBoundingClientRect();
+          if (activePaliReferenceResize.mode === "side") {
+            const rawPercent = ((clientX - shellRect.left) / Math.max(1, shellRect.width)) * 100;
+            templateShell.style.setProperty("--reference-side-size", `${clamp(rawPercent, 24, 68)}%`);
+          } else if (activePaliReferenceResize.mode === "stack") {
+            const rawVh = (clientY / Math.max(1, window.innerHeight)) * 100;
+            templateShell.style.setProperty("--reference-stack-size", `${clamp(rawVh, 28, 72)}vh`);
+          }
         };
 
         const setSaveStatus = (message) => {
@@ -4926,10 +5190,17 @@
 
         closePaliReferenceButton?.addEventListener("click", closePaliReferencePip);
         minimizePaliReferenceButton?.addEventListener("click", togglePaliReferenceMinimized);
+        paliReferenceModeButtons.forEach((button) => {
+          button.addEventListener("click", () => {
+            setReferenceWorkspaceMode(button.dataset.paliReferenceMode);
+            if (paliReferencePip?.hidden) openPaliReferencePip();
+          });
+        });
 
         paliReferenceDragHandle?.addEventListener("pointerdown", (event) => {
           if (event.target?.closest?.("button, a")) return;
           if (!paliReferencePip) return;
+          if (normalizeReferenceWorkspaceMode(paliReferencePip.dataset.referenceMode) !== "float") return;
 
           const rect = paliReferencePip.getBoundingClientRect();
           activePaliReferenceDrag = {
@@ -4954,6 +5225,24 @@
 
         paliReferenceDragHandle?.addEventListener("pointerup", endPaliReferenceDrag);
         paliReferenceDragHandle?.addEventListener("pointercancel", endPaliReferenceDrag);
+        paliReferenceResizeHandle?.addEventListener("pointerdown", (event) => {
+          const mode = normalizeReferenceWorkspaceMode(paliReferencePip?.dataset.referenceMode);
+          if (mode === "float") return;
+          activePaliReferenceResize = { pointerId: event.pointerId, mode };
+          paliReferenceResizeHandle.setPointerCapture?.(event.pointerId);
+          event.preventDefault();
+        });
+        paliReferenceResizeHandle?.addEventListener("pointermove", (event) => {
+          if (!activePaliReferenceResize || activePaliReferenceResize.pointerId !== event.pointerId) return;
+          resizeReferenceWorkspace(event.clientX, event.clientY);
+        });
+        const endPaliReferenceResize = (event) => {
+          if (!activePaliReferenceResize || activePaliReferenceResize.pointerId !== event.pointerId) return;
+          activePaliReferenceResize = null;
+          savePaliReferenceState();
+        };
+        paliReferenceResizeHandle?.addEventListener("pointerup", endPaliReferenceResize);
+        paliReferenceResizeHandle?.addEventListener("pointercancel", endPaliReferenceResize);
         window.addEventListener("resize", () => {
           if (!paliReferencePip || paliReferencePip.hidden) return;
           applyPaliReferenceState();

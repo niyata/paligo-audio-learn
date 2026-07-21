@@ -4,6 +4,8 @@
 สถานะ: Draft / near-term feature source of truth
 เกี่ยวข้อง: `pali-reference-pip.html`, `workbook.html`, reader/PiP surfaces, future annotation plugin/config
 
+ดูเพิ่ม: `docs/reference-workspace-modes-prd.md` สำหรับโหมดเปิดตำราแบบลอย/ฝังข้าง/ฝังบนล่าง โดยต้องใช้ annotation core เดียวกัน
+
 ฟีเจอร์เฉพาะที่แตกออกจาก PRD นี้:
 
 - [`docs/bidirectional-lexical-tooltip-prd.md`](bidirectional-lexical-tooltip-prd.md) — Bidirectional Lexical Tooltip + PAT Selection Tooltip
