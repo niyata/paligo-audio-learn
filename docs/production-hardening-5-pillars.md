@@ -11,7 +11,7 @@ Paligo from late prototype toward production grade.
 
 | Pillar | Status | Current evidence | Next closure work |
 | --- | --- | --- | --- |
-| 1. Auth / Session / Pairing State | In Progress | `workers/src/auth.js` returns `/v1/me`; `paligo-inbox-client.js` stores sessions; UI still has page-specific gates | Add shared `appState`/`capabilities` contract in backend and client; update inbox/account/books gates to read it |
+| 1. Auth / Session / Pairing State | In Progress | Backend and client now expose `appState`/`capabilities`; `exam-inbox.html` gate reads the shared contract and avoids duplicate login CTAs | Extend the same gate pattern to `exam-books.html`, `workbook.html`, `exam-account.html`, and profile surfaces |
 | 2. First-Run Onboarding Fallbacks | In Progress | Reviewer virtual trial student exists in `workers/src/db.js`; student no-pairing path still needs stronger CTA state | Add explicit virtual metadata/capabilities for reviewer trial and student no-pairing; ensure UI never shows login CTA when logged in |
 | 3. Visual Smoke Regression | In Progress | `scripts/audit-production-critical-pages.mjs` covers critical page selectors and screenshots | Track the script, run it before deploy, and keep generated screenshots out of routine commits unless requested |
 | 4. Backend Contract And Error Codes | Not Started | Existing API returns lowercase `error` values such as `not_authenticated` and `no_pairing` | Normalize canonical error codes server/client-side while keeping legacy values compatible |
@@ -51,6 +51,8 @@ Backend source:
 
 - `GET /v1/me`
 - `PATCH /v1/me`
+- `POST /v1/auth/register`
+- `POST /v1/auth/login`
 
 Backend responses keep existing fields and add:
 
@@ -67,6 +69,14 @@ Backend responses keep existing fields and add:
   }
 }
 ```
+
+Implementation notes:
+
+- `workers/src/db.js` owns `buildAppState(user, pairingContext)`.
+- `workers/src/auth.js` returns the contract from register/login/me/profile patch.
+- `paligo-inbox-client.js` exposes `buildAppState(...)` and `getAppState(...)`.
+- `exam-inbox.html` uses the contract to distinguish `guest` from logged-in
+  no-pairing users, so a signed-in user should not be shown a redundant login CTA.
 
 ## 2. First-Run Onboarding Fallbacks
 
