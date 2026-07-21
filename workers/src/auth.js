@@ -12,7 +12,7 @@ import {
   normalizeEmail,
   verifyPin,
 } from "./crypto.js";
-import { createSession, deleteSession, getPairingContext, getUserByEmail, getUserByIdWithSecret, getUserBySession, mapUser, updateUserPin, updateUserProfile } from "./db.js";
+import { buildAppState, createSession, deleteSession, getPairingContext, getUserByEmail, getUserByIdWithSecret, getUserBySession, mapUser, updateUserPin, updateUserProfile } from "./db.js";
 import { ensureSuperAdminFlag, SUPER_ADMIN_EMAILS } from "./platform.js";
 import { errorResponse, jsonResponse, parseJsonBody, readBearerToken } from "./http.js";
 import { mergeReviewAvailabilityIntoProfile } from "./review-capacity.js";
@@ -76,6 +76,8 @@ export async function handleRegister(request, env) {
 
   const session = await createSession(env.DB, userId);
   const user = await getUserBySession(env.DB, session.sessionId);
+  const pairingContext = await getPairingContext(env.DB, user);
+  const appContract = buildAppState(user, pairingContext);
 
   return jsonResponse(
     request,
@@ -83,6 +85,8 @@ export async function handleRegister(request, env) {
       user,
       sessionToken: session.sessionId,
       expiresAt: session.expiresAt,
+      ...pairingContext,
+      ...appContract,
     },
     201
   );
@@ -122,11 +126,15 @@ export async function handleLogin(request, env) {
 
   const session = await createSession(env.DB, row.id);
   const user = mapUser(row);
+  const pairingContext = await getPairingContext(env.DB, user);
+  const appContract = buildAppState(user, pairingContext);
 
   return jsonResponse(request, {
     user,
     sessionToken: session.sessionId,
     expiresAt: session.expiresAt,
+    ...pairingContext,
+    ...appContract,
   });
 }
 
@@ -146,9 +154,11 @@ export async function handleMe(request, env) {
   }
 
   const pairingContext = await getPairingContext(env.DB, user);
+  const appContract = buildAppState(user, pairingContext);
   return jsonResponse(request, {
     user,
     ...pairingContext,
+    ...appContract,
   });
 }
 
@@ -198,9 +208,11 @@ export async function handlePatchMe(request, env) {
 
   const updated = await updateUserProfile(env.DB, user.id, patch);
   const pairingContext = await getPairingContext(env.DB, updated);
+  const appContract = buildAppState(updated, pairingContext);
   return jsonResponse(request, {
     user: updated,
     ...pairingContext,
+    ...appContract,
   });
 }
 
