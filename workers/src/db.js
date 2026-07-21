@@ -21,6 +21,40 @@ function buildVirtualStudentContext(user) {
   };
 }
 
+export function buildAppState(user, pairingContext = {}, options = {}) {
+  const inboxEnabled = options.inboxEnabled !== false;
+  const isSuperAdmin = Boolean(user?.isSuperAdmin);
+  const role = user?.role || null;
+  const hasPairing = Boolean(pairingContext?.pairing);
+  const students = Array.isArray(pairingContext?.students) ? pairingContext.students : [];
+  const realStudents = students.filter((student) => !student?.isVirtual);
+  const hasVirtualStudent = students.some((student) => Boolean(student?.isVirtual));
+  const hasRealStudents = realStudents.length > 0;
+
+  let appState = "guest";
+  if (user) {
+    if (!inboxEnabled) appState = "feature_disabled";
+    else if (isSuperAdmin) appState = "super_admin";
+    else if (role === "student") appState = hasPairing ? "ready_student" : "logged_in_no_pairing";
+    else if (role === "reviewer") appState = hasRealStudents ? "ready_reviewer" : "ready_reviewer_trial";
+    else appState = "logged_in_no_pairing";
+  }
+
+  return {
+    appState,
+    capabilities: {
+      canUseInbox: Boolean(user && inboxEnabled),
+      canOpenInbox: Boolean(user && inboxEnabled && (role === "reviewer" || hasPairing || isSuperAdmin)),
+      canCreateInvite: Boolean(user && inboxEnabled && role === "reviewer"),
+      canJoinPairing: Boolean(user && inboxEnabled && role === "student"),
+      needsPairing: Boolean(user && inboxEnabled && role === "student" && !hasPairing),
+      hasVirtualStudent,
+      hasRealStudents,
+      isSuperAdmin,
+    },
+  };
+}
+
 export async function createSession(db, userId) {
   const sessionId = createId();
   const expiresAt = new Date(Date.now() + SESSION_DAYS * 24 * 60 * 60 * 1000).toISOString();

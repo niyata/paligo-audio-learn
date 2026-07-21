@@ -50,7 +50,7 @@
       localPorts: DEV_PORTS.slice(),
       localCommand: "cd workers && npm run dev",
       localHint: `รัน Workers dev แล้วเปิดหน้านี้ใหม่ หรือใช้ ?apiPort=8788 ถ้า port เปลี่ยน`,
-      cloudHint: `ตรวจ Workers route/CORS ที่ ${base} และ DNS api.paligo.jp`,
+      cloudHint: `ตรวจ Workers CORS (ต้องมี PATCH) · route · DNS ที่ ${base}`,
     };
   }
 
@@ -73,6 +73,8 @@
       sessionToken: payload.sessionToken,
       expiresAt: payload.expiresAt,
       user: payload.user || null,
+      appState: payload.appState || null,
+      capabilities: payload.capabilities || null,
     };
     global.localStorage?.setItem(SESSION_KEY, JSON.stringify(record));
     return record;
@@ -105,6 +107,43 @@
     return true;
   }
 
+  function buildAppState(source = {}) {
+    const session = source.session || null;
+    const user = source.user || session?.user || null;
+    const inboxEnabled = source.inboxEnabled ?? isInboxFeatureEnabled();
+    const pairing = source.pairing ?? null;
+    const students = Array.isArray(source.students) ? source.students : [];
+    const hasPairing = Boolean(pairing);
+    const hasVirtualStudent = students.some((student) => Boolean(student?.isVirtual));
+    const hasRealStudents = students.some((student) => !student?.isVirtual);
+    const isSuperAdmin = Boolean(user?.isSuperAdmin);
+    const role = user?.role || null;
+
+    let appState = "guest";
+    if (source.forceOffline && user) appState = "logged_in_offline";
+    else if (user) {
+      if (!inboxEnabled) appState = "feature_disabled";
+      else if (isSuperAdmin) appState = "super_admin";
+      else if (role === "student") appState = hasPairing ? "ready_student" : "logged_in_no_pairing";
+      else if (role === "reviewer") appState = hasRealStudents ? "ready_reviewer" : "ready_reviewer_trial";
+      else appState = "logged_in_no_pairing";
+    }
+
+    return {
+      appState,
+      capabilities: {
+        canUseInbox: Boolean(user && inboxEnabled),
+        canOpenInbox: Boolean(user && inboxEnabled && (role === "reviewer" || hasPairing || isSuperAdmin || source.forceOffline)),
+        canCreateInvite: Boolean(user && inboxEnabled && role === "reviewer"),
+        canJoinPairing: Boolean(user && inboxEnabled && role === "student"),
+        needsPairing: Boolean(user && inboxEnabled && role === "student" && !hasPairing),
+        hasVirtualStudent,
+        hasRealStudents,
+        isSuperAdmin,
+      },
+    };
+  }
+
   /**
    * ยืนยัน session กับ API และอัปเดต user ใน localStorage
    * @returns {Promise<object|null>}
@@ -116,10 +155,12 @@
     try {
       const payload = await safeRequest("/me", { method: "GET" });
       if (payload?.user) {
+        const appContract = buildAppState(payload);
         setSession({
           sessionToken: session.sessionToken,
           expiresAt: session.expiresAt,
           user: payload.user,
+          ...appContract,
         });
       }
       return getSession();
@@ -128,7 +169,8 @@
         clearSession();
         return null;
       }
-      return session;
+      const offlineContract = buildAppState({ session, forceOffline: true });
+      return { ...session, ...offlineContract };
     }
   }
 
@@ -171,7 +213,7 @@
     const diag = getApiDiagnostics();
     const message = diag.isLocal
       ? `ไม่พบ Inbox API บน localhost (${DEV_PORTS.join(", ")}) — รัน: ${diag.localCommand}`
-      : `ไม่ติด Inbox API ที่ ${diag.apiBase} — ตรวจ Workers route/CORS และ DNS`;
+      : `ไม่ติด Inbox API ที่ ${diag.apiBase} — ตรวจ Workers CORS (ต้องอนุญาต PATCH) / route / DNS`;
     const error = new Error(message);
     error.diagnostics = diag;
     throw error;
@@ -235,7 +277,7 @@
       const diag = getApiDiagnostics();
       const hint = diag.isLocal
         ? `ไม่ติด Inbox API ที่ ${diag.apiBase} — รัน: ${diag.localCommand}`
-        : `ไม่ติด Inbox API ที่ ${diag.apiBase} — ตรวจ Workers route/CORS และ DNS api.paligo.jp`;
+        : `ไม่ติด Inbox API ที่ ${diag.apiBase} — ตรวจ Workers CORS (ต้องอนุญาต PATCH) / route / DNS api.paligo.jp`;
       const wrapped = new Error(hint);
       wrapped.cause = error;
       wrapped.diagnostics = diag;
@@ -296,7 +338,52 @@
   }
 
   async function getMe() {
-    return safeRequest("/me", { method: "GET" });
+    const payload = await safeRequest("/me", { method: "GET" });
+    if (payload?.user) {
+      const session = getSession();
+      if (session?.sessionToken) {
+        setSession({
+          sessionToken: session.sessionToken,
+          expiresAt: session.expiresAt,
+          user: payload.user,
+          appState: payload.appState,
+          capabilities: payload.capabilities,
+        });
+      }
+    }
+    return payload;
+  }
+
+  async function getAppState({ refresh = true } = {}) {
+    const session = getSession();
+    if (!session?.sessionToken) return buildAppState({ inboxEnabled: isInboxFeatureEnabled() });
+    if (!refresh) {
+      return {
+        ...buildAppState({ session, inboxEnabled: isInboxFeatureEnabled() }),
+        appState: session.appState || buildAppState({ session, inboxEnabled: isInboxFeatureEnabled() }).appState,
+        capabilities: session.capabilities || buildAppState({ session, inboxEnabled: isInboxFeatureEnabled() }).capabilities,
+      };
+    }
+    try {
+      const payload = await getMe();
+      return {
+        user: payload.user,
+        pairing: payload.pairing || null,
+        students: payload.students || [],
+        appState: payload.appState || buildAppState(payload).appState,
+        capabilities: payload.capabilities || buildAppState(payload).capabilities,
+      };
+    } catch (error) {
+      if (error.status === 401) {
+        clearSession();
+        return buildAppState({ inboxEnabled: isInboxFeatureEnabled() });
+      }
+      return {
+        ...buildAppState({ session, forceOffline: true }),
+        offline: true,
+        diagnostics: error.diagnostics || getApiDiagnostics(),
+      };
+    }
   }
 
   async function updateMe({ displayName, email, profileJson } = {}) {
@@ -312,6 +399,8 @@
           sessionToken: session.sessionToken,
           expiresAt: session.expiresAt,
           user: payload.user,
+          appState: payload.appState,
+          capabilities: payload.capabilities,
         });
       }
     }
@@ -398,6 +487,8 @@
     getInboxRole,
     isInboxFeatureEnabled,
     ensureAuthenticatedSession,
+    buildAppState,
+    getAppState,
     buildUrl,
     discoverApiPort,
     ensureApiReady,

@@ -114,8 +114,8 @@
         <h2 class="paligo-book-bar__title">กล่องข้อความ</h2>
         <p class="paligo-local-note" data-gate-message>กำลังตรวจสอบบัญชี…</p>
         <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px">
-          <a class="paligo-btn is-primary" href="exam-account.html?return=/exam-inbox">เข้าสู่ระบบ</a>
-          <a class="paligo-btn" href="exam-books.html">สมุดข้อสอบ</a>
+          <a class="paligo-btn is-primary" href="exam-account.html?return=/exam-inbox" data-gate-primary>เข้าสู่ระบบ</a>
+          <a class="paligo-btn" href="exam-books.html" data-gate-secondary>สมุดข้อสอบ</a>
         </div>
       </div>
     </section>
@@ -295,6 +295,8 @@
         const shell = document.querySelector("[data-inbox-shell]");
         const gate = document.querySelector("[data-inbox-gate]");
         const gateMessage = document.querySelector("[data-gate-message]");
+        const gatePrimary = document.querySelector("[data-gate-primary]");
+        const gateSecondary = document.querySelector("[data-gate-secondary]");
         const threadEl = document.querySelector("[data-chat-thread]");
         const peerName = document.querySelector("[data-chat-peer-name]");
         const peerMeta = document.querySelector("[data-chat-peer-meta]");
@@ -1191,10 +1193,20 @@
           paintThread();
         };
 
-        const showGate = (message) => {
+        const showGate = (message, options = {}) => {
           shell.hidden = true;
           gate.hidden = false;
           if (gateMessage) gateMessage.textContent = message;
+          if (gatePrimary) {
+            gatePrimary.textContent = options.primaryLabel || "เข้าสู่ระบบ";
+            gatePrimary.href = options.primaryHref || "exam-account.html?return=/exam-inbox";
+            gatePrimary.hidden = options.primaryHidden === true;
+          }
+          if (gateSecondary) {
+            gateSecondary.textContent = options.secondaryLabel || "สมุดข้อสอบ";
+            gateSecondary.href = options.secondaryHref || "exam-books.html";
+            gateSecondary.hidden = options.secondaryHidden === true;
+          }
         };
 
         const showChat = () => {
@@ -1817,8 +1829,29 @@
             pairingContext = loadCachedPairingContext(session.user.id);
           }
 
-          if (role === "student" && !pairingContext?.pairing) {
-            showGate("ยังไม่ได้จับคู่ครู — ไปที่บัญชี แท็บจับคู่");
+          const appState = PaligoInboxClient.buildAppState({
+            session,
+            user: pairingContext?.user || session.user,
+            pairing: pairingContext?.pairing || null,
+            students: pairingContext?.students || [],
+          });
+
+          if (appState.appState === "feature_disabled") {
+            showGate("กล่องข้อความปิดชั่วคราว", {
+              primaryLabel: "สมุดข้อสอบ",
+              primaryHref: "exam-books.html",
+              secondaryHidden: true,
+            });
+            return;
+          }
+
+          if (appState.capabilities?.needsPairing && !appState.capabilities?.canOpenInbox) {
+            showGate("เข้าสู่ระบบแล้ว — ยังไม่ได้จับคู่ครู ไปที่บัญชี แท็บจับคู่", {
+              primaryLabel: "ไปจับคู่ครู",
+              primaryHref: "exam-account.html?tab=pairing&return=/exam-inbox",
+              secondaryLabel: "สมุดข้อสอบ",
+              secondaryHref: "exam-books.html",
+            });
             return;
           }
 
