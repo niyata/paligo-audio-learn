@@ -273,9 +273,22 @@
       .sort((a, b) => new Date(b.submittedAt || 0) - new Date(a.submittedAt || 0))[0] || null;
   }
 
+  /** Inbox is the only delivery channel; map legacy line/email/facebook values. */
+  function normalizeDeliveryMethod(value) {
+    if (typeof window !== "undefined" && window.PaligoProfile?.normalizeDeliveryMethod) {
+      return window.PaligoProfile.normalizeDeliveryMethod(value);
+    }
+    return "inbox";
+  }
+
   function getStudentProfile() {
     try {
-      return JSON.parse(readRaw(KEYS.studentProfile) || "null");
+      const profile = JSON.parse(readRaw(KEYS.studentProfile) || "null");
+      if (!profile || typeof profile !== "object") return null;
+      return {
+        ...profile,
+        deliveryMethod: normalizeDeliveryMethod(profile.deliveryMethod),
+      };
     } catch {
       return null;
     }
@@ -307,7 +320,7 @@
       teacherUserId: String(profile?.teacherUserId || "").trim(),
       teacherDisplayName: String(profile?.teacherDisplayName || "").trim(),
       teacherInstitution: String(profile?.teacherInstitution || "").trim(),
-      deliveryMethod: profile?.deliveryMethod || "line",
+      deliveryMethod: normalizeDeliveryMethod(profile?.deliveryMethod),
       displayAlias: String(profile?.displayAlias || "").trim(),
       avatarUrl: normalizeAvatarUrl(profile?.avatarUrl),
       updatedAt: new Date().toISOString(),
@@ -453,7 +466,7 @@
       teacherUserId: String(merged.teacherUserId || "").trim(),
       teacherDisplayName: String(merged.teacherDisplayName || "").trim(),
       teacherInstitution: String(merged.teacherInstitution || "").trim(),
-      deliveryMethod: merged.deliveryMethod || "line",
+      deliveryMethod: normalizeDeliveryMethod(merged.deliveryMethod),
       displayAlias: String(merged.displayAlias || "").trim(),
       avatarUrl: normalizeAvatarUrl(merged.avatarUrl),
     };
@@ -547,8 +560,8 @@
       studentRole: "student",
       teacherRole: profile.teacherRole || "teacher-reviewer",
       teacherName: profile.teacherName || "",
-      deliveryMethod: profile.deliveryMethod || "line",
-      profile: { ...profile },
+      deliveryMethod: normalizeDeliveryMethod(profile.deliveryMethod),
+      profile: { ...profile, deliveryMethod: normalizeDeliveryMethod(profile.deliveryMethod) },
       grade: book.grade || gradePicker?.value || profile.grade || "4",
       pickers: draft.pickers || [],
       pages: pageObjects,
@@ -1134,6 +1147,7 @@
     cancelBookSubmit,
     getStudentProfile,
     saveStudentProfile,
+    normalizeDeliveryMethod,
     getReviewerProfile,
     saveReviewerProfile,
     deriveStudentName,

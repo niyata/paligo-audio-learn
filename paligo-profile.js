@@ -20,11 +20,12 @@
     { value: "9", label: "๙" },
   ];
 
-  const DELIVERY_OPTIONS = [
-    { value: "line", label: "LINE / กล่องข้อความ" },
-    { value: "email", label: "อีเมล" },
-    { value: "facebook", label: "Facebook" },
-  ];
+  /** Inbox is the only submission channel — legacy line/email/facebook normalize to inbox. */
+  const DELIVERY_OPTIONS = [{ value: "inbox", label: "Inbox" }];
+
+  function normalizeDeliveryMethod(_value) {
+    return "inbox";
+  }
 
   const REVIEWER_PROFILE_STATUS_OPTIONS = [
     { value: "monk_teacher", label: "พระอาจารย์" },
@@ -427,7 +428,7 @@
           grade: "4",
           teacherName: "",
           teacherRole: "teacher-reviewer",
-          deliveryMethod: "line",
+          deliveryMethod: "inbox",
           displayAlias: "",
         }
       );
@@ -690,6 +691,7 @@
     PREFIX_OPTIONS,
     GRADE_OPTIONS,
     DELIVERY_OPTIONS,
+    normalizeDeliveryMethod,
     REVIEWER_PROFILE_STATUS_OPTIONS,
     REVIEWER_CAPABILITY_OPTIONS,
     REVIEWER_CAPABILITY_WIZARD_OPTIONS,
