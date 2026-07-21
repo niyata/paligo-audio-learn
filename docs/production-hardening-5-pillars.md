@@ -15,7 +15,7 @@ Paligo from late prototype toward production grade.
 | 2. First-Run Onboarding Fallbacks | In Progress | Reviewer virtual trial student exists and is labeled; account/inbox gates now show pairing or trial CTAs from `appState` | Extend visual smoke to assert these first-run states and add equivalent copy to any remaining entry pages |
 | 3. Visual Smoke Regression | In Progress | `scripts/audit-production-critical-pages.mjs` passes locally against 6 critical pages; generated artifacts are gitignored | Add CI/PR usage notes and extend assertions beyond selectors for avatars, inbox create group, PiP tooltip, and footer tools |
 | 4. Backend Contract And Error Codes | In Progress | `errorResponse(...)` now returns canonical `code` plus legacy `error`; client errors expose normalized `error.code` | Migrate UI branching from status/text to canonical code and add endpoint-level contract tests |
-| 5. Deployment Discipline | In Progress | Branch push and `git diff --check` are used manually; privacy gate doc exists | Add repeatable deploy checklist/noindex verification and ensure audit artifacts are excluded from deploy commits |
+| 5. Deployment Discipline | In Progress | `docs/deploy-production-checklist.md` and `scripts/check-deploy-discipline.mjs` define repeatable pre-deploy checks; visual audit artifacts are ignored | Wire the checklist into PR/deploy automation when CI exists |
 
 Rule for this hardening pass:
 
@@ -150,6 +150,13 @@ Until launch:
 - Pages should default to `noindex,nofollow` unless super admin allows indexing.
 - Deploys must run `git diff --check`, syntax checks, and dirty-tree review.
 - Do not include audit screenshots or large media files in deploy archives.
+
+Implementation notes:
+
+- Use `docs/deploy-production-checklist.md` as the human release checklist.
+- Run `node scripts/check-deploy-discipline.mjs` before production-candidate
+  deploys.
+- `_headers` and `robots.txt` remain locked to noindex/disallow during pre-launch.
 
 ## Multi-Agent Rule
 
