@@ -2954,18 +2954,35 @@
       if (item.itemType === 'kho') return (item.lines || []).map((line) => line.text).join(' ');
       if (item.itemType === 'page') {
         if (languageVisibility === 'thai') {
-          return normalizeThaiPdfDisplay(item.thai || (item.children || []).map((line) => line.thai || line.pali).join(' '));
+          return normalizeThaiPdfDisplay(item.thai || (item.children || []).map((line) => line.thai || normalizePaliDisplay(line.pali)).join(' '));
         }
-        if (languageVisibility === 'pali') return item.pali || (item.children || []).map((line) => line.pali).join(' ');
-        return (item.children || []).map((line) => [normalizeThaiPdfDisplay(line.thai), line.pali].filter(Boolean).join(' / ')).join(' ');
+        if (languageVisibility === 'pali') return normalizePaliDisplay(item.pali || (item.children || []).map((line) => line.pali).join(' '));
+        return (item.children || []).map((line) => [normalizeThaiPdfDisplay(line.thai), normalizePaliDisplay(line.pali)].filter(Boolean).join(' / ')).join(' ');
       }
       if (item.itemType === 'sentence') {
-        if (languageVisibility === 'thai') return normalizeThaiPdfDisplay(item.thai || item.pali || '');
-        if (languageVisibility === 'pali') return item.pali || '';
-        return [normalizeThaiPdfDisplay(item.thai), item.pali].filter(Boolean).join(' / ');
+        if (languageVisibility === 'thai') return normalizeThaiPdfDisplay(item.thai || normalizePaliDisplay(item.pali) || '');
+        if (languageVisibility === 'pali') return normalizePaliDisplay(item.pali || '');
+        return [normalizeThaiPdfDisplay(item.thai), normalizePaliDisplay(item.pali)].filter(Boolean).join(' / ');
       }
       if (item.itemType === 'chapter') return item.title || '';
       return item.title || '';
+    }
+
+    const LEGACY_PALI_GLYPH_MAP = {
+      '\uF700': 'ฐ',
+      '\uF701': 'ิ',
+      '\uF702': 'ี',
+      '\uF703': 'ึ',
+      '\uF70B': '้',
+      '\uF70E': '์',
+      '\uF70F': 'ญ',
+      '\uF711': 'ํ',
+      '\uF718': 'ุ',
+      '\uF71A': 'ฺ',
+    };
+
+    function normalizePaliDisplay(value) {
+      return String(value || '').replace(/[\uF700\uF701-\uF703\uF70B\uF70E\uF70F\uF711\uF718\uF71A]/g, (char) => LEGACY_PALI_GLYPH_MAP[char] || char);
     }
 
     const THAI_PDF_TEXT_FIXES = [
@@ -3083,8 +3100,8 @@
       if (preferred === 'thaiMeaning') return stripFootnoteCallouts(normalizeThaiPdfDisplay(line.thaiMeaning || line.thai || line.text || ''));
       if (preferred === 'thaiLiteral') return stripFootnoteCallouts(normalizeThaiPdfDisplay(line.thaiLiteral || line.thai || line.text || ''));
       if (preferred === 'thai') return stripFootnoteCallouts(normalizeThaiPdfDisplay(line.thai || line.thaiLiteral || line.thaiMeaning || line.pali || line.text || ''));
-      if (preferred === 'pali') return line.pali || line.text || '';
-      return line.pali || line.thai || line.text || '';
+      if (preferred === 'pali') return normalizePaliDisplay(line.pali || line.text || '');
+      return normalizePaliDisplay(line.pali || line.thai || line.text || '');
     }
 
     function preferredLanguage() {

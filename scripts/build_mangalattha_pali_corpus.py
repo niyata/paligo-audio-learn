@@ -24,6 +24,20 @@ DEFAULT_PDF = Path(
 CORPUS_ID = "mangalattha-pali-pt4-pathamo"
 THAI_DIGITS = str.maketrans("0123456789", "๐๑๒๓๔๕๖๗๘๙")
 THAI_DIGIT_VALUES = {char: str(index) for index, char in enumerate("๐๑๒๓๔๕๖๗๘๙")}
+LEGACY_PALI_GLYPH_MAP = str.maketrans(
+    {
+        "\uf700": "ฐ",
+        "\uf701": "ิ",
+        "\uf702": "ี",
+        "\uf703": "ึ",
+        "\uf70b": "้",
+        "\uf70e": "์",
+        "\uf70f": "ญ",
+        "\uf711": "ํ",
+        "\uf718": "ุ",
+        "\uf71a": "ฺ",
+    }
+)
 SPACE_RE = re.compile(r"[ \t]+")
 PAGE_COUNT_RE = re.compile(r"^Pages:\s+(\d+)", re.MULTILINE)
 KHO_MARKER_RE = re.compile(r"^\s*\[([๐-๙0-9]+)\]\s*(.*)$")
@@ -43,6 +57,10 @@ def normalize_kho_no(value: str) -> str:
     return str(int(normalized)) if normalized.isdigit() else normalized
 
 
+def normalize_pali_glyphs(value: str) -> str:
+    return value.translate(LEGACY_PALI_GLYPH_MAP)
+
+
 def run_text(command: list[str]) -> str:
     result = subprocess.run(command, check=True, capture_output=True, text=True)
     return result.stdout
@@ -60,7 +78,7 @@ def extract_page_lines(pdf: Path, page_no: int) -> list[str]:
     raw = run_text(["pdftotext", "-f", str(page_no), "-l", str(page_no), "-layout", str(pdf), "-"])
     lines: list[str] = []
     for line in raw.splitlines():
-        clean = SPACE_RE.sub(" ", line).strip()
+        clean = normalize_pali_glyphs(SPACE_RE.sub(" ", line).strip())
         if clean:
             lines.append(clean)
     return lines

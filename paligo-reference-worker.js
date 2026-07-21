@@ -14,7 +14,10 @@
     "\uF702": "ี",
     "\uF703": "ึ",
     "\uF704": "ื",
+    "\uF70B": "้",
+    "\uF70E": "์",
     "\uF712": "็",
+    "\uF718": "ุ",
     "\uF709": "์",
     "\uF711": "ํ",
   };
@@ -22,7 +25,7 @@
   const corpora = new Map();
 
   const normalizePali = (value) =>
-    String(value ?? "").replace(/[\uF700\uF70F\uF71A\uF710\uF701-\uF704\uF712\uF709\uF711]/g, (ch) => LEGACY_GLYPH_MAP[ch] || ch);
+    String(value ?? "").replace(/[\uF700\uF70F\uF71A\uF710\uF701-\uF704\uF70B\uF70E\uF712\uF718\uF709\uF711]/g, (ch) => LEGACY_GLYPH_MAP[ch] || ch);
 
   const tokenizeText = (text) =>
     normalizePali(text)
