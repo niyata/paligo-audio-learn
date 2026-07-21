@@ -52,6 +52,12 @@ Backend source:
 - `GET /v1/me`
 - `PATCH /v1/me`
 
+Live readiness:
+
+- `scripts/audit-live-api-readiness.mjs` checks `https://api.paligo.jp/v1`
+  health, CORS, unauthenticated error contracts, and optional login `/me`
+  contracts when credential environment variables are present.
+
 Backend responses keep existing fields and add:
 
 ```json

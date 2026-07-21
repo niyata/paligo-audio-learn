@@ -44,6 +44,7 @@ jobs:
       - name: Syntax check critical scripts
         run: |
           node --check paligo-inbox-client.js
+          node --check scripts/audit-live-api-readiness.mjs
           node --check scripts/audit-production-critical-pages.mjs
           node --check scripts/check-deploy-discipline.mjs
           node --check scripts/test-production-contracts.mjs

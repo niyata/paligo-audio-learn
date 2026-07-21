@@ -54,6 +54,22 @@ Use this before pushing or deploying a production candidate branch for
    .github/workflows/production-hardening.yml
    ```
 
+8. Live API readiness, before promoting a branch to `app.paligo.jp`:
+
+   ```bash
+   node scripts/audit-live-api-readiness.mjs
+   ```
+
+   Optional login contract checks can be enabled without storing secrets in git:
+
+   ```bash
+   PALIGO_LIVE_STUDENT_EMAIL="tha.std@paligo.jp" \
+   PALIGO_LIVE_STUDENT_PIN="147258" \
+   PALIGO_LIVE_REVIEWER_EMAIL="1.tha.tc@paligo.jp" \
+   PALIGO_LIVE_REVIEWER_PIN="147258" \
+   node scripts/audit-live-api-readiness.mjs
+   ```
+
 ## Privacy Rule
 
 Until the PO explicitly opens public indexing:
