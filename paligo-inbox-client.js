@@ -227,6 +227,8 @@
     const { json, headers: extraHeaders, auth = true, ...rest } = options;
     const headers = {
       Accept: "application/json",
+      // Bust stale CORS preflight caches that omitted PATCH (Max-Age was 86400).
+      "X-Paligo-Client": "1",
       ...(extraHeaders || {}),
     };
 
