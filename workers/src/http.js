@@ -8,6 +8,16 @@ const ALLOWED_ORIGINS = [
   "http://127.0.0.1:8765",
 ];
 
+/** Methods the Inbox API actually serves — keep in sync with router.js */
+export const CORS_ALLOW_METHODS = ["GET", "POST", "PATCH", "OPTIONS"];
+
+/**
+ * Browser may cache preflight for Max-Age seconds.
+ * Keep short enough that a CORS method/header fix recovers within minutes,
+ * not a full day (86400 previously left clients blocked after PATCH deploy).
+ */
+const CORS_MAX_AGE_SECONDS = "600";
+
 export function isAllowedOrigin(origin) {
   if (!origin) return false;
   if (ALLOWED_ORIGINS.includes(origin)) return true;
@@ -18,9 +28,10 @@ export function isAllowedOrigin(origin) {
 export function corsHeaders(request, extra = {}) {
   const origin = request.headers.get("Origin") || "";
   const headers = {
-    "Access-Control-Allow-Methods": "GET, POST, PATCH, OPTIONS",
-    "Access-Control-Allow-Headers": "Authorization, Content-Type, Accept",
-    "Access-Control-Max-Age": "86400",
+    "Access-Control-Allow-Methods": CORS_ALLOW_METHODS.join(", "),
+    "Access-Control-Allow-Headers":
+      "Authorization, Content-Type, Accept, X-Paligo-Client",
+    "Access-Control-Max-Age": CORS_MAX_AGE_SECONDS,
     ...extra,
   };
   if (isAllowedOrigin(origin)) {

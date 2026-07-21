@@ -51,6 +51,7 @@ Browser: [`exam-account.html`](../exam-account.html) — สมัคร · logi
 | POST | `/v1/auth/login` | 200 |
 | POST | `/v1/auth/logout` | 200 |
 | GET | `/v1/me` | 200 (auth) |
+| PATCH | `/v1/me` | 200 (auth) — profile sync; CORS ต้องมี PATCH |
 | POST | `/v1/pairings/invite` | 201 (reviewer) |
 | POST | `/v1/pairings/join` | 201 (student) |
 | POST | `/v1/packages` | 201 to-reviewer · to-student |
@@ -72,6 +73,23 @@ Production: สร้าง DB จริงแล้วอัปเดต `datab
 ```bash
 wrangler d1 create paligo-inbox
 ```
+
+---
+
+## CORS (สำคัญ)
+
+Inbox client ใช้ `PATCH /v1/me` — Workers ต้องตอบ preflight ด้วย:
+
+`Access-Control-Allow-Methods: GET, POST, PATCH, OPTIONS`
+
+หลัง deploy ตรวจเสมอ:
+
+```bash
+npm run smoke:cors
+# หรือ: node ../scripts/smoke-inbox-cors.mjs https://api.paligo.jp/v1
+```
+
+อย่าลดรายการ methods กลับเป็นแค่ GET/POST — เบราว์เซอร์จะบล็อกบันทึกโปรไฟล์/จับคู่ครู
 
 ---
 
