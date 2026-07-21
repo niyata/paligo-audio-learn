@@ -107,6 +107,33 @@
     return true;
   }
 
+  const CANONICAL_ERROR_CODES = {
+    not_authenticated: "NOT_AUTHENTICATED",
+    invalid_session: "SESSION_EXPIRED",
+    session_expired: "SESSION_EXPIRED",
+    no_pairing: "NO_PAIRING",
+    feature_disabled: "FEATURE_DISABLED",
+    forbidden: "PERMISSION_DENIED",
+    permission_denied: "PERMISSION_DENIED",
+    invalid_json: "INVALID_INPUT",
+    invalid_role: "INVALID_INPUT",
+    invalid_profile: "INVALID_INPUT",
+    invalid_display_name: "INVALID_INPUT",
+    invalid_pin: "INVALID_INPUT",
+    invalid_login: "INVALID_INPUT",
+    invalid_credentials: "INVALID_INPUT",
+    empty_patch: "INVALID_INPUT",
+    email_taken: "INVALID_INPUT",
+    not_found: "NOT_FOUND",
+  };
+
+  function normalizeErrorCode(code) {
+    const raw = String(code || "").trim();
+    if (!raw) return "UNKNOWN_ERROR";
+    if (/^[A-Z0-9_]+$/.test(raw)) return raw;
+    return CANONICAL_ERROR_CODES[raw] || raw.toUpperCase().replace(/[^A-Z0-9]+/g, "_");
+  }
+
   function buildAppState(source = {}) {
     const session = source.session || null;
     const user = source.user || session?.user || null;
@@ -268,6 +295,8 @@
       const error = new Error(message);
       error.status = response.status;
       error.payload = payload;
+      error.legacyCode = payload && typeof payload === "object" ? payload.error || "" : "";
+      error.code = normalizeErrorCode(payload && typeof payload === "object" ? payload.code || payload.error : "");
       throw error;
     }
 
@@ -283,6 +312,7 @@
       const wrapped = new Error(hint);
       wrapped.cause = error;
       wrapped.diagnostics = diag;
+      wrapped.code = "API_OFFLINE";
       return wrapped;
     }
     return error;
@@ -488,6 +518,7 @@
     isLoggedIn,
     getInboxRole,
     isInboxFeatureEnabled,
+    normalizeErrorCode,
     ensureAuthenticatedSession,
     buildAppState,
     getAppState,

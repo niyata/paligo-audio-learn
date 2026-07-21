@@ -51,8 +51,35 @@ export function jsonResponse(request, data, status = 200) {
   });
 }
 
+const CANONICAL_ERROR_CODES = {
+  not_authenticated: "NOT_AUTHENTICATED",
+  invalid_session: "SESSION_EXPIRED",
+  session_expired: "SESSION_EXPIRED",
+  no_pairing: "NO_PAIRING",
+  feature_disabled: "FEATURE_DISABLED",
+  forbidden: "PERMISSION_DENIED",
+  permission_denied: "PERMISSION_DENIED",
+  invalid_json: "INVALID_INPUT",
+  invalid_role: "INVALID_INPUT",
+  invalid_profile: "INVALID_INPUT",
+  invalid_display_name: "INVALID_INPUT",
+  invalid_pin: "INVALID_INPUT",
+  invalid_login: "INVALID_INPUT",
+  invalid_credentials: "INVALID_INPUT",
+  empty_patch: "INVALID_INPUT",
+  email_taken: "INVALID_INPUT",
+  not_found: "NOT_FOUND",
+};
+
+export function canonicalErrorCode(code) {
+  const raw = String(code || "").trim();
+  if (!raw) return "UNKNOWN_ERROR";
+  if (/^[A-Z0-9_]+$/.test(raw)) return raw;
+  return CANONICAL_ERROR_CODES[raw] || raw.toUpperCase().replace(/[^A-Z0-9]+/g, "_");
+}
+
 export function errorResponse(request, code, message, status) {
-  return jsonResponse(request, { error: code, message }, status);
+  return jsonResponse(request, { error: code, code: canonicalErrorCode(code), message }, status);
 }
 
 export async function parseJsonBody(request) {

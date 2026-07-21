@@ -14,7 +14,7 @@ Paligo from late prototype toward production grade.
 | 1. Auth / Session / Pairing State | In Progress | `workers/src/auth.js` returns `/v1/me`; `paligo-inbox-client.js` stores sessions; UI still has page-specific gates | Add shared `appState`/`capabilities` contract in backend and client; update inbox/account/books gates to read it |
 | 2. First-Run Onboarding Fallbacks | In Progress | Reviewer virtual trial student exists and is labeled; account/inbox gates now show pairing or trial CTAs from `appState` | Extend visual smoke to assert these first-run states and add equivalent copy to any remaining entry pages |
 | 3. Visual Smoke Regression | In Progress | `scripts/audit-production-critical-pages.mjs` passes locally against 6 critical pages; generated artifacts are gitignored | Add CI/PR usage notes and extend assertions beyond selectors for avatars, inbox create group, PiP tooltip, and footer tools |
-| 4. Backend Contract And Error Codes | Not Started | Existing API returns lowercase `error` values such as `not_authenticated` and `no_pairing` | Normalize canonical error codes server/client-side while keeping legacy values compatible |
+| 4. Backend Contract And Error Codes | In Progress | `errorResponse(...)` now returns canonical `code` plus legacy `error`; client errors expose normalized `error.code` | Migrate UI branching from status/text to canonical code and add endpoint-level contract tests |
 | 5. Deployment Discipline | In Progress | Branch push and `git diff --check` are used manually; privacy gate doc exists | Add repeatable deploy checklist/noindex verification and ensure audit artifacts are excluded from deploy commits |
 
 Rule for this hardening pass:
@@ -130,6 +130,14 @@ Preferred canonical error codes:
 
 During migration, existing lowercase codes may continue to appear; new client
 logic should normalize codes before branching.
+
+Implementation notes:
+
+- `workers/src/http.js` owns server-side `canonicalErrorCode(...)`.
+- Error responses now include both `error` (legacy lowercase) and `code`
+  (canonical uppercase).
+- `paligo-inbox-client.js` owns `normalizeErrorCode(...)` and attaches
+  `error.code` / `error.legacyCode` to thrown API errors.
 
 ## 5. Deployment Discipline
 
