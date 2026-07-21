@@ -12,7 +12,7 @@ Paligo from late prototype toward production grade.
 | Pillar | Status | Current evidence | Next closure work |
 | --- | --- | --- | --- |
 | 1. Auth / Session / Pairing State | In Progress | `workers/src/auth.js` returns `/v1/me`; `paligo-inbox-client.js` stores sessions; UI still has page-specific gates | Add shared `appState`/`capabilities` contract in backend and client; update inbox/account/books gates to read it |
-| 2. First-Run Onboarding Fallbacks | In Progress | Reviewer virtual trial student exists in `workers/src/db.js`; student no-pairing path still needs stronger CTA state | Add explicit virtual metadata/capabilities for reviewer trial and student no-pairing; ensure UI never shows login CTA when logged in |
+| 2. First-Run Onboarding Fallbacks | In Progress | Reviewer virtual trial student exists and is labeled; account/inbox gates now show pairing or trial CTAs from `appState` | Extend visual smoke to assert these first-run states and add equivalent copy to any remaining entry pages |
 | 3. Visual Smoke Regression | In Progress | `scripts/audit-production-critical-pages.mjs` covers critical page selectors and screenshots | Track the script, run it before deploy, and keep generated screenshots out of routine commits unless requested |
 | 4. Backend Contract And Error Codes | Not Started | Existing API returns lowercase `error` values such as `not_authenticated` and `no_pairing` | Normalize canonical error codes server/client-side while keeping legacy values compatible |
 | 5. Deployment Discipline | In Progress | Branch push and `git diff --check` are used manually; privacy gate doc exists | Add repeatable deploy checklist/noindex verification and ensure audit artifacts are excluded from deploy commits |
@@ -77,6 +77,13 @@ New users must never dead-end after signup.
 - New students without a real teacher must see a pairing CTA, not a login CTA.
 - New reviewers without real students get a virtual trial student.
 - Virtual users must be visibly labeled as trial data.
+
+Implementation notes:
+
+- `exam-inbox.html` shows a pairing CTA for `logged_in_no_pairing` instead of
+  forcing another login.
+- `exam-account.html` labels `ready_reviewer_trial` and points reviewers to
+  trial inbox workflow until they have real students.
 
 ## 3. Visual Smoke Regression
 

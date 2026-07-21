@@ -1373,22 +1373,37 @@
       function renderLoggedInBanner(session) {
         const user = session?.user;
         if (!user || !accountBanner) return;
+        const appState = session.appState || PaligoInboxClient.buildAppState({ session }).appState;
+        const capabilities = session.capabilities || PaligoInboxClient.buildAppState({ session }).capabilities;
 
         accountBanner.hidden = false;
         if (accountBannerTitle) {
           accountBannerTitle.textContent = `เข้าสู่ระบบแล้ว: ${user.displayName || "ไม่ระบุชื่อ"}`;
         }
         if (accountBannerMeta) {
-          accountBannerMeta.textContent = `บทบาท ${roleLabels[user.role] || user.role} · User ID ${user.id}`;
+          const stateLabel = {
+            logged_in_no_pairing: "ยังไม่ได้จับคู่ครู",
+            ready_student: "พร้อมใช้สมุดและ Inbox",
+            ready_reviewer: "พร้อมรับงานจากนักเรียนจริง",
+            ready_reviewer_trial: "โหมดทดลอง · มีนักเรียนเสมือน",
+            super_admin: "Super Admin",
+            feature_disabled: "Inbox ปิดชั่วคราว",
+            logged_in_offline: "ออฟไลน์ · ใช้ session ในเครื่อง",
+          }[appState] || appState;
+          accountBannerMeta.textContent = `บทบาท ${roleLabels[user.role] || user.role} · ${stateLabel} · User ID ${user.id}`;
         }
         if (accountProfileLink) {
           accountProfileLink.hidden = false;
         }
         if (accountPrimaryLink) {
-          if (user.role === "reviewer") {
+          if (capabilities.needsPairing) {
+            accountPrimaryLink.hidden = false;
+            accountPrimaryLink.href = "exam-account.html?tab=pairing";
+            accountPrimaryLink.textContent = "ไปจับคู่ครู";
+          } else if (user.role === "reviewer") {
             accountPrimaryLink.hidden = false;
             accountPrimaryLink.href = "exam-reviewer-console.html";
-            accountPrimaryLink.textContent = "เปิดกล่องข้อความ";
+            accountPrimaryLink.textContent = capabilities.hasVirtualStudent ? "ทดลองรับงาน" : "เปิดกล่องข้อความ";
           } else if (user.role === "student") {
             accountPrimaryLink.hidden = false;
             accountPrimaryLink.href = "exam-books.html";
@@ -1404,7 +1419,11 @@
         if (session?.user) {
           renderLoggedInBanner(session);
           if (meOutput) {
-            meOutput.textContent = JSON.stringify(session.user, null, 2);
+            meOutput.textContent = JSON.stringify({
+              user: session.user,
+              appState: session.appState || null,
+              capabilities: session.capabilities || null,
+            }, null, 2);
           }
         } else if (accountBanner) {
           accountBanner.hidden = true;
