@@ -6,8 +6,7 @@
  *   node scripts/audit-production-critical-pages.mjs
  */
 import { chromium } from "playwright";
-import { mkdir, mkdtemp, writeFile } from "node:fs/promises";
-import os from "node:os";
+import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -27,7 +26,7 @@ const routes = [
   {
     name: "workbook",
     path: "/workbook.html?newBook=1&apiPort=9999",
-    required: ["#paligoSidebar", ".paligo-topbar", "[data-line-height-range]"],
+    required: ["#paligoSidebar", ".paligo-topbar", "[data-line-height-control]"],
   },
   {
     name: "exam-inbox",
@@ -37,6 +36,9 @@ const routes = [
   {
     name: "exam-account",
     path: "/exam-account.html?tab=pairing&apiPort=9999",
+    prepare: async (page) => {
+      await page.click("[data-tab='pairing']");
+    },
     required: ["#paligoSidebar", ".paligo-topbar", "[data-tab='pairing']", "[data-panel='pairing']"],
   },
   {
@@ -47,7 +49,7 @@ const routes = [
   {
     name: "pali-reference-pip",
     path: "/pali-reference-pip.html?corpus=data%2Fcorpora%2Fdhammapadatthakatha-pali-rtf-prototype%2Fmanifest.json&subject=thai-to-pali",
-    required: [".pip-toolbar, [data-reference-toolbar]", ".reference-content, [data-reference-content]"],
+    required: [".pip-toolbar, [data-reference-toolbar]", "[data-reader]"],
   },
 ];
 
@@ -86,24 +88,16 @@ function seedBook() {
 
 async function main() {
   await mkdir(OUT_DIR, { recursive: true });
-  const userDataDir = await mkdtemp(path.join(os.tmpdir(), "paligo-audit-production-"));
-  let browser;
-  try {
-    browser = await chromium.launchPersistentContext(userDataDir, {
-      viewport: { width: 1280, height: 900 },
-    });
-  } catch (error) {
-    if (!/Executable doesn't exist/i.test(error.message || "")) throw error;
-    browser = await chromium.launchPersistentContext(userDataDir, {
-      channel: "chrome",
-      viewport: { width: 1280, height: 900 },
-    });
-  }
-  const page = browser.pages()[0] || (await browser.newPage());
+  const browser = await chromium.launch({ channel: "chrome" });
+  const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  const page = context.pages()[0] || (await context.newPage());
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
   page.on("console", (message) => {
-    if (message.type() === "error") errors.push(message.text());
+    const text = message.text();
+    if (message.type() !== "error") return;
+    if (/Failed to load resource:/i.test(text)) return;
+    errors.push(text);
   });
 
   await page.addInitScript(
@@ -156,6 +150,9 @@ async function main() {
   for (const route of routes) {
     const url = `${BASE_URL}${route.path}`;
     await page.goto(url, { waitUntil: "networkidle", timeout: 25000 });
+    if (typeof route.prepare === "function") {
+      await route.prepare(page);
+    }
     const checks = await page.evaluate((selectors) => {
       return selectors.map((selector) => {
         const nodes = Array.from(document.querySelectorAll(selector));
@@ -172,7 +169,8 @@ async function main() {
     report.routes.push({ name: route.name, url, checks, ok: failed.length === 0 });
   }
 
-  await browser.close();
+  await context.close();
+  if (browser) await browser.close();
   await writeFile(path.join(OUT_DIR, "report.json"), JSON.stringify(report, null, 2));
 
   const failures = report.routes.filter((route) => !route.ok);

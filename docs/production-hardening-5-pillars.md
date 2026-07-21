@@ -13,7 +13,7 @@ Paligo from late prototype toward production grade.
 | --- | --- | --- | --- |
 | 1. Auth / Session / Pairing State | In Progress | `workers/src/auth.js` returns `/v1/me`; `paligo-inbox-client.js` stores sessions; UI still has page-specific gates | Add shared `appState`/`capabilities` contract in backend and client; update inbox/account/books gates to read it |
 | 2. First-Run Onboarding Fallbacks | In Progress | Reviewer virtual trial student exists and is labeled; account/inbox gates now show pairing or trial CTAs from `appState` | Extend visual smoke to assert these first-run states and add equivalent copy to any remaining entry pages |
-| 3. Visual Smoke Regression | In Progress | `scripts/audit-production-critical-pages.mjs` covers critical page selectors and screenshots | Track the script, run it before deploy, and keep generated screenshots out of routine commits unless requested |
+| 3. Visual Smoke Regression | In Progress | `scripts/audit-production-critical-pages.mjs` passes locally against 6 critical pages; generated artifacts are gitignored | Add CI/PR usage notes and extend assertions beyond selectors for avatars, inbox create group, PiP tooltip, and footer tools |
 | 4. Backend Contract And Error Codes | Not Started | Existing API returns lowercase `error` values such as `not_authenticated` and `no_pairing` | Normalize canonical error codes server/client-side while keeping legacy values compatible |
 | 5. Deployment Discipline | In Progress | Branch push and `git diff --check` are used manually; privacy gate doc exists | Add repeatable deploy checklist/noindex verification and ensure audit artifacts are excluded from deploy commits |
 
@@ -101,6 +101,15 @@ Critical pages need screenshot smoke checks before deploy:
 Required checks include visible book-cover avatar, inbox group creation, compact
 composer buttons, working profile/inbox topbar, unclipped PiP tooltip, and stable
 annotation footer tools.
+
+Implementation notes:
+
+- Run `node scripts/audit-production-critical-pages.mjs` while the static server
+  is available at `http://127.0.0.1:8765`.
+- The script opens Chrome and writes screenshots/report to
+  `docs/audit/production-critical-pages/`.
+- Generated audit artifacts are ignored by git; commit them only when a human
+  asks for a visual evidence bundle.
 
 ## 4. Backend Contract And Error Codes
 

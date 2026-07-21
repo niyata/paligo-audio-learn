@@ -34,3 +34,6 @@ tmp/
 
 # Local / external media (not shipped via git or Pages; use CDN later)
 *.mp3
+
+# Generated visual smoke artifacts
+docs/audit/production-critical-pages/
