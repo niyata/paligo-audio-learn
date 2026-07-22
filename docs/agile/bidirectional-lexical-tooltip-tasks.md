@@ -1,6 +1,7 @@
 # Task Backlog: Bidirectional Lexical Tooltip + PAT Selection Tooltip
 
 วันที่สร้าง: 2026-07-21
+อัปเดตล่าสุด: 2026-07-22
 Source PRD: [`docs/bidirectional-lexical-tooltip-prd.md`](../bidirectional-lexical-tooltip-prd.md)
 
 ---
@@ -15,10 +16,16 @@ Source PRD: [`docs/bidirectional-lexical-tooltip-prd.md`](../bidirectional-lexic
 
 | ID | Task | Owner suggestion | Acceptance |
 |----|------|------------------|------------|
-| BLT-01 | แยก click-to-lookup ออกจาก selection-to-annotate ใน PiP | Codex / Cursor | คลิกคำเดียวเปิด lookup tooltip; ลากคลุมคำเปิด PAT Tooltip |
-| BLT-02 | เพิ่ม pointer threshold และ guard สำหรับ pencil/eraser/report mode | Codex | click/drag ไม่ชนกัน และ Escape/reset state ยังทำงาน |
-| BLT-03 | เพิ่ม smoke test สำหรับ click lookup และ drag PAT | Cursor / Integrator | test ยืนยัน `.is-click-lookup` สำหรับ click และไม่ใช่สำหรับ drag |
-| BLT-04 | ปรับ tooltip lookup mode ให้ซ่อน action ที่เป็น annotation | Codex | lookup tooltip ไม่แสดงปุ่มจัดการศัพท์/รายงาน/ออกข้อสอบ |
+| BLT-01 | แยก click-to-lookup ออกจาก selection-to-annotate ใน PiP | Codex / Cursor | ✅ คลิกคำเดียวเปิด lookup tooltip; ลากคลุมคำเปิด PAT Tooltip |
+| BLT-02 | เพิ่ม pointer threshold และ guard สำหรับ pencil/eraser/report mode | Codex | ✅ click/drag ไม่ชนกัน และ Escape/reset state ยังทำงาน |
+| BLT-03 | เพิ่ม smoke test สำหรับ click lookup และ drag PAT | Cursor / Integrator | ✅ test ยืนยัน `.is-click-lookup` สำหรับ click, ไม่ใช่สำหรับ drag, และ Escape reset ไม่ค้างโหมด |
+| BLT-04 | ปรับ tooltip lookup mode ให้ซ่อน action ที่เป็น annotation | Codex | ✅ lookup tooltip ไม่แสดงปุ่มจัดการศัพท์/รายงาน/ออกข้อสอบ |
+
+หมายเหตุ 2026-07-22:
+
+- `pali-reference-pip.html` เพิ่ม pointer threshold + suppress window หลัง drag selection เพื่อกัน click lookup ยิงซ้ำหลังผู้ใช้ลากเลือกข้อความ
+- lookup ถูก guard ไม่ให้ทำงานขณะ pencil/eraser mode หรือเมื่อคลิก control/breadcrumb ภายใน reader
+- `scripts/audit-production-critical-pages.mjs` เพิ่ม smoke สำหรับ Escape/reset state หลัง click lookup และ selection PAT
 
 ---
 

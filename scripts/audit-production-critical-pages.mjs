@@ -140,6 +140,15 @@ const routes = [
         throw new Error(`PiP click-to-lookup failed: ${JSON.stringify(clickState)}`);
       }
       await page.keyboard.press("Escape");
+      const clickResetState = await page.evaluate(() => ({
+        hidden: document.querySelector("[data-vocab-tooltip]")?.hidden,
+        clickMode: document.querySelector("[data-vocab-tooltip]")?.classList.contains("is-click-lookup"),
+        pencilMode: document.body.classList.contains("is-remark-pencil-mode"),
+        eraseMode: document.body.classList.contains("is-highlight-erase-mode"),
+      }));
+      if (!clickResetState.hidden || clickResetState.clickMode || clickResetState.pencilMode || clickResetState.eraseMode) {
+        throw new Error(`PiP click lookup Escape reset failed: ${JSON.stringify(clickResetState)}`);
+      }
       await page.mouse.move(point.x, point.y);
       await page.mouse.down();
       await page.mouse.move(point.dragX, point.y, { steps: 10 });
@@ -152,6 +161,16 @@ const routes = [
       }));
       if (dragState.hidden || dragState.clickMode || !dragState.manageVisible) {
         throw new Error(`PiP selection-to-annotate failed: ${JSON.stringify(dragState)}`);
+      }
+      await page.keyboard.press("Escape");
+      const dragResetState = await page.evaluate(() => ({
+        hidden: document.querySelector("[data-vocab-tooltip]")?.hidden,
+        clickMode: document.querySelector("[data-vocab-tooltip]")?.classList.contains("is-click-lookup"),
+        pencilMode: document.body.classList.contains("is-remark-pencil-mode"),
+        eraseMode: document.body.classList.contains("is-highlight-erase-mode"),
+      }));
+      if (!dragResetState.hidden || dragResetState.clickMode || dragResetState.pencilMode || dragResetState.eraseMode) {
+        throw new Error(`PiP selection Escape reset failed: ${JSON.stringify(dragResetState)}`);
       }
     },
   },

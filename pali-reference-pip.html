@@ -1895,6 +1895,8 @@
     const ALL_STORIES_LOOKUP_KEY = 'story:all';
     const FOOTNOTE_CALLOUT_VISIBILITY_KEY = 'paligo-show-footnote-callouts-v1';
     const REFERENCE_WORKER_URL = 'paligo-reference-worker.js';
+    const READER_CLICK_DRAG_THRESHOLD_PX = 6;
+    const READER_SUPPRESS_LOOKUP_MS = 260;
     const NAV_LABELS = {
       sentence: { prev: 'บรรทัดที่แล้ว', next: 'บรรทัดถัดไป' },
       kho: { prev: 'ข้อที่แล้ว', next: 'ข้อถัดไป' },
@@ -1937,6 +1939,7 @@
     let remarkPencilMode = false;
     let highlightEraseMode = false;
     let readerPointerStart = null;
+    let suppressReaderLookupUntil = 0;
     let corpusSearchResults = [];
     let corpusSearchController = null;
     let activeLoadController = null;
@@ -4553,7 +4556,21 @@
 
     function readerPointerMoved(event) {
       if (!readerPointerStart || !event) return false;
-      return Math.hypot(event.clientX - readerPointerStart.x, event.clientY - readerPointerStart.y) > 5;
+      return Math.hypot(event.clientX - readerPointerStart.x, event.clientY - readerPointerStart.y) > READER_CLICK_DRAG_THRESHOLD_PX;
+    }
+
+    function suppressNextReaderLookup() {
+      suppressReaderLookupUntil = Date.now() + READER_SUPPRESS_LOOKUP_MS;
+    }
+
+    function shouldSuppressReaderLookup(event) {
+      if (Date.now() < suppressReaderLookupUntil) return true;
+      if (remarkPencilMode || highlightEraseMode) return true;
+      const target = event?.target;
+      if (!target?.closest) return false;
+      return Boolean(target.closest(
+        'button, a, input, select, textarea, [role="button"], [data-breadcrumb-lookup], [data-breadcrumb-target-page], [data-breadcrumb-filter-topic]'
+      ));
     }
 
     const scheduleReaderSelection = debounce(handleReaderSelection, 80);
@@ -4684,6 +4701,7 @@
         render();
         return;
       }
+      if (shouldSuppressReaderLookup(event)) return;
       showClickLookupTooltip(event);
     });
     prevEl.addEventListener('click', () => move(-1));
@@ -4707,11 +4725,14 @@
       else closeReviewPanel();
     });
     readerEl.addEventListener('mousedown', (event) => {
-      readerPointerStart = { x: event.clientX, y: event.clientY };
+      if (event.button !== 0) return;
+      readerPointerStart = { x: event.clientX, y: event.clientY, at: Date.now() };
     });
     readerEl.addEventListener('mouseup', (event) => {
-      const shouldHandleSelection = readerPointerMoved(event) || hasActiveReaderSelection();
+      const moved = readerPointerMoved(event);
+      const shouldHandleSelection = moved || hasActiveReaderSelection();
       readerPointerStart = null;
+      if (moved) suppressNextReaderLookup();
       if (!shouldHandleSelection && !remarkPencilMode && !highlightEraseMode) return;
       if (remarkPencilMode || highlightEraseMode) {
         handleReaderPointerSelection();
@@ -4739,10 +4760,16 @@
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape' && highlightEraseMode) {
         setHighlightEraseMode(false);
+        hideVocabTooltip();
         return;
       }
       if (event.key === 'Escape' && remarkPencilMode) {
         setRemarkPencilMode(false);
+        hideVocabTooltip();
+        return;
+      }
+      if (event.key === 'Escape' && !vocabTooltip?.hidden) {
+        hideVocabTooltip();
       }
     });
     vocabClose?.addEventListener('click', hideVocabTooltip);
