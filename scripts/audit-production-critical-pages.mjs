@@ -16,6 +16,10 @@ const OUT_DIR = path.join(ROOT, "docs", "audit", "production-critical-pages");
 const BASE_URL = process.env.PALIGO_AUDIT_BASE_URL || "http://127.0.0.1:8765";
 const USER_ID = "audit-production-student";
 const NOW = new Date().toISOString();
+const VIEWPORTS = [
+  { name: "desktop", width: 1280, height: 900 },
+  { name: "tablet", width: 820, height: 1100 },
+];
 
 const auditStudent = {
   id: USER_ID,
@@ -83,6 +87,42 @@ const routes = [
     name: "workbook",
     path: "/workbook.html?newBook=1&apiPort=9999",
     required: ["#paligoSidebar", ".paligo-topbar", "[data-line-height-control]"],
+    assert: async (page) => {
+      await page.click("[data-open-pali-reference]");
+      await page.waitForSelector("[data-pali-reference-pip]:not([hidden])", { timeout: 10000 });
+      await page.click("[data-pali-reference-mode='right']");
+      const rightState = await page.evaluate(() => {
+        const shell = document.querySelector(".template-shell");
+        const splitter = document.querySelector("[data-pali-reference-resize]");
+        const answerCard = document.querySelector(".answer-card");
+        return {
+          width: window.innerWidth,
+          docked: shell?.classList.contains("is-reference-docked"),
+          right: shell?.classList.contains("is-reference-right"),
+          topFallback: shell?.classList.contains("is-reference-top"),
+          splitterVisible: splitter ? !splitter.hidden && splitter.getBoundingClientRect().width > 0 : false,
+          answerScroll: answerCard ? getComputedStyle(answerCard).overflowY : "",
+        };
+      });
+      const rightOrNarrowFallback = rightState.width < 860 ? rightState.topFallback : rightState.right;
+      if (!rightState.docked || !rightOrNarrowFallback || !rightState.splitterVisible || rightState.answerScroll !== "auto") {
+        throw new Error(`Workbook right dock mode failed: ${JSON.stringify(rightState)}`);
+      }
+      await page.click("[data-pali-reference-mode='bottom']");
+      const bottomState = await page.evaluate(() => {
+        const shell = document.querySelector(".template-shell");
+        const splitter = document.querySelector("[data-pali-reference-resize]");
+        const pip = document.querySelector("[data-pali-reference-pip]");
+        return {
+          bottom: shell?.classList.contains("is-reference-bottom"),
+          splitterVisible: splitter ? !splitter.hidden && splitter.getBoundingClientRect().height > 0 : false,
+          pipHeight: Math.round(pip?.getBoundingClientRect().height || 0),
+        };
+      });
+      if (!bottomState.bottom || !bottomState.splitterVisible || bottomState.pipHeight < 300) {
+        throw new Error(`Workbook bottom dock mode failed: ${JSON.stringify(bottomState)}`);
+      }
+    },
   },
   {
     name: "exam-inbox",
@@ -225,115 +265,153 @@ function seedBook() {
 async function main() {
   await mkdir(OUT_DIR, { recursive: true });
   const browser = await chromium.launch({ channel: "chrome" });
-  const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
-  let activeMockMe = auditReadyContract;
-  await context.route("http://localhost:9999/v1/health", async (route) => {
-    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true }) });
-  });
-  await context.route("http://localhost:9999/v1/me", async (route) => {
-    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(activeMockMe) });
-  });
-  const page = context.pages()[0] || (await context.newPage());
-  const errors = [];
-  page.on("pageerror", (error) => errors.push(error.message));
-  page.on("console", (message) => {
-    const text = message.text();
-    if (message.type() !== "error") return;
-    if (/Failed to load resource:/i.test(text)) return;
-    errors.push(text);
-  });
-
-  await page.addInitScript(
-    ({ userId, now, book }) => {
-      localStorage.setItem(
-        "paligo-inbox-session-v1",
-        JSON.stringify({
-          sessionToken: "audit-production-token",
-          expiresAt: new Date(Date.now() + 86400000).toISOString(),
-          user: {
-            id: userId,
-            role: "student",
-            displayName: "นักเรียน Audit",
-            email: "audit.std@paligo.jp",
-            createdAt: now,
-            profileJson: { firstName: "นักเรียน", lastName: "Audit", grade: "4" },
-          },
-          appState: "ready_student",
-          capabilities: {
-            canUseInbox: true,
-            canOpenInbox: true,
-            canCreateInvite: false,
-            canJoinPairing: true,
-            needsPairing: false,
-            hasVirtualStudent: false,
-            hasRealStudents: false,
-            isSuperAdmin: false,
-          },
-        })
-      );
-      localStorage.setItem(
-        "paligo-inbox-pairing-cache-v1",
-        JSON.stringify({
-          userId,
-          ctx: {
-            user: { id: userId, role: "student", displayName: "นักเรียน Audit" },
-            pairing: {
-              pairingId: "pairing-audit-production",
-              reviewerUserId: "reviewer-audit-production",
-              reviewerDisplayName: "ครู Audit",
-              reviewerRoleLabel: "ครูผู้ตรวจ",
-              status: "active",
-              createdAt: now,
-            },
-          },
-        })
-      );
-      localStorage.setItem(`paligo-exam-answer-books-v1::${userId}`, JSON.stringify([book]));
-      localStorage.setItem(`paligo-exam-active-book-id-v1::${userId}`, book.id);
-    },
-    { userId: USER_ID, now: NOW, book: seedBook() }
-  );
 
   const report = {
     auditedAt: new Date().toISOString(),
     baseUrl: BASE_URL,
+    viewports: VIEWPORTS,
     routes: [],
-    errors,
+    errors: [],
   };
 
-  for (const route of routes) {
-    activeMockMe = route.mockMe || auditReadyContract;
-    const url = `${BASE_URL}${route.path}`;
-    await page.goto(url, { waitUntil: "networkidle", timeout: 25000 });
-    if (typeof route.prepare === "function") {
-      await route.prepare(page);
-    }
-    if (typeof route.assert === "function") {
-      await route.assert(page);
-    }
-    const checks = await page.evaluate((selectors) => {
-      return selectors.map((selector) => {
-        const nodes = Array.from(document.querySelectorAll(selector));
-        const visible = nodes.some((node) => {
-          const rect = node.getBoundingClientRect();
-          const style = window.getComputedStyle(node);
-          return rect.width > 0 && rect.height > 0 && style.visibility !== "hidden" && style.display !== "none";
-        });
-        return { selector, found: nodes.length > 0, visible };
+  try {
+    for (const viewport of VIEWPORTS) {
+      const context = await browser.newContext({
+        viewport: { width: viewport.width, height: viewport.height },
       });
-    }, route.required);
-    const failed = checks.filter((check) => !check.found || !check.visible);
-    await page.screenshot({ path: path.join(OUT_DIR, `${route.name}.png`), fullPage: true });
-    report.routes.push({ name: route.name, url, checks, ok: failed.length === 0 });
+      let activeMockMe = auditReadyContract;
+      await context.route("http://localhost:9999/v1/health", async (route) => {
+        await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true }) });
+      });
+      await context.route("http://localhost:9999/v1/me", async (route) => {
+        await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(activeMockMe) });
+      });
+      const page = context.pages()[0] || (await context.newPage());
+      const viewportErrors = [];
+      page.on("pageerror", (error) => viewportErrors.push(error.message));
+      page.on("console", (message) => {
+        const text = message.text();
+        if (message.type() !== "error") return;
+        if (/Failed to load resource:/i.test(text)) return;
+        viewportErrors.push(text);
+      });
+
+      await page.addInitScript(
+        ({ userId, now, book }) => {
+          localStorage.setItem(
+            "paligo-exam-student-profile-v1",
+            JSON.stringify({
+              id: userId,
+              role: "student",
+              prefix: "กัลฯ",
+              firstName: "นักเรียน",
+              lastName: "Audit",
+              displayName: "นักเรียน Audit",
+              email: "audit.std@paligo.jp",
+              grade: "4",
+              teacherName: "ครู Audit",
+              teacherRole: "teacher-reviewer",
+              updatedAt: now,
+            })
+          );
+          localStorage.setItem(
+            "paligo-inbox-session-v1",
+            JSON.stringify({
+              sessionToken: "audit-production-token",
+              expiresAt: new Date(Date.now() + 86400000).toISOString(),
+              user: {
+                id: userId,
+                role: "student",
+                displayName: "นักเรียน Audit",
+                email: "audit.std@paligo.jp",
+                createdAt: now,
+                profileJson: { firstName: "นักเรียน", lastName: "Audit", grade: "4" },
+              },
+              appState: "ready_student",
+              capabilities: {
+                canUseInbox: true,
+                canOpenInbox: true,
+                canCreateInvite: false,
+                canJoinPairing: true,
+                needsPairing: false,
+                hasVirtualStudent: false,
+                hasRealStudents: false,
+                isSuperAdmin: false,
+              },
+            })
+          );
+          localStorage.setItem(
+            "paligo-inbox-pairing-cache-v1",
+            JSON.stringify({
+              userId,
+              ctx: {
+                user: { id: userId, role: "student", displayName: "นักเรียน Audit" },
+                pairing: {
+                  pairingId: "pairing-audit-production",
+                  reviewerUserId: "reviewer-audit-production",
+                  reviewerDisplayName: "ครู Audit",
+                  reviewerRoleLabel: "ครูผู้ตรวจ",
+                  status: "active",
+                  createdAt: now,
+                },
+              },
+            })
+          );
+          localStorage.setItem(`paligo-exam-answer-books-v1::${userId}`, JSON.stringify([book]));
+          localStorage.setItem(`paligo-exam-active-book-id-v1::${userId}`, book.id);
+        },
+        { userId: USER_ID, now: NOW, book: seedBook() }
+      );
+
+      for (const route of routes) {
+        activeMockMe = route.mockMe || auditReadyContract;
+        const url = `${BASE_URL}${route.path}`;
+        await page.goto(url, { waitUntil: "networkidle", timeout: 25000 });
+        if (typeof route.prepare === "function") {
+          await route.prepare(page);
+        }
+        if (typeof route.assert === "function") {
+          await route.assert(page);
+        }
+        const checks = await page.evaluate((selectors) => {
+          return selectors.map((selector) => {
+            const nodes = Array.from(document.querySelectorAll(selector));
+            const visible = nodes.some((node) => {
+              const rect = node.getBoundingClientRect();
+              const style = window.getComputedStyle(node);
+              return rect.width > 0 && rect.height > 0 && style.visibility !== "hidden" && style.display !== "none";
+            });
+            return { selector, found: nodes.length > 0, visible };
+          });
+        }, route.required);
+        const failed = checks.filter((check) => !check.found || !check.visible);
+        await page.screenshot({
+          path: path.join(OUT_DIR, `${viewport.name}-${route.name}.png`),
+          fullPage: true,
+        });
+        report.routes.push({
+          name: route.name,
+          viewport: viewport.name,
+          viewportSize: { width: viewport.width, height: viewport.height },
+          url,
+          checks,
+          ok: failed.length === 0,
+        });
+      }
+      report.errors.push(...viewportErrors.map((message) => ({ viewport: viewport.name, message })));
+      await context.close();
+    }
+  } finally {
+    if (browser) {
+      await browser.close();
+    }
   }
 
-  await context.close();
-  if (browser) await browser.close();
   await writeFile(path.join(OUT_DIR, "report.json"), JSON.stringify(report, null, 2));
 
   const failures = report.routes.filter((route) => !route.ok);
-  if (errors.length || failures.length) {
-    console.error(JSON.stringify({ errors, failures }, null, 2));
+  if (report.errors.length || failures.length) {
+    console.error(JSON.stringify({ errors: report.errors, failures }, null, 2));
     process.exit(1);
   }
   console.log(`Production-critical audit passed: ${path.relative(ROOT, OUT_DIR)}/report.json`);

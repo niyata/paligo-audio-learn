@@ -73,41 +73,89 @@
       }
 
       .template-shell.is-reference-docked {
+        --reference-workspace-height: max(360px, calc(100vh - 230px));
         display: grid;
         gap: 14px;
+        grid-template-rows: auto;
+        height: calc(100vh - 18px);
         max-width: min(1800px, calc(100vw - 32px));
+        overflow: hidden;
       }
 
       .template-shell.is-reference-docked > * {
         grid-column: 1 / -1;
       }
 
-      .template-shell.is-reference-side {
+      .template-shell.is-reference-left {
         grid-template-columns: minmax(340px, var(--reference-side-size)) 10px minmax(0, 1fr);
       }
 
-      .template-shell.is-reference-side .pali-reference-pip {
+      .template-shell.is-reference-right {
+        grid-template-columns: minmax(0, 1fr) 10px minmax(340px, var(--reference-side-size));
+      }
+
+      .template-shell.is-reference-left .pali-reference-pip {
         grid-column: 1;
+        order: 20;
       }
 
-      .template-shell.is-reference-side .pali-reference-splitter {
+      .template-shell.is-reference-left .pali-reference-splitter {
         grid-column: 2;
+        order: 20;
       }
 
-      .template-shell.is-reference-side .answer-card {
+      .template-shell.is-reference-left .answer-card {
         grid-column: 3;
+        order: 20;
       }
 
-      .template-shell.is-reference-stack {
-        grid-template-rows: auto 10px auto;
+      .template-shell.is-reference-right .answer-card {
+        grid-column: 1;
+        order: 20;
       }
 
-      .template-shell.is-reference-stack .pali-reference-pip {
-        grid-row: auto;
+      .template-shell.is-reference-right .pali-reference-splitter {
+        grid-column: 2;
+        order: 20;
       }
 
-      .template-shell.is-reference-stack .pali-reference-splitter {
-        grid-row: auto;
+      .template-shell.is-reference-right .pali-reference-pip {
+        grid-column: 3;
+        order: 20;
+      }
+
+      .template-shell.is-reference-top {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .template-shell.is-reference-bottom {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .template-shell.is-reference-top .pali-reference-pip {
+        height: var(--reference-stack-size);
+        order: 20;
+      }
+
+      .template-shell.is-reference-top .pali-reference-splitter {
+        order: 21;
+      }
+
+      .template-shell.is-reference-top .answer-card {
+        order: 22;
+      }
+
+      .template-shell.is-reference-bottom .answer-card {
+        order: 20;
+      }
+
+      .template-shell.is-reference-bottom .pali-reference-splitter {
+        order: 21;
+      }
+
+      .template-shell.is-reference-bottom .pali-reference-pip {
+        height: var(--reference-stack-size);
+        order: 22;
       }
 
       .template-controls,
@@ -417,21 +465,19 @@
       }
 
       .template-shell.is-reference-docked .pali-reference-pip {
-        height: min(78vh, 720px);
+        height: var(--reference-workspace-height);
         inset: auto;
         min-height: 360px;
-        position: sticky;
+        position: relative;
         resize: none;
-        top: 12px;
+        top: 0;
         width: auto;
         z-index: 4;
       }
 
-      .template-shell.is-reference-stack .pali-reference-pip {
-        height: var(--reference-stack-size);
+      .template-shell.is-reference-top .pali-reference-pip,
+      .template-shell.is-reference-bottom .pali-reference-pip {
         min-height: 320px;
-        position: relative;
-        top: 0;
       }
 
       .pali-reference-pip[hidden] {
@@ -442,11 +488,6 @@
         height: auto !important;
         min-height: 0;
         resize: none;
-      }
-
-      .template-shell.is-reference-docked .pali-reference-pip.is-minimized {
-        position: relative;
-        top: 0;
       }
 
       .pali-reference-pip__bar {
@@ -559,7 +600,8 @@
         display: block;
       }
 
-      .template-shell.is-reference-stack .pali-reference-splitter {
+      .template-shell.is-reference-top .pali-reference-splitter,
+      .template-shell.is-reference-bottom .pali-reference-splitter {
         cursor: row-resize;
         min-height: 10px;
       }
@@ -574,7 +616,8 @@
         width: 3px;
       }
 
-      .template-shell.is-reference-stack .pali-reference-splitter::before {
+      .template-shell.is-reference-top .pali-reference-splitter::before,
+      .template-shell.is-reference-bottom .pali-reference-splitter::before {
         height: 3px;
         width: 64px;
       }
@@ -596,7 +639,15 @@
 
       .answer-card {
         min-width: 0;
+        min-height: 0;
+        overflow: visible;
         padding: clamp(14px, 2.4vw, 22px);
+      }
+
+      .template-shell.is-reference-docked .answer-card {
+        max-height: var(--reference-workspace-height);
+        overflow: auto;
+        overscroll-behavior: contain;
       }
 
       .exam-page-stack {
@@ -1342,7 +1393,9 @@
 
         .template-shell.is-reference-docked {
           display: block;
+          height: auto;
           max-width: calc(var(--paper-width) + 46px);
+          overflow: visible;
         }
 
         .template-shell.is-reference-docked .pali-reference-pip {
@@ -1661,8 +1714,10 @@
           <div class="pali-reference-pip__actions">
             <div class="pali-reference-mode" role="group" aria-label="โหมดเปิดตำรา">
               <button class="pali-reference-mode__button" type="button" data-pali-reference-mode="float" aria-pressed="true">ลอย</button>
-              <button class="pali-reference-mode__button" type="button" data-pali-reference-mode="side" aria-pressed="false">ซ้ายขวา</button>
-              <button class="pali-reference-mode__button" type="button" data-pali-reference-mode="stack" aria-pressed="false">บนล่าง</button>
+              <button class="pali-reference-mode__button" type="button" data-pali-reference-mode="left" aria-pressed="false">ซ้าย</button>
+              <button class="pali-reference-mode__button" type="button" data-pali-reference-mode="right" aria-pressed="false">ขวา</button>
+              <button class="pali-reference-mode__button" type="button" data-pali-reference-mode="top" aria-pressed="false">บน</button>
+              <button class="pali-reference-mode__button" type="button" data-pali-reference-mode="bottom" aria-pressed="false">ล่าง</button>
             </div>
             <a
               class="pali-reference-pip__action"
@@ -2415,9 +2470,14 @@
         const plaiWhisperToggle = document.querySelector("[data-plai-whisper-toggle]");
 
         const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
-        const referenceWorkspaceModes = new Set(["float", "side", "stack"]);
-        const normalizeReferenceWorkspaceMode = (mode) =>
-          referenceWorkspaceModes.has(mode) ? mode : "float";
+        const referenceWorkspaceModes = new Set(["float", "left", "right", "top", "bottom"]);
+        const normalizeReferenceWorkspaceMode = (mode) => {
+          if (mode === "side") return "left";
+          if (mode === "stack") return "top";
+          return referenceWorkspaceModes.has(mode) ? mode : "float";
+        };
+        const isReferenceSideMode = (mode) => mode === "left" || mode === "right";
+        const isReferenceStackMode = (mode) => mode === "top" || mode === "bottom";
 
         const loadPaliReferenceState = () => {
           try {
@@ -2431,7 +2491,7 @@
         const getReferenceWorkspaceMode = () => {
           const state = loadPaliReferenceState();
           const mode = normalizeReferenceWorkspaceMode(state?.mode);
-          if (mode === "side" && window.innerWidth < 860) return "stack";
+          if (isReferenceSideMode(mode) && window.innerWidth < 860) return "top";
           return mode;
         };
 
@@ -2446,8 +2506,10 @@
           if (!templateShell || !paliReferencePip) return;
           const normalizedMode = normalizeReferenceWorkspaceMode(mode);
           templateShell.classList.toggle("is-reference-docked", normalizedMode !== "float");
-          templateShell.classList.toggle("is-reference-side", normalizedMode === "side");
-          templateShell.classList.toggle("is-reference-stack", normalizedMode === "stack");
+          templateShell.classList.toggle("is-reference-left", normalizedMode === "left");
+          templateShell.classList.toggle("is-reference-right", normalizedMode === "right");
+          templateShell.classList.toggle("is-reference-top", normalizedMode === "top");
+          templateShell.classList.toggle("is-reference-bottom", normalizedMode === "bottom");
           paliReferencePip.dataset.referenceMode = normalizedMode;
           if (paliReferenceResizeHandle) {
             paliReferenceResizeHandle.hidden = normalizedMode === "float" || paliReferencePip.hidden;
@@ -2456,7 +2518,13 @@
         };
 
         const clearReferenceWorkspaceLayout = () => {
-          templateShell?.classList.remove("is-reference-docked", "is-reference-side", "is-reference-stack");
+          templateShell?.classList.remove(
+            "is-reference-docked",
+            "is-reference-left",
+            "is-reference-right",
+            "is-reference-top",
+            "is-reference-bottom"
+          );
           if (paliReferenceResizeHandle) paliReferenceResizeHandle.hidden = true;
         };
 
@@ -2639,11 +2707,17 @@
         const resizeReferenceWorkspace = (clientX, clientY) => {
           if (!activePaliReferenceResize || !templateShell) return;
           const shellRect = templateShell.getBoundingClientRect();
-          if (activePaliReferenceResize.mode === "side") {
+          if (activePaliReferenceResize.mode === "left") {
             const rawPercent = ((clientX - shellRect.left) / Math.max(1, shellRect.width)) * 100;
             templateShell.style.setProperty("--reference-side-size", `${clamp(rawPercent, 24, 68)}%`);
-          } else if (activePaliReferenceResize.mode === "stack") {
-            const rawVh = (clientY / Math.max(1, window.innerHeight)) * 100;
+          } else if (activePaliReferenceResize.mode === "right") {
+            const rawPercent = ((shellRect.right - clientX) / Math.max(1, shellRect.width)) * 100;
+            templateShell.style.setProperty("--reference-side-size", `${clamp(rawPercent, 24, 68)}%`);
+          } else if (activePaliReferenceResize.mode === "top") {
+            const rawVh = ((clientY - shellRect.top) / Math.max(1, window.innerHeight)) * 100;
+            templateShell.style.setProperty("--reference-stack-size", `${clamp(rawVh, 28, 72)}vh`);
+          } else if (activePaliReferenceResize.mode === "bottom") {
+            const rawVh = ((shellRect.bottom - clientY) / Math.max(1, window.innerHeight)) * 100;
             templateShell.style.setProperty("--reference-stack-size", `${clamp(rawVh, 28, 72)}vh`);
           }
         };
