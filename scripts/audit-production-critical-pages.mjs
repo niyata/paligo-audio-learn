@@ -121,6 +121,19 @@ const routes = [
     required: [".pip-toolbar, [data-reference-toolbar]", "[data-reader]"],
     assert: async (page) => {
       await page.waitForSelector(".pip-line", { timeout: 10000 });
+      const webNumberState = await page.evaluate(() => {
+        const dataPageLabels = Array.from(document.querySelectorAll(".pip-line[data-source-page-label]"))
+          .map((node) => node.getAttribute("data-source-page-label") || "");
+        const marker = document.querySelector(".pip-page-marker");
+        return {
+          hasThaiDigitInDataPageLabel: dataPageLabels.some((value) => /[\u0E50-\u0E59]/u.test(value)),
+          pageMarkerText: marker?.textContent || "",
+          pageMarkerHasPageLabel: marker ? /^หน้า\s*(?:[\u0E50-\u0E59]|\d)+/u.test(marker.textContent || "") : true,
+        };
+      });
+      if (webNumberState.hasThaiDigitInDataPageLabel || !webNumberState.pageMarkerHasPageLabel) {
+        throw new Error(`PiP web numeral/page-marker contract failed: ${JSON.stringify(webNumberState)}`);
+      }
       const point = await page.evaluate(() => {
         const line = Array.from(document.querySelectorAll(".pip-line"))
           .find((node) => (node.dataset.plainText || node.textContent || "").trim().length > 12);

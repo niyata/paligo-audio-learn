@@ -1723,8 +1723,8 @@
               <div class="pip-control-group__label">วิชา</div>
               <label class="pip-subject-select-wrap">
                 <select class="pip-subject-select" data-subject-select aria-label="เลือกวิชา">
-                  <option value="thai-to-pali">ป.ธ. ๔ · แปลไทยเป็นมคธ</option>
-                  <option value="pali-to-thai">ป.ธ. ๔ · แปลมคธเป็นไทย</option>
+                  <option value="thai-to-pali">ป.ธ. 4 · แปลไทยเป็นมคธ</option>
+                  <option value="pali-to-thai">ป.ธ. 4 · แปลมคธเป็นไทย</option>
                 </select>
               </label>
             </div>
@@ -1907,12 +1907,12 @@
     const SUBJECT_SOURCES = {
       'thai-to-pali': {
         grade: '4',
-        label: 'ป.ธ. ๔ · แปลไทยเป็นมคธ',
+        label: 'ป.ธ. 4 · แปลไทยเป็นมคธ',
         manifest: 'data/corpora/dhammapadatthakatha-pali-rtf-prototype/manifest.json',
       },
       'pali-to-thai': {
         grade: '4',
-        label: 'ป.ธ. ๔ · แปลมคธเป็นไทย',
+        label: 'ป.ธ. 4 · แปลมคธเป็นไทย',
         manifest: 'data/corpora/mangalattha-pali-pathamo/manifest.json',
       },
     };
@@ -2054,7 +2054,7 @@
         type: 'paligo:pip-subject-change',
         grade: source.grade,
         subject: value,
-        subjectLabel: source.label.replace(/^ป\.ธ\. ๔ · /, ''),
+        subjectLabel: source.label.replace(/^ป\.ธ\. 4 · /, ''),
         manifest: source.manifest,
       }, '*');
     }
@@ -2364,26 +2364,26 @@
       const value = String(text || '').trim();
       if (!value || !corpusUsesReferenceBreadcrumbs()) return false;
       if (isTopicHeading(value)) return true;
-      if (/^พระธัมมปทัฏฐกถา.*หน้า\s*[๐-๙0-9]+$/u.test(value)) return true;
+      if (new RegExp(`^พระธัมมปทัฏฐกถา.*หน้า\\s*${THAI_OR_ASCII_DIGIT_PATTERN}+$`, 'u').test(value)) return true;
       if (isVaggaHeading(value)) return true;
       if (isStoryHeading(value)) return true;
       return false;
     }
 
     function isBookPageHeading(text) {
-      return /^พระธัมมปทัฏฐกถา.*หน้า\s*[๐-๙0-9]+$/u.test(String(text || '').trim());
+      return new RegExp(`^พระธัมมปทัฏฐกถา.*หน้า\\s*${THAI_OR_ASCII_DIGIT_PATTERN}+$`, 'u').test(String(text || '').trim());
     }
 
     function isVaggaHeading(text) {
       const value = String(text || '').trim();
-      return /^[๐-๙0-9]+\.\s+.+วรรค\s+วรรณนา$/u.test(value)
-        || /^[๐-๙0-9]+\.\s+.+วคฺค.*วณฺณนา$/u.test(value);
+      return new RegExp(`^${THAI_OR_ASCII_DIGIT_PATTERN}+\\.\\s+.+วรรค\\s+วรรณนา$`, 'u').test(value)
+        || new RegExp(`^${THAI_OR_ASCII_DIGIT_PATTERN}+\\.\\s+.+วคฺค.*วณฺณนา$`, 'u').test(value);
     }
 
     function isStoryHeading(text) {
       const value = String(text || '').trim();
-      return /^[๐-๙0-9]+\.\s+เรื่อง/u.test(value)
-        || /^[๐-๙0-9]+\.\s+.+ตฺเถรวตฺถุ/u.test(value);
+      return new RegExp(`^${THAI_OR_ASCII_DIGIT_PATTERN}+\\.\\s+เรื่อง`, 'u').test(value)
+        || new RegExp(`^${THAI_OR_ASCII_DIGIT_PATTERN}+\\.\\s+.+ตฺเถรวตฺถุ`, 'u').test(value);
     }
 
     function breadcrumbKind(text, fallback = '') {
@@ -2400,7 +2400,7 @@
         .replace(/^พระธัมมปทัฏฐกถาแปล\s*/u, 'ธัมมปทัฏฐกถาแปล ')
         .trim();
       if (isTopicHeading(value)) value = value.replace(/^\[|\]$/g, '');
-      return value.replace(/\s*\[\s*[๐-๙0-9]+\s*\]$/u, '').trim();
+      return value.replace(new RegExp(`\\s*\\[\\s*${THAI_OR_ASCII_DIGIT_PATTERN}+\\s*\\]$`, 'u'), '').trim();
     }
 
     function breadcrumbKey(label, kind = '') {
@@ -2524,7 +2524,7 @@
           filterTopicId: options.filterTopicId || '',
         });
       };
-      push(`หน้า ${referencePage.sourcePageLabel || referencePage.sourcePage}`, 'page');
+      push(`หน้า ${pageLabelFor(referencePage)}`, 'page');
       if (referencePage.title && !/^หน้า\s+/u.test(referencePage.title)) push(referencePage.title, 'book');
       const parentGroup = referenceGroupForPage(referencePage);
       if (parentGroup) push(parentGroup.label, 'vagga');
@@ -2545,7 +2545,7 @@
 
     function cleanReferenceStoryLabel(label) {
       return normalizeBreadcrumbText(label)
-        .replace(/^\s*[0-9๐-๙]+\s*[.)]\s*/u, '')
+        .replace(/^\s*[0-9\u0E50-\u0E59]+\s*[.)]\s*/u, '')
         .replace(/\*+$/u, '')
         .trim();
     }
@@ -2591,7 +2591,7 @@
       window.parent?.postMessage({
         type: 'paligo:pip-reference-context',
         sourcePage: contextPage?.sourcePage ?? item?.sourcePage ?? '',
-        sourcePageLabel: contextPage?.sourcePageLabel || item?.sourcePageLabel || '',
+        sourcePageLabel: machineNumberLabel(contextPage?.sourcePageLabel || item?.sourcePageLabel, contextPage?.sourcePage || item?.sourcePage || ''),
         itemId: item?.itemId || contextPage?.itemId || '',
         languageVisibility,
         mode,
@@ -2671,10 +2671,10 @@
 
     function optionLabel(item) {
       if (!item) return '-';
-      if (item.itemType === 'kho') return `${item.khoLabel || `ข้อ ${item.itemNo}`} · หน้า ${item.sourcePageLabel || item.sourcePage}`;
-      if (item.itemType === 'page') return `หน้า ${item.sourcePageLabel || item.sourcePage}`;
-      if (item.itemType === 'sentence') return `หน้า ${item.sourcePageLabel || item.sourcePage} · บรรทัด ${item.itemNo}`;
-      if (item.itemType === 'topic') return `${item.title} · หน้า ${item.sourcePageLabel || item.sourcePage}`;
+      if (item.itemType === 'kho') return `${item.khoLabel || `ข้อ ${item.itemNo}`} · หน้า ${pageLabelFor(item)}`;
+      if (item.itemType === 'page') return `หน้า ${pageLabelFor(item)}`;
+      if (item.itemType === 'sentence') return `หน้า ${pageLabelFor(item)} · บรรทัด ${item.itemNo}`;
+      if (item.itemType === 'topic') return `${item.title} · หน้า ${pageLabelFor(item)}`;
       if (item.itemType === 'chapter') return item.title || item.chapterId;
       return item.title || item.itemId;
     }
@@ -2830,7 +2830,7 @@
     function noteLocationLabel(note) {
       const parts = [];
       if (note.khoLabel) parts.push(note.khoLabel);
-      if (note.sourcePageLabel || note.sourcePage) parts.push(`หน้า ${note.sourcePageLabel || note.sourcePage}`);
+      if (note.sourcePageLabel || note.sourcePage) parts.push(`หน้า ${displayPageLabel(note.sourcePageLabel, note.sourcePage)}`);
       if (note.lineNo) parts.push(`บรรทัด ${note.lineNo}`);
       return parts.join(' · ') || 'ตำแหน่งในตำรา';
     }
@@ -2998,9 +2998,39 @@
     };
     const LEGACY_PALI_GLYPH_REGEX = /[\uF700\uF701-\uF704\uF709\uF70B\uF70E-\uF712\uF718\uF71A]/g;
     const THAI_COMBINING_MARK_REGEX = /[\u0E31\u0E34-\u0E3A\u0E47-\u0E4E]/u;
+    const THAI_OR_ASCII_DIGIT_PATTERN = '[\\u0E50-\\u0E59\\d]';
+    const THAI_OR_ASCII_DIGITS_RE = new RegExp(`^${THAI_OR_ASCII_DIGIT_PATTERN}+$`, 'u');
+    const THAI_DIGIT_MAP = {
+      '\u0E50': '0',
+      '\u0E51': '1',
+      '\u0E52': '2',
+      '\u0E53': '3',
+      '\u0E54': '4',
+      '\u0E55': '5',
+      '\u0E56': '6',
+      '\u0E57': '7',
+      '\u0E58': '8',
+      '\u0E59': '9',
+    };
 
     function normalizePaliDisplay(value) {
       return String(value || '').replace(LEGACY_PALI_GLYPH_REGEX, (char) => LEGACY_PALI_GLYPH_MAP[char] || char);
+    }
+
+    function machineNumberLabel(value, fallback = '') {
+      return String(value || fallback || '').replace(/[\u0E50-\u0E59]/g, (char) => THAI_DIGIT_MAP[char] || char);
+    }
+
+    function toThaiDigits(value) {
+      return String(value || '').replace(/[0-9]/g, (digit) => String.fromCharCode(0x0E50 + Number(digit)));
+    }
+
+    function displayPageLabel(value, fallback = '') {
+      return toThaiDigits(machineNumberLabel(value, fallback));
+    }
+
+    function pageLabelFor(item) {
+      return displayPageLabel(item?.sourcePageLabel || item?.sourcePage, item?.sourcePage || '');
     }
 
     const THAI_PDF_TEXT_FIXES = [
@@ -3106,10 +3136,10 @@
     function stripFootnoteCallouts(text) {
       let next = String(text || '').trim();
       if (!shouldHideFootnoteCallouts() || !corpusUsesFootnoteCallouts()) return next;
-      if (/^[๐-๙0-9]{1,2}$/.test(next)) return '';
-      next = next.replace(/([\u0e01-\u0e3a\u0e40-\u0e4e])\s*[๐-๙0-9]{1,2}(?=[\sฯ,;:!?"”')\]]|$)/gu, '$1');
-      next = next.replace(/([)"”')\]])\s*[๐-๙0-9]{1,2}(?=[ฯ,;:!?]|$)/gu, '$1');
-      next = next.replace(/([ฯ.!?"”')\]])\s*[๐-๙0-9]{1,2}$/u, '$1');
+      if (THAI_OR_ASCII_DIGITS_RE.test(next) && next.length <= 2) return '';
+      next = next.replace(new RegExp(`([\\u0e01-\\u0e3a\\u0e40-\\u0e4e])\\s*${THAI_OR_ASCII_DIGIT_PATTERN}{1,2}(?=[\\sฯ,;:!?"”')\\]]|$)`, 'gu'), '$1');
+      next = next.replace(new RegExp(`([)"”')\\]])\\s*${THAI_OR_ASCII_DIGIT_PATTERN}{1,2}(?=[ฯ,;:!?]|$)`, 'gu'), '$1');
+      next = next.replace(new RegExp(`([ฯ.!?"”')\\]])\\s*${THAI_OR_ASCII_DIGIT_PATTERN}{1,2}$`, 'u'), '$1');
       return next.trim();
     }
 
@@ -3231,7 +3261,7 @@
         parentItemId: item.parentItemId || '',
         chapterId: item.chapterId || '',
         sourcePage: item.sourcePage || '',
-        sourcePageLabel: item.sourcePageLabel || '',
+        sourcePageLabel: machineNumberLabel(item.sourcePageLabel, item.sourcePage),
         khoNo: item.khoNo || '',
         khoLabel: item.khoLabel || '',
         selectedText: itemTextPreview(item).slice(0, 500),
@@ -3245,7 +3275,10 @@
         || pages().flatMap((page) => page.children || []).find((entry) => entry.itemId === selection.lineItemId)
         || currentItem();
       const sourcePage = selection.sourcePage || item?.sourcePage || currentItem()?.sourcePage || '';
-      const sourcePageLabel = selection.sourcePageLabel || item?.sourcePageLabel || currentItem()?.sourcePageLabel || '';
+      const sourcePageLabel = machineNumberLabel(
+        selection.sourcePageLabel || item?.sourcePageLabel || currentItem()?.sourcePageLabel,
+        selection.sourcePage || item?.sourcePage || currentItem()?.sourcePage || ''
+      );
       const lineNo = selection.lineNo || item?.itemNo || '';
       return {
         corpusId: currentCorpus?.corpusId || currentCorpus?.id || '',
@@ -3386,7 +3419,7 @@
     function formatReviewTarget(target) {
       const parts = [];
       if (target?.khoLabel) parts.push(target.khoLabel);
-      if (target?.sourcePageLabel || target?.sourcePage) parts.push(`หน้า ${target.sourcePageLabel || target.sourcePage}`);
+      if (target?.sourcePageLabel || target?.sourcePage) parts.push(`หน้า ${displayPageLabel(target.sourcePageLabel, target.sourcePage)}`);
       if (target?.lineNo) parts.push(`บรรทัด ${target.lineNo}`);
       if (target?.selectedText && target?.reportScope === 'selection') parts.push(`"${target.selectedText}"`);
       if (target?.itemId) parts.push(target.itemId);
@@ -3658,7 +3691,9 @@
       if (lineData?.anchorId) line.id = lineData.anchorId;
       if (lineData?.itemId) line.dataset.itemId = lineData.itemId;
       if (lineData?.sourcePage) line.dataset.sourcePage = lineData.sourcePage;
-      if (lineData?.sourcePageLabel) line.dataset.sourcePageLabel = lineData.sourcePageLabel;
+      if (lineData?.sourcePageLabel || lineData?.sourcePage) {
+        line.dataset.sourcePageLabel = machineNumberLabel(lineData.sourcePageLabel, lineData.sourcePage);
+      }
       if (lineData?.itemNo) line.dataset.lineNo = lineData.itemNo;
       appendTextWithMarks(line, text, lineData);
       return line;
@@ -3751,12 +3786,12 @@
         const activeLookupStory = activeLookupInThisTrail ? referenceStoryByKey(activeBreadcrumbLookupKey) : null;
         const lookupItems = activeLookupGroup?.stories?.map((story) => ({
           label: story.label,
-          pageLabel: story.sourcePageLabel || story.sourcePage,
+          pageLabel: pageLabelFor(story),
           targetPage: story.pageId,
           targetTopic: '',
         })) || activeLookupStory?.topics?.map((topic) => ({
           label: topic.label,
-          pageLabel: topic.sourcePageLabel || topic.sourcePage,
+          pageLabel: pageLabelFor(topic),
           targetPage: topic.pageId,
           targetTopic: topic.topicId,
         })) || [];
@@ -3803,8 +3838,10 @@
         if (line.sourcePage && line.sourcePage !== lastPage) {
           result.push({
             itemId: `${item.itemId}-page-${line.sourcePage}`,
-            text: `${item.khoLabel || item.title || 'ข้อ'} ต่อหน้า ${line.sourcePageLabel || line.sourcePage}`,
+            text: `หน้า ${pageLabelFor(line)}`,
             className: 'pip-page-marker',
+            sourcePage: line.sourcePage,
+            sourcePageLabel: machineNumberLabel(line.sourcePageLabel, line.sourcePage),
           });
           lastPage = line.sourcePage;
         }
@@ -3853,7 +3890,7 @@
         const itemPage = pages().find((page) => String(page.sourcePage) === String(item.sourcePage)) || null;
         readerEl.append(renderUnit({
           title: item.title,
-          meta: `เริ่มหน้า ${item.sourcePageLabel || item.sourcePage}`,
+          meta: `เริ่มหน้า ${pageLabelFor(item)}`,
           unitLines: khoLines(item),
         }));
         statusEl.textContent = `${item.khoLabel || item.title} · ${item.lines?.length || 0} บรรทัด`;
@@ -3870,7 +3907,7 @@
         const preferred = preferredLanguage();
         readerEl.append(renderUnit({
           title: '',
-          meta: `หน้า ${item.sourcePageLabel || item.sourcePage}`,
+          meta: `หน้า ${pageLabelFor(item)}`,
           unitLines: [{
             itemId: item.itemId,
             text: segmentText(item, preferred),
@@ -3881,7 +3918,7 @@
           }],
           activeItemId: item.itemId,
         }));
-        statusEl.textContent = `บรรทัด ${item.itemNo} · หน้า ${item.sourcePageLabel || item.sourcePage}`;
+        statusEl.textContent = `บรรทัด ${item.itemNo} · หน้า ${pageLabelFor(item)}`;
         updateWindowTitleForContext({ page: itemPage });
         updateReviewButton();
         warmPageChunkFor(itemPage, { signal: renderSignal });
@@ -3893,14 +3930,14 @@
         if (!item) return;
         const topicPage = pages().find((page) => String(page.sourcePage) === String(item.sourcePage)) || null;
         const topicBreadcrumbs = topicPage ? breadcrumbItemsForPage(topicPage) : [
-          { label: `หน้า ${item.sourcePageLabel || item.sourcePage}`, kind: 'page', tone: 'page' },
+          { label: `หน้า ${pageLabelFor(item)}`, kind: 'page', tone: 'page' },
         ];
         if (!topicBreadcrumbs.some((crumb) => crumb.kind === 'topic' && crumb.label === item.title)) {
           topicBreadcrumbs.push({ label: item.title, kind: 'topic', tone: 'topic' });
         }
         readerEl.append(renderUnit({
           title: item.title,
-          meta: `หน้า ${item.sourcePageLabel || item.sourcePage} · บรรทัด ${item.lineNo || '-'}`,
+          meta: `หน้า ${pageLabelFor(item)} · บรรทัด ${item.lineNo || '-'}`,
           breadcrumbs: topicBreadcrumbs,
           unitLines: item.lines.filter((line) => !isReferenceContextLine(line.text)),
           activeItemId: item.anchorItemId,
@@ -3927,7 +3964,7 @@
         pagesToRender.forEach((page) => {
           readerEl.append(renderUnit({
             title: pageDisplayTitle(page),
-            meta: `หน้า ${page.sourcePageLabel || page.sourcePage}`,
+            meta: `หน้า ${pageLabelFor(page)}`,
             breadcrumbs: breadcrumbItemsForPage(page),
             unitLines: pageLinesForRender(page),
           }));
@@ -3945,14 +3982,14 @@
       if (!page) return;
       readerEl.append(renderUnit({
         title: pageDisplayTitle(page),
-        meta: `หน้า ${page.sourcePageLabel || page.sourcePage}`,
+        meta: `หน้า ${pageLabelFor(page)}`,
         breadcrumbs: breadcrumbItemsForPage(page),
         unitLines: pageLinesForRender(page),
       }));
       const filterTopic = activeTopicFilter();
       statusEl.textContent = filterTopic
-        ? `หน้า ${page.sourcePageLabel || page.sourcePage} · กรองประเด็น ${filterTopic.title}`
-        : `หน้า ${page.sourcePageLabel || page.sourcePage} · ${page.children?.length || 0} บรรทัด`;
+        ? `หน้า ${pageLabelFor(page)} · กรองประเด็น ${filterTopic.title}`
+        : `หน้า ${pageLabelFor(page)} · ${page.children?.length || 0} บรรทัด`;
       updateWindowTitleForContext({ page });
       updateReviewButton();
       warmPageChunkFor(page, { signal: renderSignal });
@@ -4089,7 +4126,7 @@
         {
           pali: 'ตำแหน่งอ้างอิง',
           gloss: activeVocabSelection
-            ? `หน้า ${activeVocabSelection.sourcePageLabel || activeVocabSelection.sourcePage || '-'} · บรรทัด ${activeVocabSelection.lineNo || '-'}`
+            ? `หน้า ${displayPageLabel(activeVocabSelection.sourcePageLabel, activeVocabSelection.sourcePage) || '-'} · บรรทัด ${activeVocabSelection.lineNo || '-'}`
             : 'เลือกคำในบรรทัดเพื่อดูตำแหน่ง',
         },
       ];
@@ -4233,7 +4270,7 @@
         text: payload.text,
         lineItemId: line.dataset.itemId || selectedId,
         sourcePage: line.dataset.sourcePage || currentItem()?.sourcePage || '',
-        sourcePageLabel: line.dataset.sourcePageLabel || currentItem()?.sourcePageLabel || '',
+        sourcePageLabel: machineNumberLabel(line.dataset.sourcePageLabel || currentItem()?.sourcePageLabel, line.dataset.sourcePage || currentItem()?.sourcePage || ''),
         lineNo: line.dataset.lineNo || '',
         selectionStart: payload.selectionStart,
         selectionEnd: payload.selectionEnd,
@@ -4432,7 +4469,7 @@
         text: payload.text,
         lineItemId: line.dataset.itemId || selectedId,
         sourcePage: line.dataset.sourcePage || currentItem()?.sourcePage || '',
-        sourcePageLabel: line.dataset.sourcePageLabel || currentItem()?.sourcePageLabel || '',
+        sourcePageLabel: machineNumberLabel(line.dataset.sourcePageLabel || currentItem()?.sourcePageLabel, line.dataset.sourcePage || currentItem()?.sourcePage || ''),
         lineNo: line.dataset.lineNo || '',
         selectionStart: payload.selectionStart,
         selectionEnd: payload.selectionEnd,
@@ -4440,7 +4477,7 @@
 
       vocabTooltip.classList.remove('is-click-lookup');
       vocabTerm.textContent = `「${payload.text}」`;
-      vocabMeta.textContent = `Mockup คำศัพท์บาลีเทียบ · หน้า ${activeVocabSelection.sourcePageLabel || activeVocabSelection.sourcePage || '-'} · บรรทัด ${activeVocabSelection.lineNo || '-'}`;
+      vocabMeta.textContent = `Mockup คำศัพท์บาลีเทียบ · หน้า ${displayPageLabel(activeVocabSelection.sourcePageLabel, activeVocabSelection.sourcePage) || '-'} · บรรทัด ${activeVocabSelection.lineNo || '-'}`;
       vocabList.replaceChildren();
       mockVocabItems(payload.text).forEach((item) => {
         const row = document.createElement('div');
@@ -4486,7 +4523,7 @@
         text: payload.text,
         lineItemId: line.dataset.itemId || selectedId,
         sourcePage: line.dataset.sourcePage || currentItem()?.sourcePage || '',
-        sourcePageLabel: line.dataset.sourcePageLabel || currentItem()?.sourcePageLabel || '',
+        sourcePageLabel: machineNumberLabel(line.dataset.sourcePageLabel || currentItem()?.sourcePageLabel, line.dataset.sourcePage || currentItem()?.sourcePage || ''),
         lineNo: line.dataset.lineNo || '',
         selectionStart: payload.selectionStart,
         selectionEnd: payload.selectionEnd,
@@ -4495,7 +4532,7 @@
       vocabTooltip.classList.add('is-click-lookup');
       vocabTerm.textContent = `「${payload.text}」`;
       const direction = /[\u0e01-\u0e4e]/u.test(payload.text) ? 'คำไทย → บาลี' : 'คำบาลี → ไทย';
-      vocabMeta.textContent = `${direction} · หน้า ${activeVocabSelection.sourcePageLabel || activeVocabSelection.sourcePage || '-'} · บรรทัด ${activeVocabSelection.lineNo || '-'}`;
+      vocabMeta.textContent = `${direction} · หน้า ${displayPageLabel(activeVocabSelection.sourcePageLabel, activeVocabSelection.sourcePage) || '-'} · บรรทัด ${activeVocabSelection.lineNo || '-'}`;
       vocabList.replaceChildren();
       mockVocabItems(payload.text, 'click').forEach((item) => {
         const row = document.createElement('div');
