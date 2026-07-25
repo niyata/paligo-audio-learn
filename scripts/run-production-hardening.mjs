@@ -26,10 +26,12 @@ const checks = [
   },
   ...[
     "paligo-inbox-client.js",
+    "paligo-annotation-tools.js",
     "scripts/audit-live-api-readiness.mjs",
     "scripts/audit-pip-pali-glyphs.mjs",
     "scripts/audit-production-critical-pages.mjs",
     "scripts/check-deploy-discipline.mjs",
+    "scripts/test-annotation-tools.mjs",
     "scripts/test-production-contracts.mjs",
     "workers/src/auth.js",
     "workers/src/db.js",
@@ -44,6 +46,11 @@ const checks = [
     name: "contracts.appStateAndErrors",
     command: node,
     args: ["scripts/test-production-contracts.mjs"],
+  },
+  {
+    name: "contracts.annotationTools",
+    command: node,
+    args: ["scripts/test-annotation-tools.mjs"],
   },
   {
     name: "corpus.paliGlyphNormalization",

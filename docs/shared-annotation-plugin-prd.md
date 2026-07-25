@@ -22,6 +22,16 @@
 
 Tooltip เป็นเพียง UI surface สำหรับสร้าง/แก้ annotation เท่านั้น ข้อมูลจริงต้องถูกเก็บคู่กับตำราและตำแหน่งอ้างอิงที่เรียกใช้ tooltip นั้น
 
+สถานะ implementation ล่าสุด:
+
+- `paligo-annotation-tools.js` มี shared API เริ่มต้นแล้ว:
+  - `PaligoAnnotationTools.init(...)`
+  - `PaligoAnnotationTools.context.normalize(...)`
+  - `PaligoAnnotationTools.annotations.create(...)`
+  - `PaligoAnnotationTools.annotations.localStorageAdapter(...)`
+- `pali-reference-pip.html` เริ่มแนบ `annotationContext` มาตรฐานกับ review/selection target ใหม่
+- `scripts/test-annotation-tools.mjs` ตรวจ contract ของ shared layer และถูกรวมใน `scripts/run-production-hardening.mjs`
+
 ---
 
 ## 2. ปัญหาที่ต้องแก้

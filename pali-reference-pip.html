@@ -1884,6 +1884,11 @@
     const DEFAULT_CORPUS = 'data/corpora/mangalattha-pali-pathamo/manifest.json';
     const PAT = window.PaligoAnnotationTools;
     const PAT_PRESET = PAT.presets.pt4PaliGrammar;
+    const annotationSession = PAT.init({
+      host: 'pip',
+      preset: PAT_PRESET,
+      contextProvider: () => currentAnnotationContext(),
+    });
     const SCALE_KEY = 'paligo-reference-pip-scale-v1';
     const LAYOUT_KEY = 'paligo-reference-pip-layout-v1';
     const COLLAPSED_KEY = 'paligo-reference-pip-toolbar-collapsed-v1';
@@ -1919,6 +1924,7 @@
 
     let currentCorpus = null;
     let currentManifest = null;
+    let currentManifestPath = '';
     let primaryCorpus = null;
     let companionCorpora = {};
     let corpusBaseUrl = '';
@@ -2043,6 +2049,45 @@
       if (/dhammapadatthakatha/i.test(normalized)) return 'thai-to-pali';
       if (/mangalattha/i.test(normalized)) return 'pali-to-thai';
       return '';
+    }
+
+    function currentSubjectId() {
+      return subjectSelect?.value
+        || currentManifest?.subjectHint
+        || subjectForManifestPath(currentManifestPath || queryParam('corpus') || DEFAULT_CORPUS)
+        || '';
+    }
+
+    function currentAnnotationContext(overrides = {}) {
+      const item = currentItem?.();
+      const subjectId = currentSubjectId();
+      return {
+        surface: 'pip',
+        courseId: SUBJECT_SOURCES[subjectId]?.grade ? `pt${SUBJECT_SOURCES[subjectId].grade}` : 'pt4',
+        subjectId,
+        corpusId: currentCorpus?.corpusId || currentCorpus?.id || currentManifest?.corpusId || '',
+        manifestPath: currentManifestPath || queryParam('corpus') || DEFAULT_CORPUS,
+        pageId: item?.itemId || selectedId || '',
+        sourcePage: item?.sourcePage || '',
+        sourcePageLabel: machineNumberLabel(item?.sourcePageLabel, item?.sourcePage),
+        storyId: item?.chapterId || '',
+        ...overrides,
+      };
+    }
+
+    function withAnnotationContext(target, overrides = {}) {
+      const annotationContext = annotationSession.context(overrides);
+      return {
+        ...target,
+        schema: PAT.SCHEMA,
+        schemaVersion: 1,
+        surface: annotationContext.surface,
+        courseId: annotationContext.courseId,
+        subjectId: annotationContext.subjectId,
+        manifestPath: annotationContext.manifestPath,
+        contextKey: annotationContext.contextKey,
+        annotationContext,
+      };
     }
 
     function setSubjectSelectValue(subject, { notifyParent = false } = {}) {
@@ -3255,7 +3300,7 @@
 
     function makeReviewTarget(item = currentItem()) {
       if (!item) return null;
-      return {
+      return withAnnotationContext({
         corpusId: currentCorpus?.corpusId || currentCorpus?.id || '',
         itemId: item.itemId || '',
         parentItemId: item.parentItemId || '',
@@ -3266,7 +3311,12 @@
         khoLabel: item.khoLabel || '',
         selectedText: itemTextPreview(item).slice(0, 500),
         displayMode: mode,
-      };
+      }, {
+        pageId: item.itemId || '',
+        sourcePage: item.sourcePage || '',
+        sourcePageLabel: machineNumberLabel(item.sourcePageLabel, item.sourcePage),
+        storyId: item.chapterId || '',
+      });
     }
 
     function makeSelectionReviewTarget(selection) {
@@ -3280,7 +3330,7 @@
         selection.sourcePage || item?.sourcePage || currentItem()?.sourcePage || ''
       );
       const lineNo = selection.lineNo || item?.itemNo || '';
-      return {
+      return withAnnotationContext({
         corpusId: currentCorpus?.corpusId || currentCorpus?.id || '',
         itemId: selection.lineItemId,
         parentItemId: item?.parentItemId || '',
@@ -3296,7 +3346,14 @@
         selectionId: simpleHash(`${selection.lineItemId}:${selection.selectionStart ?? ''}:${selection.selectionEnd ?? ''}:${selection.text}`),
         displayMode: mode,
         reportScope: 'selection',
-      };
+      }, {
+        pageId: selection.lineItemId,
+        sourcePage,
+        sourcePageLabel,
+        lineId: selection.lineItemId,
+        lineNo,
+        storyId: item?.chapterId || currentItem()?.chapterId || '',
+      });
     }
 
     function makeRemarkTarget(selection, tool = activeRemarkTool) {
@@ -4026,6 +4083,7 @@
       const manifest = await fetchJson(manifestPath, { signal });
       if (signalAborted(signal)) return;
       currentManifest = manifest;
+      currentManifestPath = normalizeManifestPath(manifestPath);
       corpusBaseUrl = dirname(manifestPath);
       primaryCorpus = await fetchJson(joinUrl(corpusBaseUrl, manifest.corpus || 'corpus.json'), { signal });
       if (signalAborted(signal)) return;
