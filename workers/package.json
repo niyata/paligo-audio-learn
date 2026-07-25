@@ -2,6 +2,7 @@
   "name": "paligo-inbox-api",
   "private": true,
   "version": "0.1.0",
+  "type": "module",
   "description": "Paligo Exam Inbox API — Cloudflare Workers",
   "scripts": {
     "dev": "wrangler dev --port 8788 --ip 127.0.0.1",
