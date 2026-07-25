@@ -17,5 +17,12 @@
       "manifest": "../dhammapadatthakatha-literal-thai-prototype/manifest.json"
     }
   },
+  "lexicalAlignment": {
+    "schema": "paligo.lexical-alignment.ref.v1",
+    "alignmentSet": "lexical-alignment.seed.json",
+    "status": "seed",
+    "primarySource": "pali",
+    "lookupDirections": ["pali-to-thai", "thai-to-pali"]
+  },
   "audioAlignment": ""
 }

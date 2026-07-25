@@ -28,6 +28,7 @@ const checks = [
     "paligo-inbox-client.js",
     "paligo-annotation-tools.js",
     "scripts/audit-live-api-readiness.mjs",
+    "scripts/audit-lexical-alignment.mjs",
     "scripts/audit-pip-pali-glyphs.mjs",
     "scripts/audit-production-critical-pages.mjs",
     "scripts/check-deploy-discipline.mjs",
@@ -56,6 +57,11 @@ const checks = [
     name: "corpus.paliGlyphNormalization",
     command: node,
     args: ["scripts/audit-pip-pali-glyphs.mjs"],
+  },
+  {
+    name: "corpus.lexicalAlignment",
+    command: node,
+    args: ["scripts/audit-lexical-alignment.mjs"],
   },
   {
     name: "deploy.preLaunchDiscipline",

@@ -1,0 +1,148 @@
+{
+  "schema": "paligo.lexical-alignment.v1",
+  "schemaVersion": 1,
+  "alignmentSetId": "dhammapadatthakatha-pt4-book1-seed",
+  "status": "seed",
+  "source": {
+    "corpusId": "dhammapadatthakatha-pali-rtf-prototype",
+    "manifest": "manifest.json",
+    "language": "pali",
+    "textRole": "source"
+  },
+  "targets": [
+    {
+      "corpusId": "dhammapadatthakatha-meaning-thai-prototype",
+      "manifest": "../dhammapadatthakatha-meaning-thai-prototype/manifest.json",
+      "language": "thai",
+      "translationMode": "meaning",
+      "textRole": "target"
+    },
+    {
+      "corpusId": "dhammapadatthakatha-literal-thai-prototype",
+      "manifest": "../dhammapadatthakatha-literal-thai-prototype/manifest.json",
+      "language": "thai",
+      "translationMode": "literal",
+      "textRole": "target"
+    }
+  ],
+  "tokenIndex": [
+    {
+      "tokenId": "pali:p0003:l03:t01",
+      "corpusId": "dhammapadatthakatha-pali-rtf-prototype",
+      "itemId": "dhammapadatthakatha-pali-rtf-prototype-p0003",
+      "sourcePage": 3,
+      "lineNo": 3,
+      "tokenNo": 1,
+      "language": "pali",
+      "surface": "มโนปุพฺพงฺคมา",
+      "normalized": "มโนปุพฺพงฺคมา",
+      "lemma": "มโนปุพฺพงฺคม"
+    },
+    {
+      "tokenId": "pali:p0003:l03:t02",
+      "corpusId": "dhammapadatthakatha-pali-rtf-prototype",
+      "itemId": "dhammapadatthakatha-pali-rtf-prototype-p0003",
+      "sourcePage": 3,
+      "lineNo": 3,
+      "tokenNo": 2,
+      "language": "pali",
+      "surface": "ธมฺมา",
+      "normalized": "ธมฺมา",
+      "lemma": "ธมฺม"
+    },
+    {
+      "tokenId": "pali:p0003:l03:t03",
+      "corpusId": "dhammapadatthakatha-pali-rtf-prototype",
+      "itemId": "dhammapadatthakatha-pali-rtf-prototype-p0003",
+      "sourcePage": 3,
+      "lineNo": 3,
+      "tokenNo": 3,
+      "language": "pali",
+      "surface": "มโนเสฏฺฐา",
+      "normalized": "มโนเสฏฺฐา",
+      "lemma": "มโนเสฏฺฐ"
+    },
+    {
+      "tokenId": "thai-meaning:p0003:l05:p01",
+      "corpusId": "dhammapadatthakatha-meaning-thai-prototype",
+      "itemId": "dhammapadatthakatha-meaning-thai-prototype-p0003",
+      "sourcePage": 3,
+      "lineNo": 5,
+      "tokenNo": 1,
+      "language": "thai",
+      "translationMode": "meaning",
+      "surface": "ธรรมทั้งหลาย มีใจเป็นหัวหน้า",
+      "normalized": "ธรรมทั้งหลาย มีใจเป็นหัวหน้า"
+    },
+    {
+      "tokenId": "thai-meaning:p0003:l05:p02",
+      "corpusId": "dhammapadatthakatha-meaning-thai-prototype",
+      "itemId": "dhammapadatthakatha-meaning-thai-prototype-p0003",
+      "sourcePage": 3,
+      "lineNo": 5,
+      "tokenNo": 2,
+      "language": "thai",
+      "translationMode": "meaning",
+      "surface": "มีใจเป็นใหญ่",
+      "normalized": "มีใจเป็นใหญ่"
+    },
+    {
+      "tokenId": "thai-literal:p0001:l08:p01",
+      "corpusId": "dhammapadatthakatha-literal-thai-prototype",
+      "itemId": "dhammapadatthakatha-literal-thai-prototype-p0001",
+      "sourcePage": 1,
+      "lineNo": 8,
+      "tokenNo": 1,
+      "language": "thai",
+      "translationMode": "literal",
+      "surface": "อ.ธรรม ท. มีใจเป็นสภาพถึงก่อน",
+      "normalized": "อ.ธรรม ท. มีใจเป็นสภาพถึงก่อน"
+    },
+    {
+      "tokenId": "thai-literal:p0001:l08:p02",
+      "corpusId": "dhammapadatthakatha-literal-thai-prototype",
+      "itemId": "dhammapadatthakatha-literal-thai-prototype-p0001",
+      "sourcePage": 1,
+      "lineNo": 8,
+      "tokenNo": 2,
+      "language": "thai",
+      "translationMode": "literal",
+      "surface": "มีใจประเสริฐที่สุด",
+      "normalized": "มีใจประเสริฐที่สุด"
+    }
+  ],
+  "alignments": [
+    {
+      "alignmentId": "aln-dhp-seed-0001",
+      "sourceTokenIds": ["pali:p0003:l03:t01", "pali:p0003:l03:t02"],
+      "targetTokenIds": ["thai-meaning:p0003:l05:p01", "thai-literal:p0001:l08:p01"],
+      "sourceLanguage": "pali",
+      "targetLanguage": "thai",
+      "translationModes": ["meaning", "literal"],
+      "type": "phrase-to-phrase",
+      "confidence": "seed",
+      "reviewStatus": "needs_human_review"
+    },
+    {
+      "alignmentId": "aln-dhp-seed-0002",
+      "sourceTokenIds": ["pali:p0003:l03:t03"],
+      "targetTokenIds": ["thai-meaning:p0003:l05:p02", "thai-literal:p0001:l08:p02"],
+      "sourceLanguage": "pali",
+      "targetLanguage": "thai",
+      "translationModes": ["meaning", "literal"],
+      "type": "word-to-phrase",
+      "confidence": "seed",
+      "reviewStatus": "needs_human_review"
+    }
+  ],
+  "lookupPolicy": {
+    "defaultDirection": "bidirectional",
+    "allowManyToMany": true,
+    "preferVerifiedOverSeed": true,
+    "displayUnverifiedBadge": true
+  },
+  "notes": [
+    "This file is a schema seed for production hardening. It proves the contract and audit path before full-book human verification.",
+    "Future generated alignment files must keep source page numbers as integers for web metadata; Thai numerals belong only in displayed textbook content."
+  ]
+}

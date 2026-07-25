@@ -4,6 +4,8 @@
 สถานะ: Draft / near-term feature source of truth
 เกี่ยวข้อง: `pali-reference-pip.html`, `paligo-annotation-tools.js`, `paligo-reference-worker.js`, future corpus alignment data
 
+Data contract: [`docs/lexical-alignment-data-model.md`](lexical-alignment-data-model.md)
+
 ---
 
 ## 1. เป้าหมาย
@@ -131,6 +133,13 @@ Behavior:
   "confidence": "human_verified"
 }
 ```
+
+สถานะ implementation ปัจจุบัน:
+
+- มี production contract seed แล้วที่ `data/corpora/dhammapadatthakatha-pali-rtf-prototype/lexical-alignment.seed.json`
+- Manifest บาลีชี้ไปที่ alignment seed ผ่าน `lexicalAlignment`
+- `scripts/audit-lexical-alignment.mjs` ตรวจ schema, token reference, confidence และ review status
+- ยังไม่ถือว่า alignment ครบทั้งเล่มจนกว่าจะเพิ่มข้อมูล `human_verified`
 
 ### 6.4 Lexicon / Grammar Metadata
 
