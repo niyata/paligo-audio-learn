@@ -90,6 +90,47 @@ const routes = [
     assert: async (page) => {
       await page.click("[data-open-pali-reference]");
       await page.waitForSelector("[data-pali-reference-pip]:not([hidden])", { timeout: 10000 });
+      const narrowChromeState = await page.evaluate(() => {
+        const pip = document.querySelector("[data-pali-reference-pip]");
+        const modeButtons = Array.from(document.querySelectorAll("[data-pali-reference-mode]"));
+        const closeButton = document.querySelector("[data-pali-reference-close]");
+        const minimizeButton = document.querySelector("[data-pali-reference-minimize]");
+        const fullButton = document.querySelector("[data-pali-reference-full]");
+        if (!pip || !closeButton || !minimizeButton || !fullButton || modeButtons.length < 5) {
+          return { ok: false, reason: "missing PiP controls" };
+        }
+
+        pip.style.width = "360px";
+        pip.style.left = "16px";
+        pip.style.right = "auto";
+        pip.style.top = "96px";
+        pip.style.bottom = "auto";
+
+        const pipRect = pip.getBoundingClientRect();
+        const controls = [...modeButtons, closeButton, minimizeButton, fullButton];
+        const failures = controls
+          .map((control) => {
+            const rect = control.getBoundingClientRect();
+            return {
+              label: control.getAttribute("aria-label") || control.textContent.trim(),
+              visible: rect.width > 0 && rect.height > 0,
+              inside:
+                rect.left >= pipRect.left - 1 &&
+                rect.right <= pipRect.right + 1 &&
+                rect.top >= pipRect.top - 1 &&
+                rect.bottom <= pipRect.bottom + 1,
+            };
+          })
+          .filter((item) => !item.visible || !item.inside);
+        return {
+          ok: failures.length === 0,
+          failures,
+          pipWidth: Math.round(pipRect.width),
+        };
+      });
+      if (!narrowChromeState.ok) {
+        throw new Error(`Workbook narrow PiP chrome controls failed: ${JSON.stringify(narrowChromeState)}`);
+      }
       await page.click("[data-pali-reference-mode='right']");
       const rightState = await page.evaluate(() => {
         const shell = document.querySelector(".template-shell");

@@ -13,9 +13,9 @@ Paligo from late prototype toward production grade.
 | --- | --- | --- | --- |
 | 1. Auth / Session / Pairing State | Complete (current slice) | `GET /v1/me` exposes `appState`/`capabilities`; inbox/account/books gates now consume the shared state instead of forcing page-specific login loops | Add authenticated E2E against `api.paligo.jp` after production credentials are finalized |
 | 2. First-Run Onboarding Fallbacks | Complete (current slice) | Student no-pairing and reviewer virtual-trial states have explicit CTAs; visual smoke now covers the no-pairing account path | Replace remaining mock/virtual onboarding copy with D1-backed invite telemetry |
-| 3. Visual Smoke Regression | Complete (current slice) | `scripts/audit-production-critical-pages.mjs` now asserts first-run CTA behavior plus PiP click lookup vs selection annotation behavior across desktop and tablet viewports | Run full visual smoke before each production-candidate deploy and add narrow-phone viewport coverage after shell mobile rules stabilize |
+| 3. Visual Smoke Regression | Complete (current slice) | `scripts/audit-production-critical-pages.mjs` now asserts first-run CTA behavior, PiP click lookup vs selection annotation behavior, and narrow PiP window controls across desktop and tablet viewports | Run full visual smoke before each production-candidate deploy and add narrow-phone viewport coverage after shell mobile rules stabilize |
 | 4. Backend Contract And Error Codes | Complete (current slice) | `scripts/test-production-contracts.mjs` verifies canonical app states and error-code payloads | Expand contract tests to every mutating Workers endpoint when inbox D1 schema stabilizes |
-| 5. Deployment Discipline | Complete (current slice) | `docs/deploy-production-checklist.md`, `scripts/check-deploy-discipline.mjs`, and `.github/workflows/production-hardening.yml` cover pre-launch gates | Add real Cloudflare Pages deployment status checks once branch mapping is finalized |
+| 5. Deployment Discipline | Complete (current slice) | `scripts/run-production-hardening.mjs` is the single offline gate for whitespace, syntax, contracts, PiP glyph normalization, pre-launch privacy, and Git LFS readiness; `.github/workflows/production-hardening.yml` uses the same gate | Add real Cloudflare Pages deployment status checks once branch mapping is finalized |
 
 Rule for every hardening pass:
 
@@ -112,6 +112,8 @@ Implementation notes:
 
 - Run `node scripts/audit-production-critical-pages.mjs` while the static server
   is available at `http://127.0.0.1:8765`.
+- Or run the unified optional visual gate:
+  `PALIGO_RUN_VISUAL_AUDIT=1 node scripts/run-production-hardening.mjs`.
 - The script opens Chrome and writes screenshots/report to
   `docs/audit/production-critical-pages/`.
 - Current viewport coverage is desktop `1280x900` and tablet `820x1100`.
@@ -161,8 +163,18 @@ Until launch:
 Implementation notes:
 
 - Use `docs/deploy-production-checklist.md` as the human release checklist.
-- Run `node scripts/check-deploy-discipline.mjs` before production-candidate
-  deploys.
+- Run `node scripts/run-production-hardening.mjs` before production-candidate
+  pushes and deploys. It wraps:
+  - `git diff --check`
+  - critical JS syntax checks
+  - `scripts/test-production-contracts.mjs`
+  - `scripts/audit-pip-pali-glyphs.mjs`
+  - `scripts/check-deploy-discipline.mjs`
+- Run live API checks through
+  `PALIGO_RUN_LIVE_API_AUDIT=1 node scripts/run-production-hardening.mjs` before
+  promoting a branch to `app.paligo.jp`.
+- The deploy discipline script fails when Git LFS is configured but `git-lfs`
+  is missing, because normal push hooks will otherwise fail late in the release.
 - `_headers` and `robots.txt` remain locked to noindex/disallow during pre-launch.
 
 ## Multi-Agent Rule

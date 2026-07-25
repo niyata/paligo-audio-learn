@@ -42,19 +42,7 @@ jobs:
           fi
 
       - name: Syntax check critical scripts
-        run: |
-          node --check paligo-inbox-client.js
-          node --check scripts/audit-live-api-readiness.mjs
-          node --check scripts/audit-production-critical-pages.mjs
-          node --check scripts/check-deploy-discipline.mjs
-          node --check scripts/test-production-contracts.mjs
-          node --check workers/src/auth.js
-          node --check workers/src/db.js
-          node --check workers/src/http.js
-          node --check workers/src/inbox.js
+        run: node --check scripts/run-production-hardening.mjs
 
-      - name: Backend and app-state contracts
-        run: node scripts/test-production-contracts.mjs
-
-      - name: Pre-launch deploy discipline
-        run: node scripts/check-deploy-discipline.mjs
+      - name: Production hardening gate
+        run: node scripts/run-production-hardening.mjs
