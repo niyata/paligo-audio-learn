@@ -23,6 +23,7 @@
   };
   const PUNCT_SPLIT = /[\s,;:.\u0e2f\u0e5a\u0e5b\[\]()「」『』\-–—]+/u;
   const corpora = new Map();
+  const alignmentSets = new Map();
 
   const normalizePali = (value) =>
     String(value ?? "").replace(/[\uF700\uF70F\uF71A\uF710\uF701-\uF704\uF70B\uF70E\uF712\uF718\uF709\uF711]/g, (ch) => LEGACY_GLYPH_MAP[ch] || ch);
@@ -32,6 +33,13 @@
       .split(PUNCT_SPLIT)
       .map((token) => token.trim())
       .filter(Boolean);
+
+  const normalizeLookupText = (value) =>
+    normalizePali(value)
+      .normalize('NFC')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .toLowerCase();
 
   const simpleHash = (value) => {
     let hash = 0;
@@ -166,6 +174,98 @@
     };
   };
 
+  const buildAlignmentState = (alignment) => {
+    const tokens = Array.isArray(alignment?.tokenIndex) ? alignment.tokenIndex : [];
+    const alignments = Array.isArray(alignment?.alignments) ? alignment.alignments : [];
+    const tokenById = new Map();
+    const tokenIdsByLookup = new Map();
+
+    tokens.forEach((token) => {
+      if (!token?.tokenId) return;
+      tokenById.set(token.tokenId, token);
+      [
+        token.surface,
+        token.normalized,
+        token.lemma,
+      ].forEach((value) => {
+        const key = normalizeLookupText(value);
+        if (!key) return;
+        if (!tokenIdsByLookup.has(key)) tokenIdsByLookup.set(key, new Set());
+        tokenIdsByLookup.get(key).add(token.tokenId);
+      });
+    });
+
+    return { alignment, tokenById, tokenIdsByLookup, alignments };
+  };
+
+  const registerAlignment = ({ corpusKey, alignment }) => {
+    if (!corpusKey || !alignment) return { ok: false, reason: 'missing corpusKey or alignment' };
+    const state = buildAlignmentState(alignment);
+    alignmentSets.set(corpusKey, state);
+    return {
+      ok: true,
+      corpusKey,
+      alignmentSetId: alignment.alignmentSetId || '',
+      status: alignment.status || '',
+      tokenCount: state.tokenById.size,
+      alignmentCount: state.alignments.length,
+    };
+  };
+
+  const confidenceRank = (confidence) => ({
+    human_verified: 4,
+    human_reviewed: 3,
+    machine: 2,
+    seed: 1,
+  }[confidence] || 0);
+
+  const alignmentMatchesToken = (alignment, tokenIds) => {
+    const sourceIds = alignment.sourceTokenIds || [];
+    const targetIds = alignment.targetTokenIds || [];
+    return sourceIds.some((id) => tokenIds.has(id)) || targetIds.some((id) => tokenIds.has(id));
+  };
+
+  const hydrateAlignment = (alignment, state) => ({
+    alignmentId: alignment.alignmentId,
+    type: alignment.type,
+    confidence: alignment.confidence,
+    reviewStatus: alignment.reviewStatus,
+    sourceLanguage: alignment.sourceLanguage,
+    targetLanguage: alignment.targetLanguage,
+    translationModes: alignment.translationModes || [],
+    sourceTokens: (alignment.sourceTokenIds || []).map((id) => state.tokenById.get(id)).filter(Boolean),
+    targetTokens: (alignment.targetTokenIds || []).map((id) => state.tokenById.get(id)).filter(Boolean),
+  });
+
+  const lookupAlignment = ({ corpusKey, query, limit = 8 }) => {
+    const state = alignmentSets.get(corpusKey);
+    const normalizedQuery = normalizeLookupText(query);
+    if (!state || !normalizedQuery) {
+      return { query, normalizedQuery, matches: [], status: state?.alignment?.status || '' };
+    }
+
+    const direct = state.tokenIdsByLookup.get(normalizedQuery) || new Set();
+    const fuzzy = direct.size
+      ? direct
+      : new Set(Array.from(state.tokenIdsByLookup.entries())
+        .filter(([key]) => key.includes(normalizedQuery) || normalizedQuery.includes(key))
+        .flatMap(([, ids]) => Array.from(ids)));
+
+    const matches = state.alignments
+      .filter((alignment) => alignmentMatchesToken(alignment, fuzzy))
+      .map((alignment) => hydrateAlignment(alignment, state))
+      .sort((a, b) => confidenceRank(b.confidence) - confidenceRank(a.confidence))
+      .slice(0, limit);
+
+    return {
+      query,
+      normalizedQuery,
+      alignmentSetId: state.alignment.alignmentSetId || '',
+      status: state.alignment.status || '',
+      matches,
+    };
+  };
+
   const corpusState = (corpusKey) => {
     const state = corpora.get(corpusKey);
     if (!state) throw new Error(`ไม่พบ corpus worker key: ${corpusKey}`);
@@ -246,6 +346,8 @@
     try {
       let result;
       if (type === 'register-corpus') result = registerCorpus(payload);
+      else if (type === 'register-alignment') result = registerAlignment(payload);
+      else if (type === 'lookup-alignment') result = lookupAlignment(payload);
       else if (type === 'page-tokens') result = pageTokens(payload);
       else if (type === 'search') result = search(payload);
       else if (type === 'reference-groups') result = referenceGroups(payload);

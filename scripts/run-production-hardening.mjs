@@ -27,12 +27,14 @@ const checks = [
   ...[
     "paligo-inbox-client.js",
     "paligo-annotation-tools.js",
+    "paligo-reference-worker.js",
     "scripts/audit-live-api-readiness.mjs",
     "scripts/audit-lexical-alignment.mjs",
     "scripts/audit-pip-pali-glyphs.mjs",
     "scripts/audit-production-critical-pages.mjs",
     "scripts/check-deploy-discipline.mjs",
     "scripts/test-annotation-tools.mjs",
+    "scripts/test-reference-worker.mjs",
     "scripts/test-production-contracts.mjs",
     "workers/src/auth.js",
     "workers/src/db.js",
@@ -52,6 +54,11 @@ const checks = [
     name: "contracts.annotationTools",
     command: node,
     args: ["scripts/test-annotation-tools.mjs"],
+  },
+  {
+    name: "contracts.referenceWorker",
+    command: node,
+    args: ["scripts/test-reference-worker.mjs"],
   },
   {
     name: "corpus.paliGlyphNormalization",

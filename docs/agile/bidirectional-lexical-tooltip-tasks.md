@@ -1,7 +1,7 @@
 # Task Backlog: Bidirectional Lexical Tooltip + PAT Selection Tooltip
 
 วันที่สร้าง: 2026-07-21
-อัปเดตล่าสุด: 2026-07-22
+อัปเดตล่าสุด: 2026-07-27
 Source PRD: [`docs/bidirectional-lexical-tooltip-prd.md`](../bidirectional-lexical-tooltip-prd.md)
 
 ---
@@ -37,6 +37,13 @@ Source PRD: [`docs/bidirectional-lexical-tooltip-prd.md`](../bidirectional-lexic
 | BLT-11 | ออกแบบ lexical alignment schema บาลี <-> ไทย | PALI-AI | รองรับ word-to-word, word-to-phrase, phrase-to-phrase, confidence |
 | BLT-12 | สร้าง prototype alignment สำหรับเรื่องพระจักขุบาล | PALI-AI / Claude | คลิกคำตัวอย่างอย่างน้อย 20 จุดแล้วได้คู่แปลที่ตรวจได้ |
 | BLT-13 | เพิ่ม worker API สำหรับ lookup token/alignment | Codex | PiP เรียก lookup โดยไม่ block main thread |
+
+หมายเหตุ 2026-07-27:
+
+- `paligo-reference-worker.js` เพิ่ม `register-alignment` และ `lookup-alignment` สำหรับ lexical alignment seed
+- `pali-reference-pip.html` โหลด `lexicalAlignment` จาก manifest แล้ว register เข้า worker ระหว่างโหลดตำรา
+- Click lookup และ PAT selection tooltip ใช้ผลจาก alignment ก่อน fallback เป็น mock
+- `scripts/test-reference-worker.mjs` ตรวจบาลี -> ไทย และไทย -> บาลี จาก seed alignment
 
 ---
 

@@ -1952,6 +1952,9 @@
     let renderPassController = null;
     let referenceWorker = null;
     let referenceWorkerSeq = 0;
+    let lexicalAlignmentReady = false;
+    let lexicalAlignmentStatus = '';
+    let lexicalLookupSeq = 0;
     let corpusWorkerSeq = 0;
     const referenceWorkerPending = new Map();
     const corpusWorkerKeys = new WeakMap();
@@ -2321,6 +2324,32 @@
           manifestUrl,
         };
       }));
+    }
+
+    async function loadLexicalAlignment(manifest, { signal } = {}) {
+      lexicalAlignmentReady = false;
+      lexicalAlignmentStatus = '';
+      const ref = manifest?.lexicalAlignment || null;
+      if (!ref?.alignmentSet || !primaryCorpus) return null;
+      try {
+        const alignment = await fetchJson(joinUrl(corpusBaseUrl, ref.alignmentSet), { signal });
+        if (signalAborted(signal)) return null;
+        const result = await referenceWorkerRequest('register-alignment', {
+          corpusKey: workerKeyForCorpus(primaryCorpus),
+          alignment,
+        }, { signal });
+        if (signalAborted(signal)) return null;
+        lexicalAlignmentReady = Boolean(result?.ok);
+        lexicalAlignmentStatus = result?.status || alignment.status || ref.status || '';
+        return result;
+      } catch (error) {
+        if (!isAbortError(error) && !isWorkerUnavailableError(error)) {
+          console.debug('[Paligo PiP] lexical alignment unavailable', error.message || error);
+        }
+        lexicalAlignmentReady = false;
+        lexicalAlignmentStatus = ref.status || '';
+        return null;
+      }
     }
 
     function pages() {
@@ -4091,6 +4120,7 @@
       corpusSearchResults = [];
       await registerCorpusWithWorker(primaryCorpus, { signal });
       await loadTranslationCompanions(manifest, { signal });
+      await loadLexicalAlignment(manifest, { signal });
       if (signalAborted(signal)) return;
       titleEl.textContent = manifest.title || currentCorpus.title || 'ตำรา';
       mode = manifest.defaultDisplayMode || 'kho';
@@ -4190,6 +4220,94 @@
       ];
     }
 
+    function alignmentStatusLabel(status) {
+      return {
+        seed: 'seed alignment',
+        machine: 'machine alignment',
+        human_reviewed: 'reviewed alignment',
+        human_verified: 'verified alignment',
+      }[status] || 'alignment';
+    }
+
+    function tokenSurfaceList(tokens) {
+      return (tokens || [])
+        .map((token) => token?.surface || token?.normalized || '')
+        .filter(Boolean)
+        .join(' · ');
+    }
+
+    function isLikelyPaliLookup(text, line = null) {
+      if (/[\u0E3A\u0E4D]/u.test(String(text || ''))) return true;
+      if (line?.closest?.('.pip-bilingual__col--pali')) return true;
+      return languageVisibility === 'pali';
+    }
+
+    function lookupDirectionLabel(text, line = null) {
+      return isLikelyPaliLookup(text, line) ? 'คำบาลี → ไทย' : 'คำไทย → บาลี';
+    }
+
+    function lookupPrimaryHasQuery(sourceText, targetText, queryText) {
+      const queryNormalized = normalizePaliDisplay(queryText).normalize('NFC').trim();
+      if (!queryNormalized) return true;
+      if (normalizePaliDisplay(sourceText).includes(queryNormalized)) return true;
+      if (normalizePaliDisplay(targetText).includes(queryNormalized)) return false;
+      return true;
+    }
+
+    function vocabItemsFromAlignment(lookupResult, queryText) {
+      const matches = Array.isArray(lookupResult?.matches) ? lookupResult.matches : [];
+      if (!matches.length) return [];
+      return matches.flatMap((match) => {
+        const sourceText = tokenSurfaceList(match.sourceTokens);
+        const targetText = tokenSurfaceList(match.targetTokens);
+        const sourceHasQuery = lookupPrimaryHasQuery(sourceText, targetText, queryText);
+        const primary = sourceHasQuery ? targetText : sourceText;
+        const secondary = sourceHasQuery ? sourceText : targetText;
+        const modes = (match.translationModes || []).join(', ');
+        return [{
+          pali: primary || targetText || sourceText || queryText,
+          gloss: [
+            secondary ? `เทียบจาก: ${secondary}` : '',
+            modes ? `โหมด: ${modes}` : '',
+            `${alignmentStatusLabel(match.confidence)} · ${match.type || 'alignment'}`,
+          ].filter(Boolean).join(' · '),
+        }];
+      });
+    }
+
+    function renderVocabItems(items) {
+      vocabList.replaceChildren();
+      items.forEach((item) => {
+        const row = document.createElement('div');
+        row.className = 'pip-vocab-tooltip__item';
+        const pali = document.createElement('div');
+        pali.className = 'pip-vocab-tooltip__pali';
+        pali.textContent = item.pali;
+        const gloss = document.createElement('div');
+        gloss.className = 'pip-vocab-tooltip__gloss';
+        gloss.textContent = item.gloss;
+        row.append(pali, gloss);
+        vocabList.append(row);
+      });
+    }
+
+    async function lookupAlignmentItems(text, { signal } = {}) {
+      if (!lexicalAlignmentReady || !primaryCorpus) return [];
+      try {
+        const result = await referenceWorkerRequest('lookup-alignment', {
+          corpusKey: workerKeyForCorpus(primaryCorpus),
+          query: text,
+          limit: 8,
+        }, { signal });
+        return vocabItemsFromAlignment(result, text);
+      } catch (error) {
+        if (!isAbortError(error) && !isWorkerUnavailableError(error)) {
+          console.debug('[Paligo PiP] lexical lookup fallback', error.message || error);
+        }
+        return [];
+      }
+    }
+
     function renderRemarkTools() {
       if (!remarkTools) return;
       remarkTools.replaceChildren();
@@ -4247,6 +4365,7 @@
 
     function hideVocabTooltip({ resetTools = true } = {}) {
       if (!vocabTooltip) return;
+      lexicalLookupSeq += 1;
       vocabTooltip.hidden = true;
       vocabTooltip.classList.remove('is-click-lookup');
       activeVocabSelection = null;
@@ -4536,18 +4655,13 @@
       vocabTooltip.classList.remove('is-click-lookup');
       vocabTerm.textContent = `「${payload.text}」`;
       vocabMeta.textContent = `Mockup คำศัพท์บาลีเทียบ · หน้า ${displayPageLabel(activeVocabSelection.sourcePageLabel, activeVocabSelection.sourcePage) || '-'} · บรรทัด ${activeVocabSelection.lineNo || '-'}`;
-      vocabList.replaceChildren();
-      mockVocabItems(payload.text).forEach((item) => {
-        const row = document.createElement('div');
-        row.className = 'pip-vocab-tooltip__item';
-        const pali = document.createElement('div');
-        pali.className = 'pip-vocab-tooltip__pali';
-        pali.textContent = item.pali;
-        const gloss = document.createElement('div');
-        gloss.className = 'pip-vocab-tooltip__gloss';
-        gloss.textContent = item.gloss;
-        row.append(pali, gloss);
-        vocabList.append(row);
+      renderVocabItems(mockVocabItems(payload.text));
+      const lookupSeq = ++lexicalLookupSeq;
+      lookupAlignmentItems(payload.text).then((items) => {
+        if (!items.length || lookupSeq !== lexicalLookupSeq || activeVocabSelection?.text !== payload.text) return;
+        vocabMeta.textContent = `Lexical alignment (${alignmentStatusLabel(lexicalAlignmentStatus)}) · หน้า ${displayPageLabel(activeVocabSelection.sourcePageLabel, activeVocabSelection.sourcePage) || '-'} · บรรทัด ${activeVocabSelection.lineNo || '-'}`;
+        renderVocabItems(items);
+        requestAnimationFrame(() => placeVocabTooltip(rect));
       });
       renderRemarkTools();
 
@@ -4589,20 +4703,15 @@
       };
       vocabTooltip.classList.add('is-click-lookup');
       vocabTerm.textContent = `「${payload.text}」`;
-      const direction = /[\u0e01-\u0e4e]/u.test(payload.text) ? 'คำไทย → บาลี' : 'คำบาลี → ไทย';
+      const direction = lookupDirectionLabel(payload.text, line);
       vocabMeta.textContent = `${direction} · หน้า ${displayPageLabel(activeVocabSelection.sourcePageLabel, activeVocabSelection.sourcePage) || '-'} · บรรทัด ${activeVocabSelection.lineNo || '-'}`;
-      vocabList.replaceChildren();
-      mockVocabItems(payload.text, 'click').forEach((item) => {
-        const row = document.createElement('div');
-        row.className = 'pip-vocab-tooltip__item';
-        const pali = document.createElement('div');
-        pali.className = 'pip-vocab-tooltip__pali';
-        pali.textContent = item.pali;
-        const gloss = document.createElement('div');
-        gloss.className = 'pip-vocab-tooltip__gloss';
-        gloss.textContent = item.gloss;
-        row.append(pali, gloss);
-        vocabList.append(row);
+      renderVocabItems(mockVocabItems(payload.text, 'click'));
+      const lookupSeq = ++lexicalLookupSeq;
+      lookupAlignmentItems(payload.text).then((items) => {
+        if (!items.length || lookupSeq !== lexicalLookupSeq || activeVocabSelection?.text !== payload.text) return;
+        vocabMeta.textContent = `${direction} · ${alignmentStatusLabel(lexicalAlignmentStatus)} · หน้า ${displayPageLabel(activeVocabSelection.sourcePageLabel, activeVocabSelection.sourcePage) || '-'} · บรรทัด ${activeVocabSelection.lineNo || '-'}`;
+        renderVocabItems(items);
+        requestAnimationFrame(() => placeVocabTooltip(anchorRect));
       });
       vocabTooltip.hidden = false;
       requestAnimationFrame(() => placeVocabTooltip(anchorRect));
