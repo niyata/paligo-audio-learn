@@ -22,6 +22,10 @@
     "\uF711": "ํ",
   };
   const PUNCT_SPLIT = /[\s,;:.\u0e2f\u0e5a\u0e5b\[\]()「」『』\-–—]+/u;
+  const WEB_DIGIT_RE = /[0-9\u0e50-\u0e59]/u;
+  const PALI_MARK_RE = /[\u0e3a\u0e4d\uF711\uF71A]/u;
+  const LETTER_RE = /[\p{L}\u0e31-\u0e4e]/u;
+  const STRUCTURAL_TOKEN_RE = /^(?:หน้า|ภาค|เล่ม|เรื่อง|วรรค|วณฺณนา|prototype)$/iu;
   const corpora = new Map();
   const alignmentSets = new Map();
 
@@ -33,6 +37,22 @@
       .split(PUNCT_SPLIT)
       .map((token) => token.trim())
       .filter(Boolean);
+
+  const normalizeTokenFocus = (focus) => {
+    const value = String(focus || 'auto');
+    if (value === 'thaiMeaning' || value === 'thaiLiteral') return 'thai';
+    if (value === 'pali' || value === 'thai') return value;
+    return 'auto';
+  };
+
+  const isPageToken = (token, focus = 'auto') => {
+    const value = normalizePali(token).trim();
+    const normalizedFocus = normalizeTokenFocus(focus);
+    if (!value || WEB_DIGIT_RE.test(value) || !LETTER_RE.test(value)) return false;
+    if (STRUCTURAL_TOKEN_RE.test(value)) return false;
+    if (normalizedFocus === 'thai' && PALI_MARK_RE.test(value)) return false;
+    return true;
+  };
 
   const normalizeLookupText = (value) =>
     normalizePali(value)
@@ -275,11 +295,12 @@
   const pageFor = (state, sourcePage) =>
     state.index.bySourcePage.get(String(sourcePage)) || state.index.byItemId.get(String(sourcePage)) || null;
 
-  const pageTokens = ({ corpusKey, sourcePage, preferredLanguage = 'auto' }) => {
+  const pageTokens = ({ corpusKey, sourcePage, preferredLanguage = 'auto', tokenFocus = 'auto' }) => {
     const state = corpusState(corpusKey);
     return {
       sourcePage,
-      tokens: tokenizeText(pageText(pageFor(state, sourcePage), preferredLanguage)),
+      tokens: tokenizeText(pageText(pageFor(state, sourcePage), preferredLanguage))
+        .filter((token) => isPageToken(token, tokenFocus || preferredLanguage)),
     };
   };
 

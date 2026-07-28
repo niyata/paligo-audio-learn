@@ -34,6 +34,7 @@ const checks = [
     "scripts/audit-production-critical-pages.mjs",
     "scripts/check-deploy-discipline.mjs",
     "scripts/test-annotation-tools.mjs",
+    "scripts/test-ghost-suggestion.mjs",
     "scripts/test-reference-worker.mjs",
     "scripts/test-production-contracts.mjs",
     "workers/src/auth.js",
@@ -54,6 +55,11 @@ const checks = [
     name: "contracts.annotationTools",
     command: node,
     args: ["scripts/test-annotation-tools.mjs"],
+  },
+  {
+    name: "contracts.ghostSuggestion",
+    command: node,
+    args: ["scripts/test-ghost-suggestion.mjs"],
   },
   {
     name: "contracts.referenceWorker",

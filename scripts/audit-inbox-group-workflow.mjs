@@ -70,6 +70,52 @@ async function main() {
 
   await page.locator("[data-open-group-sheet]").first().click();
   await page.waitForSelector("[data-group-sheet].is-open", { timeout: 5000 });
+
+  const groupSheetLayout = await page.evaluate(() => {
+    const rectOf = (selector) => {
+      const node = document.querySelector(selector);
+      if (!node) return null;
+      const rect = node.getBoundingClientRect();
+      return {
+        top: Math.round(rect.top),
+        right: Math.round(rect.right),
+        bottom: Math.round(rect.bottom),
+        left: Math.round(rect.left),
+        width: Math.round(rect.width),
+        height: Math.round(rect.height),
+      };
+    };
+    const overlap = (a, b) => {
+      if (!a || !b) return true;
+      return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+    };
+    const panel = rectOf("[data-group-sheet] .inbox-group-sheet__panel");
+    const name = rectOf("[data-group-name]");
+    const owner = rectOf("[data-group-owner-role]");
+    const kind = rectOf("[data-group-kind]");
+    const theme = rectOf("[data-group-theme]");
+    const description = rectOf("[data-group-description]");
+    const preview = rectOf("[data-group-preview]");
+    const controls = [name, owner, kind, theme, description].filter(Boolean);
+    return {
+      panel,
+      name,
+      owner,
+      kind,
+      theme,
+      description,
+      preview,
+      nameOwnerOverlap: overlap(name, owner),
+      kindThemeOverlap: overlap(kind, theme),
+      controlsWithinPanel: Boolean(
+        panel &&
+          controls.length === 5 &&
+          controls.every((control) => control.left >= panel.left && control.right <= panel.right)
+      ),
+      previewBelowDescription: Boolean(description && preview && preview.top >= description.bottom),
+    };
+  });
+
   await page.fill("[data-group-name]", GROUP_NAME);
   await page.selectOption("[data-group-owner-role]", "student");
   await page.selectOption("[data-group-kind]", "study");
@@ -141,11 +187,16 @@ async function main() {
     result.listAlignContent === "start" &&
     result.listGridAutoRows === "max-content" &&
     result.contactCardHeights.length >= 2 &&
-    result.contactCardHeights.every((height) => height <= 100);
+    result.contactCardHeights.every((height) => height <= 100) &&
+    groupSheetLayout.controlsWithinPanel &&
+    groupSheetLayout.previewBelowDescription &&
+    !groupSheetLayout.nameOwnerOverlap &&
+    !groupSheetLayout.kindThemeOverlap;
 
   const report = {
     auditedAt: new Date().toISOString(),
     url: URL,
+    groupSheetLayout,
     result,
     errors,
     pass,

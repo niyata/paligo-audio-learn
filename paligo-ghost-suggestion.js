@@ -22,6 +22,10 @@
 
   const PUNCT_SPLIT = /[\s,;:.\u0e2f\u0e5a\u0e5b\[\]()「」『』「」\-–—]+/u;
   const MAX_SUGGESTIONS = 8;
+  const WEB_DIGIT_RE = /[0-9\u0e50-\u0e59]/u;
+  const PALI_MARK_RE = /[\u0e3a\u0e4d\uF711\uF71A]/u;
+  const LETTER_RE = /[\p{L}\u0e31-\u0e4e]/u;
+  const STRUCTURAL_TOKEN_RE = /^(?:หน้า|ภาค|เล่ม|เรื่อง|วรรค|วณฺณนา|prototype)$/iu;
 
   const normalizePali = (value) =>
     String(value ?? "").replace(/[\uF700\uF70F\uF71A\uF710\uF701-\uF704\uF70B\uF70E\uF712\uF718\uF709\uF711]/g, (ch) => LEGACY_GLYPH_MAP[ch] || ch);
@@ -31,6 +35,25 @@
       .split(PUNCT_SPLIT)
       .map((token) => token.trim())
       .filter(Boolean);
+
+  const normalizeTokenFocus = (focus) => {
+    const value = String(focus || "auto");
+    if (value === "thaiMeaning" || value === "thaiLiteral") return "thai";
+    if (value === "pali" || value === "thai") return value;
+    return "auto";
+  };
+
+  const isGhostSuggestionToken = (token, { focus = "auto" } = {}) => {
+    const value = normalizePali(token).trim();
+    const normalizedFocus = normalizeTokenFocus(focus);
+    if (!value || WEB_DIGIT_RE.test(value) || !LETTER_RE.test(value)) return false;
+    if (STRUCTURAL_TOKEN_RE.test(value)) return false;
+    if (normalizedFocus === "thai" && PALI_MARK_RE.test(value)) return false;
+    return true;
+  };
+
+  const filterGhostSuggestionTokens = (tokens, options = {}) =>
+    (Array.isArray(tokens) ? tokens : []).filter((token) => isGhostSuggestionToken(token, options));
 
   const extractPageAnswerText = (page, { prefer = "auto" } = {}) => {
     if (!page) return "";
@@ -62,7 +85,9 @@
       pages.find((item) => String(item.sourcePage) === String(sourcePage)) ||
       pages.find((item) => String(item.itemId) === String(sourcePage)) ||
       null;
-    return tokenizeAnswerText(extractPageAnswerText(page, options));
+    return filterGhostSuggestionTokens(tokenizeAnswerText(extractPageAnswerText(page, options)), {
+      focus: options.focus || options.prefer,
+    });
   };
 
   const findNextTokenIndex = (completedTokens, answerTokens) => {
@@ -97,11 +122,12 @@
    * @param {{ typedPrefix: string, answerTokens: string[], completedTokens?: string[] }} args
    * @returns {string[]}
    */
-  const suggestNextTokens = ({ typedPrefix, answerTokens, completedTokens = [] }) => {
-    const answers = Array.isArray(answerTokens) ? answerTokens.filter(Boolean) : [];
+  const suggestNextTokens = ({ typedPrefix, answerTokens, completedTokens = [], focus = "auto" }) => {
+    const answers = filterGhostSuggestionTokens(answerTokens, { focus });
     if (!answers.length) return [];
 
     const prefix = normalizePali(typedPrefix || "");
+    if (prefix && !isGhostSuggestionToken(prefix, { focus })) return [];
     const nextIndex = findNextTokenIndex(completedTokens, answers);
     const out = [];
     const seen = new Set();
@@ -131,7 +157,7 @@
     const match = normalized.match(/^(.*?)(\S*)$/su);
     const head = match?.[1] || "";
     const partial = match?.[2] || "";
-    const completedTokens = tokenizeAnswerText(head).filter((token) => !/^[0-9๐-๙]+$/u.test(token));
+    const completedTokens = filterGhostSuggestionTokens(tokenizeAnswerText(head));
     return { completedTokens, typedPrefix: partial };
   };
 
@@ -239,21 +265,22 @@
 
     async tokensForPage(corpus, sourcePage, options = {}) {
       const prefer = options.prefer || "auto";
-      const cacheKey = `${prefer}:${sourcePage}`;
+      const focus = normalizeTokenFocus(options.focus || prefer);
+      const cacheKey = `${prefer}:${focus}:${sourcePage}`;
       const tokenCache = this._tokenCacheForCorpus(corpus);
       if (tokenCache.has(cacheKey)) return tokenCache.get(cacheKey);
       try {
         const corpusKey = await this._registerCorpus(corpus, prefer);
         if (corpusKey) {
-          const result = await this._requestWorker("page-tokens", { corpusKey, sourcePage, preferredLanguage: prefer });
-          const tokens = result?.tokens || [];
+          const result = await this._requestWorker("page-tokens", { corpusKey, sourcePage, preferredLanguage: prefer, tokenFocus: focus });
+          const tokens = filterGhostSuggestionTokens(result?.tokens || [], { focus });
           tokenCache.set(cacheKey, tokens);
           return tokens;
         }
       } catch {
         // Worker is an optimization only; keep ghost suggestion usable everywhere.
       }
-      const tokens = pageTokensFromCorpus(corpus, sourcePage, options);
+      const tokens = pageTokensFromCorpus(corpus, sourcePage, { ...options, focus });
       tokenCache.set(cacheKey, tokens);
       return tokens;
     }
@@ -268,6 +295,8 @@
   window.PaligoGhostSuggestion = {
     normalizePali,
     tokenizeAnswerText,
+    isGhostSuggestionToken,
+    filterGhostSuggestionTokens,
     extractPageAnswerText,
     pageTokensFromCorpus,
     findNextTokenIndex,

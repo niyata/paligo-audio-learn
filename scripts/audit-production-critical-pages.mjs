@@ -88,6 +88,49 @@ const routes = [
     path: "/workbook.html?newBook=1&apiPort=9999",
     required: ["#paligoSidebar", ".paligo-topbar", "[data-line-height-control]"],
     assert: async (page) => {
+      const workbookControlState = await page.evaluate(() => {
+        const toggle = document.querySelector(".control-menu-toggle");
+        const menuPanel = document.querySelector(".control-menu__panel");
+        const prev = document.querySelector("[data-page-prev]");
+        const next = document.querySelector("[data-page-next]");
+        const rectOf = (node) => {
+          if (!node) return null;
+          const rect = node.getBoundingClientRect();
+          return { left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom, width: rect.width, height: rect.height };
+        };
+        const toggleRect = rectOf(toggle);
+        const prevRect = rectOf(prev);
+        const nextRect = rectOf(next);
+        const toggleVisible = Boolean(toggleRect && toggleRect.width > 0 && toggleRect.height > 0);
+        const panelVisible = Boolean(menuPanel && getComputedStyle(menuPanel).display !== "none");
+        return {
+          width: window.innerWidth,
+          toggleVisible,
+          panelVisible,
+          prevVisible: Boolean(prevRect && prevRect.width > 0 && prevRect.height > 0),
+          nextVisible: Boolean(nextRect && nextRect.width > 0 && nextRect.height > 0),
+          railOrderOk: !toggleVisible || Boolean(prevRect && nextRect && toggleRect && prevRect.right <= toggleRect.left && toggleRect.right <= nextRect.left),
+        };
+      });
+      if (workbookControlState.width <= 900) {
+        if (
+          !workbookControlState.toggleVisible ||
+          workbookControlState.panelVisible ||
+          !workbookControlState.prevVisible ||
+          !workbookControlState.nextVisible ||
+          !workbookControlState.railOrderOk
+        ) {
+          throw new Error(`Workbook mobile/tablet floating controls failed: ${JSON.stringify(workbookControlState)}`);
+        }
+      } else if (workbookControlState.toggleVisible || !workbookControlState.panelVisible) {
+        throw new Error(`Workbook desktop controls failed: ${JSON.stringify(workbookControlState)}`);
+      }
+      if (workbookControlState.width <= 900) {
+        await page.click(".control-menu-toggle");
+        await page.waitForFunction(() => getComputedStyle(document.querySelector(".control-menu__panel")).display !== "none", null, {
+          timeout: 5000,
+        });
+      }
       await page.click("[data-open-pali-reference]");
       await page.waitForSelector("[data-pali-reference-pip]:not([hidden])", { timeout: 10000 });
       const narrowChromeState = await page.evaluate(() => {
@@ -169,6 +212,59 @@ const routes = [
     name: "exam-inbox",
     path: "/exam-inbox.html?apiPort=9999",
     required: ["#paligoSidebar", ".paligo-topbar", "[data-inbox-shell], [data-inbox-gate]"],
+    assert: async (page) => {
+      await page.locator("[data-open-group-sheet]").first().click();
+      await page.waitForSelector("[data-group-sheet].is-open", { timeout: 5000 });
+      const layout = await page.evaluate(() => {
+        const rectOf = (selector) => {
+          const node = document.querySelector(selector);
+          if (!node) return null;
+          const rect = node.getBoundingClientRect();
+          return {
+            top: rect.top,
+            right: rect.right,
+            bottom: rect.bottom,
+            left: rect.left,
+            width: rect.width,
+            height: rect.height,
+          };
+        };
+        const overlap = (a, b) => {
+          if (!a || !b) return true;
+          return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+        };
+        const panel = rectOf("[data-group-sheet] .inbox-group-sheet__panel");
+        const name = rectOf("[data-group-name]");
+        const owner = rectOf("[data-group-owner-role]");
+        const kind = rectOf("[data-group-kind]");
+        const theme = rectOf("[data-group-theme]");
+        const description = rectOf("[data-group-description]");
+        const preview = rectOf("[data-group-preview]");
+        const controls = [name, owner, kind, theme, description].filter(Boolean);
+        return {
+          nameOwnerOverlap: overlap(name, owner),
+          kindThemeOverlap: overlap(kind, theme),
+          controlsWithinPanel: Boolean(
+            panel &&
+              controls.length === 5 &&
+              controls.every((control) => control.left >= panel.left - 1 && control.right <= panel.right + 1)
+          ),
+          previewBelowDescription: Boolean(description && preview && preview.top >= description.bottom - 1),
+        };
+      });
+      if (
+        !layout.controlsWithinPanel ||
+        !layout.previewBelowDescription ||
+        layout.nameOwnerOverlap ||
+        layout.kindThemeOverlap
+      ) {
+        throw new Error(`Inbox group sheet layout failed: ${JSON.stringify(layout)}`);
+      }
+      await page.click("[data-close-group-sheet]");
+      await page.waitForFunction(() => document.querySelector("[data-group-sheet]")?.hidden === true, null, {
+        timeout: 5000,
+      });
+    },
   },
   {
     name: "exam-account",

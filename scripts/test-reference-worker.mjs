@@ -38,6 +38,8 @@ function workerRequest(type, payload) {
   return message.result;
 }
 
+const nodeArray = (value) => Array.from(value || []);
+
 const alignment = JSON.parse(await readFile(
   "data/corpora/dhammapadatthakatha-pali-rtf-prototype/lexical-alignment.seed.json",
   "utf8",
@@ -66,5 +68,36 @@ const thaiLookup = workerRequest("lookup-alignment", {
 assert.equal(thaiLookup.matches.length, 1);
 assert.equal(thaiLookup.matches[0].alignmentId, "aln-dhp-seed-0001");
 assert.equal(thaiLookup.matches[0].sourceTokens.some((token) => token.surface === "มโนปุพฺพงฺคมา"), true);
+
+const corpusRegistered = workerRequest("register-corpus", {
+  corpusKey: "ghost-filter-seed",
+  corpus: {
+    items: [
+      {
+        itemType: "page",
+        sourcePage: 1,
+        pali: "๑ จกฺขุปาลตฺเถร วตฺถุ",
+        thai: "๑ พระศาสดา มงฺคลํ ภาค",
+      },
+    ],
+  },
+});
+assert.equal(corpusRegistered.ok, true);
+
+const paliTokens = workerRequest("page-tokens", {
+  corpusKey: "ghost-filter-seed",
+  sourcePage: 1,
+  preferredLanguage: "pali",
+  tokenFocus: "pali",
+});
+assert.deepEqual(nodeArray(paliTokens.tokens), ["จกฺขุปาลตฺเถร", "วตฺถุ"]);
+
+const thaiTokens = workerRequest("page-tokens", {
+  corpusKey: "ghost-filter-seed",
+  sourcePage: 1,
+  preferredLanguage: "thai",
+  tokenFocus: "thai",
+});
+assert.deepEqual(nodeArray(thaiTokens.tokens), ["พระศาสดา"]);
 
 console.log("Reference worker contracts passed");

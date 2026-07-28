@@ -1,6 +1,68 @@
 {
-  "auditedAt": "2026-07-14T05:33:34.455Z",
+  "auditedAt": "2026-07-28T02:13:51.364Z",
   "url": "http://127.0.0.1:8765/exam-inbox.html?apiPort=9999",
+  "groupSheetLayout": {
+    "panel": {
+      "top": 160,
+      "right": 1080,
+      "bottom": 740,
+      "left": 360,
+      "width": 720,
+      "height": 580
+    },
+    "name": {
+      "top": 266,
+      "right": 712,
+      "bottom": 306,
+      "left": 376,
+      "width": 336,
+      "height": 40
+    },
+    "owner": {
+      "top": 266,
+      "right": 1064,
+      "bottom": 304,
+      "left": 728,
+      "width": 336,
+      "height": 38
+    },
+    "kind": {
+      "top": 343,
+      "right": 712,
+      "bottom": 381,
+      "left": 376,
+      "width": 336,
+      "height": 38
+    },
+    "theme": {
+      "top": 343,
+      "right": 1064,
+      "bottom": 381,
+      "left": 728,
+      "width": 336,
+      "height": 38
+    },
+    "description": {
+      "top": 417,
+      "right": 1064,
+      "bottom": 457,
+      "left": 376,
+      "width": 688,
+      "height": 40
+    },
+    "preview": {
+      "top": 469,
+      "right": 1064,
+      "bottom": 599,
+      "left": 376,
+      "width": 688,
+      "height": 130
+    },
+    "nameOwnerOverlap": false,
+    "kindThemeOverlap": false,
+    "controlsWithinPanel": true,
+    "previewBelowDescription": true
+  },
   "result": {
     "sheetHidden": true,
     "inviteSheetHidden": true,
