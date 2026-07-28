@@ -675,12 +675,21 @@
 }
 
 .book-cover-grade,
-.book-cover-date {
+.book-cover-date,
+.book-cover-classroom {
   color: color-mix(in srgb, var(--paligo-exam-blue, #1f2d89) 82%, transparent);
   font-size: 0.78rem;
   font-weight: 600;
   letter-spacing: 0.01em;
   line-height: 1.35rem;
+}
+
+.book-cover-classroom {
+  font-weight: 700;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  padding: 0 4px;
+  word-break: break-word;
 }
 
 .book-cover-subject {

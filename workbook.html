@@ -4216,6 +4216,10 @@
             grade: gradePicker?.dataset.value || studentProfile?.grade || "4",
             subject: subjectValue,
             subjectLabel,
+            classroomName:
+              typeof PaligoExamShared?.normalizeClassroomName === "function"
+                ? PaligoExamShared.normalizeClassroomName(studentProfile?.classroomName)
+                : studentProfile?.classroomName || "เรียนออนไลน์วัดพระธรรมกาย",
             deliveryMethod:
               typeof PaligoExamShared?.normalizeDeliveryMethod === "function"
                 ? PaligoExamShared.normalizeDeliveryMethod(studentProfile?.deliveryMethod)

@@ -390,6 +390,9 @@
         };
         const getGroupOwnerScope = () => session?.user?.id || "anonymous";
         const readStoredGroups = () => {
+          if (typeof window.PaligoExamShared?.getVisibleInboxGroups === "function") {
+            return window.PaligoExamShared.getVisibleInboxGroups(getGroupOwnerScope());
+          }
           try {
             const parsed = JSON.parse(localStorage.getItem(GROUPS_STORAGE_KEY) || "{}");
             const groups = parsed?.[getGroupOwnerScope()];
@@ -401,7 +404,18 @@
         const writeStoredGroups = (groups) => {
           try {
             const parsed = JSON.parse(localStorage.getItem(GROUPS_STORAGE_KEY) || "{}") || {};
-            parsed[getGroupOwnerScope()] = groups;
+            const ownerId = getGroupOwnerScope();
+            // Never overwrite owner storage with invited-only rooms from other accounts.
+            const ownedOnly = (Array.isArray(groups) ? groups : []).filter((group) => {
+              if (!group?.classroomId && !group?.id) return true;
+              const classroom =
+                typeof window.PaligoExamShared?.findClassroomByGroupId === "function"
+                  ? window.PaligoExamShared.findClassroomByGroupId(group.classroomId || group.id)
+                  : null;
+              if (!classroom) return true;
+              return String(classroom.ownerId || "") === String(ownerId);
+            });
+            parsed[ownerId] = ownedOnly;
             localStorage.setItem(GROUPS_STORAGE_KEY, JSON.stringify(parsed));
           } catch {}
         };
@@ -999,23 +1013,60 @@
           const description = groupDescriptionInput?.value?.trim() || "คิวรวม · invite สมาชิกได้";
           const ownerLabel = ownerRole === "teacher" ? "ครู/ผู้ตรวจ" : "นักเรียน";
           const kindLabel = { study: "กลุ่มเรียน", review: "กลุ่มตรวจ", exam: "กลุ่มข้อสอบ" }[kind] || "กลุ่มเรียน";
-          const id = `group:${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
-          const group = {
-            id,
-            threadId: `group-${getGroupOwnerScope().replace(/[^a-zA-Z0-9_-]/g, "_")}-${id.replace(/[^a-zA-Z0-9_-]/g, "_")}`,
-            name,
-            ownerRole,
-            kind,
-            themeKey,
-            description,
-            members: [],
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          };
-          group.avatarUrl = makeGroupAvatarUrl(group);
+          const ownerId = getGroupOwnerScope();
 
-          const groups = readStoredGroups();
-          writeStoredGroups([group, ...groups]);
+          let group = null;
+          if (typeof window.PaligoExamShared?.createClassroom === "function") {
+            const classroom = window.PaligoExamShared.createClassroom({
+              name,
+              ownerId,
+              ownerRole,
+              kind,
+              themeKey,
+              description,
+            });
+            group = {
+              id: classroom.groupId || classroom.id,
+              threadId: classroom.threadId,
+              name: classroom.name,
+              ownerRole,
+              kind: classroom.kind || kind,
+              themeKey: classroom.themeKey || themeKey,
+              description: classroom.description || description,
+              members: Array.isArray(classroom.members) ? classroom.members.slice() : [],
+              classroomId: classroom.id,
+              createdAt: classroom.createdAt,
+              updatedAt: classroom.updatedAt,
+            };
+          } else {
+            const id = `group:${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+            group = {
+              id,
+              threadId: `group-${ownerId.replace(/[^a-zA-Z0-9_-]/g, "_")}-${id.replace(/[^a-zA-Z0-9_-]/g, "_")}`,
+              name,
+              ownerRole,
+              kind,
+              themeKey,
+              description,
+              members: [],
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            };
+            const groups = readStoredGroups().filter((item) => item.id !== group.id);
+            writeStoredGroups([group, ...groups]);
+          }
+
+          group.avatarUrl = makeGroupAvatarUrl(group);
+          // Keep owner-scoped list avatar in sync when shared helper created the group.
+          const owned = JSON.parse(localStorage.getItem(GROUPS_STORAGE_KEY) || "{}") || {};
+          const ownerGroups = Array.isArray(owned[ownerId]) ? owned[ownerId] : [];
+          const ownedIndex = ownerGroups.findIndex((item) => item.id === group.id);
+          if (ownedIndex >= 0) {
+            ownerGroups[ownedIndex] = { ...ownerGroups[ownedIndex], avatarUrl: group.avatarUrl };
+            owned[ownerId] = ownerGroups;
+            localStorage.setItem(GROUPS_STORAGE_KEY, JSON.stringify(owned));
+          }
+
           upsertContact(buildGroupContact(group));
           closeGroupSheet();
           setActiveContact(group.id);
@@ -1147,7 +1198,27 @@
           group.members = Array.from(memberMap.values());
           group.updatedAt = new Date().toISOString();
           groups[groupIndex] = group;
-          writeStoredGroups(groups);
+
+          // Owner-scoped write for the account that owns the group.
+          const ownerGroups = JSON.parse(localStorage.getItem(GROUPS_STORAGE_KEY) || "{}") || {};
+          const ownerId = getGroupOwnerScope();
+          const ownedList = Array.isArray(ownerGroups[ownerId]) ? ownerGroups[ownerId] : [];
+          const ownedIndex = ownedList.findIndex((item) => item.id === group.id);
+          if (ownedIndex >= 0) {
+            ownedList[ownedIndex] = group;
+            ownerGroups[ownerId] = ownedList;
+            localStorage.setItem(GROUPS_STORAGE_KEY, JSON.stringify(ownerGroups));
+          } else {
+            writeStoredGroups(groups.filter((item) => item.id !== group.id).concat([group]));
+          }
+
+          if (typeof window.PaligoExamShared?.inviteClassroomMembers === "function") {
+            const classroomId = group.classroomId || group.id;
+            window.PaligoExamShared.inviteClassroomMembers(classroomId, group.members);
+          } else if (typeof window.PaligoExamShared?.findClassroomByGroupId === "function") {
+            const classroom = window.PaligoExamShared.findClassroomByGroupId(group.id);
+            if (classroom) window.PaligoExamShared.inviteClassroomMembers?.(classroom.id, group.members);
+          }
 
           const stored = readStoredInvites();
           stored.groupMembers[group.id] = group.members;

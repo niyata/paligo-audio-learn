@@ -150,12 +150,21 @@
       }
 
       .book-cover-grade,
-      .book-cover-date {
+      .book-cover-date,
+      .book-cover-classroom {
         color: color-mix(in srgb, var(--exam-blue) 82%, transparent);
         font-size: 0.78rem;
         font-weight: 600;
         letter-spacing: 0.01em;
         line-height: 1.35rem;
+      }
+
+      .book-cover-classroom {
+        font-weight: 700;
+        max-width: 100%;
+        overflow-wrap: anywhere;
+        padding: 0 4px;
+        word-break: break-word;
       }
 
       .book-cover-subject {
@@ -707,6 +716,7 @@
           <div class="cover-preview" data-cover-preview aria-live="polite">
             <div class="cover-preview-meta" data-preview-grade>ประโยค ป.ธ. ๔</div>
             <div class="cover-preview-subject" data-preview-subject>วิชา แปลมคธเป็นไทย</div>
+            <div class="cover-preview-meta" data-preview-classroom>เรียนออนไลน์วัดพระธรรมกาย</div>
             <div class="cover-preview-meta" data-preview-date>สอบ วันที่ —</div>
           </div>
         </div>
@@ -766,6 +776,7 @@
           getSubjectOptionsForGrade,
           getGradesForSubject,
           buildStudentProfileSnapshot,
+          normalizeClassroomName,
         } = window.PaligoExamShared;
 
         const roleGuard = guardExamPageRole({ page: "student" });
@@ -800,6 +811,7 @@
         const coverForm = document.querySelector("[data-cover-form]");
         const previewGrade = document.querySelector("[data-preview-grade]");
         const previewSubject = document.querySelector("[data-preview-subject]");
+        const previewClassroom = document.querySelector("[data-preview-classroom]");
         const previewDate = document.querySelector("[data-preview-date]");
         const bookAlertModal = document.querySelector("[data-book-alert-modal]");
         const bookAlertTitle = document.querySelector("[data-book-alert-title]");
@@ -1434,16 +1446,27 @@
           const cover = document.createElement("div");
           const grade = document.createElement("div");
           const subject = document.createElement("div");
+          const classroom = document.createElement("div");
           const date = document.createElement("div");
 
           cover.className = "book-cover";
           grade.className = "book-cover-grade";
           subject.className = "book-cover-subject";
+          classroom.className = "book-cover-classroom";
           date.className = "book-cover-date";
           grade.textContent = `ประโยค ป.ธ. ${toThaiNumber(getCoverGrade(book))}`;
           subject.textContent = formatCoverSubjectLine(getSubjectLabel(book));
+          classroom.textContent =
+            typeof normalizeClassroomName === "function"
+              ? normalizeClassroomName(
+                  book?.classroomName ||
+                    book?.profile?.classroomName ||
+                    book?.studentProfile?.classroomName ||
+                    book?.draft?.profile?.classroomName
+                )
+              : book?.classroomName || "เรียนออนไลน์วัดพระธรรมกาย";
           date.textContent = `สอบ วันที่ ${getCoverDateLabel(book)}`;
-          cover.append(grade, subject, date);
+          cover.append(grade, subject, classroom, date);
           return cover;
         };
 
@@ -1457,6 +1480,14 @@
           const year = String(formData.get("year") || "");
           if (previewGrade) previewGrade.textContent = `ประโยค ป.ธ. ${toThaiNumber(grade)}`;
           if (previewSubject) previewSubject.textContent = formatCoverSubjectLine(subject);
+          if (previewClassroom) {
+            const profileSnapshot =
+              typeof buildStudentProfileSnapshot === "function" ? buildStudentProfileSnapshot() : null;
+            previewClassroom.textContent =
+              typeof normalizeClassroomName === "function"
+                ? normalizeClassroomName(profileSnapshot?.classroomName)
+                : profileSnapshot?.classroomName || "เรียนออนไลน์วัดพระธรรมกาย";
+          }
           if (previewDate) {
             previewDate.textContent =
               day && month && year
@@ -1510,6 +1541,10 @@
             grade,
             subject,
             subjectLabel,
+            classroomName:
+              typeof normalizeClassroomName === "function"
+                ? normalizeClassroomName(savedProfile?.classroomName)
+                : savedProfile?.classroomName || "เรียนออนไลน์วัดพระธรรมกาย",
             status: BOOK_STATUS.draft,
             revision: 1,
             createdAt: now,

@@ -27,6 +27,33 @@
     return "inbox";
   }
 
+  const DEFAULT_CLASSROOM_NAME = "เรียนออนไลน์วัดพระธรรมกาย";
+  const CREATE_CLASSROOM_VALUE = "__create_classroom__";
+
+  function normalizeClassroomName(value) {
+    const name = String(value || "").trim();
+    if (!name || name === CREATE_CLASSROOM_VALUE) return DEFAULT_CLASSROOM_NAME;
+    return name;
+  }
+
+  function buildClassroomSelectOptions(customNames = []) {
+    const seen = new Set();
+    const options = [];
+    const pushUnique = (value, label) => {
+      const key = String(value || "").trim();
+      if (!key || seen.has(key)) return;
+      seen.add(key);
+      options.push({ value: key, label: label || key });
+    };
+
+    pushUnique(DEFAULT_CLASSROOM_NAME, DEFAULT_CLASSROOM_NAME);
+    (Array.isArray(customNames) ? customNames : []).forEach((name) => {
+      pushUnique(normalizeClassroomName(name), normalizeClassroomName(name));
+    });
+    options.push({ value: CREATE_CLASSROOM_VALUE, label: "สร้างห้องที่นี่" });
+    return options;
+  }
+
   const REVIEWER_PROFILE_STATUS_OPTIONS = [
     { value: "monk_teacher", label: "พระอาจารย์" },
     { value: "novice_teacher", label: "สามเณรอาจารย์" },
@@ -429,6 +456,7 @@
           teacherName: "",
           teacherRole: "teacher-reviewer",
           deliveryMethod: "inbox",
+          classroomName: DEFAULT_CLASSROOM_NAME,
           displayAlias: "",
         }
       );
@@ -692,6 +720,10 @@
     GRADE_OPTIONS,
     DELIVERY_OPTIONS,
     normalizeDeliveryMethod,
+    DEFAULT_CLASSROOM_NAME,
+    CREATE_CLASSROOM_VALUE,
+    normalizeClassroomName,
+    buildClassroomSelectOptions,
     REVIEWER_PROFILE_STATUS_OPTIONS,
     REVIEWER_CAPABILITY_OPTIONS,
     REVIEWER_CAPABILITY_WIZARD_OPTIONS,

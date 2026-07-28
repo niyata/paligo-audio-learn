@@ -13,6 +13,8 @@
     reviewerProfile: "paligo-exam-reviewer-profile-v1",
     reviewerSignature: "paligo-exam-reviewer-signature-v1",
     reviewWorkflow: "paligo-exam-review-workflow-v1",
+    classrooms: "paligo-exam-classrooms-v1",
+    classroomRegistry: "paligo-exam-classroom-registry-v1",
   };
 
   const REVIEW_WORKFLOW_PHASE = {
@@ -281,6 +283,369 @@
     return "inbox";
   }
 
+  function normalizeClassroomName(value) {
+    if (typeof window !== "undefined" && window.PaligoProfile?.normalizeClassroomName) {
+      return window.PaligoProfile.normalizeClassroomName(value);
+    }
+    const name = String(value || "").trim();
+    if (!name || name === "__create_classroom__") return "เรียนออนไลน์วัดพระธรรมกาย";
+    return name;
+  }
+
+  const DEFAULT_CLASSROOM_NAME = "เรียนออนไลน์วัดพระธรรมกาย";
+  const INBOX_GROUPS_STORAGE_KEY = "paligo-inbox-groups-v1";
+
+  function createClassroomId() {
+    const random =
+      typeof crypto !== "undefined" && crypto.randomUUID?.()
+        ? crypto.randomUUID()
+        : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+    return `classroom:${random}`;
+  }
+
+  function readClassroomRegistry() {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(KEYS.classroomRegistry) || "{}");
+      return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+    } catch {
+      return {};
+    }
+  }
+
+  function writeClassroomRegistry(registry) {
+    localStorage.setItem(KEYS.classroomRegistry, JSON.stringify(registry || {}));
+    return registry;
+  }
+
+  function readInboxGroupsForOwner(ownerId) {
+    const scope = String(ownerId || "").trim() || "anonymous";
+    try {
+      const parsed = JSON.parse(localStorage.getItem(INBOX_GROUPS_STORAGE_KEY) || "{}") || {};
+      const groups = parsed[scope];
+      return Array.isArray(groups) ? groups : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function writeInboxGroupsForOwner(ownerId, groups) {
+    const scope = String(ownerId || "").trim() || "anonymous";
+    try {
+      const parsed = JSON.parse(localStorage.getItem(INBOX_GROUPS_STORAGE_KEY) || "{}") || {};
+      parsed[scope] = Array.isArray(groups) ? groups : [];
+      localStorage.setItem(INBOX_GROUPS_STORAGE_KEY, JSON.stringify(parsed));
+    } catch {
+      /* ignore quota */
+    }
+  }
+
+  function migrateLegacyCustomClassrooms(ownerId) {
+    const scope = String(ownerId || getInboxUserId() || "").trim();
+    if (!scope) return;
+    let legacy = [];
+    try {
+      legacy = JSON.parse(readRaw(KEYS.classrooms) || "[]");
+    } catch {
+      legacy = [];
+    }
+    if (!Array.isArray(legacy) || !legacy.length) return;
+
+    const registry = readClassroomRegistry();
+    let changed = false;
+    legacy.forEach((name) => {
+      const cleaned = String(name || "").trim();
+      if (!cleaned || cleaned === DEFAULT_CLASSROOM_NAME) return;
+      const exists = Object.values(registry).some(
+        (room) => room?.ownerId === scope && String(room?.name || "").trim() === cleaned
+      );
+      if (exists) return;
+      const id = createClassroomId();
+      const now = new Date().toISOString();
+      const threadId = `group-${scope.replace(/[^a-zA-Z0-9_-]/g, "_")}-${id.replace(/[^a-zA-Z0-9_-]/g, "_")}`;
+      registry[id] = {
+        id,
+        name: cleaned,
+        ownerId: scope,
+        groupId: id,
+        threadId,
+        members: [],
+        kind: "study",
+        themeKey: "blue-gold",
+        description: "ห้องเรียนจากโปรไฟล์",
+        source: "profile",
+        createdAt: now,
+        updatedAt: now,
+      };
+      changed = true;
+      const groups = readInboxGroupsForOwner(scope);
+      if (!groups.some((group) => group.id === id || group.name === cleaned)) {
+        writeInboxGroupsForOwner(scope, [
+          {
+            id,
+            threadId,
+            name: cleaned,
+            ownerRole: getInboxRole() === "reviewer" ? "teacher" : "student",
+            kind: "study",
+            themeKey: "blue-gold",
+            description: "ห้องเรียนจากโปรไฟล์",
+            members: [],
+            classroomId: id,
+            createdAt: now,
+            updatedAt: now,
+          },
+          ...groups,
+        ]);
+      }
+    });
+    if (changed) writeClassroomRegistry(registry);
+  }
+
+  function listClassroomRecords() {
+    migrateLegacyCustomClassrooms(getInboxUserId());
+    return Object.values(readClassroomRegistry()).filter((room) => room && typeof room === "object");
+  }
+
+  function getViewerIdentityKeys(userId = getInboxUserId()) {
+    const keys = new Set();
+    const id = String(userId || "").trim();
+    if (id) keys.add(id);
+    const session = getInboxSession();
+    const email = String(session?.user?.email || "").trim().toLowerCase();
+    if (email) keys.add(email);
+    if (id) keys.add(id.toLowerCase());
+    return keys;
+  }
+
+  function memberMatchesViewer(member, viewerKeys) {
+    const id = String(member?.id || "").trim();
+    const email = String(member?.email || "").trim();
+    if (id && (viewerKeys.has(id) || viewerKeys.has(id.toLowerCase()))) return true;
+    if (email && (viewerKeys.has(email) || viewerKeys.has(email.toLowerCase()))) return true;
+    return false;
+  }
+
+  function getVisibleClassroomRecords(userId = getInboxUserId()) {
+    const viewerKeys = getViewerIdentityKeys(userId);
+    if (!viewerKeys.size) return [];
+    return listClassroomRecords()
+      .filter((room) => {
+        const ownerId = String(room.ownerId || "").trim();
+        if (ownerId && (viewerKeys.has(ownerId) || viewerKeys.has(ownerId.toLowerCase()))) return true;
+        return (Array.isArray(room.members) ? room.members : []).some((member) =>
+          memberMatchesViewer(member, viewerKeys)
+        );
+      })
+      .sort((a, b) => String(b.updatedAt || "").localeCompare(String(a.updatedAt || "")));
+  }
+
+  function getCustomClassrooms(userId = getInboxUserId()) {
+    const seen = new Set();
+    return getVisibleClassroomRecords(userId)
+      .map((room) => String(room.name || "").trim())
+      .filter((name) => {
+        if (!name || name === DEFAULT_CLASSROOM_NAME || seen.has(name)) return false;
+        seen.add(name);
+        return true;
+      });
+  }
+
+  function saveCustomClassrooms(names) {
+    // Compatibility shim — prefer createClassroom/inviteClassroomMembers.
+    const ownerId = getInboxUserId() || "anonymous";
+    const wanted = [];
+    const seen = new Set();
+    (Array.isArray(names) ? names : []).forEach((name) => {
+      const cleaned = String(name || "").trim();
+      if (!cleaned || cleaned === DEFAULT_CLASSROOM_NAME || seen.has(cleaned)) return;
+      seen.add(cleaned);
+      wanted.push(cleaned);
+    });
+    wanted.forEach((name) => createClassroom({ name, ownerId }));
+    return getCustomClassrooms(ownerId);
+  }
+
+  function createClassroom({
+    name,
+    ownerId = getInboxUserId() || "anonymous",
+    ownerRole = getInboxRole() === "reviewer" ? "teacher" : "student",
+    kind = "study",
+    themeKey = "blue-gold",
+    description = "ห้องเรียน · invite สมาชิกได้",
+  } = {}) {
+    const cleaned = normalizeClassroomName(name);
+    if (cleaned === DEFAULT_CLASSROOM_NAME) {
+      return {
+        id: "classroom:default",
+        name: DEFAULT_CLASSROOM_NAME,
+        ownerId: null,
+        isDefault: true,
+        members: [],
+      };
+    }
+
+    const scope = String(ownerId || "anonymous").trim() || "anonymous";
+    const registry = readClassroomRegistry();
+    const existing = Object.values(registry).find(
+      (room) => room?.ownerId === scope && String(room?.name || "").trim() === cleaned
+    );
+    if (existing) return existing;
+
+    const id = createClassroomId();
+    const now = new Date().toISOString();
+    const threadId = `group-${scope.replace(/[^a-zA-Z0-9_-]/g, "_")}-${id.replace(/[^a-zA-Z0-9_-]/g, "_")}`;
+    const classroom = {
+      id,
+      name: cleaned,
+      ownerId: scope,
+      groupId: id,
+      threadId,
+      members: [],
+      kind,
+      themeKey,
+      description,
+      source: "profile",
+      createdAt: now,
+      updatedAt: now,
+    };
+    registry[id] = classroom;
+    writeClassroomRegistry(registry);
+
+    const groups = readInboxGroupsForOwner(scope);
+    writeInboxGroupsForOwner(scope, [
+      {
+        id,
+        threadId,
+        name: cleaned,
+        ownerRole,
+        kind,
+        themeKey,
+        description,
+        members: [],
+        classroomId: id,
+        createdAt: now,
+        updatedAt: now,
+      },
+      ...groups.filter((group) => group.id !== id),
+    ]);
+
+    // Keep scoped legacy name list in sync for older readers.
+    try {
+      const legacy = getCustomClassrooms(scope);
+      writeRaw(KEYS.classrooms, JSON.stringify(legacy));
+    } catch {
+      /* ignore */
+    }
+
+    return classroom;
+  }
+
+  function addCustomClassroom(name) {
+    const classroom = createClassroom({ name });
+    return getCustomClassrooms(classroom.ownerId || getInboxUserId());
+  }
+
+  function findClassroomByGroupId(groupId) {
+    const id = String(groupId || "").trim();
+    if (!id) return null;
+    return listClassroomRecords().find((room) => room.id === id || room.groupId === id) || null;
+  }
+
+  function findClassroomByName(name, userId = getInboxUserId()) {
+    const cleaned = String(name || "").trim();
+    if (!cleaned) return null;
+    return (
+      getVisibleClassroomRecords(userId).find((room) => String(room.name || "").trim() === cleaned) ||
+      null
+    );
+  }
+
+  function inviteClassroomMembers(classroomId, contacts = []) {
+    const registry = readClassroomRegistry();
+    const room = registry[String(classroomId || "").trim()];
+    if (!room) return null;
+
+    const memberMap = new Map((Array.isArray(room.members) ? room.members : []).map((member) => [member.id, member]));
+    (Array.isArray(contacts) ? contacts : []).forEach((contact) => {
+      const id = String(contact?.id || contact?.email || "").trim();
+      if (!id) return;
+      memberMap.set(id, {
+        id,
+        name: String(contact?.name || id).trim(),
+        email: String(contact?.email || id).trim(),
+        role: contact?.role || "student",
+        invitedAt: new Date().toISOString(),
+      });
+    });
+    room.members = Array.from(memberMap.values());
+    room.updatedAt = new Date().toISOString();
+    registry[room.id] = room;
+    writeClassroomRegistry(registry);
+
+    // Mirror members onto owner's inbox group record.
+    const groups = readInboxGroupsForOwner(room.ownerId);
+    const index = groups.findIndex((group) => group.id === room.groupId || group.id === room.id);
+    if (index >= 0) {
+      groups[index] = {
+        ...groups[index],
+        members: room.members.slice(),
+        updatedAt: room.updatedAt,
+        classroomId: room.id,
+      };
+      writeInboxGroupsForOwner(room.ownerId, groups);
+    }
+
+    return room;
+  }
+
+  function getVisibleInboxGroups(userId = getInboxUserId()) {
+    const viewerId = String(userId || "").trim();
+    const owned = readInboxGroupsForOwner(viewerId);
+    const byId = new Map(owned.map((group) => [group.id, group]));
+
+    getVisibleClassroomRecords(viewerId).forEach((room) => {
+      if (byId.has(room.groupId) || byId.has(room.id)) {
+        const existing = byId.get(room.groupId) || byId.get(room.id);
+        byId.set(existing.id, {
+          ...existing,
+          name: room.name,
+          members: room.members || existing.members || [],
+          classroomId: room.id,
+          updatedAt: room.updatedAt || existing.updatedAt,
+        });
+        return;
+      }
+      byId.set(room.id, {
+        id: room.groupId || room.id,
+        threadId: room.threadId,
+        name: room.name,
+        ownerRole: "student",
+        kind: room.kind || "study",
+        themeKey: room.themeKey || "blue-gold",
+        description: room.description || "ห้องเรียน · invite สมาชิกได้",
+        members: Array.isArray(room.members) ? room.members.slice() : [],
+        classroomId: room.id,
+        createdAt: room.createdAt,
+        updatedAt: room.updatedAt,
+      });
+    });
+
+    return Array.from(byId.values()).sort((a, b) =>
+      String(b.updatedAt || "").localeCompare(String(a.updatedAt || ""))
+    );
+  }
+
+  function getClassroomSelectOptions(userId = getInboxUserId()) {
+    const custom = getCustomClassrooms(userId);
+    if (typeof window !== "undefined" && window.PaligoProfile?.buildClassroomSelectOptions) {
+      return window.PaligoProfile.buildClassroomSelectOptions(custom);
+    }
+    return [
+      { value: DEFAULT_CLASSROOM_NAME, label: DEFAULT_CLASSROOM_NAME },
+      ...custom.map((name) => ({ value: name, label: name })),
+      { value: "__create_classroom__", label: "สร้างห้องที่นี่" },
+    ];
+  }
+
   function getStudentProfile() {
     try {
       const profile = JSON.parse(readRaw(KEYS.studentProfile) || "null");
@@ -288,6 +653,7 @@
       return {
         ...profile,
         deliveryMethod: normalizeDeliveryMethod(profile.deliveryMethod),
+        classroomName: normalizeClassroomName(profile.classroomName),
       };
     } catch {
       return null;
@@ -321,6 +687,7 @@
       teacherDisplayName: String(profile?.teacherDisplayName || "").trim(),
       teacherInstitution: String(profile?.teacherInstitution || "").trim(),
       deliveryMethod: normalizeDeliveryMethod(profile?.deliveryMethod),
+      classroomName: normalizeClassroomName(profile?.classroomName),
       displayAlias: String(profile?.displayAlias || "").trim(),
       avatarUrl: normalizeAvatarUrl(profile?.avatarUrl),
       updatedAt: new Date().toISOString(),
@@ -467,6 +834,7 @@
       teacherDisplayName: String(merged.teacherDisplayName || "").trim(),
       teacherInstitution: String(merged.teacherInstitution || "").trim(),
       deliveryMethod: normalizeDeliveryMethod(merged.deliveryMethod),
+      classroomName: normalizeClassroomName(merged.classroomName),
       displayAlias: String(merged.displayAlias || "").trim(),
       avatarUrl: normalizeAvatarUrl(merged.avatarUrl),
     };
@@ -1148,6 +1516,17 @@
     getStudentProfile,
     saveStudentProfile,
     normalizeDeliveryMethod,
+    normalizeClassroomName,
+    getCustomClassrooms,
+    saveCustomClassrooms,
+    addCustomClassroom,
+    createClassroom,
+    getVisibleClassroomRecords,
+    getVisibleInboxGroups,
+    findClassroomByGroupId,
+    findClassroomByName,
+    inviteClassroomMembers,
+    getClassroomSelectOptions,
     getReviewerProfile,
     saveReviewerProfile,
     deriveStudentName,

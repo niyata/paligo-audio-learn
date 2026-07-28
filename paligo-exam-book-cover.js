@@ -115,6 +115,21 @@
     return wrap;
   }
 
+  function getCoverClassroom(book) {
+    const shared = getShared();
+    const normalize =
+      shared?.normalizeClassroomName ||
+      global.PaligoProfile?.normalizeClassroomName ||
+      ((value) => String(value || "").trim() || "เรียนออนไลน์วัดพระธรรมกาย");
+    return normalize(
+      book?.classroomName ||
+        book?.profile?.classroomName ||
+        book?.studentProfile?.classroomName ||
+        book?.draft?.profile?.classroomName ||
+        ""
+    );
+  }
+
   /**
    * @param {object} book
    * @param {{ compact?: boolean, portrait?: boolean, avatarUrl?: string, avatarName?: string }} [options]
@@ -125,6 +140,7 @@
     const cover = document.createElement("div");
     const grade = document.createElement("div");
     const subject = document.createElement("div");
+    const classroom = document.createElement("div");
     const date = document.createElement("div");
 
     const classes = ["book-cover"];
@@ -139,11 +155,13 @@
     }
     grade.className = "book-cover-grade";
     subject.className = "book-cover-subject";
+    classroom.className = "book-cover-classroom";
     date.className = "book-cover-date";
     grade.textContent = `ประโยค ป.ธ. ${toThaiNumber(getCoverGrade(book))}`;
     subject.textContent = formatCoverSubjectLine(getSubjectLabel(book, shared));
+    classroom.textContent = getCoverClassroom(book);
     date.textContent = `สอบ วันที่ ${getCoverDateLabel(book, toThaiNumber)}`;
-    cover.append(grade, subject, date);
+    cover.append(grade, subject, classroom, date);
     return cover;
   }
 
@@ -153,6 +171,7 @@
     getSubjectLabel,
     getCoverGrade,
     getCoverDateLabel,
+    getCoverClassroom,
     formatCoverSubjectLine,
   };
 })(typeof window !== "undefined" ? window : globalThis);
