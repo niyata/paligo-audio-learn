@@ -1245,14 +1245,26 @@
   background: var(--paligo-paper-bg, #fffaf0);
   border-radius: 14px 14px 0 0;
   box-shadow: 0 -12px 40px rgba(28, 24, 18, 0.22);
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
   max-height: min(86vh, 720px);
-  max-width: 560px;
+  max-width: min(560px, calc(100vw - 36px));
   overflow: auto;
-  padding: 16px;
+  padding: 18px;
   width: 100%;
+}
+
+.inbox-group-sheet__panel > .inbox-book-sheet__title {
+  font-size: 1.05rem;
+  line-height: 1.35;
+  margin: 0;
+}
+
+.inbox-group-sheet__panel > .paligo-local-note {
+  margin: -8px 0 0;
+  max-width: 42rem;
 }
 
 .inbox-book-sheet__footer {
@@ -1265,6 +1277,34 @@
   padding: 14px 16px max(16px, env(safe-area-inset-bottom, 0px));
   position: relative;
   z-index: 1;
+}
+
+.inbox-group-sheet__panel > .inbox-book-sheet__footer {
+  align-items: stretch;
+  background: var(--paligo-paper-bg, #fffaf0);
+  border-top: 1px solid rgba(31, 45, 137, 0.1);
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 4px 0 0;
+  padding: 14px 0 0;
+  position: static;
+  z-index: auto;
+}
+
+.inbox-group-sheet__panel > .inbox-book-sheet__footer .is-primary {
+  flex: 1 1 12rem;
+  justify-content: center;
+  min-height: 44px;
+}
+
+.inbox-group-sheet__panel > .inbox-book-sheet__footer .inbox-book-sheet__close {
+  flex: 0 0 auto;
+  justify-content: center;
+  justify-self: unset;
+  min-height: 44px;
+  min-width: 5.5rem;
 }
 
 .inbox-book-sheet__close {
@@ -1560,10 +1600,50 @@
   grid-column: 1 / -1;
 }
 
+/* Primer rhythm: mobile 1-col → 2-col from 520px (match exam-profile field grid) */
 .inbox-group-form {
+  align-items: start;
   display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  grid-template-columns: 1fr;
+  width: 100%;
+}
+
+.inbox-group-form > .inbox-book-sheet__filter {
+  display: grid;
+  gap: 6px;
+  grid-template-rows: auto auto;
+  min-width: 0;
+}
+
+.inbox-group-form .inbox-book-sheet__filter-label {
+  color: rgba(52, 52, 52, 0.82);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.35;
+}
+
+.inbox-group-form .inbox-book-sheet__search-input,
+.inbox-group-form .inbox-book-sheet__filter-select {
+  box-sizing: border-box;
+  border-radius: 8px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  min-height: 44px;
+  min-width: 0;
+  padding: 10px 12px;
+  width: 100%;
+}
+
+.inbox-group-form .inbox-book-sheet__filter-select:focus {
+  border-color: rgba(31, 45, 137, 0.42);
+  outline: 2px solid rgba(31, 45, 137, 0.14);
+  outline-offset: 1px;
+}
+
+.inbox-group-form > * {
+  min-width: 0;
 }
 
 .inbox-group-form__wide {
@@ -1573,20 +1653,20 @@
 .inbox-group-preview {
   background: #fff;
   border: 1px solid rgba(31, 45, 137, 0.14);
-  border-radius: 10px;
+  border-radius: 12px;
   overflow: hidden;
 }
 
 .inbox-group-preview__cover {
   background: linear-gradient(135deg, #1f2d89 0%, #4654b8 58%, #f4b400 100%);
-  height: 74px;
+  height: 72px;
 }
 
 .inbox-group-preview__body {
-  align-items: end;
+  align-items: flex-end;
   display: flex;
   gap: 12px;
-  margin-top: -24px;
+  margin-top: -22px;
   padding: 0 14px 14px;
 }
 
@@ -1601,37 +1681,38 @@
   flex: 0 0 auto;
   font-size: 0.88rem;
   font-weight: 900;
-  height: 58px;
+  height: 56px;
   justify-content: center;
   line-height: 1.1;
   text-align: center;
-  width: 58px;
+  width: 56px;
 }
 
 .inbox-group-preview__text {
   min-width: 0;
-  padding-bottom: 3px;
+  padding-bottom: 2px;
 }
 
 .inbox-group-preview__text strong,
 .inbox-group-preview__text span {
   display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .inbox-group-preview__text strong {
   color: var(--paligo-exam-blue, #1f2d89);
   font-size: 0.95rem;
   font-weight: 900;
+  line-height: 1.35;
 }
 
 .inbox-group-preview__text span {
   color: var(--paligo-muted, rgba(52, 52, 52, 0.62));
   font-size: 0.78rem;
-  font-weight: 800;
-  margin-top: 2px;
+  font-weight: 700;
+  line-height: 1.4;
+  margin-top: 4px;
 }
 
 .inbox-invite-list {
@@ -1685,6 +1766,13 @@
   font-size: 0.82rem;
   font-weight: 800;
   margin: 0;
+}
+
+@media (min-width: 520px) {
+  .inbox-group-form {
+    gap: 14px 16px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (min-width: 768px) {
@@ -1742,10 +1830,6 @@
 }
 
 @media (max-width: 420px) {
-  .inbox-group-form {
-    grid-template-columns: 1fr;
-  }
-
   .inbox-book-sheet__filters {
     grid-template-columns: 1fr;
   }
