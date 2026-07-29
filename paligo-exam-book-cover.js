@@ -123,20 +123,40 @@
       ((value) => String(value || "").trim() || "เรียนออนไลน์วัดพระธรรมกาย");
     return normalize(
       book?.classroomName ||
+        book?.classroom ||
+        book?.roomName ||
+        book?.groupName ||
+        book?.group?.name ||
+        book?.chatGroup?.name ||
         book?.profile?.classroomName ||
+        book?.profile?.classroom ||
+        book?.profile?.roomName ||
+        book?.profile?.groupName ||
         book?.studentProfile?.classroomName ||
+        book?.studentProfile?.classroom ||
+        book?.studentProfile?.roomName ||
+        book?.studentProfile?.groupName ||
         book?.draft?.profile?.classroomName ||
+        book?.draft?.profile?.classroom ||
+        book?.draft?.profile?.roomName ||
+        book?.draft?.profile?.groupName ||
         ""
     );
   }
 
+  function getCoverTheme(book, options) {
+    return String(options?.theme || book?.coverTheme || "blue-gold").trim() || "blue-gold";
+  }
+
   /**
    * @param {object} book
-   * @param {{ compact?: boolean, portrait?: boolean, avatarUrl?: string, avatarName?: string }} [options]
+   * @param {{ compact?: boolean, portrait?: boolean, avatarUrl?: string, avatarName?: string, theme?: string }} [options]
    */
   function buildBookCoverElement(book, options = {}) {
     const shared = getShared();
     const toThaiNumber = shared?.toThaiNumber || ((value) => String(value ?? ""));
+    const theme = getCoverTheme(book, options);
+    const isBlueGold = theme === "blue-gold";
     const cover = document.createElement("div");
     const grade = document.createElement("div");
     const subject = document.createElement("div");
@@ -144,6 +164,7 @@
     const date = document.createElement("div");
 
     const classes = ["book-cover"];
+    if (isBlueGold) classes.push("book-cover--blue-gold");
     if (options.compact) classes.push("is-compact");
     if (options.portrait) classes.push("is-portrait");
     cover.className = classes.join(" ");
@@ -159,7 +180,7 @@
     date.className = "book-cover-date";
     grade.textContent = `ประโยค ป.ธ. ${toThaiNumber(getCoverGrade(book))}`;
     subject.textContent = formatCoverSubjectLine(getSubjectLabel(book, shared));
-    classroom.textContent = getCoverClassroom(book);
+    classroom.textContent = isBlueGold ? `สังกัด : ${getCoverClassroom(book)}` : getCoverClassroom(book);
     date.textContent = `สอบ วันที่ ${getCoverDateLabel(book, toThaiNumber)}`;
     cover.append(grade, subject, classroom, date);
     return cover;
@@ -172,6 +193,7 @@
     getCoverGrade,
     getCoverDateLabel,
     getCoverClassroom,
+    getCoverTheme,
     formatCoverSubjectLine,
   };
 })(typeof window !== "undefined" ? window : globalThis);
