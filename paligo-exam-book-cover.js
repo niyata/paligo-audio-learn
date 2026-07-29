@@ -145,7 +145,14 @@
   }
 
   function getCoverTheme(book, options) {
-    return String(options?.theme || book?.coverTheme || "blue-gold").trim() || "blue-gold";
+    const configured =
+      options?.theme ||
+      book?.coverTheme ||
+      global.PaligoExamBookCoverTheme ||
+      global.localStorage?.getItem?.("paligo.bookCoverTheme") ||
+      new URLSearchParams(global.location?.search || "").get("coverTheme") ||
+      "ruled";
+    return String(configured).trim() || "ruled";
   }
 
   /**
