@@ -867,7 +867,9 @@
           pick.dataset.bookId = book.id;
           pick.setAttribute("aria-pressed", String(sheetSelectedBookId === book.id));
           if (sheetSelectedBookId === book.id) pick.classList.add("is-selected");
-          if (cover?.buildBookCoverElement) pick.append(cover.buildBookCoverElement(book, { portrait: true }));
+          if (cover?.buildBookCoverElement) {
+            pick.append(cover.buildBookCoverElement(book, { portrait: true, theme: "blue-gold" }));
+          }
 
           const status = normalizeBookStatus(book.status);
           const meta = document.createElement("div");
