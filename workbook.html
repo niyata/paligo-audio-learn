@@ -376,6 +376,44 @@
         z-index: 120;
       }
 
+      .pali-reference-pip.is-compact-dock {
+        bottom: max(8px, env(safe-area-inset-bottom));
+        height: min(72dvh, 620px);
+        left: max(8px, env(safe-area-inset-left));
+        min-height: 220px;
+        min-width: 0;
+        max-height: calc(100dvh - 16px);
+        max-width: none;
+        resize: vertical;
+        right: max(8px, env(safe-area-inset-right));
+        top: auto;
+        width: auto;
+      }
+
+      .pali-reference-pip.is-layout-side:not(.is-compact-dock) {
+        bottom: 12px;
+        height: auto;
+        left: max(12px, calc(var(--sidebar-width, 66px) + 12px));
+        max-height: calc(100dvh - 104px);
+        max-width: min(760px, 56vw);
+        resize: horizontal;
+        right: auto;
+        top: 88px;
+        width: min(46vw, 720px);
+      }
+
+      .pali-reference-pip.is-layout-bottom:not(.is-compact-dock) {
+        bottom: 12px;
+        height: min(44dvh, 520px);
+        left: max(12px, calc(var(--sidebar-width, 66px) + 12px));
+        max-height: calc(100dvh - 104px);
+        max-width: none;
+        resize: vertical;
+        right: 12px;
+        top: auto;
+        width: auto;
+      }
+
       .pali-reference-pip[hidden] {
         display: none;
       }
@@ -399,6 +437,15 @@
         user-select: none;
       }
 
+      .pali-reference-pip.is-compact-dock .pali-reference-pip__bar {
+        cursor: default;
+        display: grid;
+        gap: 8px;
+        grid-template-columns: minmax(0, 1fr) auto;
+        min-height: 52px;
+        padding: 8px;
+      }
+
       .pali-reference-pip__bar:active {
         cursor: grabbing;
       }
@@ -412,9 +459,24 @@
         white-space: nowrap;
       }
 
+      .pali-reference-pip.is-compact-dock .pali-reference-pip__title {
+        min-width: 0;
+      }
+
       .pali-reference-pip__actions {
         display: flex;
         gap: 6px;
+        min-width: 0;
+        overflow-x: auto;
+        scrollbar-width: none;
+      }
+
+      .pali-reference-pip.is-compact-dock .pali-reference-pip__actions {
+        flex: 0 0 auto;
+      }
+
+      .pali-reference-pip__actions::-webkit-scrollbar {
+        display: none;
       }
 
       .pali-reference-pip__action {
@@ -433,11 +495,26 @@
         justify-content: center;
         min-width: 30px;
         padding: 4px 8px;
+        white-space: nowrap;
+      }
+
+      .pali-reference-pip__action.is-active {
+        background: rgba(31, 45, 137, 0.12);
+        border-color: rgba(31, 45, 137, 0.28);
+        box-shadow: inset 0 0 0 1px rgba(31, 45, 137, 0.04);
+      }
+
+      .pali-reference-pip.is-compact-dock .pali-reference-pip__action {
+        border-radius: 8px;
+        height: 40px;
+        min-width: 40px;
+        padding: 6px 10px;
       }
 
       .pali-reference-pip__body {
         background: #fffaf0;
         min-height: 0;
+        overflow: hidden;
       }
 
       .pali-reference-pip.is-minimized .pali-reference-pip__body {
@@ -1203,13 +1280,13 @@
         }
 
         .pali-reference-pip {
-          bottom: 12px;
-          left: 12px;
-          right: 12px;
+          bottom: max(8px, env(safe-area-inset-bottom));
+          height: min(72dvh, 520px);
+          left: max(8px, env(safe-area-inset-left));
           top: auto;
-          width: auto;
-          height: min(64vh, 520px);
           min-width: 0;
+          right: max(8px, env(safe-area-inset-right));
+          width: auto;
         }
 
         .pali-reference-pip__title {
@@ -1333,8 +1410,8 @@
     <section class="profile-wizard" aria-label="ตั้งค่าโปรไฟล์ผู้เรียน" data-profile-wizard>
       <form class="profile-wizard-card" data-profile-form novalidate>
         <button class="profile-close-button" type="button" data-profile-dismiss aria-label="ปิดหน้าตั้งค่า">×</button>
-        <h1 class="profile-wizard-title">ตั้งค่าผู้เรียน</h1>
-        <p class="profile-wizard-note">บันทึกในเครื่อง — ใช้งานออฟไลน์และส่งตรวจได้</p>
+        <h1 class="profile-wizard-title" tabindex="-1">ตั้งค่าผู้เรียน</h1>
+        <p class="profile-wizard-note">ใช้แสดงบนหน้าปกสมุดและการส่งตรวจ — เปิดแก้ไขเองได้จากแผงควบคุม</p>
         <p class="profile-wizard-error" data-profile-error hidden role="alert"></p>
         <div class="profile-wizard-grid">
           <div class="profile-field is-wide">
@@ -1494,6 +1571,9 @@
           <button class="save-button pali-reference-button" type="button" data-open-pali-reference aria-controls="paliReferencePip" aria-expanded="false">
             <svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-book-open"></use></svg><span>เปิดตำรา</span>
           </button>
+          <button class="save-button" type="button" data-open-profile-wizard>
+            <svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-pen-line"></use></svg><span>ตั้งค่าผู้เรียน</span>
+          </button>
           <button class="save-button" type="button" data-save-draft><svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-save"></use></svg><span>บันทึก</span></button>
           <button class="save-button" type="button" data-submit-review><svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-send"></use></svg><span>ส่งตรวจ</span></button>
           <a class="save-button" href="exam-books.html"><svg class="exam-icon" aria-hidden="true"><use href="#exam-icon-file-text"></use></svg><span>สมุดข้อสอบ</span></a>
@@ -1511,6 +1591,9 @@
         <div class="pali-reference-pip__bar" data-pali-reference-drag>
           <div class="pali-reference-pip__title" data-pali-reference-title>มังคลัตถทีปนีบาลี (ปฐโม ภาโค) · ดูโจทย์ควบคู่กับสมุด</div>
           <div class="pali-reference-pip__actions">
+            <button class="pali-reference-pip__action" type="button" data-pali-reference-layout="floating" aria-pressed="true">ลอย</button>
+            <button class="pali-reference-pip__action" type="button" data-pali-reference-layout="side" aria-pressed="false">ซ้ายขวา</button>
+            <button class="pali-reference-pip__action" type="button" data-pali-reference-layout="bottom" aria-pressed="false">บนล่าง</button>
             <a
               class="pali-reference-pip__action"
               data-pali-reference-full
@@ -1770,6 +1853,7 @@
         const storageKey = "ruled-lines-card-only-draft-v1";
         const profileStorageKey = KEYS.studentProfile;
         const profileDraftStorageKey = "paligo-exam-student-profile-draft-v1";
+        const profileWizardDismissedStorageKey = "paligo-exam-profile-wizard-dismissed-v1";
         const submissionsStorageKey = KEYS.submissions;
         const booksStorageKey = KEYS.books;
         const activeBookStorageKey = KEYS.activeBook;
@@ -1780,7 +1864,7 @@
           corpusId: "mangalattha-pali-pathamo",
           title: "มังคลัตถทีปนีบาลี (ปฐโม ภาโค)",
           description: "ป.ธ. ๔ · แปลมคธเป็นไทย",
-          url: "pali-reference-pip.html?corpus=data/corpora/mangalattha-pali-pathamo/manifest.json",
+          url: "pali-reference-pip.html?corpus=data/corpora/mangalattha-pali-pathamo/manifest.json&subject=pali-to-thai",
         };
         const paliReferenceByExam = new Map([
           [
@@ -1793,7 +1877,7 @@
               corpusId: "dhammapadatthakatha-pali-rtf-prototype",
               title: "ธัมมปทัฏฐกถา ปฐโม ภาโค (เรื่องพระจักขุบาล)",
               description: "ป.ธ. ๔ · แปลไทยเป็นมคธ",
-              url: "pali-reference-pip.html?corpus=data/corpora/dhammapadatthakatha-pali-rtf-prototype/manifest.json",
+              url: "pali-reference-pip.html?corpus=data/corpora/dhammapadatthakatha-pali-rtf-prototype/manifest.json&subject=thai-to-pali",
             },
           ],
         ]);
@@ -1927,6 +2011,7 @@
         const profileForm = document.querySelector("[data-profile-form]");
         const profileDismissButtons = document.querySelectorAll("[data-profile-dismiss]");
         const profileError = document.querySelector("[data-profile-error]");
+        const openProfileWizardButton = document.querySelector("[data-open-profile-wizard]");
         const paliReferencePip = document.querySelector("[data-pali-reference-pip]");
         const openPaliReferenceButton = document.querySelector("[data-open-pali-reference]");
         const closePaliReferenceButton = document.querySelector("[data-pali-reference-close]");
@@ -1935,6 +2020,7 @@
         const paliReferenceTitle = document.querySelector("[data-pali-reference-title]");
         const paliReferenceFrame = document.querySelector("[data-pali-reference-frame]");
         const paliReferenceFullLink = document.querySelector("[data-pali-reference-full]");
+        const paliReferenceLayoutButtons = document.querySelectorAll("[data-pali-reference-layout]");
         const thaiDigits = new Map([
           ["0", "๐"],
           ["1", "๑"],
@@ -2018,26 +2104,127 @@
 
         const setStoredList = (key, value) => setList(key, value);
 
-        const loadStudentProfile = () => {
+        const markBookSyncStatus = (bookId, patch) => {
+          if (!bookId || !patch) return;
+          const books = getStoredList(booksStorageKey);
+          const index = books.findIndex((book) => book.id === bookId);
+          if (index < 0) return;
+          const next = [...books];
+          next[index] = { ...next[index], ...patch };
+          setStoredList(booksStorageKey, next);
+        };
+
+        const syncBookToServer = async (book, { silent = false } = {}) => {
+          if (!book?.id || !window.PaligoInboxClient?.isLoggedIn?.() || !window.PaligoInboxClient?.syncBooks) {
+            return null;
+          }
           try {
-            const raw = readRaw(profileStorageKey);
-            const profile = raw ? JSON.parse(raw) : null;
+            const payload = await window.PaligoInboxClient.syncBooks([book]);
+            const syncedAt = payload?.serverTime || new Date().toISOString();
+            markBookSyncStatus(book.id, { syncStatus: "synced", serverSyncedAt: syncedAt });
+            if (!silent) setSaveStatus("บันทึกบนเซิร์ฟเวอร์แล้ว");
+            return payload;
+          } catch (error) {
+            markBookSyncStatus(book.id, {
+              syncStatus: "pending_sync",
+              syncError: error.message || "server sync failed",
+            });
+            if (!silent) setSaveStatus("บันทึกในเครื่องแล้ว — sync ขึ้นเซิร์ฟเวอร์ไม่สำเร็จ");
+            return null;
+          }
+        };
+
+        const hydrateCurrentBookFromServer = async () => {
+          if (!currentBookId || !window.PaligoInboxClient?.isLoggedIn?.() || !window.PaligoInboxClient?.listBooks) {
+            return false;
+          }
+          try {
+            const payload = await window.PaligoInboxClient.listBooks();
+            const serverBooks = Array.isArray(payload?.books) ? payload.books : [];
+            const serverBook = serverBooks.find((book) => book.id === currentBookId);
+            if (!serverBook) return false;
+            const books = getStoredList(booksStorageKey);
+            setStoredList(booksStorageKey, upsertBookInList(books, serverBook));
+            return true;
+          } catch {
+            return false;
+          }
+        };
+
+        const deriveProfileDisplayName = (profile) => {
+          if (!profile) return "";
+          const parts = [profile.prefix, profile.firstName, profile.lastName]
+            .map((part) => String(part || "").trim())
+            .filter(Boolean);
+          let name = parts.join(" ").trim();
+          const monasticName = String(profile.monasticName || "").trim();
+          if (monasticName) name = name ? `${name} (${monasticName})` : monasticName;
+          return name || String(profile.displayAlias || "").trim();
+        };
+
+        const syncStudentProfileToServer = async (profile, { silent = false } = {}) => {
+          if (!profile || !window.PaligoInboxClient?.isLoggedIn?.() || !window.PaligoInboxClient?.updateMe) {
+            return null;
+          }
+          try {
+            const displayName = deriveProfileDisplayName(profile);
+            const payload = await window.PaligoInboxClient.updateMe({
+              displayName: displayName || undefined,
+              profileJson: profile,
+            });
+            if (!silent) setSaveStatus("บันทึกโปรไฟล์บนเซิร์ฟเวอร์แล้ว");
+            return payload;
+          } catch (error) {
+            if (!silent) setSaveStatus("บันทึกโปรไฟล์ในเครื่องแล้ว — sync ขึ้นเซิร์ฟเวอร์ไม่สำเร็จ");
+            return null;
+          }
+        };
+
+        const loadStudentProfile = () => {
+          const normalizeProfile = (profile, source = "local") => {
             if (!profile || typeof profile !== "object") return null;
             return {
               ...profile,
+              profileSetupCompleted: profile.profileSetupCompleted !== false,
+              profileSource: profile.profileSource || source,
               deliveryMethod:
                 typeof PaligoExamShared?.normalizeDeliveryMethod === "function"
                   ? PaligoExamShared.normalizeDeliveryMethod(profile.deliveryMethod)
                   : "inbox",
             };
+          };
+
+          try {
+            const raw = readRaw(profileStorageKey);
+            const profile = raw ? JSON.parse(raw) : null;
+            const localProfile = normalizeProfile(profile, "local");
+            if (localProfile) return localProfile;
           } catch {
-            return null;
+            /* fall through to account profile */
           }
+
+          const sessionUser = window.PaligoInboxClient?.getSession?.()?.user || null;
+          const serverProfile =
+            sessionUser?.role === "student" &&
+            sessionUser.profileJson &&
+            typeof sessionUser.profileJson === "object"
+              ? normalizeProfile(sessionUser.profileJson, "account")
+              : null;
+          if (!serverProfile) return null;
+
+          try {
+            writeRaw(profileStorageKey, JSON.stringify(serverProfile));
+          } catch {
+            /* local cache is best-effort; server/account profile still counts */
+          }
+          return serverProfile;
         };
 
         const saveStudentProfile = (profile) => {
           const next = {
             ...profile,
+            profileSetupCompleted: true,
+            profileWizardCompletedAt: profile?.profileWizardCompletedAt || new Date().toISOString(),
             deliveryMethod:
               typeof PaligoExamShared?.normalizeDeliveryMethod === "function"
                 ? PaligoExamShared.normalizeDeliveryMethod(profile?.deliveryMethod)
@@ -2187,14 +2374,24 @@
 
         const dismissProfileWizard = () => {
           persistProfileDraft();
+          writeRaw(profileWizardDismissedStorageKey, new Date().toISOString());
           clearProfileError();
           document.body.classList.remove("needs-profile");
           focusWritingEditorIfReady();
         };
 
+        const openProfileWizard = () => {
+          writeRaw(profileWizardDismissedStorageKey, "");
+          clearProfileError();
+          document.body.classList.add("needs-profile");
+          profileForm?.querySelector(".profile-wizard-title")?.focus?.({ preventScroll: true });
+        };
+
         profileDismissButtons.forEach((button) => {
           button.addEventListener("click", dismissProfileWizard);
         });
+
+        openProfileWizardButton?.addEventListener("click", openProfileWizard);
 
         const setProfileFormValues = (profile) => {
           if (!profileForm || !profile) return;
@@ -2251,6 +2448,46 @@
         const plaiWhisperToggle = document.querySelector("[data-plai-whisper-toggle]");
 
         const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+        const paliReferenceCompactQuery = window.matchMedia?.("(max-width: 900px), (max-height: 720px)");
+        const paliReferenceLayoutModes = new Set(["floating", "side", "bottom"]);
+
+        const isPaliReferenceCompactViewport = () => Boolean(paliReferenceCompactQuery?.matches);
+
+        const normalizePaliReferenceLayout = (value) =>
+          paliReferenceLayoutModes.has(value) ? value : "floating";
+
+        const resetPaliReferenceInlineFrame = () => {
+          if (!paliReferencePip) return;
+          paliReferencePip.style.left = "";
+          paliReferencePip.style.top = "";
+          paliReferencePip.style.right = "";
+          paliReferencePip.style.bottom = "";
+          paliReferencePip.style.width = "";
+          paliReferencePip.style.height = "";
+        };
+
+        const getPaliReferenceLayout = (state = loadPaliReferenceState()) =>
+          normalizePaliReferenceLayout(state?.layout);
+
+        const setPaliReferenceLayoutClasses = (layout) => {
+          if (!paliReferencePip) return;
+          paliReferencePip.classList.toggle("is-layout-floating", layout === "floating");
+          paliReferencePip.classList.toggle("is-layout-side", layout === "side");
+          paliReferencePip.classList.toggle("is-layout-bottom", layout === "bottom");
+          paliReferenceLayoutButtons.forEach((button) => {
+            const isActive = button.dataset.paliReferenceLayout === layout;
+            button.classList.toggle("is-active", isActive);
+            button.setAttribute("aria-pressed", String(isActive));
+          });
+        };
+
+        const applyPaliReferenceResponsiveMode = () => {
+          if (!paliReferencePip) return false;
+          const isCompact = isPaliReferenceCompactViewport();
+          paliReferencePip.classList.toggle("is-compact-dock", isCompact);
+          if (isCompact) resetPaliReferenceInlineFrame();
+          return isCompact;
+        };
 
         const loadPaliReferenceState = () => {
           try {
@@ -2264,15 +2501,25 @@
         const savePaliReferenceState = () => {
           if (!paliReferencePip || paliReferencePip.hidden) return;
           const rect = paliReferencePip.getBoundingClientRect();
+          const previousState = loadPaliReferenceState() || {};
+          const layout = getPaliReferenceLayout(previousState);
+          const geometry =
+            layout === "floating"
+              ? {
+                  left: Math.round(rect.left),
+                  top: Math.round(rect.top),
+                  width: Math.round(rect.width),
+                  height: Math.round(rect.height),
+                }
+              : {};
           try {
             localStorage.setItem(
               paliReferencePipStorageKey,
               JSON.stringify({
-                left: Math.round(rect.left),
-                top: Math.round(rect.top),
-                width: Math.round(rect.width),
-                height: Math.round(rect.height),
+                ...previousState,
+                ...geometry,
                 minimized: paliReferencePip.classList.contains("is-minimized"),
+                layout,
               })
             );
           } catch {
@@ -2282,7 +2529,21 @@
 
         const applyPaliReferenceState = () => {
           if (!paliReferencePip) return;
+          const isCompact = applyPaliReferenceResponsiveMode();
           const state = loadPaliReferenceState();
+          const layout = getPaliReferenceLayout(state);
+          setPaliReferenceLayoutClasses(layout);
+          paliReferencePip.classList.toggle("is-minimized", Boolean(state?.minimized));
+          if (minimizePaliReferenceButton) {
+            setExamButtonLabel(minimizePaliReferenceButton, state?.minimized ? "+" : "", state?.minimized ? "expand" : "minus");
+            minimizePaliReferenceButton.setAttribute("aria-label", state?.minimized ? "ขยายหน้าต่าง" : "ย่อหน้าต่าง");
+          }
+          if (isCompact) return;
+          if (layout !== "floating") {
+            resetPaliReferenceInlineFrame();
+            return;
+          }
+
           const viewportWidth = window.innerWidth;
           const viewportHeight = window.innerHeight;
           const width = clamp(state?.width || Math.min(620, Math.round(viewportWidth * 0.46)), 320, viewportWidth - 24);
@@ -2297,11 +2558,6 @@
           paliReferencePip.style.bottom = "auto";
           paliReferencePip.style.width = `${width}px`;
           if (!state?.minimized) paliReferencePip.style.height = `${height}px`;
-          paliReferencePip.classList.toggle("is-minimized", Boolean(state?.minimized));
-          if (minimizePaliReferenceButton) {
-            setExamButtonLabel(minimizePaliReferenceButton, state?.minimized ? "+" : "", state?.minimized ? "expand" : "minus");
-            minimizePaliReferenceButton.setAttribute("aria-label", state?.minimized ? "ขยายหน้าต่าง" : "ย่อหน้าต่าง");
-          }
         };
 
         const getCurrentPaliReferenceSource = () => {
@@ -2331,6 +2587,10 @@
           }
 
           return source;
+        };
+
+        const syncPaliReferenceForPickerChange = () => {
+          syncPaliReferenceContext({ reload: !paliReferencePip?.hidden });
         };
 
         const ensurePaliReferenceFrame = () => {
@@ -2370,8 +2630,28 @@
           savePaliReferenceState();
         };
 
+        const setPaliReferenceLayout = (layout) => {
+          if (!paliReferencePip) return;
+          const nextLayout = normalizePaliReferenceLayout(layout);
+          const state = loadPaliReferenceState() || {};
+          try {
+            localStorage.setItem(
+              paliReferencePipStorageKey,
+              JSON.stringify({
+                ...state,
+                layout: nextLayout,
+              })
+            );
+          } catch {
+            /* ignore quota / privacy mode */
+          }
+          applyPaliReferenceState();
+        };
+
         const movePaliReferencePip = (clientX, clientY) => {
           if (!paliReferencePip || !activePaliReferenceDrag) return;
+          if (isPaliReferenceCompactViewport()) return;
+          if (getPaliReferenceLayout() !== "floating") return;
           const rect = paliReferencePip.getBoundingClientRect();
           const left = clamp(clientX - activePaliReferenceDrag.offsetX, 8, Math.max(8, window.innerWidth - rect.width - 8));
           const maxTop = paliReferencePip.classList.contains("is-minimized")
@@ -3653,6 +3933,7 @@
               event.stopPropagation();
               selectPickerValue(subjectPicker, optionValue);
               if (!PLAI_WHISPER_SUBJECTS.has(optionValue)) closeGhostSuggestions();
+              syncPaliReferenceForPickerChange();
               syncPlaiWhisperToggle();
               scheduleAutoSave();
             });
@@ -3704,7 +3985,10 @@
             option.addEventListener("click", (event) => {
               event.stopPropagation();
               selectPickerValue(picker, value);
-              if (isGradePicker) rebuildSubjectPickerOptions();
+              if (isGradePicker) {
+                rebuildSubjectPickerOptions();
+                syncPaliReferenceForPickerChange();
+              }
               scheduleAutoSave();
             });
             options.append(option);
@@ -4245,7 +4529,8 @@
           const draft = buildDraftSnapshot();
 
           localStorage.setItem(storageKey, JSON.stringify(draft));
-          upsertAnswerBook(draft);
+          const savedBook = upsertAnswerBook(draft);
+          syncBookToServer(savedBook, { silent });
           if (!silent) {
             setSaveStatus("บันทึกแล้ว");
             updateBookBar();
@@ -4353,12 +4638,16 @@
 
           studentProfile = {
             ...readProfileFormValues(),
+            profileSetupCompleted: true,
+            profileWizardCompletedAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
           };
 
           try {
             saveStudentProfile(studentProfile);
+            writeRaw(profileWizardDismissedStorageKey, "");
             persistProfileDraft();
+            syncStudentProfileToServer(studentProfile);
           } catch (error) {
             showProfileError("บันทึกโปรไฟล์ไม่ได้ — ตรวจสอบการอนุญาต localStorage ของเบราว์เซอร์");
             return false;
@@ -4392,7 +4681,7 @@
           saveProfileFromForm();
         });
 
-        if (!studentProfile) {
+        if (!studentProfile && !readRaw(profileWizardDismissedStorageKey)) {
           document.body.classList.add("needs-profile");
         }
 
@@ -4930,10 +5219,17 @@
 
         closePaliReferenceButton?.addEventListener("click", closePaliReferencePip);
         minimizePaliReferenceButton?.addEventListener("click", togglePaliReferenceMinimized);
+        paliReferenceLayoutButtons.forEach((button) => {
+          button.addEventListener("click", () => {
+            setPaliReferenceLayout(button.dataset.paliReferenceLayout);
+          });
+        });
 
         paliReferenceDragHandle?.addEventListener("pointerdown", (event) => {
           if (event.target?.closest?.("button, a")) return;
           if (!paliReferencePip) return;
+          if (isPaliReferenceCompactViewport()) return;
+          if (getPaliReferenceLayout() !== "floating") return;
 
           const rect = paliReferencePip.getBoundingClientRect();
           activePaliReferenceDrag = {
@@ -4963,17 +5259,33 @@
           applyPaliReferenceState();
         });
 
+        const finishWorkbookBoot = () => {
+          syncPrefilledAnswerLine();
+          applyPermissions();
+          focusWritingEditorIfReady();
+        };
+
         showPage(0);
         if (initReviewMode()) {
-          /* loaded from submission */
+          finishWorkbookBoot();
         } else {
-          restoreDraft();
-          ensureInitialQuestionNumber({ autosave: true });
-          loadReviewLayerForStudent();
+          PaligoInboxClient.ensureAuthenticatedSession?.()
+            .catch(() => null)
+            .then(() => hydrateCurrentBookFromServer())
+            .catch(() => false)
+            .finally(() => {
+              const hydratedProfile = loadStudentProfile();
+              if (!studentProfile && hydratedProfile) {
+                studentProfile = hydratedProfile;
+                setProfileFormValues(studentProfile);
+                document.body.classList.remove("needs-profile");
+              }
+              restoreDraft();
+              ensureInitialQuestionNumber({ autosave: true });
+              loadReviewLayerForStudent();
+              finishWorkbookBoot();
+            });
         }
-        syncPrefilledAnswerLine();
-        applyPermissions();
-        focusWritingEditorIfReady();
       })();
       PaligoSidebar.autoInit();
     </script>

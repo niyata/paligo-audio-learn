@@ -146,6 +146,15 @@
         border-color: rgba(180, 40, 40, 0.24);
       }
 
+      .technical-disclosure {
+        display: grid;
+        gap: 8px;
+      }
+
+      .technical-disclosure__toggle {
+        justify-self: start;
+      }
+
       .api-status {
         display: grid;
         gap: 8px;
@@ -680,7 +689,18 @@
           <div class="field-grid">
             <button class="button" type="button" data-refresh-me>โหลดสถานะ</button>
             <button class="button" type="button" data-logout>ออกจากระบบ</button>
-            <pre class="status-box" data-me-output>ยังไม่โหลด</pre>
+            <div class="technical-disclosure">
+              <button
+                class="button technical-disclosure__toggle"
+                type="button"
+                aria-controls="accountTechnicalDetails"
+                aria-expanded="false"
+                data-me-json-toggle
+              >
+                แสดงรายละเอียดเทคนิค
+              </button>
+              <pre class="status-box" id="accountTechnicalDetails" data-me-output hidden>ยังไม่โหลด</pre>
+            </div>
           </div>
         </div>
 
@@ -738,6 +758,7 @@
       const accountBannerMeta = document.querySelector("[data-account-banner-meta]");
       const accountPrimaryLink = document.querySelector("[data-account-primary-link]");
       const accountProfileLink = document.querySelector("[data-account-profile-link]");
+      const meJsonToggle = document.querySelector("[data-me-json-toggle]");
 
       const searchParams = new URLSearchParams(window.location.search);
       const returnPath = searchParams.get("return");
@@ -1277,6 +1298,17 @@
         });
         setOnboardingMode(name === "register");
       }
+
+      function setTechnicalDetailsOpen(open) {
+        if (!meOutput || !meJsonToggle) return;
+        meOutput.hidden = !open;
+        meJsonToggle.setAttribute("aria-expanded", String(open));
+        meJsonToggle.textContent = open ? "ซ่อนรายละเอียดเทคนิค" : "แสดงรายละเอียดเทคนิค";
+      }
+
+      meJsonToggle?.addEventListener("click", () => {
+        setTechnicalDetailsOpen(Boolean(meOutput?.hidden));
+      });
 
       function setOnboardingMode(active) {
         // Shell stays mounted (nav rule) but its chrome is hidden via CSS so it never

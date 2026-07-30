@@ -57,6 +57,16 @@
         padding: 16px 18px;
       }
 
+      .qa-shell[hidden],
+      .qa-access-card[hidden] {
+        display: none !important;
+      }
+
+      .qa-access-card {
+        margin: 24px auto;
+        max-width: 720px;
+      }
+
       .qa-title {
         color: var(--exam-blue);
         font-size: clamp(1.25rem, 2.8vw, 1.75rem);
@@ -644,7 +654,7 @@
     </style>
   </head>
   <body>
-    <main class="qa-shell">
+    <main class="qa-shell" data-qa-shell hidden>
       <header class="qa-card">
         <h1 class="qa-title" data-book-title>ตรวจหน้าเล่ม (QA)</h1>
         <p class="qa-note">เทียบ PDF ต้นฉบับกับ HTML ที่แปลงแล้ว และบันทึกสถานะตรวจสอบลง footnote ของแต่ละหน้า</p>
@@ -801,10 +811,41 @@
       </section>
     </main>
 
+    <section class="qa-card qa-access-card" data-qa-access-card>
+      <h1 class="qa-title">เตรียมเล่ม</h1>
+      <p class="qa-note" data-qa-access-message>กำลังตรวจสอบสิทธิ์ Super Admin…</p>
+    </section>
+
+    <script src="paligo-config.js"></script>
+    <script src="paligo-inbox-client.js"></script>
+    <script src="paligo-platform.js"></script>
+    <script src="paligo-nav-config.js"></script>
+    <script src="sidebar-nav.js"></script>
     <script src="book-fonts.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script>
-      (() => {
+      (async () => {
+        const qaShell = document.querySelector("[data-qa-shell]");
+        const accessCard = document.querySelector("[data-qa-access-card]");
+        const accessMessage = document.querySelector("[data-qa-access-message]");
+
+        async function requireSuperAdminAccess() {
+          try {
+            const user = await window.PaligoPlatform?.ensureSuperAdminPage?.(
+              "exam-account.html?tab=login&return=/book-page-qa"
+            );
+            if (!user) return false;
+            await window.PaligoPlatform?.boot?.({ user });
+            qaShell.hidden = false;
+            accessCard.hidden = true;
+            window.PaligoSidebar?.autoInit?.();
+            return true;
+          } catch (error) {
+            accessMessage.textContent = error?.message || "ตรวจสอบสิทธิ์ไม่สำเร็จ";
+            return false;
+          }
+        }
+
         const STATUS_LABELS = {
           pending: "รอตรวจสอบ",
           verified: "ยืนยันแล้ว",
@@ -1387,6 +1428,9 @@
 
         window.PaligoBookFonts?.bindSelect(els.htmlFontSelect, () => [els.htmlHost, els.htmlOverlayHost]);
 
+        const hasAccess = await requireSuperAdminAccess();
+        if (!hasAccess) return;
+
         const manifestParam = resolveQueryParam("manifest");
         if (manifestParam) {
           loadManifest(manifestParam).catch((error) => {
@@ -1397,15 +1441,6 @@
             "เปิดด้วย ?manifest=output/4-MT-29/manifest.json (อย่า encode = เป็น %3D)";
         }
       })();
-    </script>
-    <script src="paligo-config.js"></script>
-    <script src="paligo-inbox-client.js"></script>
-    <script src="paligo-platform.js"></script>
-    <script src="paligo-nav-config.js"></script>
-    <script src="sidebar-nav.js"></script>
-    <script>
-      PaligoSidebar.autoInit();
-      PaligoPlatform?.boot?.();
     </script>
   </body>
 </html>

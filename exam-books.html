@@ -1122,7 +1122,80 @@
         };
 
         const getBooks = () => getList(KEYS.books);
-        const setBooks = (books) => setList(KEYS.books, books);
+        const saveBooksLocally = (books) => setList(KEYS.books, sortBooksNewestFirst(books));
+        let booksSyncTimer = null;
+        let isHydratingBooksFromServer = false;
+
+        const getBookSyncTime = (book) => {
+          const value = book?.updatedAt || book?.draft?.savedAt || book?.serverSyncedAt || book?.createdAt || "";
+          const time = Date.parse(value);
+          return Number.isFinite(time) ? time : 0;
+        };
+
+        const mergeBooksForCurrentUser = (localBooks = [], serverBooks = []) => {
+          const byId = new Map();
+          [...serverBooks, ...localBooks].forEach((book) => {
+            if (!book?.id) return;
+            const existing = byId.get(book.id);
+            if (!existing || getBookSyncTime(book) >= getBookSyncTime(existing)) {
+              byId.set(book.id, { ...existing, ...book });
+            }
+          });
+          return sortBooksNewestFirst([...byId.values()]);
+        };
+
+        const syncBooksToServer = async (books = getBooks()) => {
+          if (!window.PaligoInboxClient?.isLoggedIn?.() || !window.PaligoInboxClient?.syncBooks) return null;
+          const payload = await window.PaligoInboxClient.syncBooks(books);
+          const syncedAt = payload?.serverTime || new Date().toISOString();
+          const syncedIds = new Set(payload?.synced || []);
+          if (syncedIds.size) {
+            saveBooksLocally(
+              getBooks().map((book) =>
+                syncedIds.has(book.id)
+                  ? { ...book, syncStatus: "synced", serverSyncedAt: syncedAt }
+                  : book
+              )
+            );
+          }
+          return payload;
+        };
+
+        const scheduleBooksServerSync = () => {
+          if (isHydratingBooksFromServer || !window.PaligoInboxClient?.isLoggedIn?.()) return;
+          clearTimeout(booksSyncTimer);
+          booksSyncTimer = setTimeout(() => {
+            syncBooksToServer().catch((error) => {
+              console.warn("sync สมุดขึ้น server ไม่สำเร็จ", error);
+              saveBooksLocally(
+                getBooks().map((book) =>
+                  book.syncStatus === "synced" ? book : { ...book, syncStatus: "pending_sync" }
+                )
+              );
+            });
+          }, 450);
+        };
+
+        const setBooks = (books, { sync = true } = {}) => {
+          saveBooksLocally(books);
+          if (sync) scheduleBooksServerSync();
+        };
+
+        const hydrateBooksFromServer = async () => {
+          if (!window.PaligoInboxClient?.isLoggedIn?.() || !window.PaligoInboxClient?.listBooks) return;
+          const localBooks = getBooks();
+          const payload = await window.PaligoInboxClient.listBooks();
+          const serverBooks = Array.isArray(payload?.books) ? payload.books : [];
+          const merged = mergeBooksForCurrentUser(localBooks, serverBooks);
+          isHydratingBooksFromServer = true;
+          try {
+            setBooks(merged, { sync: false });
+          } finally {
+            isHydratingBooksFromServer = false;
+          }
+          renderBooks({ skipDatePickerSync: true });
+          await syncBooksToServer(merged);
+        };
 
         const thaiMonthNames = [
           "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน",
@@ -1794,9 +1867,20 @@
           console.error("ตั้งค่าแบบฟอร์มสร้างสมุดไม่สำเร็จ", error);
         }
 
-        window.addEventListener("pageshow", renderBooks);
+        window.addEventListener("pageshow", () => {
+          hydrateBooksFromServer()
+            .catch((error) => {
+              console.warn("โหลดสมุดจาก server ไม่สำเร็จ", error);
+              renderBooks();
+            });
+        });
         PaligoInboxClient.ensureAuthenticatedSession?.()
           .catch(() => null)
+          .then(() => hydrateBooksFromServer())
+          .catch((error) => {
+            console.warn("ใช้รายการสมุดในเครื่องชั่วคราว", error);
+            renderBooks();
+          })
           .finally(updateBooksAppState);
         updateBooksAppState();
         renderBooks();

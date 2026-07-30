@@ -3,6 +3,7 @@
  */
 
 import { handleChangePin, handleLogin, handleLogout, handleMe, handlePatchMe, handleRegister, requireUser } from "./auth.js";
+import { handleGetBooks, handleSyncBooks } from "./books.js";
 import { handleGetAdminPanel, handleGetPlatformFlags, handlePatchAdminSettings } from "./platform.js";
 import { handleClaimInbox, handleGetInbox } from "./inbox.js";
 import { handleLineIssueWebhook } from "./line-issue-bot.js";
@@ -44,6 +45,9 @@ export async function handleV1(request, env) {
   if (path === "/v1/pairings/join" && method === "POST") return handlePairingJoin(request, env);
 
   if (path === "/v1/reviewers/search" && method === "GET") return handleSearchReviewers(request, env);
+
+  if (path === "/v1/books" && method === "GET") return handleGetBooks(request, env);
+  if (path === "/v1/books/sync" && method === "POST") return handleSyncBooks(request, env);
 
   if (path === "/v1/inbox" && method === "GET") return handleGetInbox(request, env);
 

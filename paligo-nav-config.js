@@ -73,6 +73,7 @@
           label: "ตรวจหน้าเล่ม (QA)",
           href: "book-page-qa.html",
           description: "เทียบ PDF กับ HTML หลังแปลงเล่ม",
+          requiresSuperAdmin: true,
         },
       ],
     },

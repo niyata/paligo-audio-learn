@@ -498,6 +498,17 @@
     });
   }
 
+  async function listBooks() {
+    return safeRequest("/books", { method: "GET" });
+  }
+
+  async function syncBooks(books) {
+    return safeRequest("/books/sync", {
+      method: "POST",
+      json: { books: Array.isArray(books) ? books : [books].filter(Boolean) },
+    });
+  }
+
   async function listInbox() {
     return safeRequest("/inbox", { method: "GET" });
   }
@@ -540,6 +551,8 @@
     joinPairing,
     searchReviewers,
     canUseInbox,
+    listBooks,
+    syncBooks,
     pushPackage,
     listInbox,
     claimInboxItem,

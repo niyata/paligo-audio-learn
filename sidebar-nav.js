@@ -96,8 +96,19 @@
     return ICONS[name] || ICONS.book;
   }
 
+  function canShowMenuItem(item) {
+    if (!item?.requiresSuperAdmin) return true;
+    const session =
+      typeof window !== "undefined" ? window.PaligoInboxClient?.getSession?.() : null;
+    return isSuperAdminUser(session?.user);
+  }
+
+  function visibleChildren(section) {
+    return (section.children || []).filter(canShowMenuItem);
+  }
+
   function buildSubmenu(section, activeRef) {
-    return section.children
+    return visibleChildren(section)
       .map((item) => {
         const itemRef = normalizeHref(item.href);
         const active = itemRef === activeRef ? " is-active" : "";
@@ -209,7 +220,7 @@
   }
 
   function buildFlyoutLinks(section, activeRef) {
-    return section.children
+    return visibleChildren(section)
       .map((item) => {
         const itemRef = normalizeHref(item.href);
         const active = itemRef === activeRef ? " is-active" : "";
@@ -221,6 +232,8 @@
 
   function renderSidebar(menu, activeRef, brand) {
     const sections = menu
+      .map((section) => ({ ...section, children: visibleChildren(section) }))
+      .filter((section) => section.children.length)
       .map((section) => {
         const submenuId = `paligo-submenu-${section.id}`;
         const openByDefault = section.children.some((item) => normalizeHref(item.href) === activeRef);
