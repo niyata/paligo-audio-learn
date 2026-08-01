@@ -151,6 +151,10 @@
         gap: 8px;
       }
 
+      .technical-disclosure.is-spaced {
+        margin-top: 24px;
+      }
+
       .technical-disclosure__toggle {
         justify-self: start;
       }
@@ -683,6 +687,18 @@
               <button class="button is-primary" type="submit">เข้าร่วม (นักเรียน)</button>
             </form>
           </div>
+          <div class="technical-disclosure is-spaced">
+            <button
+              class="button is-ghost technical-disclosure__toggle"
+              type="button"
+              aria-controls="pairingTechnicalDetails"
+              aria-expanded="false"
+              data-pairing-json-toggle
+            >
+              แสดงรายละเอียดเทคนิค
+            </button>
+            <pre class="status-box" id="pairingTechnicalDetails" data-pairing-output hidden>ยังไม่โหลด</pre>
+          </div>
         </div>
 
         <div class="panel" data-panel="me" hidden>
@@ -759,6 +775,8 @@
       const accountPrimaryLink = document.querySelector("[data-account-primary-link]");
       const accountProfileLink = document.querySelector("[data-account-profile-link]");
       const meJsonToggle = document.querySelector("[data-me-json-toggle]");
+      const pairingOutput = document.querySelector("[data-pairing-output]");
+      const pairingJsonToggle = document.querySelector("[data-pairing-json-toggle]");
 
       const searchParams = new URLSearchParams(window.location.search);
       const returnPath = searchParams.get("return");
@@ -1306,8 +1324,19 @@
         meJsonToggle.textContent = open ? "ซ่อนรายละเอียดเทคนิค" : "แสดงรายละเอียดเทคนิค";
       }
 
+      function setPairingDetailsOpen(open) {
+        if (!pairingOutput || !pairingJsonToggle) return;
+        pairingOutput.hidden = !open;
+        pairingJsonToggle.setAttribute("aria-expanded", String(open));
+        pairingJsonToggle.textContent = open ? "ซ่อนรายละเอียดเทคนิค" : "แสดงรายละเอียดเทคนิค";
+      }
+
       meJsonToggle?.addEventListener("click", () => {
         setTechnicalDetailsOpen(Boolean(meOutput?.hidden));
+      });
+
+      pairingJsonToggle?.addEventListener("click", () => {
+        setPairingDetailsOpen(Boolean(pairingOutput?.hidden));
       });
 
       function setOnboardingMode(active) {
@@ -1539,8 +1568,10 @@
         try {
           const payload = await PaligoInboxClient.createInvite();
           showStatus(`รหัสจับคู่: ${payload.inviteCode}\nแจกให้นักเรียนกรอกในแท็บจับคู่`);
+          if (pairingOutput) pairingOutput.textContent = JSON.stringify(payload, null, 2);
         } catch (error) {
           showStatus(error.message || "สร้างรหัสไม่สำเร็จ", true);
+          if (pairingOutput) pairingOutput.textContent = error.message || "สร้างรหัสไม่สำเร็จ";
         }
       });
 
@@ -1551,8 +1582,10 @@
         try {
           const payload = await PaligoInboxClient.joinPairing(inviteCode);
           showStatus(`จับคู่แล้วกับ ${payload.reviewerDisplayName}`);
+          if (pairingOutput) pairingOutput.textContent = JSON.stringify(payload, null, 2);
         } catch (error) {
           showStatus(error.message || "จับคู่ไม่สำเร็จ", true);
+          if (pairingOutput) pairingOutput.textContent = error.message || "จับคู่ไม่สำเร็จ";
         }
       });
 
