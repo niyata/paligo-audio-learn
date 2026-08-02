@@ -741,6 +741,134 @@
           selectFirstContact();
         };
 
+        const roomUpdatedAt = (room) => Date.parse(room?.updatedAt || room?.invitedAt || room?.createdAt || "") || 0;
+        const roomMergeKey = (room) => `${room?.type || "room"}:${room?.id || ""}`;
+        const toRoomPayloads = () => [
+          ...readStoredInvites().personal.map((contact) => ({
+            ...contact,
+            id: contact.id,
+            type: "personal",
+            threadId: resolvePeerThreadId(contact.id),
+            name: contact.name || contact.email || "ผู้ติดต่อ",
+            updatedAt: contact.updatedAt || contact.invitedAt || new Date().toISOString(),
+          })),
+          ...readStoredGroups().map((group) => ({
+            ...group,
+            id: group.id,
+            type: "group",
+            threadId: group.threadId,
+            name: group.name || "กลุ่ม",
+            updatedAt: group.updatedAt || group.createdAt || new Date().toISOString(),
+          })),
+        ];
+
+        const normalizeServerRoomPayload = (room) => {
+          const payload = room?.payload && typeof room.payload === "object" ? room.payload : room;
+          const type = payload?.type || room?.type;
+          const id = payload?.id || room?.id;
+          const thread = payload?.threadId || room?.threadId;
+          const name = payload?.name || room?.name;
+          if (!id || !thread || !name || (type !== "personal" && type !== "group")) return null;
+          return {
+            ...payload,
+            id,
+            type,
+            threadId: thread,
+            name,
+            updatedAt: payload?.updatedAt || room?.updatedAt || payload?.invitedAt || payload?.createdAt,
+            createdAt: payload?.createdAt || room?.createdAt,
+          };
+        };
+
+        const mergeRooms = (localRooms, serverRooms) => {
+          const merged = new Map();
+          [...localRooms, ...serverRooms].filter(Boolean).forEach((room) => {
+            const key = roomMergeKey(room);
+            if (!room.id || key.endsWith(":")) return;
+            const existing = merged.get(key);
+            if (!existing || roomUpdatedAt(room) >= roomUpdatedAt(existing)) merged.set(key, room);
+          });
+          return Array.from(merged.values()).sort((a, b) => roomUpdatedAt(b) - roomUpdatedAt(a));
+        };
+
+        const mirrorGroupsToClassroomRegistry = (groups) => {
+          const key = window.PaligoExamShared?.KEYS?.classroomRegistry;
+          if (!key) return;
+          try {
+            const registry = JSON.parse(localStorage.getItem(key) || "{}") || {};
+            const ownerId = getGroupOwnerScope();
+            groups.forEach((group) => {
+              const classroomId = group.classroomId || group.id;
+              if (!classroomId) return;
+              registry[classroomId] = {
+                ...(registry[classroomId] || {}),
+                id: classroomId,
+                groupId: group.id,
+                threadId: group.threadId,
+                name: group.name,
+                ownerId,
+                ownerRole: group.ownerRole || (role === "reviewer" ? "teacher" : "student"),
+                kind: group.kind || "study",
+                themeKey: group.themeKey || "blue-gold",
+                description: group.description || "ห้องเรียน · invite สมาชิกได้",
+                members: Array.isArray(group.members) ? group.members.slice() : [],
+                source: "inbox-room-sync",
+                createdAt: group.createdAt || registry[classroomId]?.createdAt || new Date().toISOString(),
+                updatedAt: group.updatedAt || new Date().toISOString(),
+              };
+            });
+            localStorage.setItem(key, JSON.stringify(registry));
+          } catch {
+            /* keep roster sync best-effort */
+          }
+        };
+
+        const persistMergedRooms = (rooms) => {
+          const personal = rooms.filter((room) => room.type === "personal").map(({ type, ...contact }) => contact);
+          const groups = rooms.filter((room) => room.type === "group").map(({ type, ...group }) => group);
+          const stored = readStoredInvites();
+          stored.personal = personal;
+          writeStoredInvites(stored);
+          writeStoredGroups(groups);
+          mirrorGroupsToClassroomRegistry(groups);
+        };
+
+        const repaintRoomContacts = () => {
+          readStoredInvites().personal.forEach((contact) => {
+            upsertContact(buildInviteContact(contact));
+          });
+          readStoredGroups().forEach((group) => {
+            upsertContact(buildGroupContact(group));
+          });
+          renderContactList();
+        };
+
+        let roomRosterSyncTimer = null;
+        const syncRoomRosterWithServer = async ({ quiet = false } = {}) => {
+          if (!PaligoInboxClient.listInboxRooms || !PaligoInboxClient.syncInboxRooms) return false;
+          const localRooms = toRoomPayloads();
+          try {
+            const remote = await PaligoInboxClient.listInboxRooms();
+            const serverRooms = (remote.rooms || []).map(normalizeServerRoomPayload).filter(Boolean);
+            const merged = mergeRooms(localRooms, serverRooms);
+            persistMergedRooms(merged);
+            repaintRoomContacts();
+            await PaligoInboxClient.syncInboxRooms(merged);
+            if (!quiet && serverRooms.length) setSyncStatus("เชื่อมต่อแล้ว — sync ห้องสนทนา", "online");
+            return true;
+          } catch (error) {
+            if (!quiet) setSyncStatus("sync รายชื่อห้องไม่ได้ — ใช้ข้อมูลในเครื่อง", "offline");
+            return false;
+          }
+        };
+
+        const scheduleRoomRosterSync = () => {
+          window.clearTimeout(roomRosterSyncTimer);
+          roomRosterSyncTimer = window.setTimeout(() => {
+            syncRoomRosterWithServer({ quiet: true });
+          }, 400);
+        };
+
         const syncBookSheetFilterOptions = () => {
           const refs = getSheetRefs();
           if (!refs.filterSubject) return;
@@ -1073,6 +1201,7 @@
           closeGroupSheet();
           setActiveContact(group.id);
           appendSystem(`${ownerLabel}สร้าง${kindLabel}: ${name}`);
+          scheduleRoomRosterSync();
         };
 
         const findActiveGroup = () =>
@@ -1188,6 +1317,7 @@
           stored.personal = Array.from(byId.values());
           writeStoredInvites(stored);
           stored.personal.forEach((contact) => upsertContact(buildInviteContact(contact)));
+          scheduleRoomRosterSync();
         };
 
         const persistGroupInvites = (groupId, contacts) => {
@@ -1226,6 +1356,7 @@
           stored.groupMembers[group.id] = group.members;
           writeStoredInvites(stored);
           upsertContact(buildGroupContact(group));
+          scheduleRoomRosterSync();
           return group;
         };
 
@@ -1931,6 +2062,7 @@
           showChat();
           configureRoleUi();
           initializeContacts();
+          await syncRoomRosterWithServer({ quiet: true });
           await syncInboxToChat();
           paintThread();
         };
@@ -1974,6 +2106,7 @@
           }
           configureRoleUi();
           initializeContacts();
+          await syncRoomRosterWithServer({ quiet: true });
           await syncInboxToChat();
           paintThread();
           if (!isOfflineMode) setSyncStatus("เชื่อมต่อแล้ว — sync ล่าสุด", "online");

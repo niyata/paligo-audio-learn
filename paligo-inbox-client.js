@@ -513,6 +513,17 @@
     return safeRequest("/inbox", { method: "GET" });
   }
 
+  async function listInboxRooms() {
+    return safeRequest("/inbox/rooms", { method: "GET" });
+  }
+
+  async function syncInboxRooms(rooms) {
+    return safeRequest("/inbox/rooms", {
+      method: "POST",
+      json: { rooms: Array.isArray(rooms) ? rooms : [] },
+    });
+  }
+
   async function claimInboxItem(inboxItemId) {
     return safeRequest(`/inbox/${inboxItemId}/claim`, { method: "POST" });
   }
@@ -555,6 +566,8 @@
     syncBooks,
     pushPackage,
     listInbox,
+    listInboxRooms,
+    syncInboxRooms,
     claimInboxItem,
   };
 })(typeof window !== "undefined" ? window : globalThis);

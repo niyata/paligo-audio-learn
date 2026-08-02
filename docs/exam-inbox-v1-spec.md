@@ -127,6 +127,21 @@ reviewed ──[ทำรอบใหม่]──► draft (revision ใหม�
 | `claimed_at` | timestamptz nullable | |
 | `created_at` | timestamptz | |
 
+### `inbox_rooms`
+
+Account-backed roster สำหรับห้องที่ไม่ได้มาจาก pairing โดยตรง เช่น invite ส่วนตัวและกลุ่มเรียน
+เพื่อไม่ให้ browser A/B เห็น contact rail ต่างกันเพราะ `localStorage` คนละชุด
+
+| คอลัมน์ | ประเภท | หมายเหตุ |
+|---------|--------|----------|
+| `owner_user_id` | FK → users | เจ้าของ roster |
+| `room_id` | text | id จาก client/group |
+| `room_type` | enum | `personal` \| `group` |
+| `thread_id` | text | thread key ที่ client ใช้ |
+| `display_name` | text | ชื่อที่แสดงใน contact rail |
+| `payload_json` | text | metadata ที่ client ต้องใช้สร้าง contact |
+| `updated_at` | timestamptz | ใช้ merge กับ local cache |
+
 ### `sessions` (MVP auth)
 
 | คอลัมน์ | ประเภท | หมายเหตุ |
@@ -136,7 +151,7 @@ reviewed ──[ทำรอบใหม่]──► draft (revision ใหม�
 | `expires_at` | timestamptz | |
 | `created_at` | timestamptz | |
 
-**Index แนะนำ:** `(to_user_id, status, created_at DESC)`, `(book_id, book_revision)`, `(invite_code)`.
+**Index แนะนำ:** `(to_user_id, status, created_at DESC)`, `(book_id, book_revision)`, `(invite_code)`, `(owner_user_id, updated_at DESC)`.
 
 ---
 
@@ -160,6 +175,8 @@ Base: `https://api.paligo.jp/v1` · Auth: `Authorization: Bearer <session>` ห�
 | Method | Path | บทบาท | คำอธิบาย |
 |--------|------|--------|-----------|
 | `GET` | `/inbox` | user | รายการ `pending` (+ optional `claimed` ล่าสุด) |
+| `GET` | `/inbox/rooms` | user | roster ห้อง custom ของบัญชี เช่น invite ส่วนตัว/กลุ่ม |
+| `POST` | `/inbox/rooms` | user | sync roster จาก browser local cache ขึ้นบัญชี |
 | `GET` | `/inbox/{id}` | recipient | รายละเอียด + `intendedRecipientLabel` (ยังไม่ให้ payload) |
 | `POST` | `/inbox/{id}/claim` | recipient | ตรวจ `to_user_id` + role · คืน `bookTransfer` JSON · ตั้ง `claimed` |
 | `POST` | `/inbox/{id}/cancel` | sender | ยกเลิกก่อน claim |

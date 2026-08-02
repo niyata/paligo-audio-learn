@@ -56,6 +56,8 @@ Browser: [`exam-account.html`](../exam-account.html) — สมัคร · logi
 | POST | `/v1/pairings/join` | 201 (student) |
 | POST | `/v1/packages` | 201 to-reviewer · to-student |
 | GET | `/v1/inbox` | 200 |
+| GET | `/v1/inbox/rooms` | 200 (account-backed chat groups/invites) |
+| POST | `/v1/inbox/rooms` | 200 (sync browser-local rooms to account) |
 | POST | `/v1/inbox/{id}/claim` | 200 |
 
 ---
@@ -136,6 +138,7 @@ Override: `window.PALIGO_API_BASE = "…"` ก่อนโหลด `paligo-conf
 | 3 | inbox list + claim (reviewer) |
 | 4 | POST packages to-student + student claim |
 | 5 | exam-inbox UX polish |
+| 6 | account-backed inbox room roster |
 
 Smoke (local): `bash scripts/smoke-inbox-api.sh` (ต้อง `cd workers && npm run dev`)
 

@@ -6,6 +6,7 @@ import { handleChangePin, handleLogin, handleLogout, handleMe, handlePatchMe, ha
 import { handleGetBooks, handleSyncBooks } from "./books.js";
 import { handleGetAdminPanel, handleGetPlatformFlags, handlePatchAdminSettings } from "./platform.js";
 import { handleClaimInbox, handleGetInbox } from "./inbox.js";
+import { handleGetInboxRooms, handleSyncInboxRooms } from "./inbox-rooms.js";
 import { handleLineIssueWebhook } from "./line-issue-bot.js";
 import { handlePostPackage } from "./packages.js";
 import { handlePairingInvite, handlePairingJoin } from "./pairing.js";
@@ -50,6 +51,8 @@ export async function handleV1(request, env) {
   if (path === "/v1/books/sync" && method === "POST") return handleSyncBooks(request, env);
 
   if (path === "/v1/inbox" && method === "GET") return handleGetInbox(request, env);
+  if (path === "/v1/inbox/rooms" && method === "GET") return handleGetInboxRooms(request, env);
+  if (path === "/v1/inbox/rooms" && method === "POST") return handleSyncInboxRooms(request, env);
 
   if (path.startsWith("/v1/inbox/") && path.endsWith("/claim") && method === "POST") {
     const inboxId = path.slice("/v1/inbox/".length, -"/claim".length);

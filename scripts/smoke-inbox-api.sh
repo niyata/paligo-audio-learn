@@ -27,6 +27,15 @@ curl -sf -X POST "$API/pairings/join" \
   -H "Content-Type: application/json" \
   -d "{\"inviteCode\":\"$CODE\"}" >/dev/null
 
+echo "→ sync account-backed inbox rooms"
+ROOMS=$(curl -sf -X POST "$API/inbox/rooms" \
+  -H "Authorization: Bearer $STU_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"rooms":[{"id":"pete.std@paligo.jp","type":"personal","threadId":"student-smoke-pete","name":"สามเณร Pete","email":"pete.std@paligo.jp","role":"student"}]}')
+echo "$ROOMS" | python3 -c "import sys,json; assert len(json.load(sys.stdin)['rooms']) == 1"
+curl -sf "$API/inbox/rooms" -H "Authorization: Bearer $STU_TOKEN" \
+  | python3 -c "import sys,json; assert json.load(sys.stdin)['rooms'][0]['id'] == 'pete.std@paligo.jp'"
+
 BOOK_ID="book-smoke-$(date +%s)"
 SUB_ID="sub-smoke-1"
 
