@@ -859,14 +859,9 @@
                   <span class="profile-field__hint">ค้นหาจากรายชื่อครูในระบบ หรือพิมพ์เอง</span>
                 </div>
                 <div class="profile-field profile-field--full">
-                  <label class="profile-field__label" for="classroomSelect">ชื่อห้องเรียน</label>
-                  <select
-                    class="profile-select profile-field__control"
-                    id="classroomSelect"
-                    name="classroomName"
-                    data-field-classroom
-                  ></select>
-                  <span class="profile-field__hint">แสดงบนหน้าปกสมุดและเป็นชื่อกลุ่มในกล่องข้อความ · ห้องที่สร้างเห็นได้เฉพาะบัญชีคุณจนกว่าจะเชิญสมาชิก</span>
+                  <label class="profile-field__label" for="deliverySelect">ช่องทางส่งตรวจ</label>
+                  <select class="profile-select profile-field__control" id="deliverySelect" name="deliveryMethod" data-field-delivery></select>
+                  <span class="profile-field__hint is-empty" aria-hidden="true"></span>
                 </div>
               </div>
             </section>
@@ -1085,7 +1080,6 @@
       (() => {
         const profile = window.PaligoProfile;
         const client = window.PaligoInboxClient;
-        const shared = window.PaligoExamShared;
         const shell = document.querySelector("[data-profile-shell]");
         const tabs = document.querySelectorAll("[data-profile-tab]");
         const panels = document.querySelectorAll("[data-profile-panel]");
@@ -1375,11 +1369,9 @@
             );
             document.querySelector("[data-field-teacher-name]").value = localProfile.teacherName || "";
             fillSelect(
-              document.querySelector("[data-field-classroom]"),
-              shared?.getClassroomSelectOptions?.() ||
-                profile.buildClassroomSelectOptions?.(shared?.getCustomClassrooms?.() || []) ||
-                [],
-              profile.normalizeClassroomName(localProfile.classroomName)
+              document.querySelector("[data-field-delivery]"),
+              profile.DELIVERY_OPTIONS,
+              localProfile.deliveryMethod || "line"
             );
           }
 
@@ -1433,10 +1425,7 @@
               teacherUserId: localProfile?.teacherUserId || "",
               teacherDisplayName: localProfile?.teacherDisplayName || "",
               teacherInstitution: localProfile?.teacherInstitution || "",
-              deliveryMethod: profile.normalizeDeliveryMethod?.(localProfile?.deliveryMethod) || "inbox",
-              classroomName: profile.normalizeClassroomName(
-                document.querySelector("[data-field-classroom]")?.value
-              ),
+              deliveryMethod: document.querySelector("[data-field-delivery]").value,
               displayAlias: document.querySelector("[data-field-display-alias]").value.trim(),
               avatarUrl,
             };
@@ -1889,40 +1878,6 @@
         };
 
         initTeacherCombobox();
-
-        const classroomSelect = document.querySelector("[data-field-classroom]");
-        classroomSelect?.addEventListener("change", () => {
-          if (!classroomSelect || classroomSelect.value !== profile.CREATE_CLASSROOM_VALUE) return;
-          const previous =
-            profile.normalizeClassroomName(localProfile?.classroomName) ||
-            profile.DEFAULT_CLASSROOM_NAME;
-          const entered = window.prompt("ตั้งชื่อห้องเรียนใหม่", "");
-          const name = String(entered || "").trim();
-          if (!name) {
-            classroomSelect.value = previous;
-            return;
-          }
-          if (name === profile.CREATE_CLASSROOM_VALUE) {
-            classroomSelect.value = previous;
-            return;
-          }
-          const created =
-            shared?.createClassroom?.({
-              name,
-              ownerId: meContext?.user?.id || shared.getInboxUserId?.(),
-              ownerRole: meContext?.user?.role === "reviewer" ? "teacher" : "student",
-              description: "ห้องเรียนจากโปรไฟล์ · invite สมาชิกได้ในกล่องข้อความ",
-            }) || null;
-          const selectedName = created?.name || name;
-          fillSelect(
-            classroomSelect,
-            shared?.getClassroomSelectOptions?.() ||
-              profile.buildClassroomSelectOptions?.(shared?.getCustomClassrooms?.() || []) ||
-              [],
-            selectedName
-          );
-          if (localProfile) localProfile.classroomName = selectedName;
-        });
 
         (async () => {
           const session = await profile.ensureLoggedIn("exam-profile.html");
