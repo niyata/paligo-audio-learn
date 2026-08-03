@@ -5511,6 +5511,27 @@
           );
         };
 
+        const paliReferenceViewportExitMargin = 24;
+        const paliReferenceSplitterExitDistance = 120;
+
+        const isPointerOutsideReferenceViewport = (event) =>
+          event.clientX < -paliReferenceViewportExitMargin ||
+          event.clientY < -paliReferenceViewportExitMargin ||
+          event.clientX > window.innerWidth + paliReferenceViewportExitMargin ||
+          event.clientY > window.innerHeight + paliReferenceViewportExitMargin;
+
+        const isPointerOutsideActiveSplitter = (event) => {
+          if (!activePaliReferenceResize || !paliReferenceResizeHandle) return false;
+          const rect = paliReferenceResizeHandle.getBoundingClientRect();
+          const centerX = rect.left + rect.width / 2;
+          const centerY = rect.top + rect.height / 2;
+          const distance =
+            activePaliReferenceResize.mode === "stack"
+              ? Math.abs(event.clientY - centerY)
+              : Math.abs(event.clientX - centerX);
+          return distance > paliReferenceSplitterExitDistance;
+        };
+
         const finishPaliReferenceDrag = ({ pointerId, save = true } = {}) => {
           if (!activePaliReferenceDrag) return;
           if (pointerId !== undefined && activePaliReferenceDrag.pointerId !== pointerId) return;
@@ -5554,6 +5575,10 @@
 
         const moveActivePaliReferenceDrag = (event) => {
           if (!activePaliReferenceDrag || activePaliReferenceDrag.pointerId !== event.pointerId) return;
+          if (isPointerOutsideReferenceViewport(event)) {
+            finishPaliReferenceDrag({ pointerId: event.pointerId });
+            return;
+          }
           movePaliReferencePip(event.clientX, event.clientY);
         };
 
@@ -5583,7 +5608,14 @@
 
         const moveActivePaliReferenceResize = (event) => {
           if (!activePaliReferenceResize || activePaliReferenceResize.pointerId !== event.pointerId) return;
+          if (isPointerOutsideReferenceViewport(event)) {
+            finishPaliReferenceResize({ pointerId: event.pointerId });
+            return;
+          }
           resizeReferenceWorkspace(event.clientX, event.clientY);
+          if (isPointerOutsideActiveSplitter(event)) {
+            finishPaliReferenceResize({ pointerId: event.pointerId });
+          }
         };
 
         const endActivePaliReferenceResize = (event) => {
