@@ -466,6 +466,23 @@
         cursor: grabbing;
       }
 
+      body.is-reference-dragging,
+      body.is-reference-dragging * {
+        cursor: grabbing !important;
+        user-select: none !important;
+      }
+
+      body.is-reference-resizing,
+      body.is-reference-resizing * {
+        cursor: col-resize !important;
+        user-select: none !important;
+      }
+
+      body.is-reference-resizing.is-reference-stack-resizing,
+      body.is-reference-resizing.is-reference-stack-resizing * {
+        cursor: row-resize !important;
+      }
+
       .pali-reference-pip__title {
         color: var(--exam-blue);
         font-size: 0.92rem;
@@ -626,6 +643,11 @@
         display: block;
         height: 100%;
         width: 100%;
+      }
+
+      body.is-reference-dragging .pali-reference-pip__frame,
+      body.is-reference-resizing .pali-reference-pip__frame {
+        pointer-events: none;
       }
 
       .pali-reference-splitter {
@@ -5472,10 +5494,50 @@
           if (paliReferencePip?.hidden) openPaliReferencePip();
         });
 
+        const releasePaliReferencePointer = (element, pointerId) => {
+          if (!element || pointerId === undefined || !element.releasePointerCapture) return;
+          try {
+            if (!element.hasPointerCapture || element.hasPointerCapture(pointerId)) {
+              element.releasePointerCapture(pointerId);
+            }
+          } catch {}
+        };
+
+        const clearPaliReferenceInteractionClasses = () => {
+          document.body.classList.remove(
+            "is-reference-dragging",
+            "is-reference-resizing",
+            "is-reference-stack-resizing",
+          );
+        };
+
+        const finishPaliReferenceDrag = ({ pointerId, save = true } = {}) => {
+          if (!activePaliReferenceDrag) return;
+          if (pointerId !== undefined && activePaliReferenceDrag.pointerId !== pointerId) return;
+          const endedPointerId = activePaliReferenceDrag.pointerId;
+          activePaliReferenceDrag = null;
+          releasePaliReferencePointer(paliReferenceDragHandle, endedPointerId);
+          if (!activePaliReferenceResize) clearPaliReferenceInteractionClasses();
+          if (save) savePaliReferenceState();
+        };
+
+        const finishPaliReferenceResize = ({ pointerId, save = true } = {}) => {
+          if (!activePaliReferenceResize) return;
+          if (pointerId !== undefined && activePaliReferenceResize.pointerId !== pointerId) return;
+          const endedPointerId = activePaliReferenceResize.pointerId;
+          activePaliReferenceResize = null;
+          releasePaliReferencePointer(paliReferenceResizeHandle, endedPointerId);
+          if (!activePaliReferenceDrag) clearPaliReferenceInteractionClasses();
+          if (save) savePaliReferenceState();
+        };
+
         paliReferenceDragHandle?.addEventListener("pointerdown", (event) => {
           if (event.target?.closest?.("button, a")) return;
           if (!paliReferencePip) return;
           if (normalizeReferenceWorkspaceMode(paliReferencePip.dataset.referenceMode) !== "float") return;
+
+          finishPaliReferenceResize({ save: false });
+          finishPaliReferenceDrag({ save: false });
 
           const rect = paliReferencePip.getBoundingClientRect();
           activePaliReferenceDrag = {
@@ -5483,45 +5545,76 @@
             offsetX: event.clientX - rect.left,
             offsetY: event.clientY - rect.top,
           };
-          paliReferenceDragHandle.setPointerCapture?.(event.pointerId);
+          document.body.classList.add("is-reference-dragging");
+          try {
+            paliReferenceDragHandle.setPointerCapture?.(event.pointerId);
+          } catch {}
           event.preventDefault();
         });
 
-        paliReferenceDragHandle?.addEventListener("pointermove", (event) => {
+        const moveActivePaliReferenceDrag = (event) => {
           if (!activePaliReferenceDrag || activePaliReferenceDrag.pointerId !== event.pointerId) return;
           movePaliReferencePip(event.clientX, event.clientY);
-        });
-
-        const endPaliReferenceDrag = (event) => {
-          if (!activePaliReferenceDrag || activePaliReferenceDrag.pointerId !== event.pointerId) return;
-          activePaliReferenceDrag = null;
-          savePaliReferenceState();
         };
 
-        paliReferenceDragHandle?.addEventListener("pointerup", endPaliReferenceDrag);
-        paliReferenceDragHandle?.addEventListener("pointercancel", endPaliReferenceDrag);
+        const endActivePaliReferenceDrag = (event) => {
+          finishPaliReferenceDrag({ pointerId: event.pointerId });
+        };
+
+        paliReferenceDragHandle?.addEventListener("pointerup", endActivePaliReferenceDrag);
+        paliReferenceDragHandle?.addEventListener("pointercancel", endActivePaliReferenceDrag);
+        paliReferenceDragHandle?.addEventListener("lostpointercapture", endActivePaliReferenceDrag);
 
         paliReferenceResizeHandle?.addEventListener("pointerdown", (event) => {
           const mode = normalizeReferenceWorkspaceMode(paliReferencePip?.dataset.referenceMode);
           if (mode === "float") return;
+
+          finishPaliReferenceDrag({ save: false });
+          finishPaliReferenceResize({ save: false });
+
           activePaliReferenceResize = { pointerId: event.pointerId, mode };
-          paliReferenceResizeHandle.setPointerCapture?.(event.pointerId);
+          document.body.classList.add("is-reference-resizing");
+          document.body.classList.toggle("is-reference-stack-resizing", mode === "stack");
+          try {
+            paliReferenceResizeHandle.setPointerCapture?.(event.pointerId);
+          } catch {}
           event.preventDefault();
         });
 
-        paliReferenceResizeHandle?.addEventListener("pointermove", (event) => {
+        const moveActivePaliReferenceResize = (event) => {
           if (!activePaliReferenceResize || activePaliReferenceResize.pointerId !== event.pointerId) return;
           resizeReferenceWorkspace(event.clientX, event.clientY);
-        });
-
-        const endPaliReferenceResize = (event) => {
-          if (!activePaliReferenceResize || activePaliReferenceResize.pointerId !== event.pointerId) return;
-          activePaliReferenceResize = null;
-          savePaliReferenceState();
         };
 
-        paliReferenceResizeHandle?.addEventListener("pointerup", endPaliReferenceResize);
-        paliReferenceResizeHandle?.addEventListener("pointercancel", endPaliReferenceResize);
+        const endActivePaliReferenceResize = (event) => {
+          finishPaliReferenceResize({ pointerId: event.pointerId });
+        };
+
+        paliReferenceResizeHandle?.addEventListener("pointerup", endActivePaliReferenceResize);
+        paliReferenceResizeHandle?.addEventListener("pointercancel", endActivePaliReferenceResize);
+        paliReferenceResizeHandle?.addEventListener("lostpointercapture", endActivePaliReferenceResize);
+
+        window.addEventListener("pointermove", (event) => {
+          moveActivePaliReferenceDrag(event);
+          moveActivePaliReferenceResize(event);
+        });
+        window.addEventListener("pointerup", (event) => {
+          finishPaliReferenceDrag({ pointerId: event.pointerId });
+          finishPaliReferenceResize({ pointerId: event.pointerId });
+        });
+        window.addEventListener("pointercancel", (event) => {
+          finishPaliReferenceDrag({ pointerId: event.pointerId });
+          finishPaliReferenceResize({ pointerId: event.pointerId });
+        });
+        window.addEventListener("blur", () => {
+          finishPaliReferenceDrag();
+          finishPaliReferenceResize();
+        });
+        document.addEventListener("keydown", (event) => {
+          if (event.key !== "Escape") return;
+          finishPaliReferenceDrag();
+          finishPaliReferenceResize();
+        });
 
         window.addEventListener("resize", () => {
           if (!paliReferencePip || paliReferencePip.hidden) return;
